@@ -1,0 +1,888 @@
+local MidnightUI = LibStub("AceAddon-3.0"):NewAddon("MidnightUI", "AceConsole-3.0", "AceEvent-3.0")
+local LSM = LibStub("LibSharedMedia-3.0")
+local AceConfig = LibStub("AceConfig-3.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+
+MidnightUI.version = "1.0.0"
+
+-- Define reload confirmation dialog
+StaticPopupDialogs["MIDNIGHTUI_RELOAD_CONFIRM"] = {
+    text = "This action requires a UI reload. Reload now?",
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        if not InCombatLockdown() then
+            C_UI.Reload()
+        else
+            print("|cffff0000MidnightUI:|r Cannot reload UI while in combat. Please leave combat and run /reload.")
+        end
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+-- ============================================================================
+-- 1. DATABASE DEFAULTS
+-- ============================================================================
+local defaults = {
+    profile = {
+        theme = {
+            font = "Friz Quadrata TT",
+            fontSize = 12,
+            bgColor = {0.1, 0.1, 0.1, 0.8},
+            borderColor = {0, 0, 0, 1},
+        },
+        modules = {
+            skins = true,
+            bar = true,
+            UIButtons = true,
+            maps = true,
+            actionbars = true,
+            unitframes = true,
+            cooldowns = false,
+            tweaks = true,
+            setup = true
+        }
+    }
+}
+
+-- ============================================================================
+-- 2. INITIALIZATION
+-- ============================================================================
+function MidnightUI:OnInitialize()
+    self.db = LibStub("AceDB-3.0"):New("MidnightUIDB", defaults, true)
+    
+    -- Register slash commands
+    self:RegisterChatCommand("mui", "SlashCommand")
+    self:RegisterChatCommand("midnightui", "SlashCommand")
+    self:RegisterChatCommand("muimove", "ToggleMoveMode")
+end
+
+function MidnightUI:OnEnable()
+    -- Send the message after all modules have registered
+    C_Timer.After(0.1, function()
+        self:SendMessage("MIDNIGHTUI_DB_READY")
+    end)
+    
+    -- Register options after modules load
+    C_Timer.After(0.2, function()
+        AceConfig:RegisterOptionsTable("MidnightUI", function() return self:GetOptions() end)
+        AceConfigDialog:AddToBlizOptions("MidnightUI", "Midnight UI")
+        -- Set a larger default size for the options window
+        if AceConfigDialog.SetDefaultSize then
+            AceConfigDialog:SetDefaultSize("MidnightUI", 900, 700)
+        end
+    end)
+    
+    -- Load Focus Frame if present
+    if UnitFrames and UnitFrames.CreateFocusFrame then
+        UnitFrames:CreateFocusFrame()
+    end
+end
+
+function MidnightUI:SlashCommand(input)
+    if not input or input:trim() == "" then
+        self:OpenConfig()
+    elseif input:lower() == "move" then
+        self:ToggleMoveMode()
+    else
+        self:OpenConfig()
+    end
+end
+
+-- ============================================================================
+-- 3. UTILITY FUNCTIONS
+-- ============================================================================
+
+-- Reference resolution for default layouts (effective UI resolution at 2560x1440 with auto-scaling)
+MidnightUI.REFERENCE_WIDTH = 2133
+MidnightUI.REFERENCE_HEIGHT = 1200
+
+-- Scale position from reference resolution to current resolution
+function MidnightUI:ScalePosition(x, y)
+    local screenWidth = GetScreenWidth()
+    local screenHeight = GetScreenHeight()
+    
+    local scaleX = screenWidth / self.REFERENCE_WIDTH
+    local scaleY = screenHeight / self.REFERENCE_HEIGHT
+    
+    return x * scaleX, y * scaleY
+end
+
+-- Scale all movable frames to current resolution
+function MidnightUI:ScaleLayoutToResolution()
+    local screenWidth = GetScreenWidth()
+    local screenHeight = GetScreenHeight()
+    
+    local scaleX = screenWidth / self.REFERENCE_WIDTH
+    local scaleY = screenHeight / self.REFERENCE_HEIGHT
+    
+    print("|cff00ff00MidnightUI:|r Scaling layout from " .. self.REFERENCE_WIDTH .. "x" .. self.REFERENCE_HEIGHT .. " to " .. math.floor(screenWidth) .. "x" .. math.floor(screenHeight))
+    print("|cff00ff00Scale factors:|r X=" .. string.format("%.2f", scaleX) .. " Y=" .. string.format("%.2f", scaleY))
+    
+    -- Scale Bar module positions
+    if _G.Bar and _G.Bar.db and _G.Bar.db.profile and _G.Bar.db.profile.bars then
+        for barID, barData in pairs(_G.Bar.db.profile.bars) do
+            if barData.x and barData.y then
+                barData.x = math.floor(barData.x * scaleX)
+                barData.y = math.floor(barData.y * scaleY)
+            end
+        end
+    end
+    
+    -- Scale UIButtons position
+    if _G.UIButtons and _G.UIButtons.db and _G.UIButtons.db.profile and _G.UIButtons.db.profile.position then
+        local pos = _G.UIButtons.db.profile.position
+        if pos.x and pos.y then
+            pos.x = math.floor(pos.x * scaleX)
+            pos.y = math.floor(pos.y * scaleY)
+        end
+    end
+    
+    -- Scale UnitFrames positions
+    if _G.UnitFrames and _G.UnitFrames.db and _G.UnitFrames.db.profile then
+        local uf = _G.UnitFrames.db.profile
+        for _, frame in pairs({"player", "target", "targettarget", "focus", "pet"}) do
+            if uf[frame] and uf[frame].position then
+                local pos = uf[frame].position
+                if pos.x and pos.y then
+                    pos.x = math.floor(pos.x * scaleX)
+                    pos.y = math.floor(pos.y * scaleY)
+                end
+            end
+        end
+    end
+    
+    -- Scale Cooldowns position
+    if _G.Cooldowns and _G.Cooldowns.db and _G.Cooldowns.db.profile then
+        local cd = _G.Cooldowns.db.profile
+        if cd.x and cd.y then
+            cd.x = math.floor(cd.x * scaleX)
+            cd.y = math.floor(cd.y * scaleY)
+        end
+    end
+    
+    -- Scale Maps position
+    if _G.Maps and _G.Maps.db and _G.Maps.db.profile then
+        local maps = _G.Maps.db.profile
+        if maps.minimap and maps.minimap.position then
+            local pos = maps.minimap.position
+            if pos.x and pos.y then
+                pos.x = math.floor(pos.x * scaleX)
+                pos.y = math.floor(pos.y * scaleY)
+            end
+        end
+    end
+    
+    print("|cff00ff00MidnightUI:|r Layout scaled to your resolution!")
+    StaticPopup_Show("MIDNIGHTUI_RELOAD_CONFIRM")
+end
+
+function MidnightUI:OpenConfig()
+    if Settings and Settings.OpenToCategory then
+        local categoryID = nil
+        if SettingsPanel and SettingsPanel.GetCategoryList then
+            for _, category in ipairs(SettingsPanel:GetCategoryList()) do
+                if category.name == "Midnight UI" then
+                    categoryID = category:GetID()
+                    break
+                end
+            end
+        end
+        if categoryID then Settings.OpenToCategory(categoryID); return end
+    end
+    
+    if InterfaceOptionsFrame_OpenToCategory then
+        InterfaceOptionsFrame_OpenToCategory("Midnight UI")
+    else
+        LibStub("AceConfigDialog-3.0"):Open("MidnightUI")
+    end
+end
+
+function MidnightUI:SkinFrame(frame)
+    if not frame then return end
+    if not frame.muiBackdrop then
+        frame.muiBackdrop = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+        frame.muiBackdrop:SetAllPoints()
+        local level = frame:GetFrameLevel()
+        frame.muiBackdrop:SetFrameLevel(level > 0 and level - 1 or 0)
+        frame.muiBackdrop:SetBackdrop({
+            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        })
+    end
+    local cfg = self.db.profile.theme
+    frame.muiBackdrop:SetBackdropColor(unpack(cfg.bgColor))
+    frame.muiBackdrop:SetBackdropBorderColor(unpack(cfg.borderColor))
+end
+
+-- ============================================================================
+-- 4. OPTIONS TABLE
+-- ============================================================================
+function MidnightUI:GetOptions()
+    local options = {
+        name = "Midnight UI",
+        type = "group",
+        childGroups = "tab",
+        args = {
+            general = {
+                name = "General",
+                type = "group",
+                order = 1,
+                args = {
+                    header = { type = "header", order = 1, name = "Modules" },
+                    desc = { type = "description", order = 2, name = "Toggle modules. Requires Reload." },
+                    resolutionHeader = {
+                        type = "header",
+                        name = "Resolution Scaling",
+                        order = 2.05,
+                    },
+                    resolutionDesc = {
+                        type = "description",
+                        name = function()
+                            local screenWidth = math.floor(GetScreenWidth())
+                            local screenHeight = math.floor(GetScreenHeight())
+                            local physicalWidth = math.floor(GetScreenWidth() * UIParent:GetEffectiveScale())
+                            local physicalHeight = math.floor(GetScreenHeight() * UIParent:GetEffectiveScale())
+                            local uiScale = UIParent:GetEffectiveScale()
+                            local refWidth = MidnightUI.REFERENCE_WIDTH
+                            local refHeight = MidnightUI.REFERENCE_HEIGHT
+                            
+                            local resInfo = "UI Resolution (effective): |cffffaa00" .. screenWidth .. "x" .. screenHeight .. "|r\n"
+                            if physicalWidth ~= screenWidth or physicalHeight ~= screenHeight then
+                                resInfo = resInfo .. "Physical Resolution: |cffcccccc" .. physicalWidth .. "x" .. physicalHeight .. "|r\n"
+                                resInfo = resInfo .. "UI Scale: |cffcccccc" .. string.format("%.1f%%", uiScale * 100) .. "|r\n\n"
+                            end
+                            
+                            if screenWidth == refWidth and screenHeight == refHeight then
+                                return resInfo .. "|cff00ff00Your UI resolution matches the default layout resolution (" .. refWidth .. "x" .. refHeight .. ").|r\n" ..
+                                       "|cffccccccThis is the standard effective resolution when your game is set to 2560x1440 with 'Use UI Scale' OFF.|r\n" ..
+                                       "No scaling needed!"
+                            else
+                                return resInfo .. "Default layout resolution: " .. refWidth .. "x" .. refHeight .. "\n" ..
+                                       "|cffcccccc(Standard for 2560x1440 with 'Use UI Scale' OFF)|r\n\n" ..
+                                       "|cffaaaaIf you imported a profile from someone using " .. refWidth .. "x" .. refHeight .. ", use the button below to automatically scale all element positions to your UI resolution.|r"
+                            end
+                        end,
+                        order = 2.06,
+                        fontSize = "medium",
+                    },
+                    scaleToResolution = {
+                        type = "execute",
+                        name = "Scale Layout to My Resolution",
+                        desc = "Automatically adjusts all element positions from 2133x1200 to your current resolution",
+                        order = 2.07,
+                        func = function()
+                            MidnightUI:ScaleLayoutToResolution()
+                        end,
+                        confirm = function()
+                            local screenWidth = math.floor(GetScreenWidth())
+                            local screenHeight = math.floor(GetScreenHeight())
+                            return "This will scale all UI element positions from " .. MidnightUI.REFERENCE_WIDTH .. "x" .. MidnightUI.REFERENCE_HEIGHT .. " to " .. screenWidth .. "x" .. screenHeight .. " and reload your UI. Continue?"
+                        end,
+                    },
+                    fontHeader = {
+                        type = "header",
+                        name = "Global Font",
+                        order = 2.08,
+                    },
+                    globalFont = {
+                        type = "select",
+                        name = "Global Font",
+                        desc = "Select a font to apply to all MidnightUI elements.",
+                        order = 2.1,
+                        values = function()
+                            local fonts = LSM:List("font")
+                            local out = {}
+                            for _, font in ipairs(fonts) do out[font] = font end
+                            return out
+                        end,
+                        get = function() return self.db.profile.theme.font or "Friz Quadrata TT" end,
+                        set = function(_, v) self.db.profile.theme.font = v end,
+                    },
+                    applyGlobalFont = {
+                        type = "execute",
+                        name = "Apply to All",
+                        desc = "Apply the selected global font to all MidnightUI modules and bars.",
+                        order = 2.2,
+                        func = function()
+                            local font = MidnightUI.db.profile.theme.font or "Friz Quadrata TT"
+                            -- UnitFrames
+                            if _G.UnitFrames and _G.UnitFrames.db and _G.UnitFrames.db.profile then
+                                local uf = _G.UnitFrames.db.profile
+                                for _, frame in pairs({"player", "target", "targettarget"}) do
+                                    for _, bar in pairs({"health", "power", "info"}) do
+                                        if uf[frame] and uf[frame][bar] then
+                                            uf[frame][bar].font = font
+                                        end
+                                    end
+                                end
+                            end
+                            -- Bar module: set all bar fonts to global and update
+                            if _G.Bar and _G.Bar.db and _G.Bar.db.profile and _G.Bar.db.profile.bars then
+                                for barID, barData in pairs(_G.Bar.db.profile.bars) do
+                                    barData.font = font
+                                end
+                                if _G.Bar.UpdateAllFonts then
+                                    _G.Bar:UpdateAllFonts()
+                                end
+                            end
+                            -- Cooldowns module
+                            if _G.Cooldowns and _G.Cooldowns.db and _G.Cooldowns.db.profile then
+                                _G.Cooldowns.db.profile.font = font
+                            end
+                            -- Maps module
+                            if _G.Maps and _G.Maps.db and _G.Maps.db.profile then
+                                _G.Maps.db.profile.font = font
+                            end
+                            -- ActionBars module
+                            if _G.ActionBars and _G.ActionBars.db and _G.ActionBars.db.profile then
+                                _G.ActionBars.db.profile.font = font
+                            end
+                            -- UIButtons module
+                            if _G.UIButtons and _G.UIButtons.db and _G.UIButtons.db.profile then
+                                _G.UIButtons.db.profile.font = font
+                            end
+                            -- Tweaks module
+                            if _G.Tweaks and _G.Tweaks.db and _G.Tweaks.db.profile then
+                                _G.Tweaks.db.profile.font = font
+                            end
+                            -- Skins module
+                            if _G.Skins and _G.Skins.db and _G.Skins.db.profile then
+                                _G.Skins.db.profile.font = font
+                            end
+                            -- Movable module
+                            if _G.Movable and _G.Movable.db and _G.Movable.db.profile then
+                                _G.Movable.db.profile.font = font
+                            end
+                            -- Force UI update for UnitFrames
+                            if _G.UnitFrames and _G.UnitFrames.UpdateUnitFrame then
+                                _G.UnitFrames:UpdateUnitFrame("PlayerFrame", "player")
+                                _G.UnitFrames:UpdateUnitFrame("TargetFrame", "target")
+                                _G.UnitFrames:UpdateUnitFrame("TargetTargetFrame", "targettarget")
+                            end
+                            -- Add update calls for other modules as needed
+                        end,
+                    },
+                    bar = { name = "Data Brokers", type = "toggle", order = 3, width = "full",
+                        get = function() return self.db.profile.modules.bar end,
+                        set = function(_, v) self.db.profile.modules.bar = v; C_UI.Reload() end },
+                    UIButtons = { name = "UI Buttons", type = "toggle", order = 4, width = "full",
+                        get = function() return self.db.profile.modules.UIButtons end,
+                        set = function(_, v) self.db.profile.modules.UIButtons = v; C_UI.Reload() end },
+                    chatcopy = { name = "Chat Copy", type = "toggle", order = 4.5, width = "full",
+                        get = function() return self.db.profile.modules.chatcopy ~= false end,
+                        set = function(_, v) self.db.profile.modules.chatcopy = v; C_UI.Reload() end },
+                    maps = { name = "Maps", type = "toggle", order = 5, width = "full",
+                        get = function() return self.db.profile.modules.maps end,
+                        set = function(_, v) self.db.profile.modules.maps = v; C_UI.Reload() end },
+                    actionbars = { name = "Action Bars", type = "toggle", order = 6, width = "full",
+                        get = function() return self.db.profile.modules.actionbars end,
+                        set = function(_, v) self.db.profile.modules.actionbars = v; C_UI.Reload() end },
+                    unitframes = { name = "Unit Frames", type = "toggle", order = 7, width = "full",
+                        get = function() return self.db.profile.modules.unitframes end,
+                        set = function(_, v) self.db.profile.modules.unitframes = v; C_UI.Reload() end },
+                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 8, width = "full",
+                        desc = "Work in progress - Cannot be enabled at this time.",
+                        get = function() return self.db.profile.modules.cooldowns end,
+                        set = function(_, v)
+                            if v then
+                                print("|cffff6b6b[MidnightUI]|r Cooldown Manager is a work in progress and cannot be enabled at this time.")
+                                return
+                            end
+                            self.db.profile.modules.cooldowns = v
+                            C_UI.Reload()
+                        end },
+                    tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full",
+                        get = function() return self.db.profile.modules.tweaks end,
+                        set = function(_, v) self.db.profile.modules.tweaks = v; C_UI.Reload() end }
+                }  -- closes args table for general
+            },  -- closes general group
+            export = {
+                name = "Export",
+                type = "group",
+                order = 50,
+                args = {
+                    header = {
+                        type = "header",
+                        name = "Export Profile",
+                        order = 1,
+                    },
+                    description = {
+                        type = "description",
+                        name = "Export your entire MidnightUI configuration to a string that can be shared with others or saved as a backup.",
+                        order = 2,
+                        fontSize = "medium",
+                    },
+                    exportButton = {
+                        type = "execute",
+                        name = "Generate Export String",
+                        desc = "Creates an export string of your current profile",
+                        order = 3,
+                        func = function()
+                            MidnightUI:ExportProfile()
+                        end,
+                    },
+                    spacer = {
+                        type = "description",
+                        name = " ",
+                        order = 3.5,
+                    },
+                    exportString = {
+                        type = "input",
+                        name = "Export String (Ctrl+A to select all, Ctrl+C to copy)",
+                        desc = "Copy this entire string to share your profile",
+                        order = 4,
+                        width = "full",
+                        multiline = 25,
+                        get = function() 
+                            return MidnightUI.exportString or ""
+                        end,
+                        set = function() end,
+                    },
+                },
+            },
+            import = {
+                name = "Import",
+                type = "group",
+                order = 51,
+                args = {
+                    header = {
+                        type = "header",
+                        name = "Import Profile",
+                        order = 1,
+                    },
+                    description = {
+                        type = "description",
+                        name = "Import a MidnightUI configuration string.",
+                        order = 2,
+                        fontSize = "medium",
+                    },
+                    newProfileName = {
+                        type = "input",
+                        name = "New Profile Name (Optional)",
+                        desc = "Leave empty to overwrite current profile, or enter a name to create a new profile",
+                        order = 3,
+                        width = "full",
+                        get = function() 
+                            -- Store in both places to prevent clearing
+                            if not MidnightUI.importNewProfileName then
+                                MidnightUI.importNewProfileName = ""
+                            end
+                            return MidnightUI.importNewProfileName 
+                        end,
+                        set = function(_, v) 
+                            MidnightUI.importNewProfileName = v 
+                        end,
+                    },
+                    warning = {
+                        type = "description",
+                        name = function()
+                            local name = MidnightUI.importNewProfileName
+                            if name and name ~= "" then
+                                return "|cff00ff00Profile will be imported as: '|r" .. name .. "|cff00ff00'|r"
+                            else
+                                local currentProfile = MidnightUI.db and MidnightUI.db:GetCurrentProfile() or "Default"
+                                return "|cffff8800WARNING: This will overwrite your current profile '|r" .. currentProfile .. "|cffff8800'|r"
+                            end
+                        end,
+                        order = 3.5,
+                        fontSize = "medium",
+                    },
+                    importString = {
+                        type = "input",
+                        name = "Import String",
+                        desc = "Paste the export string here (Ctrl+V to paste)\n|cffaaaaaa" .. (MidnightUI.importString and "Current length: " .. #MidnightUI.importString .. " characters" or "") .. "|r",
+                        order = 4,
+                        width = "full",
+                        multiline = 20,
+                        get = function() 
+                            if not MidnightUI.importString then
+                                MidnightUI.importString = ""
+                            end
+                            return MidnightUI.importString 
+                        end,
+                        set = function(_, v) 
+                            -- Store the full string value
+                            MidnightUI.importString = v
+                            -- Delayed refresh to avoid interrupting the input
+                            C_Timer.After(0.1, function()
+                                local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+                                if AceConfigRegistry then
+                                    AceConfigRegistry:NotifyChange("MidnightUI")
+                                end
+                            end)
+                        end,
+                    },
+                    stringInfo = {
+                        type = "description",
+                        name = function()
+                            local str = MidnightUI.importString
+                            if str and #str > 0 then
+                                return "|cffaaaaaa" .. #str .. " characters stored|r"
+                            else
+                                return ""
+                            end
+                        end,
+                        order = 4.5,
+                        fontSize = "small",
+                    },
+                    importButton = {
+                        type = "execute",
+                        name = "Import Profile",
+                        desc = "Import the profile from the string above. Requires UI reload.",
+                        order = 5,
+                        func = function()
+                            MidnightUI:ImportProfile()
+                        end,
+                    },
+                },
+            },
+            profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+        }  -- closes main args table
+    }  -- closes options table
+    
+    options.args.profiles.order = 100
+    
+    -- Inject Module Options
+    for name, module in self:IterateModules() do
+        -- Map module names to their database keys
+        local dbKey = name
+        if name == "UIButtons" then 
+            dbKey = "UIButtons"
+        elseif name == "Skin" then
+            dbKey = "skins"
+        elseif name == "Bar" then
+            dbKey = "bar"
+        elseif name == "Maps" then
+            dbKey = "maps"
+        elseif name == "ActionBars" then
+            dbKey = "actionbars"
+        elseif name == "UnitFrames" then
+            dbKey = "unitframes"
+        elseif name == "Cooldowns" then
+            dbKey = "cooldowns"
+        elseif name == "Tweaks" then
+            dbKey = "tweaks"
+        elseif name == "Setup" then
+            dbKey = "setup"
+        else
+            dbKey = string.lower(name)
+        end
+        
+        if module.GetOptions and self.db.profile.modules[dbKey] then
+            local displayName = name
+            if name == "UIButtons" then 
+                displayName = "UI Buttons"
+            elseif name == "Skin" then
+                displayName = "Skinning"
+            elseif name == "Bar" then 
+                displayName = "Data Brokers"
+            end
+            if name == "UnitFrames" then
+                options.args.unitframes = module:GetOptions()
+                options.args.unitframes.name = "Unit Frames"
+                options.args.unitframes.order = 8
+            else
+                options.args[name] = module:GetOptions()
+                options.args[name].name = displayName
+                options.args[name].order = 10
+            end
+        end
+    end
+    
+    return options
+end
+
+-- Add Move Mode property
+MidnightUI.moveMode = false
+
+-- Add Move Mode toggle function
+function MidnightUI:ToggleMoveMode()
+    self.moveMode = not self.moveMode
+    
+    if self.moveMode then
+        print("|cff00ff00MidnightUI:|r Move Mode |cff00ff00ENABLED|r - Hover over elements to move them")
+    else
+        print("|cff00ff00MidnightUI:|r Move Mode |cffff0000DISABLED|r")
+    end
+    
+    -- Use AceEvent's SendMessage (already loaded)
+    self:SendMessage("MIDNIGHTUI_MOVEMODE_CHANGED", self.moveMode)
+    -- Directly call Movable:OnMoveModeChanged for reliability
+    local Movable
+    if self.GetModule then
+        Movable = self:GetModule("Movable", true)
+    end
+    if Movable and Movable.OnMoveModeChanged then
+        Movable:OnMoveModeChanged("MIDNIGHTUI_MOVEMODE_CHANGED", self.moveMode)
+    end
+    
+end
+
+-- ============================================================================
+-- 5. IMPORT/EXPORT FUNCTIONS
+-- ============================================================================
+
+-- Hex encoding functions (safe for copy/paste)
+local function EncodeHex(str)
+    return (str:gsub('.', function(c)
+        return string.format('%02X', string.byte(c))
+    end))
+end
+
+local function DecodeHex(hex)
+    return (hex:gsub('..', function(cc)
+        return string.char(tonumber(cc, 16))
+    end))
+end
+
+-- Export Profile
+function MidnightUI:ExportProfile()
+    local AceSerializer = LibStub("AceSerializer-3.0")
+    local LibCompress = LibStub("LibCompress")
+    
+    if not AceSerializer or not LibCompress then
+        print("|cffff0000MidnightUI Error:|r Required libraries not found for export.")
+        return
+    end
+    
+    -- Get the entire database including all namespaces
+    local exportData = {
+        main = self.db.profile,
+        namespaces = {}
+    }
+    
+    -- Export all registered namespaces
+    -- Use the children table which contains the actual namespace objects
+    if self.db.children then
+        local namespaceCount = 0
+        
+        for namespaceName, namespaceDB in pairs(self.db.children) do
+            if namespaceDB and namespaceDB.profile then
+                exportData.namespaces[namespaceName] = namespaceDB.profile
+                namespaceCount = namespaceCount + 1
+                print("|cff00ff00MidnightUI:|r   - Exporting: " .. namespaceName)
+            end
+        end
+        print("|cff00ff00MidnightUI:|r Exported " .. namespaceCount .. " module namespaces")
+    else
+        print("|cffff8800MidnightUI Warning:|r No namespace objects found to export")
+    end
+    
+    -- Serialize the data
+    local serialized = AceSerializer:Serialize(exportData)
+    
+    -- Compress the serialized data
+    local compressed = LibCompress:Compress(serialized)
+    if not compressed then
+        print("|cffff0000MidnightUI Error:|r Failed to compress export data.")
+        return
+    end
+    
+    -- Encode to hex (safe for copy/paste)
+    local encoded = EncodeHex(compressed)
+    
+    -- Add version header
+    local exportString = "MUIV2:" .. encoded
+    
+    -- Store for display
+    self.exportString = exportString
+    MidnightUI.exportString = exportString
+    
+    print("|cff00ff00MidnightUI:|r Export string generated!")
+    print("|cff00ff00MidnightUI:|r String length: " .. #exportString .. " characters")
+    print("|cff00ff00MidnightUI:|r Use Ctrl+A to select all, then Ctrl+C to copy.")
+    
+    -- Refresh the options UI
+    local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+    AceConfigRegistry:NotifyChange("MidnightUI")
+end
+
+-- Import Profile
+function MidnightUI:ImportProfile()
+    local AceSerializer = LibStub("AceSerializer-3.0")
+    local LibCompress = LibStub("LibCompress")
+    
+    if not AceSerializer or not LibCompress then
+        print("|cffff0000MidnightUI Error:|r Required libraries not found for import.")
+        return
+    end
+    
+    local importString = self.importString
+    
+    if not importString or importString == "" then
+        print("|cffff0000MidnightUI Error:|r No import string provided.")
+        return
+    end
+    
+    -- Show length for debugging
+    print("|cff00ff00MidnightUI:|r Processing import string (" .. #importString .. " characters)")
+    
+    -- Check if user wants to create a new profile
+    local newProfileName = self.importNewProfileName
+    if newProfileName and newProfileName ~= "" then
+        -- Trim whitespace
+        newProfileName = newProfileName:match("^%s*(.-)%s*$")
+    end
+    
+    if not newProfileName or newProfileName == "" then
+        -- Show confirmation dialog before overwriting current profile
+        local currentProfileName = self.db:GetCurrentProfile()
+        StaticPopupDialogs["MIDNIGHTUI_IMPORT_CONFIRM"] = {
+            text = "This will OVERWRITE your current profile '" .. currentProfileName .. "'!\n\nAre you sure you want to continue?",
+            button1 = "Yes, Import",
+            button2 = "Cancel",
+            OnAccept = function()
+                MidnightUI:DoImport(importString, nil)
+            end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+            preferredIndex = 3,
+        }
+        StaticPopup_Show("MIDNIGHTUI_IMPORT_CONFIRM")
+    else
+        -- Creating new profile - show confirmation with profile name
+        StaticPopupDialogs["MIDNIGHTUI_IMPORT_NEW"] = {
+            text = "This will create a new profile '" .. newProfileName .. "' and switch to it.\n\nAre you sure you want to continue?",
+            button1 = "Yes, Import",
+            button2 = "Cancel",
+            OnAccept = function()
+                MidnightUI:DoImport(importString, newProfileName)
+            end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+            preferredIndex = 3,
+        }
+        StaticPopup_Show("MIDNIGHTUI_IMPORT_NEW")
+    end
+end
+
+-- Actually perform the import
+function MidnightUI:DoImport(importString, newProfileName)
+    local AceSerializer = LibStub("AceSerializer-3.0")
+    local LibCompress = LibStub("LibCompress")
+    
+    if not AceSerializer or not LibCompress then
+        print("|cffff0000MidnightUI Error:|r Required libraries not found for import.")
+        return
+    end
+    
+    -- Check for version header
+    if not importString:match("^MUIV2:") then
+        print("|cffff0000MidnightUI Error:|r Invalid import string format.")
+        return
+    end
+    
+    -- Remove version header
+    local encoded = importString:sub(7) -- Remove "MUIV2:"
+    
+    -- Decode from hex
+    local success, compressed = pcall(DecodeHex, encoded)
+    if not success or not compressed then
+        print("|cffff0000MidnightUI Error:|r Failed to decode import string.")
+        return
+    end
+    
+    -- Decompress
+    local serialized, err = LibCompress:Decompress(compressed)
+    if not serialized then
+        print("|cffff0000MidnightUI Error:|r Failed to decompress import data: " .. tostring(err or "unknown error"))
+        return
+    end
+    
+    -- Deserialize
+    local success, exportData = AceSerializer:Deserialize(serialized)
+    if not success or not exportData then
+        print("|cffff0000MidnightUI Error:|r Failed to deserialize import data.")
+        return
+    end
+    
+    -- Handle old format (direct profile data) or new format (structured with namespaces)
+    local profileData = exportData.main or exportData
+    local namespaceData = exportData.namespaces or {}
+    
+    local namespaceCount = 0
+    for _ in pairs(namespaceData) do
+        namespaceCount = namespaceCount + 1
+    end
+    print("|cff00ff00MidnightUI:|r Import contains " .. namespaceCount .. " module namespaces")
+    
+    -- Check if user wants to create a new profile
+    if newProfileName and newProfileName ~= "" then
+        -- Create new profile with the imported data
+        self.db:SetProfile(newProfileName)
+        
+        -- Apply the imported main profile data
+        for key, value in pairs(profileData) do
+            self.db.profile[key] = value
+        end
+        
+        -- Apply namespace data by getting or creating namespace objects
+        if self.db.children then
+            local appliedCount = 0
+            for namespaceName, data in pairs(namespaceData) do
+                local namespace = self.db:GetNamespace(namespaceName, true)
+                if namespace then
+                    -- Copy all data to the namespace profile
+                    for key, value in pairs(data) do
+                        namespace.profile[key] = value
+                    end
+                    appliedCount = appliedCount + 1
+                    print("|cff00ff00MidnightUI:|r   - Applied: " .. namespaceName)
+                end
+            end
+            print("|cff00ff00MidnightUI:|r Applied " .. appliedCount .. " module namespaces")
+        end
+        
+        print("|cff00ff00MidnightUI:|r Profile imported as '" .. newProfileName .. "'!")
+    else
+        -- Overwrite current profile
+        local currentProfileName = self.db:GetCurrentProfile()
+        
+        -- Apply the imported main profile data
+        for key, value in pairs(profileData) do
+            self.db.profile[key] = value
+        end
+        
+        -- Apply namespace data by getting namespace objects
+        if self.db.children then
+            local appliedCount = 0
+            for namespaceName, data in pairs(namespaceData) do
+                local namespace = self.db:GetNamespace(namespaceName, true)
+                if namespace then
+                    -- Copy all data to the namespace profile
+                    for key, value in pairs(data) do
+                        namespace.profile[key] = value
+                    end
+                    appliedCount = appliedCount + 1
+                    print("|cff00ff00MidnightUI:|r   - Applied: " .. namespaceName)
+                end
+            end
+            print("|cff00ff00MidnightUI:|r Applied " .. appliedCount .. " module namespaces")
+        end
+        
+        print("|cff00ff00MidnightUI:|r Profile '" .. currentProfileName .. "' updated!")
+    end
+    
+    -- Show reload dialog
+    StaticPopupDialogs["MIDNIGHTUI_IMPORT_RELOAD"] = {
+        text = "Profile imported successfully!\n\nReload UI now to apply changes?",
+        button1 = "Reload Now",
+        button2 = "Later",
+        OnAccept = function()
+            ReloadUI()
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = 3,
+    }
+    StaticPopup_Show("MIDNIGHTUI_IMPORT_RELOAD")
+end

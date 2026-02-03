@@ -1,0 +1,55 @@
+## Interface: 120001, 120000
+## Title: Midnight UI
+## Notes: Complete Modern UI Replacement.
+## Author: Chorthee
+## Version: 12.0.0.0
+## SavedVariables: MidnightUIDB
+## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
+
+# ------------------------------------------------------------------------------
+# LIBRARIES
+# ------------------------------------------------------------------------------
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\LibSharedMedia-3.0\lib.xml
+
+# ------------------------------------------------------------------------------
+# ACE3 FRAMEWORK
+# ------------------------------------------------------------------------------
+libs\AceAddon-3.0\AceAddon-3.0.xml
+libs\AceConsole-3.0\AceConsole-3.0.xml
+libs\AceEvent-3.0\AceEvent-3.0.xml
+libs\AceHook-3.0\AceHook-3.0.xml
+libs\AceDB-3.0\AceDB-3.0.xml
+libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
+libs\AceGUI-3.0\AceGUI-3.0.xml
+libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
+libs\AceConfig-3.0\AceConfig-3.0.xml
+libs\AceConfigDialog-3.0\AceConfigDialog-3.0.xml
+libs\AceSerializer-3.0\AceSerializer-3.0.lua
+libs\LibCompress\LibCompress.lua
+
+# ------------------------------------------------------------------------------
+# CORE ENGINE
+# ------------------------------------------------------------------------------
+Core.lua
+Modules\Chat.lua
+
+# ------------------------------------------------------------------------------
+# MODULES
+# ------------------------------------------------------------------------------
+Modules\Skins.lua
+Modules\Movable.lua
+Modules\Bar.lua
+Modules\UIButtons.lua
+Modules\Tweaks.lua
+Modules\Maps.lua
+Modules\ActionBars.lua
+Modules\UnitFrames.lua
+Modules\Setup.lua
+Modules\Frames\Player.lua
+Modules\Frames\Target.lua
+Modules\Frames\TargetTarget.lua
+Modules\Cooldowns.lua
+Modules\Frames\Focus.lua
