@@ -1,7 +1,7 @@
 ## Interface: 120001, 120000
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
-## Author: Chorthee
+## Author: Vengeance
 ## Version: 12.0.0.0
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
