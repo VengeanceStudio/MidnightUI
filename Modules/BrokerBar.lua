@@ -906,7 +906,6 @@ function BrokerBar:OnDBReady()
         self:CreateWidget(name, obj) 
     end)
     
-    self:CreateInteractiveFrames()
     self:InitializeBrokers()
     
     for name, obj in LDB:DataObjectIterator() do 
