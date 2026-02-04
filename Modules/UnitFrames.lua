@@ -1516,7 +1516,7 @@ end
                 self:UpdateUnitFrame("Boss" .. bossNum .. "Frame", unit)
             end
         end
-        SetBlizzardFramesHidden(self)
+        -- Do NOT call SetBlizzardFramesHidden here - it causes massive state driver accumulation
     end
 
     function UnitFrames:UNIT_POWER_UPDATE(event, unit)
@@ -1525,7 +1525,7 @@ end
         if unit == "targettarget" and self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
         if unit == "pet" and self.db.profile.showPet then self:UpdateUnitFrame("PetFrame", "pet") end
         if unit == "focus" and self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-        SetBlizzardFramesHidden(self)
+        -- Do NOT call SetBlizzardFramesHidden here - it causes massive state driver accumulation
     end
 
     function UnitFrames:UNIT_DISPLAYPOWER(event, unit)
@@ -1534,7 +1534,7 @@ end
         if unit == "targettarget" and self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
         if unit == "pet" and self.db.profile.showPet then self:UpdateUnitFrame("PetFrame", "pet") end
         if unit == "focus" and self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-        SetBlizzardFramesHidden(self)
+        -- Do NOT call SetBlizzardFramesHidden here - it causes massive state driver accumulation
     end
 
     function UnitFrames:UNIT_TARGET(event, unit)
