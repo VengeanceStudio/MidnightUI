@@ -2,6 +2,9 @@
 if not UnitFrames then return end
 -- MidnightUI UnitFrames: Boss Frames Module
 
+-- Get MidnightUI addon reference for accessing other modules
+local MidnightUI = LibStub and LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
+
 -- ============================================================================
 -- BOSS FRAMES CREATION
 -- ============================================================================
