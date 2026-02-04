@@ -565,7 +565,15 @@ function Bar:UpdateFriendList()
         if info and info.gameAccountInfo and info.gameAccountInfo.isOnline then
             local g = info.gameAccountInfo
             if (g.clientProgram == BNET_CLIENT_WOW) and (g.wowProjectID == 1) then
-                table.insert(wowFriends, {name=g.characterName, bnet=info.battleTag, level=g.characterLevel, zone=g.areaName, realm=g.realmName, faction=g.factionName, class=g.className})
+                -- Use classID to get proper class token for coloring
+                local classToken = g.className
+                if g.classID then
+                    local classInfo = C_CreatureInfo.GetClassInfo(g.classID)
+                    if classInfo then
+                        classToken = classInfo.classFile
+                    end
+                end
+                table.insert(wowFriends, {name=g.characterName, bnet=info.battleTag, level=g.characterLevel, zone=g.areaName, realm=g.realmName, faction=g.factionName, class=classToken or g.className})
             else
                 table.insert(bnetFriends, {bnet=info.battleTag, game=g.richPresence or g.clientProgram, status=(g.isWowMobile and "Mobile" or "Online")})
             end
