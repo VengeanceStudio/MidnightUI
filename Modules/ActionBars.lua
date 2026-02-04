@@ -1,22 +1,9 @@
 -- ============================================================================
--- 0. GLOBALS FOR DRAG STATE & DEBUG
+-- 0. GLOBALS FOR DRAG STATE
 -- ============================================================================
 local forceShowEmpty = false
 local function ShouldShowEmpty(db)
     return forceShowEmpty or db.showEmpty
-end
-
--- Debug: Track state driver registrations
-local stateDriverCount = 0
-local function DebugRegisterStateDriver(frame, attr, condition)
-    stateDriverCount = stateDriverCount + 1
-    print(string.format("[AB DEBUG] RegisterStateDriver #%d: %s.%s", stateDriverCount, frame:GetName() or "Unknown", attr))
-    RegisterStateDriver(frame, attr, condition)
-end
-
-local function DebugUnregisterStateDriver(frame, attr)
-    print(string.format("[AB DEBUG] UnregisterStateDriver: %s.%s", frame:GetName() or "Unknown", attr))
-    UnregisterStateDriver(frame, attr)
 end
 
 local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
@@ -242,8 +229,6 @@ function AB:OnDBReady()
         masqueGroup = Masque:Group("Midnight ActionBars")
     end
     
-    print("[AB DEBUG] ActionBars OnInitialize complete. StateDriver count: " .. stateDriverCount)
-    
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -269,16 +254,13 @@ end
 function AB:PLAYER_ENTERING_WORLD()
     -- Only run initialization once - bars persist across zone changes
     if self.barsInitialized then
-        print("[AB DEBUG] PLAYER_ENTERING_WORLD - skipping (bars already initialized)")
         return
     end
     
-    print("[AB DEBUG] PLAYER_ENTERING_WORLD fired. StateDriver count before: " .. stateDriverCount)
     self:HideBlizzardElements()
     self:InitializeAllBars()
     self:UpdateAllBars()
     self.barsInitialized = true
-    print("[AB DEBUG] PLAYER_ENTERING_WORLD complete. StateDriver count after: " .. stateDriverCount)
     
     -- TEMPORARILY DISABLED - Skinning disabled for now
     -- C_Timer.After(0.5, function()
