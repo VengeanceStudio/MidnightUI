@@ -13,7 +13,7 @@ function UnitFrames:CreateTargetTargetFrame()
     local anchorTo = UIParent
     local posX = (db.targettarget and db.targettarget.posX) or 0
     local posY = (db.targettarget and db.targettarget.posY) or 0
-    CreateUnitFrame(self, "TargetTargetFrame", "targettarget", anchorTo, "CENTER", "CENTER", posX, posY)
+    self:CreateUnitFrame("TargetTargetFrame", "targettarget", anchorTo, "CENTER", "CENTER", posX, posY)
     -- Only show TargetTargetFrame if target has a target
     local customToTFrame = _G["MidnightUI_TargetTargetFrame"]
     if customToTFrame then

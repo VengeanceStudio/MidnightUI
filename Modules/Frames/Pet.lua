@@ -13,7 +13,7 @@ function UnitFrames:CreatePetFrame()
     local anchorTo = UIParent
     local posX = (db.pet and db.pet.posX) or 0
     local posY = (db.pet and db.pet.posY) or 0
-    CreateUnitFrame(self, "PetFrame", "pet", anchorTo, "CENTER", "CENTER", posX, posY)
+    self:CreateUnitFrame("PetFrame", "pet", anchorTo, "CENTER", "CENTER", posX, posY)
     -- Only show PetFrame if pet exists
     local customPetFrame = _G["MidnightUI_PetFrame"]
     if customPetFrame then

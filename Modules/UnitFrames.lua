@@ -1914,7 +1914,11 @@ end
                 end
 
 
-                local function CreateUnitFrame(self, key, unit, anchor, anchorTo, anchorPoint, x, y)
+                -- ============================================================================
+                -- 7. UNIT FRAME CREATION (Module Method for use by frame modules)
+                -- ============================================================================
+                
+                function UnitFrames:CreateUnitFrame(key, unit, anchor, anchorTo, anchorPoint, x, y)
                                         -- ...existing code...
                     if frames[key] then
                         -- Critical: Stop OnUpdate script to prevent memory leaks

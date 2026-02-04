@@ -13,7 +13,7 @@ function UnitFrames:CreateFocusFrame()
     local anchorTo = UIParent
     local posX = (db.focus and db.focus.posX) or 0
     local posY = (db.focus and db.focus.posY) or 0
-    CreateUnitFrame(self, "FocusFrame", "focus", anchorTo, "CENTER", "CENTER", posX, posY)
+    self:CreateUnitFrame("FocusFrame", "focus", anchorTo, "CENTER", "CENTER", posX, posY)
     -- Only show FocusFrame if a focus exists
     local customFocusFrame = _G["MidnightUI_FocusFrame"]
     if customFocusFrame then

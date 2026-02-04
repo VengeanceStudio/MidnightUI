@@ -27,7 +27,7 @@ function UnitFrames:CreateBossFrames()
             if bossConfig.posX then baseX = bossConfig.posX end
             if bossConfig.posY then baseY = bossConfig.posY end
             
-            CreateUnitFrame(self, key, unit, UIParent, "CENTER", "CENTER", baseX, baseY)
+            self:CreateUnitFrame(key, unit, UIParent, "CENTER", "CENTER", baseX, baseY)
             boss1Frame = _G["MidnightUI_" .. key]
         else
             -- Boss 2-5: Position relative to boss1 with spacing
@@ -35,7 +35,7 @@ function UnitFrames:CreateBossFrames()
             local yOffset = -spacing * (i - 1)
             
             -- Create frame initially at same position as boss1, then reposition
-            CreateUnitFrame(self, key, unit, UIParent, "CENTER", "CENTER", 0, 0)
+            self:CreateUnitFrame(key, unit, UIParent, "CENTER", "CENTER", 0, 0)
             
             local bossFrame = _G["MidnightUI_" .. key]
             if bossFrame and boss1Frame then
