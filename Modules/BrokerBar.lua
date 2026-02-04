@@ -5,6 +5,9 @@ local LDB = LibStub("LibDataBroker-1.1")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Masque = LibStub("Masque", true)
 
+-- Make BrokerBar globally accessible for broker files
+_G.BrokerBar = BrokerBar
+
 -- Update all bar widgets' fonts when the global font changes
 function BrokerBar:UpdateAllFonts()
     for barID, bar in pairs(bars) do
@@ -65,7 +68,7 @@ local SHORTEN_REPLACEMENTS = {
     ["Story"] = "S", ["Delve"] = "D", ["Keystone"] = "+", ["%("] = "", ["%)"] = "",
 }
 
-local classTokenLookup = {}
+classTokenLookup = {}
 if _G.FillLocalizedClassList then
     local temp = {}
     FillLocalizedClassList(temp, false) 
@@ -200,7 +203,8 @@ local function ShortenValue(text)
     return short
 end
 
-local function GetColor()
+-- Make helper functions global for broker files
+function GetColor()
     -- FIX: Ensure DB is loaded if Helper is called early
     if not BrokerBar.db then return 1, 1, 1 end
     
@@ -213,7 +217,7 @@ local function GetColor()
     return db.fontColor.r, db.fontColor.g, db.fontColor.b
 end
 
-local function FormatTimeDisplay(h, m, standard)
+function FormatTimeDisplay(h, m, standard)
     if standard then
         local suffix = (h >= 12) and " PM" or " AM"
         local hour = h % 12
@@ -226,7 +230,7 @@ local function FormatTimeDisplay(h, m, standard)
     end
 end
 
-local function FormatSeconds(seconds)
+function FormatSeconds(seconds)
     if not seconds or seconds <= 0 then 
         return "Now" 
     end
@@ -241,7 +245,7 @@ local function FormatSeconds(seconds)
 end
 
 -- Helper to format numbers with commas (e.g., 1,234,567)
-local function FormatWithCommas(amount)
+function FormatWithCommas(amount)
     local formatted = tostring(amount)
     while true do
         formatted, k = formatted:gsub("^(%d+)(%d%d%d)", '%1,%2')
@@ -250,7 +254,7 @@ local function FormatWithCommas(amount)
     return formatted
 end
 
-local function FormatMoney(amount)
+function FormatMoney(amount)
     if not amount then 
         return "0c" 
     end
@@ -268,7 +272,7 @@ local function FormatMoney(amount)
     return str
 end
 
-local function FormatTokenPrice(amount)
+function FormatTokenPrice(amount)
     if not amount then 
         return "N/A" 
     end
@@ -276,7 +280,7 @@ local function FormatTokenPrice(amount)
     return string.format("%s|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:2:0|t", FormatWithCommas(gold))
 end
 
-local function ApplyTooltipStyle(tip)
+function ApplyTooltipStyle(tip)
     if not tip then return end
     
     -- Don't style tooltips with embedded content to avoid taint
@@ -316,7 +320,7 @@ local function ApplyTooltipStyle(tip)
     -- Silently fail if styling causes issues (e.g., with embedded item tooltips)
 end
 
-local function SmartAnchor(tooltip, owner)
+function SmartAnchor(tooltip, owner)
     tooltip:ClearAllPoints()
     local bottom = owner:GetBottom()
     local sH, sW = GetScreenHeight(), GetScreenWidth()
@@ -341,7 +345,7 @@ local function SmartAnchor(tooltip, owner)
 end
 
 -- HELPER: DIFFICULTY STRING LOGIC
-local function GetDifficultyLabel()
+function GetDifficultyLabel()
     local _, instanceType, difficultyID, _, _, _, _, _, instanceGroupSize = GetInstanceInfo()
     
     if instanceType == "none" then return "World" end
@@ -395,707 +399,28 @@ end
 -- ============================================================================
 -- 4. INTERACTIVE FRAMES (Friends, Guild, Volume)
 -- ============================================================================
-
--- WRAPPER FUNCTION TO FIX NIL ERROR
-function BrokerBar:CreateInteractiveFrames()
-    self:CreateVolumeFrame()
-    self:CreateFriendsFrame()
-    self:CreateGuildFrame()
-end
-
--- VOLUME MIXER
-function BrokerBar:CreateVolumeFrame()
-    if volFrame then return end
-    volFrame = CreateFrame("Frame", "MidnightVolumePopout", UIParent, "BackdropTemplate")
-    volFrame:SetSize(220, 320); volFrame:SetFrameStrata("DIALOG"); volFrame:EnableMouse(true); volFrame:Hide()
-    MidnightUI:SkinFrame(volFrame)
-
-    local vTitle = volFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    vTitle:SetPoint("TOP", 0, -10)
-    vTitle:SetText("Volume Mixer")
-
-    -- Add OnShow script to update Title Font/Color dynamically based on current settings
-    volFrame:SetScript("OnShow", function()
-        local db = BrokerBar.db.profile
-        local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
-        local r, g, b = GetColor()
-        vTitle:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
-        vTitle:SetTextColor(r, g, b)
-    end)
-
-
-    volFrame:SetScript("OnUpdate", function(self, elapsed)
-        if MouseIsOver(self) or (self.owner and MouseIsOver(self.owner)) then
-            self.timer = 0
-        else
-            self.timer = (self.timer or 0) + elapsed
-            if self.timer > 0.2 then
-                self:Hide()
-            end
-        end
-    end)
-
-    -- Move slider and checkbox creation inside the function
-    local function CreateSlider(name, label, cvar, parent, yOffset)
-        local s = CreateFrame("Slider", name, parent, "OptionsSliderTemplate")
-        s:SetPoint("TOP", parent, "TOP", 0, yOffset); s:SetWidth(180)
-        s:SetMinMaxValues(0, 1); s:SetValueStep(0.05) -- Snap to 5% steps
-        _G[s:GetName().."Text"]:SetText(label)
-        s:SetScript("OnShow", function(self) 
-            self:SetValue(tonumber(GetCVar(cvar)) or 0) 
-        end)
-        s:SetScript("OnValueChanged", function(self, value) 
-            -- Snap to nearest multiple of 5% (0.05)
-            value = math.max(0, math.min(1, value))
-            value = math.floor((value * 20) + 0.5) / 20
-            SetCVar(cvar, value)
-            if cvar == "Sound_MasterVolume" then 
-                BrokerBar:UpdateAllModules() 
-            end 
-        end)
-    end
-    CreateSlider("MUI_VolMaster", "Master", "Sound_MasterVolume", volFrame, -50)
-    CreateSlider("MUI_VolMusic", "Music", "Sound_MusicVolume", volFrame, -90)
-    CreateSlider("MUI_VolAmbience", "Ambience", "Sound_AmbienceVolume", volFrame, -130)
-    CreateSlider("MUI_VolDialog", "Dialog", "Sound_DialogVolume", volFrame, -170)
-
-    local function CreateCheck(label, cvar, parent, yOffset)
-        local cb = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
-        cb:SetPoint("TOPLEFT", 20, yOffset)
-        if cb.Text then 
-            cb.Text:SetText(label) 
-        elseif cb.text then 
-            cb.text:SetText(label) 
-        end
-        cb:SetScript("OnShow", function(self) 
-            self:SetChecked(GetCVar(cvar)=="1") 
-        end)
-        cb:SetScript("OnClick", function(self) 
-            SetCVar(cvar, self:GetChecked() and "1" or "0") 
-        end)
-    end
-    -- UPDATED CHECKBOX LABELS
-    CreateCheck("Loop Music", "Sound_ZoneMusicNoDelay", volFrame, -210)
-    CreateCheck("Sound in Background", "Sound_EnableSoundWhenGameIsInBG", volFrame, -240) 
-    CreateCheck("Play Error Speech", "Sound_EnableErrorSpeech", volFrame, -270)
-end
-
--- FRIENDS LIST
-function BrokerBar:CreateFriendsFrame()
-    if friendsFrame then return end
-    friendsFrame = CreateFrame("Frame", "MidnightFriendsPopup", UIParent, "BackdropTemplate")
-    friendsFrame:SetSize(600, 400); friendsFrame:SetFrameStrata("DIALOG"); friendsFrame:EnableMouse(true); friendsFrame:Hide()
-    MidnightUI:SkinFrame(friendsFrame)
-
-    friendTitle = friendsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    friendTitle:SetPoint("TOP", 0, -10); friendTitle:SetText("Friends List")
-
-    friendFooter = friendsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    friendFooter:SetPoint("BOTTOM", 0, 8); friendFooter:SetText("|cff00ff00Click: Whisper • Ctrl-Click: Invite|r")
-
-    local fScroll = CreateFrame("ScrollFrame", nil, friendsFrame, "UIPanelScrollFrameTemplate")
-    fScroll:SetPoint("TOPLEFT", 10, -55); fScroll:SetPoint("BOTTOMRIGHT", -25, 25)
-    scrollChild = CreateFrame("Frame"); scrollChild:SetSize(560, 1); fScroll:SetScrollChild(scrollChild)
-    listSeparator = scrollChild:CreateTexture(nil, "ARTWORK"); listSeparator:SetHeight(1); listSeparator:SetColorTexture(0.3, 0.3, 0.3, 0.8)
-
-    local fHeader = CreateFrame("Frame", nil, friendsFrame)
-    fHeader:SetPoint("TOPLEFT", 10, -30); fHeader:SetSize(560, 20)
-    
-    -- Create horizontal line after headers
-    local headerLine = friendsFrame:CreateTexture(nil, "ARTWORK")
-    headerLine:SetHeight(1)
-    headerLine:SetColorTexture(0.5, 0.5, 0.5, 0.8)
-    headerLine:SetPoint("TOPLEFT", 10, -50)
-    headerLine:SetPoint("TOPRIGHT", -25, -50)
-    
-    local function CreateHeader(text, width, xPos)
-        local fs = fHeader:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        fs:SetText(text); fs:SetWidth(width); fs:SetJustifyH("LEFT"); fs:SetPoint("LEFT", xPos, 0)
-        table.insert(headerRefs, fs) 
-    end
-    -- Columns (Adjusted faction column width)
-    local colW = { btag=135, char=100, lvl=30, zone=120, realm=80, fac=50 }
-    local colX = { btag=5, char=145, lvl=250, zone=285, realm=410, fac=495 }
-    CreateHeader("BattleTag", colW.btag, colX.btag); CreateHeader("Character", colW.char, colX.char)
-    CreateHeader("Lvl", colW.lvl, colX.lvl); CreateHeader("Zone", colW.zone, colX.zone)
-    CreateHeader("Realm", colW.realm, colX.realm); CreateHeader("Faction", colW.fac, colX.fac)
-
-    -- Add OnShow script to update fonts/colors dynamically
-    friendsFrame:SetScript("OnShow", function()
-        local db = BrokerBar.db.profile
-        local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
-        local r, g, b = GetColor()
-        
-        -- Update title
-        friendTitle:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
-        friendTitle:SetTextColor(r, g, b)
-        
-        -- Update footer
-        friendFooter:SetFont(fontPath, db.fontSize, "OUTLINE")
-        
-        -- Update headers
-        for _, fs in ipairs(headerRefs) do
-            fs:SetFont(fontPath, db.fontSize, "OUTLINE")
-            fs:SetTextColor(r, g, b)
-        end
-    end)
-
-    friendsFrame:SetScript("OnUpdate", function(self, elapsed)
-        if MouseIsOver(self) or (self.owner and MouseIsOver(self.owner)) then 
-            self.timer = 0
-        else 
-            self.timer = (self.timer or 0) + elapsed
-            if self.timer > 0.2 then 
-                self:Hide() 
-            end 
-        end
-    end)
-end
-
-function BrokerBar:UpdateFriendList()
-    if not scrollChild then return end
-    for _, child in ipairs({scrollChild:GetChildren()}) do 
-        child:Hide() 
-    end
-    
-    local wowFriends, bnetFriends = {}, {}
-    local numBNet = BNGetNumFriends() or 0
-    for i = 1, numBNet do
-        local info = C_BattleNet.GetFriendAccountInfo(i)
-        if info and info.gameAccountInfo and info.gameAccountInfo.isOnline then
-            local g = info.gameAccountInfo
-            if (g.clientProgram == BNET_CLIENT_WOW) and (g.wowProjectID == 1) then
-                -- Use classID to get proper class token for coloring
-                local classToken = g.className
-                if g.classID then
-                    local classInfo = C_CreatureInfo.GetClassInfo(g.classID)
-                    if classInfo then
-                        classToken = classInfo.classFile
-                    end
-                end
-                table.insert(wowFriends, {name=g.characterName, bnet=info.battleTag, level=g.characterLevel, zone=g.areaName, realm=g.realmName, faction=g.factionName, class=classToken or g.className})
-            else
-                table.insert(bnetFriends, {bnet=info.battleTag, game=g.richPresence or g.clientProgram, status=(g.isWowMobile and "Mobile" or "Online")})
-            end
-        end
-    end
-
-    local yOffset, db, fontPath = 0, BrokerBar.db.profile, LSM:Fetch("font", BrokerBar.db.profile.font)
-    local colW = { btag=135, char=100, lvl=30, zone=120, realm=80, fac=50 }
-    local colX = { btag=5, char=145, lvl=250, zone=285, realm=410, fac=495 }
-
-    local function CreateRow(data, isWoW)
-        local btn = CreateFrame("Button", nil, scrollChild); btn:SetSize(560, 20); btn:SetPoint("TOPLEFT", 0, yOffset)
-        local function AddText(t, w, x, c)
-            local fs = btn:CreateFontString(nil, "OVERLAY"); fs:SetFont(fontPath, db.fontSize, "OUTLINE")
-            local sT = tostring(t or "")
-            if #sT > 20 then 
-                sT = sT:sub(1, 20).."..." 
-            end
-            fs:SetText(sT); fs:SetWidth(w); fs:SetJustifyH("LEFT"); fs:SetPoint("LEFT", x, 0)
-            if c then fs:SetTextColor(c.r, c.g, c.b) end
-        end
-        if isWoW then
-            local cToken = classTokenLookup[data.class] or data.class
-            -- Use RAID_CLASS_COLORS instead of C_ClassColor
-            local color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[cToken] or {r=1,g=1,b=1}
-            AddText(data.bnet, colW.btag, colX.btag, {r=0.51,g=0.77,b=1}); AddText(data.name, colW.char, colX.char, color)
-            AddText(data.level, colW.lvl, colX.lvl, {r=1,g=1,b=1}); AddText(data.zone, colW.zone, colX.zone, {r=1,g=0.82,b=0})
-            AddText(data.realm, colW.realm, colX.realm, {r=1,g=1,b=1})
-            
-            -- Fixed faction icon logic with proper texture markup
-            local facIcon = ""
-            if data.faction == "Horde" then
-                facIcon = "|TInterface\\Icons\\INV_BannerPVP_01:16:16:0:0|t"
-            elseif data.faction == "Alliance" then
-                facIcon = "|TInterface\\Icons\\INV_BannerPVP_02:16:16:0:0|t"
-            end
-            AddText(facIcon, colW.fac, colX.fac)
-
-            btn:SetScript("OnClick", function() 
-                local t = data.name
-                if data.realm then 
-                    t=t.."-"..data.realm:gsub("%s+","") 
-                end
-                if IsControlKeyDown() then 
-                    C_PartyInfo.InviteUnit(t) 
-                else 
-                    ChatFrame_SendTell(t) 
-                end 
-            end)
-        else
-            AddText(data.bnet, colW.btag, colX.btag, {r=0.51,g=0.77,b=1}); AddText(data.game, colW.char, colX.char, {r=0.6,g=0.6,b=0.6})
-            AddText(data.status, colW.zone, colX.zone, (data.status=="Mobile" and {r=0.5,g=0.5,b=0.5} or {r=0,g=1,b=0}))
-            btn:SetScript("OnClick", function() 
-                ChatFrame_SendTell(data.bnet) 
-            end)
-        end
-        local hl = btn:CreateTexture(nil, "HIGHLIGHT"); hl:SetAllPoints(); hl:SetColorTexture(1,1,1,0.1)
-        yOffset = yOffset - 20
-    end
-
-    for _, f in ipairs(wowFriends) do 
-        CreateRow(f, true) 
-    end
-    if #wowFriends > 0 and #bnetFriends > 0 then
-        listSeparator:ClearAllPoints()
-        listSeparator:SetPoint("TOPLEFT", 5, yOffset-2)
-        listSeparator:SetPoint("TOPRIGHT", -5, yOffset-2)
-        listSeparator:Show()
-        yOffset = yOffset - 5
-    else 
-        listSeparator:Hide() 
-    end
-    for _, f in ipairs(bnetFriends) do 
-        CreateRow(f, false) 
-    end
-    
-    -- Adjust scroll child height to fit content
-    local contentHeight = math.abs(yOffset) + 10
-    scrollChild:SetHeight(contentHeight)
-    
-    -- Adjust friends frame height dynamically (min 200, max 600)
-    local frameHeight = math.min(600, math.max(200, contentHeight + 90))
-    friendsFrame:SetHeight(frameHeight)
-end
-
--- GUILD LIST
-function BrokerBar:CreateGuildFrame()
-    if guildFrame then return end
-    guildFrame = CreateFrame("Frame", "MidnightGuildPopup", UIParent, "BackdropTemplate")
-    guildFrame:SetSize(600, 450); guildFrame:SetFrameStrata("DIALOG"); guildFrame:EnableMouse(true); guildFrame:Hide()
-    MidnightUI:SkinFrame(guildFrame)
-    
-    guildTitle = guildFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    guildTitle:SetPoint("TOP", 0, -10); guildTitle:SetText("Guild List")
-
-    guildMotD = guildFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    guildMotD:SetPoint("TOP", 0, -35); guildMotD:SetWidth(560); guildMotD:SetTextColor(0, 1, 0)
-
-    guildFooter = guildFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    guildFooter:SetPoint("BOTTOM", 0, 8); guildFooter:SetText("|cff00ff00Click: Whisper • Ctrl-Click: Invite|r")
-
-    local gScroll = CreateFrame("ScrollFrame", nil, guildFrame, "UIPanelScrollFrameTemplate")
-    gScroll:SetPoint("TOPLEFT", 10, -90); gScroll:SetPoint("BOTTOMRIGHT", -25, 25)
-    gScrollChild = CreateFrame("Frame"); gScrollChild:SetSize(560, 1); gScroll:SetScrollChild(gScrollChild)
-
-    local gHeader = CreateFrame("Frame", nil, guildFrame)
-    gHeader:SetPoint("TOPLEFT", 10, -65); gHeader:SetSize(560, 20)
-    
-    -- Create horizontal line after headers
-    local headerLine = guildFrame:CreateTexture(nil, "ARTWORK")
-    headerLine:SetHeight(1)
-    headerLine:SetColorTexture(0.5, 0.5, 0.5, 0.8)
-    headerLine:SetPoint("TOPLEFT", 10, -85)
-    headerLine:SetPoint("TOPRIGHT", -25, -85)
-    
-    local function CreateGHeader(t, w, x)
-        local fs = gHeader:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        fs:SetText(t); fs:SetWidth(w); fs:SetJustifyH("LEFT"); fs:SetPoint("LEFT", x, 0)
-        table.insert(guildHeaderRefs, fs)
-    end
-    -- Columns
-    local gW = { name=100, lvl=30, zone=120, rank=100, note=200 }
-    local gX = { name=5, lvl=110, zone=145, rank=270, note=375 }
-    CreateGHeader("Name", gW.name, gX.name); CreateGHeader("Lvl", gW.lvl, gX.lvl)
-    CreateGHeader("Zone", gW.zone, gX.zone); CreateGHeader("Rank", gW.rank, gX.rank); CreateGHeader("Note", gW.note, gX.note)
-
-    -- Add OnShow script to update fonts/colors dynamically
-    guildFrame:SetScript("OnShow", function()
-        local db = BrokerBar.db.profile
-        local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
-        local r, g, b = GetColor()
-        
-        -- Update title
-        guildTitle:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
-        guildTitle:SetTextColor(r, g, b)
-        
-        -- Update MotD with larger font
-        guildMotD:SetFont(fontPath, db.fontSize + 1, "OUTLINE")
-        
-        -- Update footer
-        guildFooter:SetFont(fontPath, db.fontSize, "OUTLINE")
-        
-        -- Update headers
-        for _, fs in ipairs(guildHeaderRefs) do
-            fs:SetFont(fontPath, db.fontSize, "OUTLINE")
-            fs:SetTextColor(r, g, b)
-        end
-    end)
-
-    guildFrame:SetScript("OnUpdate", function(self, elapsed)
-        if MouseIsOver(self) or (self.owner and MouseIsOver(self.owner)) then 
-            self.timer = 0
-        else 
-            self.timer = (self.timer or 0) + elapsed
-            if self.timer > 0.2 then 
-                self:Hide() 
-            end 
-        end
-    end)
-end
-
-function BrokerBar:UpdateGuildList()
-    if not gScrollChild then return end
-    for _, child in ipairs({gScrollChild:GetChildren()}) do 
-        child:Hide() 
-    end
-    local members = {}; local num = GetNumGuildMembers(); guildMotD:SetText(GetGuildRosterMOTD() or "No Message")
-    for i = 1, num do
-        local name, rank, rankIndex, level, _, zone, note, _, online, _, class = GetGuildRosterInfo(i)
-        if online then 
-            table.insert(members, {name=name, rank=rank, rIdx=rankIndex, level=level, zone=zone, note=note, class=class}) 
-        end
-    end
-    table.sort(members, function(a, b) return (a.rIdx == b.rIdx) and (a.name < b.name) or (a.rIdx < b.rIdx) end)
-    
-    local yOffset, db, fontPath = 0, BrokerBar.db.profile, LSM:Fetch("font", BrokerBar.db.profile.font)
-    local gW = { name=100, lvl=30, zone=120, rank=100, note=200 }
-    local gX = { name=5, lvl=110, zone=145, rank=270, note=375 }
-
-    for _, m in ipairs(members) do
-        local btn = CreateFrame("Button", nil, gScrollChild); btn:SetSize(560, 20); btn:SetPoint("TOPLEFT", 0, yOffset)
-        local function AddTxt(t, w, x, c, lim)
-            local fs = btn:CreateFontString(nil, "OVERLAY"); fs:SetFont(fontPath, db.fontSize, "OUTLINE")
-            local sT = tostring(t or "")
-            if lim and #sT > lim then 
-                sT = sT:sub(1, lim).."..." 
-            end
-            fs:SetText(sT); fs:SetWidth(w); fs:SetJustifyH("LEFT"); fs:SetPoint("LEFT", x, 0)
-            if c then fs:SetTextColor(c.r, c.g, c.b) end
-        end
-        -- Use RAID_CLASS_COLORS instead of C_ClassColor
-        local color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[m.class] or {r=1,g=1,b=1}
-        AddTxt(m.name:gsub("%-.+", ""), gW.name, gX.name, color, 12); AddTxt(m.level, gW.lvl, gX.lvl, {r=1,g=1,b=1})
-        AddTxt(m.zone, gW.zone, gX.zone, {r=1,g=0.82,b=0}); AddTxt(m.rank, gW.rank, gX.rank, {r=1,g=1,b=1})
-        AddTxt(m.note, gW.note, gX.note, {r=0.8,g=0.8,b=0.8})
-        btn:SetScript("OnClick", function() 
-            if IsControlKeyDown() then 
-                C_PartyInfo.InviteUnit(m.name) 
-            else 
-                ChatFrame_SendTell(m.name) 
-            end 
-        end)
-        local hl = btn:CreateTexture(nil, "HIGHLIGHT"); hl:SetAllPoints(); hl:SetColorTexture(1,1,1,0.1)
-        yOffset = yOffset - 20
-    end
-    
-    -- Adjust scroll child height to fit content
-    local contentHeight = math.abs(yOffset) + 10
-    gScrollChild:SetHeight(contentHeight)
-    
-    -- Adjust guild frame height dynamically (min 200, max 600)
-    local frameHeight = math.min(600, math.max(200, contentHeight + 140))
-    guildFrame:SetHeight(frameHeight)
-end
+-- NOTE: These functions have been moved to individual broker files in Modules/Brokers/
+-- The broker files now handle their own frame creation and update logic
 
 -- ============================================================================
 -- 5. BROKER OBJECTS (LDB)
 -- ============================================================================
 
 function BrokerBar:InitializeBrokers()
-    -- FRIENDS
-    friendObj = LDB:NewDataObject("MidnightFriends", {
-        type = "data source", text = "0", icon = "Interface\\FriendsFrame\\UI-Toast-ChatInviteIcon",
-        OnClick = function() ToggleFriendsFrame(1) end,
-        OnEnter = function(self) 
-            if not friendsFrame then 
-                BrokerBar:CreateFriendsFrame() 
-            end
-            friendsFrame.owner = self
-            BrokerBar:UpdateFriendList()
-            SmartAnchor(friendsFrame, self)
-            friendsFrame:Show() 
-        end
-    })
-
-    -- GUILD
-    guildObj = LDB:NewDataObject("MidnightGuild", {
-        type = "data source", text = "0", icon = "Interface\\Icons\\INV_Shirt_GuildTabard_01",
-        OnClick = function() ToggleGuildFrame() end,
-        OnEnter = function(self) 
-            if IsInGuild() then 
-                C_GuildInfo.GuildRoster()
-                if not guildFrame then 
-                    BrokerBar:CreateGuildFrame() 
-                end
-                guildFrame.owner = self
-                BrokerBar:UpdateGuildList()
-                SmartAnchor(guildFrame, self)
-                guildFrame:Show() 
-            end 
-        end
-    })
-
-    -- GOLD
-    goldObj = LDB:NewDataObject("MidnightGold", { 
-        type = "data source", text = "0g", icon = "Interface\\Icons\\INV_Misc_Coin_01",
-        OnEnter = function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_NONE")
-            SmartAnchor(GameTooltip, self)
-            local r, g, b = GetColor()
-            GameTooltip:AddLine("Account Gold Summary", r, g, b)
-            GameTooltip:AddLine(" ")
-            local total = 0
-            for charKey, data in pairs(BrokerBar.db.profile.goldData) do
-                local charColor = {r=1, g=1, b=1}
-                if type(data) == "table" and data.class then 
-                    local c = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[data.class]
-                    if c then charColor = c end 
-                end
-                local amt = type(data) == "table" and data.amount or data
-                total = total + amt
-                GameTooltip:AddDoubleLine(charKey:match("^(.-) %-") or charKey, FormatMoney(amt), charColor.r, charColor.g, charColor.b)
-            end
-            GameTooltip:AddLine(" ")
-            GameTooltip:AddDoubleLine("Total", FormatMoney(total), 1, 0.82, 0)
-            ApplyTooltipStyle(GameTooltip)
-            GameTooltip:Show()
-        end,
-        OnLeave = function() 
-            GameTooltip:Hide() 
-        end
-    })
-
-    -- SYSTEM (TOP 60 ADDONS) - COLORING UPDATE FOR TOOLTIP
-    sysObj = LDB:NewDataObject("MidnightSystem", {
-        type = "data source", text = "0 FPS", icon = "Interface\\Icons\\Trade_Engineering",
-        OnTooltipShow = function(tip)
-            local r, g, b = GetColor()
-            UpdateAddOnMemoryUsage()
-            local addons = {}
-            for i = 1, C_AddOns.GetNumAddOns() do 
-                local u = GetAddOnMemoryUsage(i)
-                if u > 0 then 
-                    table.insert(addons, {n = C_AddOns.GetAddOnInfo(i), m = u}) 
-                end 
-            end
-            table.sort(addons, function(a, b) return a.m > b.m end)
-            tip:AddLine("System Performance", r, g, b)
-            local _, _, _, world = GetNetStats()
-            local fps = math.floor(GetFramerate())
-            
-            -- FPS Coloring for Tooltip (Matches Bar)
-            local fr, fg, fb = 0.2, 1, 0.2 -- Green Default
-            if fps < 20 then
-                fr, fg, fb = 0.87, 0.09, 0.09 -- Red
-            elseif fps < 40 then
-                fr, fg, fb = 1, 0.49, 0.04 -- Orange
-            elseif fps < 60 then
-                fr, fg, fb = 1, 0.82, 0 -- Yellow
-            end
-            
-            -- Latency Coloring for Tooltip (Matches Bar)
-            local lr, lg, lb = 0.2, 1, 0.2 -- Green Default
-            if world >= 200 then
-                lr, lg, lb = 0.87, 0.09, 0.09 -- Red
-            elseif world >= 100 then
-                lr, lg, lb = 1, 0.82, 0 -- Yellow
-            end
-            
-            tip:AddDoubleLine("FPS:", fps, 1, 1, 1, fr, fg, fb)
-            tip:AddDoubleLine("Latency:", world.."ms", 1, 1, 1, lr, lg, lb)
-            tip:AddLine(" ")
-            tip:AddLine("Top Addon Memory", r, g, b)
-            
-            for i, data in ipairs(addons) do
-                if i > 60 then break end
-                
-                -- Determine Formatting (KB vs MB)
-                local memString = ""
-                local val = data.m -- Raw value in KB
-                if val < 1024 then
-                    memString = string.format("%.0f KB", val)
-                else
-                    memString = string.format("%.2f MB", val / 1024)
-                end
-                
-                -- Determine Coloring (Red > 10MB, Yellow > 1MB, Green < 1MB)
-                local cr, cg, cb
-                if val > 10240 then -- Red (0.87, 0.09, 0.09)
-                    cr, cg, cb = 0.87, 0.09, 0.09
-                elseif val > 1024 then -- Yellow (1.0, 0.82, 0.0)
-                    cr, cg, cb = 1, 0.82, 0
-                else -- Green (0.2, 1.0, 0.2)
-                    cr, cg, cb = 0.2, 1, 0.2
-                end
-                
-                -- Apply color to BOTH Name and Value
-                tip:AddDoubleLine(data.n, memString, cr, cg, cb, cr, cg, cb)
-            end
-            ApplyTooltipStyle(tip)
-        end
-    })
-
-    -- BAGS
-    bagObj = LDB:NewDataObject("MidnightBags", {
-        type = "data source", text = "0/0", icon = "Interface\\Icons\\INV_Misc_Bag_08", OnClick = function() ToggleAllBags() end,
-        OnTooltipShow = function(tip)
-            local r, g, b = GetColor()
-            tip:AddLine("Bag Storage", r, g, b)
-            for i = 0, 4 do
-                local s = C_Container.GetContainerNumSlots(i)
-                if s > 0 then
-                    local f = C_Container.GetContainerNumFreeSlots(i)
-                    local name = (i==0) and "Backpack" or "Bag "..i
-                    local br, bg, bb = 1, 1, 1
-                    if i > 0 then
-                        local link = GetInventoryItemLink("player", C_Container.ContainerIDToInventoryID(i))
-                        if link then 
-                            local _, _, q = C_Item.GetItemInfo(link)
-                            if q then 
-                                br, bg, bb = C_Item.GetItemQualityColor(q) 
-                            end
-                            name = GetItemInfo(link) 
-                        end
-                    end
-                    tip:AddDoubleLine(name, (s-f).."/"..s, br, bg, bb, 1, 1, 1)
-                end
-            end
-            ApplyTooltipStyle(tip)
-        end
-    })
-
-    -- TOKEN
-    tokenObj = LDB:NewDataObject("MidnightToken", {
-        type = "data source", text = "Loading...", icon = "Interface\\Icons\\WoW_Token01", 
-        OnClick = function() 
-            C_WowTokenPublic.UpdateMarketPrice() -- Manual refresh on click
-        end,
-        OnTooltipShow = function(tip)
-            local r, g, b = GetColor()
-            tip:AddLine("WoW Token", r, g, b)
-            local c = C_WowTokenPublic.GetCurrentMarketPrice()
-            if c then 
-                tip:AddDoubleLine("Current:", FormatTokenPrice(c), 1,1,1) 
-            else
-                tip:AddLine("Price not available", 0.8, 0.8, 0.8)
-            end
-            tip:AddLine(" ")
-            tip:AddLine("Price History", 1, 0.82, 0)
-            local h = BrokerBar.db.profile.tokenHistory or {}
-            if #h > 0 then
-                for _, e in ipairs(h) do 
-                    tip:AddDoubleLine(date("%m/%d %I:%M %p", e.time), FormatTokenPrice(e.price), 1,1,1) 
-                end
-            else
-                tip:AddLine("No history available", 0.6, 0.6, 0.6)
-            end
-            tip:AddLine(" ")
-            tip:AddLine("|cffaaaaaa(Click to refresh price)|r", 0.7, 0.7, 0.7)
-            ApplyTooltipStyle(tip)
-        end
-    })
-
-    -- VOLUME
-    volObj = LDB:NewDataObject("MidnightVolume", { 
-        type = "data source", text = "0%", icon = "Interface\\Common\\VoiceChat-Speaker",
-        OnClick = function(self, button) 
-            if button == "RightButton" then 
-                if not volFrame then 
-                    BrokerBar:CreateVolumeFrame() 
-                end
-                volFrame.owner = self
-                SmartAnchor(volFrame, self)
-                volFrame:Show()
-            else 
-                local current = tonumber(GetCVar("Sound_MasterVolume")) or 0
-                if current > 0 then
-                    -- Muting: Save current PERCENTAGE value (whole number) to DB
-                    local currentPercent = math.floor(current * 100)
-                    BrokerBar.db.profile.lastVolume = currentPercent
-                    SetCVar("Sound_MasterVolume", "0")
-                else
-                    -- Unmuting: Restore from DB as decimal
-                    local restorePercent = BrokerBar.db.profile.lastVolume or 100
-                    if restorePercent == 0 then restorePercent = 100 end
-                    -- Convert percentage back to decimal (0.0 - 1.0)
-                    local restoreDecimal = restorePercent / 100
-                    SetCVar("Sound_MasterVolume", tostring(restoreDecimal))
-                end
-                BrokerBar:UpdateAllModules()
-            end
-        end,
-        OnMouseWheel = function(_, d) 
-            local v = (tonumber(GetCVar("Sound_MasterVolume")) or 0) + (d>0 and 0.05 or -0.05)
-            -- Snap to nearest multiple of 5% (0.05)
-            v = math.max(0, math.min(1, v))
-            v = math.floor((v * 20) + 0.5) / 20 -- 20 steps in 0-1, each is 0.05
-            SetCVar("Sound_MasterVolume", v)
-            BrokerBar:UpdateAllModules() 
-        end
-    })
-
-    duraObj = LDB:NewDataObject("MidnightDura", { 
-        type = "data source", text = "100%", icon = "Interface\\Icons\\Trade_BlackSmithing", 
-        OnTooltipShow = function(tip) 
-            tip:AddLine("Durability Details", GetColor())
-            for i=1,18 do 
-                local c,m=GetInventoryItemDurability(i)
-                if c and m then 
-                    tip:AddDoubleLine(GetInventoryItemLink("player",i), math.floor((c/m)*100).."%") 
-                end 
-            end
-            ApplyTooltipStyle(tip) 
-        end 
-    })
-    
-    locObj = LDB:NewDataObject("MidnightLocation", { 
-        type = "data source", text = "Loc", icon = "Interface\\Icons\\INV_Misc_Map02", 
-        OnClick = function() ToggleWorldMap() end 
-    })
-    
-    diffObj = LDB:NewDataObject("MidnightDiff", { 
-        type = "data source", text = "World", icon = "Interface\\Icons\\inv_misc_groupneedmore" 
-    })
-    
-    ilvlObj = LDB:NewDataObject("MidnightILvl", { 
-        type = "data source", text = "0", icon = "Interface\\Icons\\INV_Helmet_03", 
-        OnTooltipShow = function(tip) 
-            tip:AddLine("Item Level", GetColor())
-            for i=1,18 do 
-                local l=GetInventoryItemLink("player",i)
-                if l then 
-                    tip:AddDoubleLine(l, GetDetailedItemLevelInfo(l)) 
-                end 
-            end
-            ApplyTooltipStyle(tip) 
-        end 
-    })
-    
-    -- UPDATED CLOCK TOOLTIP
-    clockObj = LDB:NewDataObject("MidnightClock", { 
-        type = "data source", text = "00:00", icon = "Interface\\Icons\\INV_Misc_PocketWatch_01", 
-        OnTooltipShow = function(tip) 
-            local r,g,b = GetColor()
-            local db = BrokerBar.db.profile
-            tip:AddLine("Midnight Clock", r,g,b) -- UPDATED TITLE
-            
-            -- Local Time
-            local localTime = date("*t")
-            tip:AddDoubleLine("Local Time:", FormatTimeDisplay(localTime.hour, localTime.min, db.useStandardTime), 1,1,1, 1,1,1)
-            
-            -- Realm Time
-            local realmH, realmM = GetGameTime()
-            tip:AddDoubleLine("Realm Time:", FormatTimeDisplay(realmH, realmM, db.useStandardTime), 1,1,1, 1,1,1)
-            
-            tip:AddLine(" ")
-            
-            -- Resets
-            tip:AddLine("Resets", r, g, b) -- ADDED TITLE
-            local dailyReset = C_DateAndTime.GetSecondsUntilDailyReset()
-            if dailyReset then
-                tip:AddDoubleLine("Daily Reset:", FormatSeconds(dailyReset), 1,1,1, 1,1,1)
-            end
-            
-            local weeklyReset = C_DateAndTime.GetSecondsUntilWeeklyReset()
-            if weeklyReset then
-                tip:AddDoubleLine("Weekly Reset:", FormatSeconds(weeklyReset), 1,1,1, 1,1,1)
-            end
-            
-            ApplyTooltipStyle(tip) 
-        end 
-    })
+    -- Brokers are now loaded from separate files in Modules/Brokers/
+    -- Get references to the data objects created by those files
+    friendObj = LDB:GetDataObjectByName("MidnightFriends")
+    guildObj = LDB:GetDataObjectByName("MidnightGuild")
+    goldObj = LDB:GetDataObjectByName("MidnightGold")
+    sysObj = LDB:GetDataObjectByName("MidnightSystem")
+    bagObj = LDB:GetDataObjectByName("MidnightBags")
+    tokenObj = LDB:GetDataObjectByName("MidnightToken")
+    volObj = LDB:GetDataObjectByName("MidnightVolume")
+    duraObj = LDB:GetDataObjectByName("MidnightDura")
+    locObj = LDB:GetDataObjectByName("MidnightLocation")
+    diffObj = LDB:GetDataObjectByName("MidnightDiff")
+    ilvlObj = LDB:GetDataObjectByName("MidnightILvl")
+    clockObj = LDB:GetDataObjectByName("MidnightClock")
 end
 
 -- ============================================================================
