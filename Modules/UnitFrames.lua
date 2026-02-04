@@ -1527,15 +1527,13 @@ end
         end
         
         -- Block duplicate event handlers (AceEvent fires this twice per zone change)
-        if playerEnteringWorldInProgress then
-            print("[UF DEBUG] PLAYER_ENTERING_WORLD blocked - already in progress")
+        -- Use timestamp to detect if we're being called multiple times in rapid succession
+        local now = GetTime()
+        if self.lastPEWTime and (now - self.lastPEWTime) < 0.3 then
+            print("[UF DEBUG] PLAYER_ENTERING_WORLD blocked - duplicate call after " .. string.format("%.3f", now - self.lastPEWTime) .. "s")
             return
         end
-        
-        playerEnteringWorldInProgress = true
-        C_Timer.After(0.5, function()
-            playerEnteringWorldInProgress = false
-        end)
+        self.lastPEWTime = now
         
         HookBlizzardPlayerFrame(self)
         -- Only create frames if they don't already exist to prevent recreation on every zone change
