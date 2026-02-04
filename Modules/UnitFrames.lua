@@ -1524,6 +1524,16 @@ end
         if not self.db or not self.db.profile then
             return
         end
+        
+        -- Skip if we're already processing this zone change (prevents duplicate event handlers)
+        local currentZone = GetZoneText() or GetRealZoneText() or "Unknown"
+        if self.lastProcessedZone == currentZone and (GetTime() - (self.lastZoneProcessTime or 0)) < 2 then
+            print("[UF DEBUG] PLAYER_ENTERING_WORLD skipped - already processed for " .. currentZone)
+            return
+        end
+        self.lastProcessedZone = currentZone
+        self.lastZoneProcessTime = GetTime()
+        
         HookBlizzardPlayerFrame(self)
         -- Only create frames if they don't already exist to prevent recreation on every zone change
         if self.db.profile.showPlayer and not _G["MidnightUI_PlayerFrame"] then self:CreatePlayerFrame() end
