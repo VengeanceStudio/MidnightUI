@@ -290,6 +290,11 @@ end
 -- CUSTOM ELEMENTS (Clock, Coords, Zone)
 -- -----------------------------------------------------------------------------
 function Maps:SetupElements()
+    -- Only set up once - prevent duplicate tickers on zone changes
+    if self.elementsInitialized then
+        return
+    end
+    
     local font = LSM:Fetch("font", self.db.profile.font)
     local size = self.db.profile.fontSize
     local flag = self.db.profile.fontOutline
@@ -299,7 +304,7 @@ function Maps:SetupElements()
         self.clock = Minimap:CreateFontString(nil, "OVERLAY")
         self.clock:SetFont(font, size, flag)
         
-        C_Timer.NewTicker(1, function()
+        self.clockTicker = C_Timer.NewTicker(1, function()
             local h, m = tonumber(date("%H")), tonumber(date("%M"))
             local timeStr = ""
             if GetCVarBool("timeMgrUseMilitaryTime") then
@@ -320,7 +325,7 @@ function Maps:SetupElements()
         self.coords = Minimap:CreateFontString(nil, "OVERLAY")
         self.coords:SetFont(font, size, flag)
         
-        C_Timer.NewTicker(0.2, function()
+        self.coordsTicker = C_Timer.NewTicker(0.2, function()
             local mapID = C_Map.GetBestMapForUnit("player")
             if mapID then
                 local pos = C_Map.GetPlayerMapPosition(mapID, "player")
@@ -354,6 +359,8 @@ function Maps:SetupElements()
             MinimapCluster.Tracking.Background:Hide() 
         end
     end
+    
+    self.elementsInitialized = true
 end
 
 function Maps:UpdateZoneText()
