@@ -698,6 +698,9 @@ function AB:SetupBarPaging(container)
     local db = self.db.profile.bars["MainMenuBar"]
     local pagingCondition = db.pagingCondition or DEFAULT_PAGING
     
+    -- Unregister any existing state driver first to prevent accumulation
+    UnregisterStateDriver(container, "actionpage")
+    
     -- Register state driver for bar paging
     RegisterStateDriver(container, "actionpage", pagingCondition)
     
@@ -737,6 +740,9 @@ function AB:UpdateBarPaging(barKey)
     
     local db = self.db.profile.bars[barKey]
     local pagingCondition = db.pagingCondition or DEFAULT_PAGING
+    
+    -- Unregister existing state driver first to prevent accumulation
+    UnregisterStateDriver(container, "actionpage")
     
     -- Update the state driver
     RegisterStateDriver(container, "actionpage", pagingCondition)
