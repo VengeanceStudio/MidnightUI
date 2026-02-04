@@ -1280,7 +1280,11 @@ function AB:UpdateBarFading(barKey)
             UIFrameFadeOut(container, 0.2, container:GetAlpha(), db.fadeAlpha)
         end)
     elseif db.fadeInCombat or db.fadeOutCombat then
-        container:SetScript("OnUpdate", function(self)
+        -- CHANGED: Use event-driven updates instead of OnUpdate polling
+        -- This prevents checking InCombatLockdown() every frame (60+ times/sec)
+        container:EnableMouse(false)
+        
+        local function UpdateCombatFade()
             local inCombat = InCombatLockdown()
             local targetAlpha = db.alpha
             
@@ -1290,10 +1294,20 @@ function AB:UpdateBarFading(barKey)
                 targetAlpha = db.fadeAlpha
             end
             
-            if self:GetAlpha() ~= targetAlpha then
-                UIFrameFadeIn(self, 0.3, self:GetAlpha(), targetAlpha)
+            if container:GetAlpha() ~= targetAlpha then
+                UIFrameFadeIn(container, 0.3, container:GetAlpha(), targetAlpha)
             end
-        end)
+        end
+        
+        -- Store handler reference for potential cleanup
+        container.combatFadeHandler = UpdateCombatFade
+        container.combatFadeFrame = container.combatFadeFrame or CreateFrame("Frame", nil, container)
+        container.combatFadeFrame:SetScript("OnEvent", UpdateCombatFade)
+        container.combatFadeFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+        container.combatFadeFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+        
+        -- Set initial state
+        UpdateCombatFade()
     else
         container:EnableMouse(false)
         container:SetAlpha(db.alpha)
