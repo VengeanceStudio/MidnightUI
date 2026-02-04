@@ -916,6 +916,7 @@ end
 local frames = {}
 local lastSetBlizzardFramesHiddenTime = 0
 local blizzardFramesInitialized = false
+local playerEnteringWorldInProgress = false
 
 -- Move HookBlizzardPlayerFrame definition above its first use
 
@@ -1525,14 +1526,16 @@ end
             return
         end
         
-        -- Skip if we're already processing this zone change (prevents duplicate event handlers)
-        local currentZone = GetZoneText() or GetRealZoneText() or "Unknown"
-        if self.lastProcessedZone == currentZone and (GetTime() - (self.lastZoneProcessTime or 0)) < 2 then
-            print("[UF DEBUG] PLAYER_ENTERING_WORLD skipped - already processed for " .. currentZone)
+        -- Block duplicate event handlers (AceEvent fires this twice per zone change)
+        if playerEnteringWorldInProgress then
+            print("[UF DEBUG] PLAYER_ENTERING_WORLD blocked - already in progress")
             return
         end
-        self.lastProcessedZone = currentZone
-        self.lastZoneProcessTime = GetTime()
+        
+        playerEnteringWorldInProgress = true
+        C_Timer.After(0.5, function()
+            playerEnteringWorldInProgress = false
+        end)
         
         HookBlizzardPlayerFrame(self)
         -- Only create frames if they don't already exist to prevent recreation on every zone change
