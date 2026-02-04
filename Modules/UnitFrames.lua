@@ -460,11 +460,11 @@ local function GetTagValue(tagName, unit)
                     -- If format failed, try to floor and return
                     local ok3, floored = pcall(math.floor, pctNum)
                     if ok3 and floored then
-                        return floored
+                        return tostring(floored)
                     end
                 end
                 -- If conversion failed, return raw value
-                return pct
+                return tostring(pct)
             end
         end
         
@@ -479,7 +479,7 @@ local function GetTagValue(tagName, unit)
             if hpNum and maxNum and type(hpNum) == "number" and type(maxNum) == "number" and maxNum > 0 then
                 local ok, pct = pcall(function() return math.floor((hpNum / maxNum) * 100) end)
                 if ok and pct and type(pct) == "number" then
-                    return pct
+                    return tostring(pct)
                 end
             end
         end
@@ -538,11 +538,11 @@ local function GetTagValue(tagName, unit)
                     -- If format failed, try to floor and return
                     local ok3, floored = pcall(math.floor, pctNum)
                     if ok3 and floored then
-                        return floored
+                        return tostring(floored)
                     end
                 end
-                -- If conversion failed, return raw value
-                return pct
+                -- If conversion failed, return raw value as string
+                return tostring(pct)
             end
         end
         
@@ -557,7 +557,7 @@ local function GetTagValue(tagName, unit)
             if ppNum and maxNum and type(ppNum) == "number" and type(maxNum) == "number" and maxNum > 0 then
                 local ok, pct = pcall(function() return math.floor((ppNum / maxNum) * 100) end)
                 if ok and pct and type(pct) == "number" then
-                    return pct
+                    return tostring(pct)
                 end
             end
         end
