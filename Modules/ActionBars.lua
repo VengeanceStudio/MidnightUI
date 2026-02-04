@@ -261,10 +261,17 @@ function AB:OnDBReady()
 end
 
 function AB:PLAYER_ENTERING_WORLD()
+    -- Only run initialization once - bars persist across zone changes
+    if self.barsInitialized then
+        print("[AB DEBUG] PLAYER_ENTERING_WORLD - skipping (bars already initialized)")
+        return
+    end
+    
     print("[AB DEBUG] PLAYER_ENTERING_WORLD fired. StateDriver count before: " .. stateDriverCount)
     self:HideBlizzardElements()
     self:InitializeAllBars()
     self:UpdateAllBars()
+    self.barsInitialized = true
     print("[AB DEBUG] PLAYER_ENTERING_WORLD complete. StateDriver count after: " .. stateDriverCount)
     
     -- TEMPORARILY DISABLED - Skinning disabled for now
