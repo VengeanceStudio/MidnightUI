@@ -227,8 +227,14 @@ end
 function AB:OnDBReady()
     if not MidnightUI.db.profile.modules.actionbars then return end
     
-    -- Check for conflicting action bar addons
-    self:CheckForConflicts()
+    -- CRITICAL: Check for conflicting addons FIRST and bail out if detected
+    local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+    if IsAddOnLoaded("Bartender4") or IsAddOnLoaded("Dominos") or IsAddOnLoaded("ElvUI") or 
+       IsAddOnLoaded("LUI") or IsAddOnLoaded("RealUI") or IsAddOnLoaded("TukUI") then
+        print("|cff9482c9MidnightUI:|r Action bar addon detected. Disabling MidnightUI ActionBars to prevent conflicts.")
+        self:CheckForConflicts() -- Show the popup
+        return -- Exit immediately - don't initialize anything
+    end
     
     self.db = MidnightUI.db:RegisterNamespace("ActionBars", defaults)
     
