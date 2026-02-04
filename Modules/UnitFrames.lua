@@ -2242,19 +2242,8 @@ end
 
                     frames[key] = frame
                     
-                    -- Add OnUpdate for smooth, frequent updates (throttled to avoid performance issues)
-                    frame.updateElapsed = 0
-                    frame.updateThrottle = 0.05  -- Update every 0.05 seconds (20 times per second)
-                    frame:SetScript("OnUpdate", function(self, elapsed)
-                        -- Only update if the unit exists to avoid wasted CPU cycles
-                        if not UnitExists(unit) then return end
-                        
-                        self.updateElapsed = self.updateElapsed + elapsed
-                        if self.updateElapsed >= self.updateThrottle then
-                            self.updateElapsed = 0
-                            UnitFrames:UpdateUnitFrame(key, unit)
-                        end
-                    end)
+                    -- Event-driven updates are already handled by UNIT_HEALTH, UNIT_POWER_UPDATE, etc.
+                    -- No OnUpdate needed - reduces CPU usage significantly
                     
                     self:UpdateUnitFrame(key, unit)
                 end
