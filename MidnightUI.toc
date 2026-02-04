@@ -2,7 +2,7 @@
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
 ## Author: Vengeance
-## Version: 12.0.0.4
+## Version: 12.0.0.5
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
 
@@ -53,3 +53,4 @@ Modules\Frames\Target.lua
 Modules\Frames\TargetTarget.lua
 Modules\Cooldowns.lua
 Modules\Frames\Focus.lua
+--
