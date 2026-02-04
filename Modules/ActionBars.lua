@@ -702,13 +702,11 @@ function AB:CollectButtons(container, barKey)
         end
         -- Register button with Masque for skinning
         if masqueGroup and masqueGroup.AddButton then
-    print("[AB DEBUG] SetupBarPaging called for MainMenuBar")
+            masqueGroup:AddButton(btn)
+        end
+    end
     
-    -- Unregister any existing state driver first to prevent accumulation
-    DebugUnregisterStateDriver(container, "actionpage")
-    
-    -- Register state driver for bar paging
-    Debug-- Re-skin after adding buttons
+    -- Re-skin after adding buttons
     if masqueGroup and masqueGroup.ReSkin then
         masqueGroup:ReSkin()
     end
@@ -718,11 +716,13 @@ function AB:SetupBarPaging(container)
     local db = self.db.profile.bars["MainMenuBar"]
     local pagingCondition = db.pagingCondition or DEFAULT_PAGING
     
+    print("[AB DEBUG] SetupBarPaging called for MainMenuBar")
+    
     -- Unregister any existing state driver first to prevent accumulation
-    UnregisterStateDriver(container, "actionpage")
+    DebugUnregisterStateDriver(container, "actionpage")
     
     -- Register state driver for bar paging
-    RegisterStateDriver(container, "actionpage", pagingCondition)
+    DebugRegisterStateDriver(container, "actionpage", pagingCondition)
     
     -- Handle state changes
     container:SetAttribute("_onstate-actionpage", [[
@@ -759,15 +759,15 @@ function AB:UpdateBarPaging(barKey)
     if not container then return end
     
     local db = self.db.profile.bars[barKey]
+    local pagingCondition = db.pagingCondition or DEFAULT_PAGING
+    
     print("[AB DEBUG] UpdateBarPaging called for MainMenuBar")
     
     -- Unregister existing state driver first to prevent accumulation
     DebugUnregisterStateDriver(container, "actionpage")
     
     -- Update the state driver
-    Debug
-    -- Update the state driver
-    RegisterStateDriver(container, "actionpage", pagingCondition)
+    DebugRegisterStateDriver(container, "actionpage", pagingCondition)
 end
 
 -- ============================================================================
