@@ -1566,6 +1566,7 @@ end
 function BrokerBar:OnDBReady()
     if not MidnightUI.db.profile.modules.bar then return end
     
+    -- Keep namespace as "Bar" for backwards compatibility with saved settings
     self.db = MidnightUI.db:RegisterNamespace("Bar", defaults)
     
     if Masque then 
@@ -1873,6 +1874,7 @@ end
 function BrokerBar:GetOptions()
     -- SAFETY CHECK: Ensure DB is loaded if GetOptions is called before OnInitialize
     if not self.db then
+        -- Keep namespace as "Bar" for backwards compatibility with saved settings
         self.db = MidnightUI.db:RegisterNamespace("Bar", defaults)
     end
 

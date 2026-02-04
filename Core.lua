@@ -580,7 +580,7 @@ function MidnightUI:GetOptions()
                 displayName = "UI Buttons"
             elseif name == "Skin" then
                 displayName = "Skinning"
-            elseif name == "Bar" then 
+            elseif name == "BrokerBar" then 
                 displayName = "Data Brokers"
             end
             if name == "UnitFrames" then
