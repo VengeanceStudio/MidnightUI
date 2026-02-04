@@ -138,6 +138,11 @@ end
 function Maps:SetupMinimapDragging()
     local Movable = MidnightUI:GetModule("Movable")
     
+    -- Only set up once - prevent multiple OnUpdate scripts on zone changes
+    if Maps.dragOverlay and Maps.dragOverlayInitialized then
+        return
+    end
+    
     -- Create invisible overlay frame to capture drag events
     if not Maps.dragOverlay then
         Maps.dragOverlay = CreateFrame("Frame", "MidnightUI_MinimapDragOverlay", Minimap)
@@ -146,6 +151,8 @@ function Maps:SetupMinimapDragging()
         Maps.dragOverlay:EnableMouse(false) -- Only enable when needed
         Maps.dragOverlay:SetFrameStrata("HIGH")
     end
+    
+    Maps.dragOverlayInitialized = true
     
     local dragStartOffsetX, dragStartOffsetY
     local dragStartMouseX, dragStartMouseY
