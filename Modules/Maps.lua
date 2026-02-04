@@ -106,6 +106,11 @@ end
 -- MINIMAP POSITIONING
 -- -----------------------------------------------------------------------------
 function Maps:SetupMinimapPosition()
+    -- Only override SetPoint once - prevent function wrapping on zone changes
+    if self.minimapPositionInitialized then
+        return
+    end
+    
     -- Store original SetPoint function
     if not self.origSetPoint then
         self.origSetPoint = Minimap.SetPoint
@@ -123,6 +128,7 @@ function Maps:SetupMinimapPosition()
         end
     end
     
+    self.minimapPositionInitialized = true
     self:ApplyMinimapOffset()
 end
 
@@ -741,27 +747,30 @@ function Maps:CollectMinimapButtons()
         button:EnableMouse(true)
         button:SetAlpha(1)
         
-        -- Add OnEnter/OnLeave to buttons to prevent collapse
-        button:HookScript("OnEnter", function()
-            if Maps.buttonBar and Maps.buttonBar.collapseTimer then
-                Maps.buttonBar.collapseTimer:Cancel()
-                Maps.buttonBar.collapseTimer = nil
-            end
-        end)
-        button:HookScript("OnLeave", function()
-            -- Start collapse timer when leaving a button
-            if Maps.buttonBar and Maps.buttonBar.collapseTimer then
-                Maps.buttonBar.collapseTimer:Cancel()
-            end
-            if Maps.buttonBar then
-                Maps.buttonBar.collapseTimer = C_Timer.NewTimer(0.3, function()
-                    Maps:CollapseButtonBar()
-                    if Maps.buttonBar then
-                        Maps.buttonBar.collapseTimer = nil
-                    end
-                end)
-            end
-        end)
+        -- Add OnEnter/OnLeave to buttons to prevent collapse (only once per button)
+        if not button._midnightUIButtonBarHooked then
+            button:HookScript("OnEnter", function()
+                if Maps.buttonBar and Maps.buttonBar.collapseTimer then
+                    Maps.buttonBar.collapseTimer:Cancel()
+                    Maps.buttonBar.collapseTimer = nil
+                end
+            end)
+            button:HookScript("OnLeave", function()
+                -- Start collapse timer when leaving a button
+                if Maps.buttonBar and Maps.buttonBar.collapseTimer then
+                    Maps.buttonBar.collapseTimer:Cancel()
+                end
+                if Maps.buttonBar then
+                    Maps.buttonBar.collapseTimer = C_Timer.NewTimer(0.3, function()
+                        Maps:CollapseButtonBar()
+                        if Maps.buttonBar then
+                            Maps.buttonBar.collapseTimer = nil
+                        end
+                    end)
+                end
+            end)
+            button._midnightUIButtonBarHooked = true
+        end
     end
     
     -- Calculate bar size when expanded (use effectiveSize for calculations)
