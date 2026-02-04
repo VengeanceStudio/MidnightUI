@@ -1265,12 +1265,12 @@ function BrokerBar:GetSafeConfig(name)
 end
 
 function BrokerBar:UpdateBarLayout(barID)
-    local BrokerBar = bars[barID]
+    local bar = bars[barID]
     local db = self.db.profile.bars[barID]
     if not bar or not db then return end
     
     -- Ensure bar has proper size before positioning widgets
-    local barWidth, barHeight = BrokerBar:GetSize()
+    local barWidth, barHeight = bar:GetSize()
     if barWidth == 0 or barHeight == 0 then
         -- Bar hasn't been sized yet, apply settings first
         self:ApplyBarSettings(barID)
@@ -1339,7 +1339,7 @@ function BrokerBar:UpdateBarLayout(barID)
         for _, name in ipairs(list) do
             local w, obj, bCfg = widgets[name], LDB:GetDataObjectByName(name), self:GetSafeConfig(name)
             w:SetParent(bar)
-            w:SetFrameLevel(BrokerBar:GetFrameLevel() + 1)  -- Ensure widgets are above the bar's background
+            w:SetFrameLevel(bar:GetFrameLevel() + 1)  -- Ensure widgets are above the bar's background
             w:ClearAllPoints()
             w.text:SetTextColor(r,g,b)
             
