@@ -1576,6 +1576,27 @@ end
         end
     end
     
+    function UnitFrames:PLAYER_FLAGS_CHANGED()
+        -- Update player frame when AFK/DND status changes
+        if self.db.profile.showPlayer then
+            self:UpdateUnitFrame("PlayerFrame", "player")
+        end
+    end
+    
+    function UnitFrames:PLAYER_UPDATE_RESTING()
+        -- Update player frame when resting status changes
+        if self.db.profile.showPlayer then
+            self:UpdateUnitFrame("PlayerFrame", "player")
+        end
+    end
+    
+    function UnitFrames:PLAYER_REGEN_DISABLED()
+        -- Update player frame when entering combat
+        if self.db.profile.showPlayer then
+            self:UpdateUnitFrame("PlayerFrame", "player")
+        end
+    end
+    
     function UnitFrames:UNIT_PET(event, unit)
         if unit == "player" and self.db.profile.showPet then
             self:UpdateUnitFrame("PetFrame", "pet")
@@ -3147,8 +3168,11 @@ end
                     self:UnregisterEvent("PLAYER_TARGET_CHANGED")
                     self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
                     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                    self:UnregisterEvent("PLAYER_REGEN_DISABLED")
                     self:UnregisterEvent("UNIT_TARGET")
                     self:UnregisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+                    self:UnregisterEvent("PLAYER_FLAGS_CHANGED")
+                    self:UnregisterEvent("PLAYER_UPDATE_RESTING")
                     
                     -- Now register them cleanly
                     self:RegisterEvent("UNIT_HEALTH")
@@ -3158,8 +3182,11 @@ end
                     self:RegisterEvent("PLAYER_TARGET_CHANGED")
                     self:RegisterEvent("PLAYER_FOCUS_CHANGED")
                     self:RegisterEvent("PLAYER_REGEN_ENABLED")
+                    self:RegisterEvent("PLAYER_REGEN_DISABLED")
                     self:RegisterEvent("UNIT_TARGET")
                     self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+                    self:RegisterEvent("PLAYER_FLAGS_CHANGED")
+                    self:RegisterEvent("PLAYER_UPDATE_RESTING")
                     self:PLAYER_ENTERING_WORLD()
                 end
 
