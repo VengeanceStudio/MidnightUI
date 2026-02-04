@@ -240,6 +240,12 @@ end
 -- NUDGE CONTROLS
 -- -----------------------------------------------------------------------------
 function Maps:SetupNudgeControls()
+    if self.nudgeControlsInitialized then
+        print("[Maps] SetupNudgeControls already initialized, skipping")
+        return
+    end
+    print("[Maps] SetupNudgeControls running for first time")
+    
     local Movable = MidnightUI:GetModule("Movable")
     
     self.nudgeFrame = Movable:CreateNudgeControls(
@@ -266,6 +272,7 @@ function Maps:SetupNudgeControls()
     end
     
     Movable:RegisterNudgeFrame(self.nudgeFrame, Minimap)
+    self.nudgeControlsInitialized = true
 end
 
 function Maps:UpdateNudgeDisplay()
@@ -391,6 +398,12 @@ end
 -- BUTTON SKINNING & HIDING
 -- -----------------------------------------------------------------------------
 function Maps:SkinBlizzardButtons()
+    if self.blizzardButtonsSkinned then
+        print("[Maps] SkinBlizzardButtons already initialized, skipping")
+        return
+    end
+    print("[Maps] SkinBlizzardButtons running for first time")
+    
     if Minimap.ZoomIn then Minimap.ZoomIn:Hide() end
     if Minimap.ZoomOut then Minimap.ZoomOut:Hide() end
     
@@ -418,12 +431,20 @@ function Maps:SkinBlizzardButtons()
             btn:SetFrameLevel(20)
         end
     end
+    
+    self.blizzardButtonsSkinned = true
 end
 
 -- -----------------------------------------------------------------------------
 -- LAYOUT UPDATE
 -- -----------------------------------------------------------------------------
 function Maps:UpdateLayout()
+    if self.layoutInitialized then
+        print("[Maps] UpdateLayout already initialized, skipping")
+        return
+    end
+    print("[Maps] UpdateLayout running for first time")
+    
     local db = self.db.profile
 
     -- ONLY SET SHAPE ONCE - Never call SetMaskTexture again after this
@@ -467,6 +488,8 @@ function Maps:UpdateLayout()
     self:PlaceButton(ExpansionLandingPageMinimapButton, "BOTTOMLEFT", 5, 5, db.showMissions)
     self:PlaceButton(QueueStatusMinimapButton, "BOTTOMRIGHT", -5, 5, db.showQueue)
     self:PlaceButton(MinimapCluster.InstanceDifficulty, "TOPRIGHT", db.difficultyOffsetX or -65, db.difficultyOffsetY or -5, db.showDifficulty)
+    
+    self.layoutInitialized = true
 end
 
 function Maps:PlaceButton(btn, point, x, y, isShown)
