@@ -1498,6 +1498,9 @@ end
             return
         end
         
+        self.zoneChangeCount = (self.zoneChangeCount or 0) + 1
+        print(string.format("[UF] Zone change #%d - Zone: %s, FPS: %d", self.zoneChangeCount, GetZoneText() or "Unknown", math.floor(GetFramerate())))
+        
         HookBlizzardPlayerFrame(self)
         -- Only create frames if they don't already exist to prevent recreation on every zone change
         if self.db.profile.showPlayer and not _G["MidnightUI_PlayerFrame"] then self:CreatePlayerFrame() end
@@ -1509,8 +1512,11 @@ end
         
         -- Only hide Blizzard frames once - state drivers persist across zone changes
         if not self.blizzardFramesHidden then
+            print("[UF] Setting up Blizzard frame hiding (first time)")
             SetBlizzardFramesHidden(self)
             self.blizzardFramesHidden = true
+        else
+            print("[UF] Blizzard frames already configured, skipping")
         end
     end
 

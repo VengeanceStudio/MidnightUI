@@ -88,6 +88,9 @@ function Maps:OnDBReady()
 end
 
 function Maps:PLAYER_ENTERING_WORLD()
+    self.zoneChangeCount = (self.zoneChangeCount or 0) + 1
+    print(string.format("[Maps] Zone change #%d - Calling setup functions", self.zoneChangeCount))
+    
     -- CRITICAL FIX: Stub out Layout function to prevent errors
     if not Minimap.Layout or Minimap.Layout == nil then
         Minimap.Layout = function() end
@@ -100,6 +103,8 @@ function Maps:PLAYER_ENTERING_WORLD()
     self:SkinBlizzardButtons()
     self:SetupButtonBar()
     self:UpdateLayout()
+    
+    print(string.format("[Maps] Zone change #%d complete", self.zoneChangeCount))
 end
 
 -- -----------------------------------------------------------------------------
@@ -108,8 +113,10 @@ end
 function Maps:SetupMinimapPosition()
     -- Only override SetPoint once - prevent function wrapping on zone changes
     if self.minimapPositionInitialized then
+        print("[Maps] SetupMinimapPosition already initialized, skipping")
         return
     end
+    print("[Maps] SetupMinimapPosition running for first time")
     
     -- Store original SetPoint function
     if not self.origSetPoint then
@@ -146,8 +153,10 @@ function Maps:SetupMinimapDragging()
     
     -- Only set up once - prevent multiple OnUpdate scripts on zone changes
     if Maps.dragOverlay and Maps.dragOverlayInitialized then
+        print("[Maps] SetupMinimapDragging already initialized, skipping")
         return
     end
+    print("[Maps] SetupMinimapDragging running for first time")
     
     -- Create invisible overlay frame to capture drag events
     if not Maps.dragOverlay then
@@ -292,8 +301,10 @@ end
 function Maps:SetupElements()
     -- Only set up once - prevent duplicate tickers on zone changes
     if self.elementsInitialized then
+        print("[Maps] SetupElements already initialized, skipping")
         return
     end
+    print("[Maps] SetupElements running for first time")
     
     local font = LSM:Fetch("font", self.db.profile.font)
     local size = self.db.profile.fontSize
