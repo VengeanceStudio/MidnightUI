@@ -2243,6 +2243,9 @@ end
                     frame.updateElapsed = 0
                     frame.updateThrottle = 0.05  -- Update every 0.05 seconds (20 times per second)
                     frame:SetScript("OnUpdate", function(self, elapsed)
+                        -- Only update if the unit exists to avoid wasted CPU cycles
+                        if not UnitExists(unit) then return end
+                        
                         self.updateElapsed = self.updateElapsed + elapsed
                         if self.updateElapsed >= self.updateThrottle then
                             self.updateElapsed = 0
