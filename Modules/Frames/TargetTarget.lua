@@ -1,5 +1,4 @@
 
-local UnitFrames = MidnightUI:GetModule("UnitFrames")
 if not UnitFrames then return end
 -- MidnightUI UnitFrames: Target of Target Frame Module
 
