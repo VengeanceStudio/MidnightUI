@@ -1526,15 +1526,6 @@ end
             return
         end
         
-        -- Block duplicate event handlers (AceEvent fires this twice per zone change)
-        -- Use timestamp to detect if we're being called multiple times in rapid succession
-        local now = GetTime()
-        if self.lastPEWTime and (now - self.lastPEWTime) < 0.3 then
-            print("[UF DEBUG] PLAYER_ENTERING_WORLD blocked - duplicate call after " .. string.format("%.3f", now - self.lastPEWTime) .. "s")
-            return
-        end
-        self.lastPEWTime = now
-        
         HookBlizzardPlayerFrame(self)
         -- Only create frames if they don't already exist to prevent recreation on every zone change
         if self.db.profile.showPlayer and not _G["MidnightUI_PlayerFrame"] then self:CreatePlayerFrame() end
@@ -1543,7 +1534,15 @@ end
         if self.db.profile.showPet and not _G["MidnightUI_PetFrame"] then self:CreatePetFrame() end
         if self.db.profile.showFocus and not _G["MidnightUI_FocusFrame"] then self:CreateFocusFrame() end
         if self.db.profile.showBoss and not _G["MidnightUI_Boss1Frame"] then self:CreateBossFrames() end
-        SetBlizzardFramesHidden(self)
+        
+        -- Only hide Blizzard frames once - state drivers persist across zone changes
+        if not self.blizzardFramesHidden then
+            print("[UF DEBUG] First-time setup: hiding Blizzard frames")
+            SetBlizzardFramesHidden(self)
+            self.blizzardFramesHidden = true
+        else
+            print("[UF DEBUG] PLAYER_ENTERING_WORLD - skipping SetBlizzardFramesHidden (already configured)")
+        end
     end
 
     function UnitFrames:PLAYER_REGEN_ENABLED()
