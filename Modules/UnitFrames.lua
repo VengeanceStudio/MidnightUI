@@ -2733,16 +2733,7 @@ end
                     local level = UnitLevel and UnitLevel(unit) or ""
                     local className = (UnitClass and select(1, UnitClass(unit))) or ""
                     local classToken = (UnitClass and select(2, UnitClass(unit))) or ""
-                    local safeCurhp = 0
-                    if UnitHealth then
-                        local ok, val = pcall(UnitHealth, unit)
-                        if ok and val ~= nil then safeCurhp = val else safeCurhp = 0 end
-                    end
-                    local safeMaxhp = 0
-                    if UnitHealthMax then
-                        local ok, val = pcall(UnitHealthMax, unit)
-                        if ok and val ~= nil then safeMaxhp = val else safeMaxhp = 0 end
-                    end
+                    -- safeCurhp and safeMaxhp already declared above, don't redeclare
                     local safeCurpp = 0
                     if UnitPower then
                         local ok, val = pcall(UnitPower, unit)
@@ -3145,6 +3136,19 @@ end
                 function UnitFrames:OnDBReady()
                     if not MidnightUI.db.profile.modules.unitframes then return end
                     self.db = MidnightUI.db:RegisterNamespace("UnitFrames", defaults)
+                    
+                    -- CRITICAL: Unregister events first to prevent duplicate handlers on reload
+                    self:UnregisterEvent("UNIT_HEALTH")
+                    self:UnregisterEvent("UNIT_MAXHEALTH")
+                    self:UnregisterEvent("UNIT_POWER_UPDATE")
+                    self:UnregisterEvent("UNIT_DISPLAYPOWER")
+                    self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+                    self:UnregisterEvent("PLAYER_FOCUS_CHANGED")
+                    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                    self:UnregisterEvent("UNIT_TARGET")
+                    self:UnregisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
+                    
+                    -- Now register them cleanly
                     self:RegisterEvent("UNIT_HEALTH")
                     self:RegisterEvent("UNIT_MAXHEALTH")
                     self:RegisterEvent("UNIT_POWER_UPDATE")
