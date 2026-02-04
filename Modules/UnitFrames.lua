@@ -2291,6 +2291,10 @@ end
                     -- Anchor PlayerFrame to CENTER
                     CreateUnitFrame(self, "PlayerFrame", "player", UIParent, "CENTER", "CENTER", self.db.profile.player.posX or 0, self.db.profile.player.posY or 0)
                     local frame = _G["MidnightUI_PlayerFrame"]
+                    -- Initial update to populate frame data immediately
+                    if frame then
+                        self:UpdateUnitFrame("PlayerFrame", "player")
+                    end
                     -- ...existing code...
                 end
 
