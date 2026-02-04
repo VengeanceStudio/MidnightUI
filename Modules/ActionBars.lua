@@ -1,10 +1,24 @@
 -- ============================================================================
--- 0. GLOBALS FOR DRAG STATE
+-- 0. GLOBALS FOR DRAG STATE & DEBUG
 -- ============================================================================
 local forceShowEmpty = false
 local function ShouldShowEmpty(db)
     return forceShowEmpty or db.showEmpty
 end
+
+-- Debug: Track state driver registrations
+local stateDriverCount = 0
+local function DebugRegisterStateDriver(frame, attr, condition)
+    stateDriverCount = stateDriverCount + 1
+    print(string.format("[AB DEBUG] RegisterStateDriver #%d: %s.%s", stateDriverCount, frame:GetName() or "Unknown", attr))
+    RegisterStateDriver(frame, attr, condition)
+end
+
+local function DebugUnregisterStateDriver(frame, attr)
+    print(string.format("[AB DEBUG] UnregisterStateDriver: %s.%s", frame:GetName() or "Unknown", attr))
+    UnregisterStateDriver(frame, attr)
+end
+
 local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local AB = MidnightUI:NewModule("ActionBars", "AceEvent-3.0", "AceHook-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -222,6 +236,8 @@ function AB:OnDBReady()
         masqueGroup = Masque:Group("Midnight ActionBars")
     end
     
+    print("[AB DEBUG] ActionBars OnInitialize complete. StateDriver count: " .. stateDriverCount)
+    
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -245,9 +261,11 @@ function AB:OnDBReady()
 end
 
 function AB:PLAYER_ENTERING_WORLD()
+    print("[AB DEBUG] PLAYER_ENTERING_WORLD fired. StateDriver count before: " .. stateDriverCount)
     self:HideBlizzardElements()
     self:InitializeAllBars()
     self:UpdateAllBars()
+    print("[AB DEBUG] PLAYER_ENTERING_WORLD complete. StateDriver count after: " .. stateDriverCount)
     
     -- TEMPORARILY DISABLED - Skinning disabled for now
     -- C_Timer.After(0.5, function()
@@ -684,11 +702,13 @@ function AB:CollectButtons(container, barKey)
         end
         -- Register button with Masque for skinning
         if masqueGroup and masqueGroup.AddButton then
-            masqueGroup:AddButton(btn)
-        end
-    end
-
-    -- Re-skin after adding buttons
+    print("[AB DEBUG] SetupBarPaging called for MainMenuBar")
+    
+    -- Unregister any existing state driver first to prevent accumulation
+    DebugUnregisterStateDriver(container, "actionpage")
+    
+    -- Register state driver for bar paging
+    Debug-- Re-skin after adding buttons
     if masqueGroup and masqueGroup.ReSkin then
         masqueGroup:ReSkin()
     end
@@ -739,11 +759,13 @@ function AB:UpdateBarPaging(barKey)
     if not container then return end
     
     local db = self.db.profile.bars[barKey]
-    local pagingCondition = db.pagingCondition or DEFAULT_PAGING
+    print("[AB DEBUG] UpdateBarPaging called for MainMenuBar")
     
     -- Unregister existing state driver first to prevent accumulation
-    UnregisterStateDriver(container, "actionpage")
+    DebugUnregisterStateDriver(container, "actionpage")
     
+    -- Update the state driver
+    Debug
     -- Update the state driver
     RegisterStateDriver(container, "actionpage", pagingCondition)
 end

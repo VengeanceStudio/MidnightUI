@@ -276,6 +276,19 @@ if not UnitFrames then return end
 _G.UnitFrames = UnitFrames
 local LSM = LibStub("LibSharedMedia-3.0")
 
+-- Debug: Track state driver registrations
+local ufStateDriverCount = 0
+local function DebugUFRegisterStateDriver(frame, attr, condition)
+    ufStateDriverCount = ufStateDriverCount + 1
+    print(string.format("[UF DEBUG] RegisterStateDriver #%d: %s.%s", ufStateDriverCount, frame:GetName() or "Unknown", attr))
+    RegisterStateDriver(frame, attr, condition)
+end
+
+local function DebugUFUnregisterStateDriver(frame, attr)
+    print(string.format("[UF DEBUG] UnregisterStateDriver: %s.%s", frame:GetName() or "Unknown", attr))
+    UnregisterStateDriver(frame, attr)
+end
+
 
 -- Utility: Sanitize a color table to ensure all values are plain numbers (not secret values)
 local function SanitizeColorTable(color, fallback)
@@ -908,37 +921,37 @@ local function SetBlizzardFramesHidden(self)
     if InCombatLockdown() then return end
     
     if self.db.profile.showPlayer and PlayerFrame then
-        UnregisterStateDriver(PlayerFrame, "visibility")
-        RegisterStateDriver(PlayerFrame, "visibility", "hide")
+        DebugUFUnregisterStateDriver(PlayerFrame, "visibility")
+        DebugUFRegisterStateDriver(PlayerFrame, "visibility", "hide")
         PlayerFrame:UnregisterAllEvents()
     end
     if self.db.profile.showTarget and TargetFrame then
-        UnregisterStateDriver(TargetFrame, "visibility")
-        RegisterStateDriver(TargetFrame, "visibility", "hide")
+        DebugUFUnregisterStateDriver(TargetFrame, "visibility")
+        DebugUFRegisterStateDriver(TargetFrame, "visibility", "hide")
         TargetFrame:UnregisterAllEvents()
     end
     -- Do not forcibly hide TargetFrame here; let the secure driver in CreateTargetFrame control its visibility
     if self.db.profile.showTargetTarget and TargetFrameToT then
-        UnregisterStateDriver(TargetFrameToT, "visibility")
-        RegisterStateDriver(TargetFrameToT, "visibility", "hide")
+        DebugUFUnregisterStateDriver(TargetFrameToT, "visibility")
+        DebugUFRegisterStateDriver(TargetFrameToT, "visibility", "hide")
         TargetFrameToT:UnregisterAllEvents()
     end
     if self.db.profile.showPet and PetFrame then
-        UnregisterStateDriver(PetFrame, "visibility")
-        RegisterStateDriver(PetFrame, "visibility", "hide")
+        DebugUFUnregisterStateDriver(PetFrame, "visibility")
+        DebugUFRegisterStateDriver(PetFrame, "visibility", "hide")
         PetFrame:UnregisterAllEvents()
     end
     if self.db.profile.showFocus and FocusFrame then
-        UnregisterStateDriver(FocusFrame, "visibility")
-        RegisterStateDriver(FocusFrame, "visibility", "hide")
+        DebugUFUnregisterStateDriver(FocusFrame, "visibility")
+        DebugUFRegisterStateDriver(FocusFrame, "visibility", "hide")
         FocusFrame:UnregisterAllEvents()
     end
     if self.db.profile.showBoss then
         for i = 1, 5 do
             local bossFrame = _G["Boss" .. i .. "TargetFrame"]
             if bossFrame then
-                UnregisterStateDriver(bossFrame, "visibility")
-                RegisterStateDriver(bossFrame, "visibility", "hide")
+                DebugUFUnregisterStateDriver(bossFrame, "visibility")
+                DebugUFRegisterStateDriver(bossFrame, "visibility", "hide")
                 bossFrame:UnregisterAllEvents()
             end
         end
@@ -1515,26 +1528,26 @@ end
         
         local targetFrame = _G["MidnightUI_TargetFrame"]
         if targetFrame and self.db.profile.showTarget then
-            UnregisterStateDriver(targetFrame, "visibility")
-            RegisterStateDriver(targetFrame, "visibility", "[@target,exists] show; hide")
+            DebugUFUnregisterStateDriver(targetFrame, "visibility")
+            DebugUFRegisterStateDriver(targetFrame, "visibility", "[@target,exists] show; hide")
         end
         
         local targetTargetFrame = _G["MidnightUI_TargetTargetFrame"]
         if targetTargetFrame and self.db.profile.showTargetTarget then
-            UnregisterStateDriver(targetTargetFrame, "visibility")
-            RegisterStateDriver(targetTargetFrame, "visibility", "[@targettarget,exists] show; hide")
+            DebugUFUnregisterStateDriver(targetTargetFrame, "visibility")
+            DebugUFRegisterStateDriver(targetTargetFrame, "visibility", "[@targettarget,exists] show; hide")
         end
         
         local petFrame = _G["MidnightUI_PetFrame"]
         if petFrame and self.db.profile.showPet then
-            UnregisterStateDriver(petFrame, "visibility")
-            RegisterStateDriver(petFrame, "visibility", "[@pet,exists] show; hide")
+            DebugUFUnregisterStateDriver(petFrame, "visibility")
+            DebugUFRegisterStateDriver(petFrame, "visibility", "[@pet,exists] show; hide")
         end
         
         local focusFrame = _G["MidnightUI_FocusFrame"]
         if focusFrame and self.db.profile.showFocus then
-            UnregisterStateDriver(focusFrame, "visibility")
-            RegisterStateDriver(focusFrame, "visibility", "[@focus,exists] show; hide")
+            DebugUFUnregisterStateDriver(focusFrame, "visibility")
+            DebugUFRegisterStateDriver(focusFrame, "visibility", "[@focus,exists] show; hide")
         end
         
         -- Re-register boss frame state drivers
@@ -1542,8 +1555,8 @@ end
             for i = 1, 5 do
                 local bossFrame = _G["MidnightUI_Boss" .. i .. "Frame"]
                 if bossFrame then
-                    UnregisterStateDriver(bossFrame, "visibility")
-                    RegisterStateDriver(bossFrame, "visibility", "[@boss" .. i .. ",exists] show; hide")
+                    DebugUFUnregisterStateDriver(bossFrame, "visibility")
+                    DebugUFRegisterStateDriver(bossFrame, "visibility", "[@boss" .. i .. ",exists] show; hide")
                 end
             end
         end
