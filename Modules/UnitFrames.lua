@@ -1,3 +1,70 @@
+--[[
+================================================================================
+MidnightUI - UnitFrames Module
+================================================================================
+Custom unit frame implementation for player, target, focus, pet, and boss frames.
+
+FILE ORGANIZATION:
+  1. UI Helper Functions (lines 2-200)
+     - ShowTagHelp(): Tag documentation window
+     - FormatHealthText(): Health text formatting with abbreviation
+  
+  2. Module Declaration & Dependencies (lines 205-212)
+     - LibStub initialization
+     - AceAddon module creation
+  
+  3. Core Utility Functions (lines 214-632)
+     - SanitizeColorTable(): Color validation
+     - GetHealthPct(), GetPowerPct(): Unit stat calculations
+     - ParseTemplate(), GetTagValue(): Text template parsing
+     - UpdateTextSegments(): Dynamic text rendering
+     - ProcessTags_OLD(): Legacy tag processor (deprecated)
+  
+  4. Frame Management (lines 836-890)
+     - frames: Frame storage table
+     - SetBlizzardFramesHidden(): Hide default Blizzard frames
+     - HookBlizzardPlayerFrame(): Hook Blizzard player frame
+  
+  5. Configuration/Options (lines 893-1430)
+     - GenerateFrameOptions(): Frame config generator
+     - GetBarOptions(): Bar config options
+     - GetOptions(): Main options table
+     - GetPlayerOptions(), GetPetOptions_Real(), GetBossOptions_Real()
+  
+  6. Event Handlers (lines 1430-1520)
+     - PLAYER_ENTERING_WORLD: Initial frame creation
+     - PLAYER_REGEN_ENABLED: Combat exit cleanup
+     - PLAYER_TARGET_CHANGED, PLAYER_FOCUS_CHANGED: Target changes
+     - INSTANCE_ENCOUNTER_ENGAGE_UNIT: Boss frame updates
+     - UNIT_HEALTH, UNIT_POWER_UPDATE, UNIT_DISPLAYPOWER: Stat updates
+     - UNIT_TARGET, UNIT_PET: Secondary unit updates
+  
+  7. Default Configuration (lines 1520-1780)
+     - defaults: Default profile settings
+     - MigrateInfoBarText(): Settings migration
+  
+  8. Frame Creation (lines 1780-2480)
+     - CreateBar(): Status bar creation
+     - CreateUnitFrame(): Main frame factory
+     - Create*Frame(): Individual frame constructors
+  
+  9. Frame Update Logic (lines 2480-3040)
+     - UpdateUnitFrame(): Main update function (handles all stat/text updates)
+  
+  10. Module Initialization (lines 3040-end)
+      - Event handlers (duplicates removed)
+      - OnInitialize(), OnDBReady()
+      - GetPlayerOptions(), GetTargetOptions(), GetTargetTargetOptions()
+
+PERFORMANCE NOTES:
+  - OnUpdate scripts removed (event-driven updates only)
+  - SetBlizzardFramesHidden() called ONLY on zone changes (not per-frame-update)
+  - Event handler deduplication prevents memory leaks
+  
+CRITICAL: Do NOT call SetBlizzardFramesHidden() in high-frequency event handlers!
+================================================================================
+--]]
+
 -- Creates and shows a popup window with tag documentation
 local function ShowTagHelp()
     -- Check if the frame already exists
@@ -1482,12 +1549,6 @@ end
         end
     end
 
-    function UnitFrames:PLAYER_TARGET_CHANGED()
-        if self.db.profile.showTarget then self:UpdateUnitFrame("TargetFrame", "target") end
-        if self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
-        if self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-    end
-    
     function UnitFrames:INSTANCE_ENCOUNTER_ENGAGE_UNIT()
         -- Update all boss frames when boss encounter starts/updates
         if self.db and self.db.profile and self.db.profile.showBoss then
@@ -1501,40 +1562,6 @@ end
 
     function UnitFrames:PLAYER_FOCUS_CHANGED()
         if self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-    end
-
-    function UnitFrames:UNIT_HEALTH(event, unit)
-        if unit == "player" and self.db.profile.showPlayer then self:UpdateUnitFrame("PlayerFrame", "player") end
-        if unit == "target" and self.db.profile.showTarget then self:UpdateUnitFrame("TargetFrame", "target") end
-        if unit == "targettarget" and self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
-        if unit == "pet" and self.db.profile.showPet then self:UpdateUnitFrame("PetFrame", "pet") end
-        if unit == "focus" and self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-        -- Handle boss frames
-        if self.db.profile.showBoss and unit and unit:match("^boss%d$") then
-            local bossNum = unit:match("^boss(%d)$")
-            if bossNum then
-                self:UpdateUnitFrame("Boss" .. bossNum .. "Frame", unit)
-            end
-        end
-        -- Do NOT call SetBlizzardFramesHidden here - it causes massive state driver accumulation
-    end
-
-    function UnitFrames:UNIT_POWER_UPDATE(event, unit)
-        if unit == "player" and self.db.profile.showPlayer then self:UpdateUnitFrame("PlayerFrame", "player") end
-        if unit == "target" and self.db.profile.showTarget then self:UpdateUnitFrame("TargetFrame", "target") end
-        if unit == "targettarget" and self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
-        if unit == "pet" and self.db.profile.showPet then self:UpdateUnitFrame("PetFrame", "pet") end
-        if unit == "focus" and self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-        -- Do NOT call SetBlizzardFramesHidden here - it causes massive state driver accumulation
-    end
-
-    function UnitFrames:UNIT_DISPLAYPOWER(event, unit)
-        if unit == "player" and self.db.profile.showPlayer then self:UpdateUnitFrame("PlayerFrame", "player") end
-        if unit == "target" and self.db.profile.showTarget then self:UpdateUnitFrame("TargetFrame", "target") end
-        if unit == "targettarget" and self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
-        if unit == "pet" and self.db.profile.showPet then self:UpdateUnitFrame("PetFrame", "pet") end
-        if unit == "focus" and self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-        -- Do NOT call SetBlizzardFramesHidden here - it causes massive state driver accumulation
     end
 
     function UnitFrames:UNIT_TARGET(event, unit)
@@ -1817,30 +1844,6 @@ do
         MigrateInfoBarText(defaults.profile.boss)
     end
 end
-
-                local function SetBlizzardFramesHidden(self)
-                    -- Don't call UnregisterStateDriver during combat as it's protected
-                    if InCombatLockdown() then return end
-                    
-                    if self.db.profile.showPlayer and PlayerFrame then
-                        UnregisterStateDriver(PlayerFrame, "visibility")
-                        RegisterStateDriver(PlayerFrame, "visibility", "hide")
-                        PlayerFrame:UnregisterAllEvents()
-                    end
-                    if self.db.profile.showTarget and TargetFrame then
-                        UnregisterStateDriver(TargetFrame, "visibility")
-                        RegisterStateDriver(TargetFrame, "visibility", "hide")
-                        TargetFrame:UnregisterAllEvents()
-                    end
-                    -- Do not forcibly hide TargetFrame here; let the secure driver in CreateTargetFrame control its visibility
-                    if self.db.profile.showTargetTarget and TargetFrameToT then
-                        UnregisterStateDriver(TargetFrameToT, "visibility")
-                        RegisterStateDriver(TargetFrameToT, "visibility", "hide")
-                        TargetFrameToT:UnregisterAllEvents()
-                    end
-                end
-
-
 
                 local function CreateBar(parent, opts, yOffset)
                     local bar = CreateFrame("StatusBar", nil, parent, "BackdropTemplate")
@@ -3075,8 +3078,16 @@ end
                     if unit == "player" and self.db.profile.showPlayer then self:UpdateUnitFrame("PlayerFrame", "player") end
                     if unit == "target" and self.db.profile.showTarget then self:UpdateUnitFrame("TargetFrame", "target") end
                     if unit == "targettarget" and self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
+                    if unit == "pet" and self.db.profile.showPet then self:UpdateUnitFrame("PetFrame", "pet") end
                     if unit == "focus" and self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
-                    SetBlizzardFramesHidden(self)
+                    -- Handle boss frames
+                    if self.db.profile.showBoss and unit and unit:match("^boss%d$") then
+                        local bossNum = unit:match("^boss(%d)$")
+                        if bossNum then
+                            self:UpdateUnitFrame("Boss" .. bossNum .. "Frame", unit)
+                        end
+                    end
+                    -- Do NOT call SetBlizzardFramesHidden - causes catastrophic state driver accumulation
                 end
 
                 function UnitFrames:UNIT_MAXHEALTH(event, unit)
@@ -3096,7 +3107,7 @@ end
                             self:UpdateUnitFrame("Boss" .. bossNum .. "Frame", unit)
                         end
                     end
-                    SetBlizzardFramesHidden(self)
+                    -- Do NOT call SetBlizzardFramesHidden - causes catastrophic state driver accumulation
                 end
 
                 function UnitFrames:UNIT_DISPLAYPOWER(event, unit)
@@ -3111,16 +3122,7 @@ end
                             self:UpdateUnitFrame("Boss" .. bossNum .. "Frame", unit)
                         end
                     end
-                    SetBlizzardFramesHidden(self)
-                end
-
-                function UnitFrames:UNIT_TARGET(event, unit)
-                    if unit == "target" and self.db.profile.showTargetTarget then
-                        self:UpdateUnitFrame("TargetTargetFrame", "targettarget")
-                    end
-                    if unit == "focus" and self.db.profile.showFocus then
-                        self:UpdateUnitFrame("FocusFrame", "focus")
-                    end
+                    -- Do NOT call SetBlizzardFramesHidden - causes catastrophic state driver accumulation
                 end
 
                 function UnitFrames:OnInitialize()
@@ -3159,13 +3161,6 @@ end
                     self:RegisterEvent("UNIT_TARGET")
                     self:RegisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
                     self:PLAYER_ENTERING_WORLD()
-                end
-
-                function UnitFrames:GetPlayerOptions()
-                    if self.GetPlayerOptions_Real then
-                        return self:GetPlayerOptions_Real()
-                    end
-                    return nil
                 end
 
                 function UnitFrames:GetTargetOptions()
