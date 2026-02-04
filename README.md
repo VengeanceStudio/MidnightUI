@@ -277,7 +277,7 @@ MidnightUI/
 ├── LICENSE.txt             # MIT License
 ├── README.md               # This file
 ├── Modules/
-│   ├── Bar.lua             # Info Bar & Data Brokers
+│   ├── BrokerBar.lua       # Info Bar & Data Brokers
 │   ├── ActionBars.lua      # Action Bar Customization
 │   ├── UnitFrames.lua      # Unit Frame System
 │   ├── Maps.lua            # Minimap Customization

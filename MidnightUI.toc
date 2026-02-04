@@ -2,7 +2,7 @@
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
 ## Author: Vengeance
-## Version: 12.0.0.11
+## Version: 12.0.0.12
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
 
@@ -41,7 +41,7 @@ Modules\Chat.lua
 # ------------------------------------------------------------------------------
 Modules\Skins.lua
 Modules\Movable.lua
-Modules\Bar.lua
+Modules\BrokerBar.lua
 Modules\UIButtons.lua
 Modules\Tweaks.lua
 Modules\Maps.lua

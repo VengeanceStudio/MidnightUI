@@ -11,7 +11,7 @@ MidnightUI/
 │
 ├── Modules/                                # Core addon modules
 │   ├── ActionBars.lua                      # Action bar customization & skinning
-│   ├── Bar.lua                             # Info bars & LibDataBroker widgets system
+│   ├── BrokerBar.lua                       # Info bars & LibDataBroker widgets system
 │   ├── Chat.lua                            # Chat frame enhancements
 │   ├── Cooldowns.lua                       # Cooldown timer manager (WIP)
 │   ├── Maps.lua                            # Minimap customization

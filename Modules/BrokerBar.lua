@@ -1,12 +1,12 @@
 
 local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
-local Bar = MidnightUI:NewModule("Bar", "AceEvent-3.0")
+local BrokerBar = MidnightUI:NewModule("BrokerBar", "AceEvent-3.0")
 local LDB = LibStub("LibDataBroker-1.1")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Masque = LibStub("Masque", true)
 
 -- Update all bar widgets' fonts when the global font changes
-function Bar:UpdateAllFonts()
+function BrokerBar:UpdateAllFonts()
     for barID, bar in pairs(bars) do
         self:UpdateBarLayout(barID)
     end
@@ -202,9 +202,9 @@ end
 
 local function GetColor()
     -- FIX: Ensure DB is loaded if Helper is called early
-    if not Bar.db then return 1, 1, 1 end
+    if not BrokerBar.db then return 1, 1, 1 end
     
-    local db = Bar.db.profile
+    local db = BrokerBar.db.profile
     if db.useClassColor then
         local _, class = UnitClass("player")
         local color = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[class]
@@ -286,7 +286,7 @@ local function ApplyTooltipStyle(tip)
     
     -- Use pcall to safely apply styling without causing taint
     local success = pcall(function()
-        local db = Bar.db.profile
+        local db = BrokerBar.db.profile
         local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
         local name = tip:GetName()
         
@@ -397,14 +397,14 @@ end
 -- ============================================================================
 
 -- WRAPPER FUNCTION TO FIX NIL ERROR
-function Bar:CreateInteractiveFrames()
+function BrokerBar:CreateInteractiveFrames()
     self:CreateVolumeFrame()
     self:CreateFriendsFrame()
     self:CreateGuildFrame()
 end
 
 -- VOLUME MIXER
-function Bar:CreateVolumeFrame()
+function BrokerBar:CreateVolumeFrame()
     if volFrame then return end
     volFrame = CreateFrame("Frame", "MidnightVolumePopout", UIParent, "BackdropTemplate")
     volFrame:SetSize(220, 320); volFrame:SetFrameStrata("DIALOG"); volFrame:EnableMouse(true); volFrame:Hide()
@@ -416,7 +416,7 @@ function Bar:CreateVolumeFrame()
 
     -- Add OnShow script to update Title Font/Color dynamically based on current settings
     volFrame:SetScript("OnShow", function()
-        local db = Bar.db.profile
+        local db = BrokerBar.db.profile
         local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
         local r, g, b = GetColor()
         vTitle:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
@@ -450,7 +450,7 @@ function Bar:CreateVolumeFrame()
             value = math.floor((value * 20) + 0.5) / 20
             SetCVar(cvar, value)
             if cvar == "Sound_MasterVolume" then 
-                Bar:UpdateAllModules() 
+                BrokerBar:UpdateAllModules() 
             end 
         end)
     end
@@ -481,7 +481,7 @@ function Bar:CreateVolumeFrame()
 end
 
 -- FRIENDS LIST
-function Bar:CreateFriendsFrame()
+function BrokerBar:CreateFriendsFrame()
     if friendsFrame then return end
     friendsFrame = CreateFrame("Frame", "MidnightFriendsPopup", UIParent, "BackdropTemplate")
     friendsFrame:SetSize(600, 400); friendsFrame:SetFrameStrata("DIALOG"); friendsFrame:EnableMouse(true); friendsFrame:Hide()
@@ -522,7 +522,7 @@ function Bar:CreateFriendsFrame()
 
     -- Add OnShow script to update fonts/colors dynamically
     friendsFrame:SetScript("OnShow", function()
-        local db = Bar.db.profile
+        local db = BrokerBar.db.profile
         local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
         local r, g, b = GetColor()
         
@@ -552,7 +552,7 @@ function Bar:CreateFriendsFrame()
     end)
 end
 
-function Bar:UpdateFriendList()
+function BrokerBar:UpdateFriendList()
     if not scrollChild then return end
     for _, child in ipairs({scrollChild:GetChildren()}) do 
         child:Hide() 
@@ -580,7 +580,7 @@ function Bar:UpdateFriendList()
         end
     end
 
-    local yOffset, db, fontPath = 0, Bar.db.profile, LSM:Fetch("font", Bar.db.profile.font)
+    local yOffset, db, fontPath = 0, BrokerBar.db.profile, LSM:Fetch("font", BrokerBar.db.profile.font)
     local colW = { btag=135, char=100, lvl=30, zone=120, realm=80, fac=50 }
     local colX = { btag=5, char=145, lvl=250, zone=285, realm=410, fac=495 }
 
@@ -660,7 +660,7 @@ function Bar:UpdateFriendList()
 end
 
 -- GUILD LIST
-function Bar:CreateGuildFrame()
+function BrokerBar:CreateGuildFrame()
     if guildFrame then return end
     guildFrame = CreateFrame("Frame", "MidnightGuildPopup", UIParent, "BackdropTemplate")
     guildFrame:SetSize(600, 450); guildFrame:SetFrameStrata("DIALOG"); guildFrame:EnableMouse(true); guildFrame:Hide()
@@ -702,7 +702,7 @@ function Bar:CreateGuildFrame()
 
     -- Add OnShow script to update fonts/colors dynamically
     guildFrame:SetScript("OnShow", function()
-        local db = Bar.db.profile
+        local db = BrokerBar.db.profile
         local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
         local r, g, b = GetColor()
         
@@ -735,7 +735,7 @@ function Bar:CreateGuildFrame()
     end)
 end
 
-function Bar:UpdateGuildList()
+function BrokerBar:UpdateGuildList()
     if not gScrollChild then return end
     for _, child in ipairs({gScrollChild:GetChildren()}) do 
         child:Hide() 
@@ -749,7 +749,7 @@ function Bar:UpdateGuildList()
     end
     table.sort(members, function(a, b) return (a.rIdx == b.rIdx) and (a.name < b.name) or (a.rIdx < b.rIdx) end)
     
-    local yOffset, db, fontPath = 0, Bar.db.profile, LSM:Fetch("font", Bar.db.profile.font)
+    local yOffset, db, fontPath = 0, BrokerBar.db.profile, LSM:Fetch("font", BrokerBar.db.profile.font)
     local gW = { name=100, lvl=30, zone=120, rank=100, note=200 }
     local gX = { name=5, lvl=110, zone=145, rank=270, note=375 }
 
@@ -793,17 +793,17 @@ end
 -- 5. BROKER OBJECTS (LDB)
 -- ============================================================================
 
-function Bar:InitializeBrokers()
+function BrokerBar:InitializeBrokers()
     -- FRIENDS
     friendObj = LDB:NewDataObject("MidnightFriends", {
         type = "data source", text = "0", icon = "Interface\\FriendsFrame\\UI-Toast-ChatInviteIcon",
         OnClick = function() ToggleFriendsFrame(1) end,
         OnEnter = function(self) 
             if not friendsFrame then 
-                Bar:CreateFriendsFrame() 
+                BrokerBar:CreateFriendsFrame() 
             end
             friendsFrame.owner = self
-            Bar:UpdateFriendList()
+            BrokerBar:UpdateFriendList()
             SmartAnchor(friendsFrame, self)
             friendsFrame:Show() 
         end
@@ -817,10 +817,10 @@ function Bar:InitializeBrokers()
             if IsInGuild() then 
                 C_GuildInfo.GuildRoster()
                 if not guildFrame then 
-                    Bar:CreateGuildFrame() 
+                    BrokerBar:CreateGuildFrame() 
                 end
                 guildFrame.owner = self
-                Bar:UpdateGuildList()
+                BrokerBar:UpdateGuildList()
                 SmartAnchor(guildFrame, self)
                 guildFrame:Show() 
             end 
@@ -837,7 +837,7 @@ function Bar:InitializeBrokers()
             GameTooltip:AddLine("Account Gold Summary", r, g, b)
             GameTooltip:AddLine(" ")
             local total = 0
-            for charKey, data in pairs(Bar.db.profile.goldData) do
+            for charKey, data in pairs(BrokerBar.db.profile.goldData) do
                 local charColor = {r=1, g=1, b=1}
                 if type(data) == "table" and data.class then 
                     local c = (CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS)[data.class]
@@ -973,7 +973,7 @@ function Bar:InitializeBrokers()
             end
             tip:AddLine(" ")
             tip:AddLine("Price History", 1, 0.82, 0)
-            local h = Bar.db.profile.tokenHistory or {}
+            local h = BrokerBar.db.profile.tokenHistory or {}
             if #h > 0 then
                 for _, e in ipairs(h) do 
                     tip:AddDoubleLine(date("%m/%d %I:%M %p", e.time), FormatTokenPrice(e.price), 1,1,1) 
@@ -993,7 +993,7 @@ function Bar:InitializeBrokers()
         OnClick = function(self, button) 
             if button == "RightButton" then 
                 if not volFrame then 
-                    Bar:CreateVolumeFrame() 
+                    BrokerBar:CreateVolumeFrame() 
                 end
                 volFrame.owner = self
                 SmartAnchor(volFrame, self)
@@ -1003,17 +1003,17 @@ function Bar:InitializeBrokers()
                 if current > 0 then
                     -- Muting: Save current PERCENTAGE value (whole number) to DB
                     local currentPercent = math.floor(current * 100)
-                    Bar.db.profile.lastVolume = currentPercent
+                    BrokerBar.db.profile.lastVolume = currentPercent
                     SetCVar("Sound_MasterVolume", "0")
                 else
                     -- Unmuting: Restore from DB as decimal
-                    local restorePercent = Bar.db.profile.lastVolume or 100
+                    local restorePercent = BrokerBar.db.profile.lastVolume or 100
                     if restorePercent == 0 then restorePercent = 100 end
                     -- Convert percentage back to decimal (0.0 - 1.0)
                     local restoreDecimal = restorePercent / 100
                     SetCVar("Sound_MasterVolume", tostring(restoreDecimal))
                 end
-                Bar:UpdateAllModules()
+                BrokerBar:UpdateAllModules()
             end
         end,
         OnMouseWheel = function(_, d) 
@@ -1022,7 +1022,7 @@ function Bar:InitializeBrokers()
             v = math.max(0, math.min(1, v))
             v = math.floor((v * 20) + 0.5) / 20 -- 20 steps in 0-1, each is 0.05
             SetCVar("Sound_MasterVolume", v)
-            Bar:UpdateAllModules() 
+            BrokerBar:UpdateAllModules() 
         end
     })
 
@@ -1068,7 +1068,7 @@ function Bar:InitializeBrokers()
         type = "data source", text = "00:00", icon = "Interface\\Icons\\INV_Misc_PocketWatch_01", 
         OnTooltipShow = function(tip) 
             local r,g,b = GetColor()
-            local db = Bar.db.profile
+            local db = BrokerBar.db.profile
             tip:AddLine("Midnight Clock", r,g,b) -- UPDATED TITLE
             
             -- Local Time
@@ -1102,7 +1102,7 @@ end
 -- 6. UPDATE ENGINE
 -- ============================================================================
 
-function Bar:UpdateAllModules()
+function BrokerBar:UpdateAllModules()
     -- CLOCK
     local h, m = tonumber(date("%H")), tonumber(date("%M"))
     if h ~= lastState.timeH or m ~= lastState.timeM then
@@ -1235,12 +1235,12 @@ end
 -- ============================================================================
 
 local function SortByOrder(a, b) 
-    local db = Bar.db.profile.brokers
+    local db = BrokerBar.db.profile.brokers
     if not db then return false end
     return (db[a] and db[a].order or 0) < (db[b] and db[b].order or 0) 
 end
 
-function Bar:GetSafeConfig(name)
+function BrokerBar:GetSafeConfig(name)
     -- Ensure brokers table exists
     if not self.db.profile.brokers then
         self.db.profile.brokers = {}
@@ -1264,13 +1264,13 @@ function Bar:GetSafeConfig(name)
     return self.db.profile.brokers[name]
 end
 
-function Bar:UpdateBarLayout(barID)
-    local bar = bars[barID]
+function BrokerBar:UpdateBarLayout(barID)
+    local BrokerBar = bars[barID]
     local db = self.db.profile.bars[barID]
     if not bar or not db then return end
     
     -- Ensure bar has proper size before positioning widgets
-    local barWidth, barHeight = bar:GetSize()
+    local barWidth, barHeight = BrokerBar:GetSize()
     if barWidth == 0 or barHeight == 0 then
         -- Bar hasn't been sized yet, apply settings first
         self:ApplyBarSettings(barID)
@@ -1339,7 +1339,7 @@ function Bar:UpdateBarLayout(barID)
         for _, name in ipairs(list) do
             local w, obj, bCfg = widgets[name], LDB:GetDataObjectByName(name), self:GetSafeConfig(name)
             w:SetParent(bar)
-            w:SetFrameLevel(bar:GetFrameLevel() + 1)  -- Ensure widgets are above the bar's background
+            w:SetFrameLevel(BrokerBar:GetFrameLevel() + 1)  -- Ensure widgets are above the bar's background
             w:ClearAllPoints()
             w.text:SetTextColor(r,g,b)
             
@@ -1411,7 +1411,7 @@ function Bar:UpdateBarLayout(barID)
     end
 end
 
-function Bar:CreateBarFrame(id)
+function BrokerBar:CreateBarFrame(id)
     local Movable = MidnightUI:GetModule("Movable")
     
     local f = CreateFrame("Frame", "MidnightBar_"..id, UIParent, "BackdropTemplate")
@@ -1424,14 +1424,14 @@ function Bar:CreateBarFrame(id)
     Movable:MakeFrameDraggable(
         f,
         function(point, x, y)
-            local db = Bar.db.profile.bars[id]
+            local db = BrokerBar.db.profile.bars[id]
             if db then
                 db.point = point or "CENTER"
                 db.x = x or 0
                 db.y = y or 0
             end
         end,
-        function() return not Bar.db.profile.locked end
+        function() return not BrokerBar.db.profile.locked end
     )
     
     -- Create compact arrow controls for this bar (like UIButtons)
@@ -1439,7 +1439,7 @@ function Bar:CreateBarFrame(id)
         f,
         { offsetX = 0, offsetY = 0 },
         function()
-            local db = Bar.db.profile.bars[id]
+            local db = BrokerBar.db.profile.bars[id]
             local nudgeDB = nudgeFrame.db
             
             -- Apply nudge offset to saved position
@@ -1474,7 +1474,7 @@ function Bar:CreateBarFrame(id)
     bars[id] = f
 end
 
-function Bar:ApplyBarSettings(barID)
+function BrokerBar:ApplyBarSettings(barID)
     local f, db = bars[barID], self.db.profile.bars[barID]
     if not f or not db then return end
     
@@ -1505,7 +1505,7 @@ function Bar:ApplyBarSettings(barID)
     self:UpdateBarLayout(barID)
 end
 
-function Bar:CreateWidget(name, obj)
+function BrokerBar:CreateWidget(name, obj)
     local btn = widgets[name]
     if not btn then
         btn = CreateFrame("Button", nil, UIParent)
@@ -1548,9 +1548,9 @@ function Bar:CreateWidget(name, obj)
         end 
     end)
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged_"..name, function() 
-        local config = Bar:GetSafeConfig(name)
+        local config = BrokerBar:GetSafeConfig(name)
         if config and config.bar and config.bar ~= "None" then
-            Bar:UpdateBarLayout(config.bar)
+            BrokerBar:UpdateBarLayout(config.bar)
         end
     end)
 end
@@ -1559,11 +1559,11 @@ end
 -- 8. INITIALIZATION & EVENTS
 -- ============================================================================
 
-function Bar:OnInitialize()
+function BrokerBar:OnInitialize()
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
 end
 
-function Bar:OnDBReady()
+function BrokerBar:OnDBReady()
     if not MidnightUI.db.profile.modules.bar then return end
     
     self.db = MidnightUI.db:RegisterNamespace("Bar", defaults)
@@ -1606,22 +1606,22 @@ function Bar:OnDBReady()
     
     C_Timer.After(1.0, function() 
         for id in pairs(bars) do 
-            Bar:ApplyBarSettings(id) 
+            BrokerBar:ApplyBarSettings(id) 
         end 
     end)
 end
 
-function Bar:PLAYER_ENTERING_WORLD()
+function BrokerBar:PLAYER_ENTERING_WORLD()
     -- Just update modules, initialization already done
     self:UpdateAllModules()
 end
 
-function Bar:UpdateGoldData()
+function BrokerBar:UpdateGoldData()
     local key = UnitName("player") .. " - " .. GetRealmName()
     self.db.profile.goldData[key] = { amount = GetMoney(), class = select(2, UnitClass("player")) }
 end
 
-function Bar:UpdateTokenHistory()
+function BrokerBar:UpdateTokenHistory()
     local price = C_WowTokenPublic.GetCurrentMarketPrice()
     if not price then return end
     
@@ -1645,7 +1645,7 @@ function Bar:UpdateTokenHistory()
     self:UpdateBarLayout("MainBar")
 end
 
-function Bar:GUILD_ROSTER_UPDATE() 
+function BrokerBar:GUILD_ROSTER_UPDATE() 
     if guildFrame and guildFrame:IsShown() then 
         self:UpdateGuildList() 
     end
@@ -1656,7 +1656,7 @@ end
 -- 9. OPTIONS
 -- ============================================================================
 
-function Bar:MoveBroker(name, direction)
+function BrokerBar:MoveBroker(name, direction)
     local config = self:GetSafeConfig(name)
     if not config or config.bar == "None" then 
         return 
@@ -1720,7 +1720,7 @@ function Bar:MoveBroker(name, direction)
     self:UpdateBarLayout(config.bar)
 end
 
-function Bar:GetPluginOptions()
+function BrokerBar:GetPluginOptions()
     local options = { 
         name = "Brokers", 
         type = "group", 
@@ -1870,7 +1870,7 @@ function Bar:GetPluginOptions()
     return options
 end
 
-function Bar:GetOptions()
+function BrokerBar:GetOptions()
     -- SAFETY CHECK: Ensure DB is loaded if GetOptions is called before OnInitialize
     if not self.db then
         self.db = MidnightUI.db:RegisterNamespace("Bar", defaults)
@@ -2059,12 +2059,12 @@ function Bar:GetOptions()
     return options
 end
 
-function Bar:ScheduleLayout() 
-    Bar.layoutQueued = true
+function BrokerBar:ScheduleLayout() 
+    BrokerBar.layoutQueued = true
     C_Timer.After(0.05, function() 
-        Bar.layoutQueued = false
+        BrokerBar.layoutQueued = false
         for id in pairs(bars) do 
-            Bar:UpdateBarLayout(id) 
+            BrokerBar:UpdateBarLayout(id) 
         end 
     end) 
 end
