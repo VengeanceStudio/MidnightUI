@@ -920,6 +920,9 @@ local frames = {}
 local function SetBlizzardFramesHidden(self)
     if InCombatLockdown() then return end
     
+    print("[UF DEBUG] SetBlizzardFramesHidden called. Stack trace:")
+    print(debugstack(2, 3, 3))
+    
     if self.db.profile.showPlayer and PlayerFrame then
         DebugUFUnregisterStateDriver(PlayerFrame, "visibility")
         DebugUFRegisterStateDriver(PlayerFrame, "visibility", "hide")
