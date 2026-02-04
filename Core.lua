@@ -556,7 +556,7 @@ function MidnightUI:GetOptions()
             dbKey = "UIButtons"
         elseif name == "Skin" then
             dbKey = "skins"
-        elseif name == "Bar" then
+        elseif name == "BrokerBar" then
             dbKey = "bar"
         elseif name == "Maps" then
             dbKey = "maps"
