@@ -1432,12 +1432,13 @@ end
             return
         end
         HookBlizzardPlayerFrame(self)
-        if self.db.profile.showPlayer then self:CreatePlayerFrame() end
-        if self.db.profile.showTarget then self:CreateTargetFrame() end
-        if self.db.profile.showTargetTarget then self:CreateTargetTargetFrame() end
-        if self.db.profile.showPet then self:CreatePetFrame() end
-        if self.db.profile.showFocus then self:CreateFocusFrame() end
-        if self.db.profile.showBoss then self:CreateBossFrames() end
+        -- Only create frames if they don't already exist to prevent recreation on every zone change
+        if self.db.profile.showPlayer and not _G["MidnightUI_PlayerFrame"] then self:CreatePlayerFrame() end
+        if self.db.profile.showTarget and not _G["MidnightUI_TargetFrame"] then self:CreateTargetFrame() end
+        if self.db.profile.showTargetTarget and not _G["MidnightUI_TargetTargetFrame"] then self:CreateTargetTargetFrame() end
+        if self.db.profile.showPet and not _G["MidnightUI_PetFrame"] then self:CreatePetFrame() end
+        if self.db.profile.showFocus and not _G["MidnightUI_FocusFrame"] then self:CreateFocusFrame() end
+        if self.db.profile.showBoss and not _G["MidnightUI_Boss1Frame"] then self:CreateBossFrames() end
         SetBlizzardFramesHidden(self)
     end
 
@@ -1923,6 +1924,8 @@ end
                 local function CreateUnitFrame(self, key, unit, anchor, anchorTo, anchorPoint, x, y)
                                         -- ...existing code...
                     if frames[key] then
+                        -- Critical: Stop OnUpdate script to prevent memory leaks
+                        frames[key]:SetScript("OnUpdate", nil)
                         frames[key]:Hide()
                         frames[key]:SetParent(nil)
                         frames[key] = nil
