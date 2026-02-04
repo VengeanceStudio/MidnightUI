@@ -914,11 +914,20 @@ end
 
 
 local frames = {}
+local lastSetBlizzardFramesHiddenTime = 0
 
 -- Move HookBlizzardPlayerFrame definition above its first use
 
 local function SetBlizzardFramesHidden(self)
     if InCombatLockdown() then return end
+    
+    -- Throttle: prevent multiple calls within 1 second
+    local currentTime = GetTime()
+    if currentTime - lastSetBlizzardFramesHiddenTime < 1 then
+        print("[UF DEBUG] SetBlizzardFramesHidden throttled (called too soon)")
+        return
+    end
+    lastSetBlizzardFramesHiddenTime = currentTime
     
     print("[UF DEBUG] SetBlizzardFramesHidden called. Stack trace:")
     print(debugstack(2, 3, 3))
