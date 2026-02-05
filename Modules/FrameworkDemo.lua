@@ -275,9 +275,11 @@ end
 
 function Demo:Show()
     if not demoFrame then
-        self:CreateDemoFrame()
+        demoFrame = self:CreateDemoFrame()
     end
-    demoFrame:Show()
+    if demoFrame then
+        demoFrame:Show()
+    end
 end
 
 function Demo:Hide()
