@@ -14,7 +14,9 @@ function BrokerBar:CreateVolumeFrame()
     if volFrame then return end
     volFrame = CreateFrame("Frame", "MidnightVolumePopout", UIParent, "BackdropTemplate")
     volFrame:SetSize(220, 320); volFrame:SetFrameStrata("DIALOG"); volFrame:EnableMouse(true); volFrame:Hide()
-    MidnightUI:SkinFrame(volFrame)
+    
+    -- Don't skin on creation, wait for OnShow to apply themed backdrop
+    -- MidnightUI:SkinFrame(volFrame)
 
     local vTitle = volFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     vTitle:SetPoint("TOP", 0, -10)

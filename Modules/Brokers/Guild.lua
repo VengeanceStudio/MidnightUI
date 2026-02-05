@@ -15,7 +15,8 @@ function BrokerBar:CreateGuildFrame()
     if guildFrame then return end
     guildFrame = CreateFrame("Frame", "MidnightGuildPopup", UIParent, "BackdropTemplate")
     guildFrame:SetSize(600, 450); guildFrame:SetFrameStrata("DIALOG"); guildFrame:EnableMouse(true); guildFrame:Hide()
-    MidnightUI:SkinFrame(guildFrame)
+    -- Don't skin on creation, wait for OnShow to apply themed backdrop
+    -- MidnightUI:SkinFrame(guildFrame)
     
     guildTitle = guildFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     guildTitle:SetPoint("TOP", 0, -10); guildTitle:SetText("Guild List")

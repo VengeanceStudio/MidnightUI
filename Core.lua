@@ -255,7 +255,9 @@ function MidnightUI:SkinFrame(frame)
     -- Use framework colors if available
     local ColorPalette = _G.MidnightUI_ColorPalette
     if ColorPalette then
-        frame.muiBackdrop:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+        local r, g, b, a = ColorPalette:GetColor('panel-bg')
+        print(string.format("[SkinFrame] Using ColorPalette panel-bg: %.2f, %.2f, %.2f, %.2f", r, g, b, a))
+        frame.muiBackdrop:SetBackdropColor(r, g, b, a)
         frame.muiBackdrop:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     else
         -- Fallback to database colors

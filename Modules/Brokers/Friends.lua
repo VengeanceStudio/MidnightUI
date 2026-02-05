@@ -15,7 +15,8 @@ function BrokerBar:CreateFriendsFrame()
     if friendsFrame then return end
     friendsFrame = CreateFrame("Frame", "MidnightFriendsPopup", UIParent, "BackdropTemplate")
     friendsFrame:SetSize(600, 400); friendsFrame:SetFrameStrata("DIALOG"); friendsFrame:EnableMouse(true); friendsFrame:Hide()
-    MidnightUI:SkinFrame(friendsFrame)
+    -- Don't skin on creation, wait for OnShow to apply themed backdrop
+    -- MidnightUI:SkinFrame(friendsFrame)
 
     friendTitle = friendsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     friendTitle:SetPoint("TOP", 0, -10); friendTitle:SetText("Friends List")
