@@ -15,13 +15,6 @@ local demoFrame
 -- ============================================================================
 
 function Demo:OnInitialize()
-    -- Get framework systems
-    FrameFactory = MidnightUI.FrameFactory
-    ColorPalette = MidnightUI.ColorPalette
-    FontKit = MidnightUI.FontKit
-    LayoutHelper = MidnightUI.LayoutHelper
-    Atlas = MidnightUI.Atlas
-    
     -- Register slash command
     SLASH_MIDNIGHTDEMO1 = "/midemo"
     SLASH_MIDNIGHTDEMO2 = "/midnightdemo"
@@ -40,6 +33,18 @@ end
 
 function Demo:CreateDemoFrame()
     if demoFrame then return demoFrame end
+    
+    -- Get framework systems (they're registered by now)
+    FrameFactory = MidnightUI.FrameFactory
+    ColorPalette = MidnightUI.ColorPalette
+    FontKit = MidnightUI.FontKit
+    LayoutHelper = MidnightUI.LayoutHelper
+    Atlas = MidnightUI.Atlas
+    
+    if not FrameFactory or not ColorPalette or not FontKit then
+        MidnightUI:Print("Framework not initialized yet. Please try again.")
+        return
+    end
     
     -- Main container
     demoFrame = CreateFrame("Frame", "MidnightUIDemoFrame", UIParent, "BackdropTemplate")
