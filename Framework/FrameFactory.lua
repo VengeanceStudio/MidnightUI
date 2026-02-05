@@ -205,7 +205,14 @@ function FrameFactory:CreateScrollBar(parent, height)
     scrollbar.thumb = scrollbar:CreateTexture(nil, "OVERLAY")
     scrollbar.thumb:SetSize(14, 32)
     scrollbar.thumb:SetColorTexture(ColorPalette:GetColor("scrollbar-thumb"))
-    scrollbar:SetThumbTexture(scrollbar.thumb)========================================================================
+    scrollbar:SetThumbTexture(scrollbar.thumb)
+    
+    return scrollbar
+end
+
+-- ============================================================================
+-- TOOLTIP FACTORY
+-- ============================================================================
 
 function FrameFactory:CreateTooltip(name)
     local tooltip = CreateFrame("GameTooltip", name or "MidnightUITooltip", UIParent, "GameTooltipTemplate")
