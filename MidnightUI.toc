@@ -2,7 +2,7 @@
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
 ## Author: Vengeance
-## Version: 12.0.0.5
+## Version: 12.0.0.6
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
 
@@ -28,7 +28,7 @@ libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 libs\AceConfig-3.0\AceConfig-3.0.xml
 libs\AceConfigDialog-3.0\AceConfigDialog-3.0.xml
 libs\AceSerializer-3.0\AceSerializer-3.0.lua
-libs\LibCompress\LibCompress.lua
+libs\LibCompress\lib.xml
 
 # ------------------------------------------------------------------------------
 # CORE ENGINE
