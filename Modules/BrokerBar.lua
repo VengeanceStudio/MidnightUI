@@ -296,6 +296,17 @@ function ApplyTooltipStyle(tip)
         return
     end
     
+    -- Hide default Blizzard tooltip borders
+    if tip.NineSlice then
+        tip.NineSlice:SetAlpha(0)
+    end
+    if tip.TopOverlay then
+        tip.TopOverlay:SetAlpha(0)
+    end
+    if tip.BottomOverlay then
+        tip.BottomOverlay:SetAlpha(0)
+    end
+    
     -- Apply themed backdrop
     local ColorPalette = _G.MidnightUI_ColorPalette
     if ColorPalette and tip.SetBackdrop then
