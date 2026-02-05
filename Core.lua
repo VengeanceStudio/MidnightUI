@@ -773,7 +773,7 @@ function MidnightUI:ImportProfile()
 end
 
 -- Actually perform the import
-function MidnightUI:DoImport(importString, newProfileName)
+function MidnightUI:DoImport(importString, newProfileName, suppressDialog)
     local AceSerializer = LibStub("AceSerializer-3.0")
     local LibCompress = LibStub("LibCompress")
     
@@ -879,19 +879,21 @@ function MidnightUI:DoImport(importString, newProfileName)
         print("|cff00ff00MidnightUI:|r Profile '" .. currentProfileName .. "' updated!")
     end
     
-    -- Show reload dialog
-    StaticPopupDialogs["MIDNIGHTUI_IMPORT_RELOAD"] = {
-        text = "Profile imported successfully!\n\nReload UI now to apply changes?",
-        button1 = "Reload Now",
-        button2 = "Later",
-        OnAccept = function()
-            ReloadUI()
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-        preferredIndex = 3,
-    }
-    StaticPopup_Show("MIDNIGHTUI_IMPORT_RELOAD")
+    -- Show reload dialog (unless suppressed by caller)
+    if not suppressDialog then
+        StaticPopupDialogs["MIDNIGHTUI_IMPORT_RELOAD"] = {
+            text = "Profile imported successfully!\n\nReload UI now to apply changes?",
+            button1 = "Reload Now",
+            button2 = "Later",
+            OnAccept = function()
+                ReloadUI()
+            end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+            preferredIndex = 3,
+        }
+        StaticPopup_Show("MIDNIGHTUI_IMPORT_RELOAD")
+    end
 end
 

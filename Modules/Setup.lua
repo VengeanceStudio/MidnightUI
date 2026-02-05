@@ -252,9 +252,9 @@ function Setup:CompleteSetup(frame)
     
     -- Import MidnightUI preset
     if midnightUIPresets[res] and midnightUIPresets[res] ~= "YOUR_" .. res:upper():gsub("P", "") .. "_MIDNIGHTUI_STRING_HERE" then
-        -- Use the DoImport function from Core to apply the preset
+        -- Use the DoImport function from Core to apply the preset (suppress its reload dialog)
         local success = pcall(function()
-            MidnightUI:DoImport(midnightUIPresets[res], nil)
+            MidnightUI:DoImport(midnightUIPresets[res], nil, true)
         end)
         if success then
             print("MidnightUI: Profile preset imported successfully")
