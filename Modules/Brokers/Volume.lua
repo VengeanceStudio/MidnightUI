@@ -23,9 +23,19 @@ function BrokerBar:CreateVolumeFrame()
     -- Add OnShow script to update Title Font/Color dynamically based on current settings
     volFrame:SetScript("OnShow", function()
         local db = BrokerBar.db.profile
-        local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+        local fontPath, fontSize, fontFlags
+        local FontKit = _G.MidnightUI_FontKit
+        if FontKit then
+            fontPath = FontKit:GetFont('header')
+            fontSize = FontKit:GetSize('large')
+            fontFlags = "OUTLINE"
+        else
+            fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+            fontSize = db.fontSize + 2
+            fontFlags = "OUTLINE"
+        end
         local r, g, b = GetColor()
-        vTitle:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
+        vTitle:SetFont(fontPath, fontSize, fontFlags)
         vTitle:SetTextColor(r, g, b)
     end)
 

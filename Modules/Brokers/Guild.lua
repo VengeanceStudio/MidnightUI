@@ -54,22 +54,39 @@ function BrokerBar:CreateGuildFrame()
     -- Add OnShow script to update fonts/colors dynamically
     guildFrame:SetScript("OnShow", function()
         local db = BrokerBar.db.profile
-        local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+        local FontKit = _G.MidnightUI_FontKit
+        local titleFont, titleSize, bodyFont, bodySize, motdSize, fontFlags
+        
+        if FontKit then
+            titleFont = FontKit:GetFont('header')
+            titleSize = FontKit:GetSize('large')
+            bodyFont = FontKit:GetFont('body')
+            bodySize = FontKit:GetSize('normal')
+            motdSize = FontKit:GetSize('medium')
+            fontFlags = "OUTLINE"
+        else
+            local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+            titleFont, bodyFont = fontPath, fontPath
+            titleSize = db.fontSize + 2
+            bodySize = db.fontSize
+            motdSize = db.fontSize + 1
+            fontFlags = "OUTLINE"
+        end
         local r, g, b = GetColor()
         
         -- Update title
-        guildTitle:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
+        guildTitle:SetFont(titleFont, titleSize, fontFlags)
         guildTitle:SetTextColor(r, g, b)
         
         -- Update MotD with larger font
-        guildMotD:SetFont(fontPath, db.fontSize + 1, "OUTLINE")
+        guildMotD:SetFont(bodyFont, motdSize, fontFlags)
         
         -- Update footer
-        guildFooter:SetFont(fontPath, db.fontSize, "OUTLINE")
+        guildFooter:SetFont(bodyFont, bodySize, fontFlags)
         
         -- Update headers
         for _, fs in ipairs(guildHeaderRefs) do
-            fs:SetFont(fontPath, db.fontSize, "OUTLINE")
+            fs:SetFont(bodyFont, bodySize, fontFlags)
             fs:SetTextColor(r, g, b)
         end
     end)

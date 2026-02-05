@@ -53,19 +53,34 @@ function BrokerBar:CreateFriendsFrame()
     -- Add OnShow script to update fonts/colors dynamically
     friendsFrame:SetScript("OnShow", function()
         local db = BrokerBar.db.profile
-        local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+        local FontKit = _G.MidnightUI_FontKit
+        local titleFont, titleSize, bodyFont, bodySize, fontFlags
+        
+        if FontKit then
+            titleFont = FontKit:GetFont('header')
+            titleSize = FontKit:GetSize('large')
+            bodyFont = FontKit:GetFont('body')
+            bodySize = FontKit:GetSize('normal')
+            fontFlags = "OUTLINE"
+        else
+            local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+            titleFont, bodyFont = fontPath, fontPath
+            titleSize = db.fontSize + 2
+            bodySize = db.fontSize
+            fontFlags = "OUTLINE"
+        end
         local r, g, b = GetColor()
         
         -- Update title
-        friendTitle:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
+        friendTitle:SetFont(titleFont, titleSize, fontFlags)
         friendTitle:SetTextColor(r, g, b)
         
         -- Update footer
-        friendFooter:SetFont(fontPath, db.fontSize, "OUTLINE")
+        friendFooter:SetFont(bodyFont, bodySize, fontFlags)
         
         -- Update headers
         for _, fs in ipairs(headerRefs) do
-            fs:SetFont(fontPath, db.fontSize, "OUTLINE")
+            fs:SetFont(bodyFont, bodySize, fontFlags)
             fs:SetTextColor(r, g, b)
         end
     end)
