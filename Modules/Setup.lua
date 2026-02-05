@@ -94,6 +94,11 @@ function Setup:ShowSetupWizard()
     -- Create themed close button
     if FrameFactory then
         frame.closeButton = FrameFactory:CreateButton(frame, 24, 24, "×")
+        -- Make the × larger for visibility
+        if frame.closeButton.text then
+            local font, _, flags = frame.closeButton.text:GetFont()
+            frame.closeButton.text:SetFont(font, 24, flags)
+        end
     else
         frame.closeButton = CreateFrame("Button", nil, frame, "BackdropTemplate")
         frame.closeButton:SetSize(24, 24)
@@ -109,9 +114,9 @@ function Setup:ShowSetupWizard()
         frame.closeButton:SetBackdropBorderColor(0.5, 0, 0, 1)
         
         local text = frame.closeButton:CreateFontString(nil, "OVERLAY")
-        text:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+        text:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
         text:SetText("×")
-        text:SetPoint("CENTER", 0, 1)
+        text:SetPoint("CENTER", 0, 0)
         text:SetTextColor(1, 1, 1)
     end
     frame.closeButton:SetPoint("TOPRIGHT", -5, -5)

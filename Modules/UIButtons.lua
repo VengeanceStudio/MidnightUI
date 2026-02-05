@@ -247,7 +247,7 @@ function UIButtons:CreateButtons()
             -- Special handling for addons button
             if key == "addons" then
                 btn:RegisterForClicks("AnyUp")
-                btn:SetScript("OnClick", function()
+                btn:SetScript("OnClick", function(self)
                     if not AddonList then
                         if _G.LoadAddOn then
                             local loaded, reason = _G.LoadAddOn("Blizzard_AddOnManager")
@@ -264,11 +264,26 @@ function UIButtons:CreateButtons()
                             AddonList:Show()
                         end
                     end
+                    -- Reset button state after click
+                    if self.normalBgColor then
+                        C_Timer.After(0.05, function()
+                            self:SetBackdropColor(unpack(self.normalBgColor))
+                        end)
+                    end
                 end)
             elseif key ~= "exit" then
                 -- Standard click handler for other non-secure buttons
                 btn:RegisterForClicks("AnyUp")
-                btn:SetScript("OnClick", data.onClick)
+                local originalOnClick = data.onClick
+                btn:SetScript("OnClick", function(self, ...)
+                    originalOnClick(...)
+                    -- Reset button state after click
+                    if self.normalBgColor then
+                        C_Timer.After(0.05, function()
+                            self:SetBackdropColor(unpack(self.normalBgColor))
+                        end)
+                    end
+                end)
             end
             
             -- Tooltip
