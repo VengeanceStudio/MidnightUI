@@ -3,6 +3,7 @@ local UIButtons = MidnightUI:NewModule("UIButtons", "AceEvent-3.0")
 
 local uiButtons = {}
 local container
+local FrameFactory, ColorPalette, FontKit
 
 function UIButtons:OnInitialize()
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
@@ -15,6 +16,11 @@ function UIButtons:OnDBReady()
     if not MidnightUI.db.profile.modules.UIButtons then
         return 
     end
+    
+    -- Get framework systems
+    FrameFactory = MidnightUI.FrameFactory
+    ColorPalette = MidnightUI.ColorPalette
+    FontKit = MidnightUI.FontKit
 
     self.db = MidnightUI.db:RegisterNamespace("UIButtons", {
         profile = {
@@ -169,21 +175,77 @@ function UIButtons:CreateButtons()
     for key, data in pairs(buttonData) do
         local config = self.db.profile.UIButtons[key]
         if config and config.enabled then
-            local template = nil
+            local btn
+            
+            -- For exit button, we need SecureActionButtonTemplate
             if key == "exit" then
-                template = "SecureActionButtonTemplate"
-            end
-            local btn = CreateFrame("Button", "MidnightUIButton_"..key, container, template)
-            btn:SetSize(32, 32)
-            btn:SetFrameStrata("TOOLTIP")
-            btn:SetFrameLevel(201)
-            btn:EnableMouse(true)
-            -- Set up secure attributes for exit button ONLY
-            if key == "exit" then
+                btn = CreateFrame("Button", "MidnightUIButton_"..key, container, "SecureActionButtonTemplate, BackdropTemplate")
+                btn:SetSize(32, 32)
                 btn:SetAttribute("type", "macro")
                 btn:SetAttribute("macrotext", "/editmode")
                 btn:RegisterForClicks("AnyUp", "AnyDown")
-            elseif key == "addons" then
+                
+                -- Apply framework styling manually for secure button
+                btn:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false,
+                    tileSize = 16,
+                    edgeSize = 1,
+                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                })
+                if ColorPalette then
+                    btn:SetBackdropColor(ColorPalette:GetColor("button-bg"))
+                    btn:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
+                else
+                    btn:SetBackdropColor(0.1, 0.1, 0.15, 0.9)
+                    btn:SetBackdropBorderColor(0, 0.8, 1, 1)
+                end
+                
+                btn.text = btn:CreateFontString(nil, "OVERLAY")
+                if FontKit then
+                    FontKit:SetFont(btn.text, "button", "normal")
+                else
+                    btn.text:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+                end
+                btn.text:SetPoint("CENTER")
+                btn.text:SetText(data.text)
+                if ColorPalette then
+                    btn.text:SetTextColor(ColorPalette:GetColor("text-primary"))
+                else
+                    btn.text:SetTextColor(1, 1, 1, 1)
+                end
+            else
+                -- Use framework button for non-secure buttons
+                if FrameFactory then
+                    btn = FrameFactory:CreateButton(container, 32, 32, data.text)
+                else
+                    -- Fallback to basic button if framework not available
+                    btn = CreateFrame("Button", "MidnightUIButton_"..key, container, "BackdropTemplate")
+                    btn:SetSize(32, 32)
+                    btn:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, edgeSize = 1,
+                        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                    })
+                    btn:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
+                    btn:SetBackdropBorderColor(0, 0, 0, 1)
+                    
+                    btn.text = btn:CreateFontString(nil, "OVERLAY")
+                    btn.text:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+                    btn.text:SetPoint("CENTER")
+                    btn.text:SetText(data.text)
+                    btn.text:SetTextColor(1, 1, 1, 1)
+                end
+            end
+            
+            btn:SetFrameStrata("TOOLTIP")
+            btn:SetFrameLevel(201)
+            btn:EnableMouse(true)
+            
+            -- Special handling for addons button
+            if key == "addons" then
                 btn:RegisterForClicks("AnyUp")
                 btn:SetScript("OnClick", function()
                     if not AddonList then
@@ -203,38 +265,22 @@ function UIButtons:CreateButtons()
                         end
                     end
                 end)
-            else
+            elseif key ~= "exit" then
+                -- Standard click handler for other non-secure buttons
                 btn:RegisterForClicks("AnyUp")
+                btn:SetScript("OnClick", data.onClick)
             end
-            local bg = btn:CreateTexture(nil, "BACKGROUND")
-            bg:SetAllPoints()
-            bg:SetColorTexture(0.1, 0.1, 0.1, 0.8)
-            btn.bg = bg
-            local text = btn:CreateFontString(nil, "OVERLAY")
-            text:SetFont(fontPath, fontSize, "OUTLINE")
-            text:SetPoint("CENTER")
-            text:SetText(data.text)
-            text:SetTextColor(1, 1, 1, 1)
-            btn.text = text
-            local border = btn:CreateTexture(nil, "OVERLAY")
-            border:SetAllPoints()
-            border:SetTexture("Interface\\Buttons\\WHITE8X8")
-            border:SetVertexColor(0, 0, 0, 1)
-            border:SetDrawLayer("OVERLAY", 7)
+            
+            -- Tooltip
             btn:SetScript("OnEnter", function(self)
-                self.bg:SetColorTexture(0.2, 0.2, 0.2, 1)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 GameTooltip:SetText(data.tooltip)
                 GameTooltip:Show()
             end)
             btn:SetScript("OnLeave", function(self)
-                self.bg:SetColorTexture(0.1, 0.1, 0.1, 0.8)
                 GameTooltip:Hide()
             end)
-            -- Click handler (only for non-secure buttons)
-            if key ~= "exit" and key ~= "addons" then
-                btn:SetScript("OnClick", data.onClick)
-            end
+            
             btn.key = key
             btn.getData = data.getColor
             btn:Show()
