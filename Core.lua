@@ -58,6 +58,7 @@ function MidnightUI:OnInitialize()
     self:RegisterChatCommand("mui", "SlashCommand")
     self:RegisterChatCommand("midnightui", "SlashCommand")
     self:RegisterChatCommand("muimove", "ToggleMoveMode")
+    self:RegisterChatCommand("demo", "OpenDemo")
 end
 
 function MidnightUI:OnEnable()
@@ -76,6 +77,11 @@ function MidnightUI:OnEnable()
         end
     end)
     
+    -- Initialize Framework
+    if self.FrameFactory then
+        self.FrameFactory:Initialize()
+    end
+    
     -- Load Focus Frame if present
     if UnitFrames and UnitFrames.CreateFocusFrame then
         UnitFrames:CreateFocusFrame()
@@ -89,6 +95,15 @@ function MidnightUI:SlashCommand(input)
         self:ToggleMoveMode()
     else
         self:OpenConfig()
+    end
+end
+
+function MidnightUI:OpenDemo()
+    local demo = self:GetModule("FrameworkDemo", true)
+    if demo then
+        demo:Toggle()
+    else
+        self:Print("Framework Demo module not loaded.")
     end
 end
 
