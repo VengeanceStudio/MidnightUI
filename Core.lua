@@ -29,6 +29,7 @@ StaticPopupDialogs["MIDNIGHTUI_RELOAD_CONFIRM"] = {
 local defaults = {
     profile = {
         theme = {
+            active = "MidnightGlass",  -- Active framework theme
             font = "Friz Quadrata TT",
             fontSize = 12,
             bgColor = {0.1, 0.1, 0.1, 0.8},
@@ -80,6 +81,12 @@ function MidnightUI:OnEnable()
     -- Initialize Framework
     if _G.MidnightUI_FrameFactory then
         _G.MidnightUI_FrameFactory:Initialize(self)
+        
+        -- Apply saved theme
+        local savedTheme = self.db.profile.theme.active
+        if self.FrameFactory and savedTheme then
+            self.FrameFactory:SetTheme(savedTheme)
+        end
     end
     
     -- Load Focus Frame if present
@@ -256,6 +263,31 @@ function MidnightUI:GetOptions()
                         end,
                         order = 0.5,
                         fontSize = "large",
+                    },
+                    themeHeader = { type = "header", order = 0.7, name = "Framework Theme" },
+                    themeSelect = {
+                        type = "select",
+                        name = "Active Theme",
+                        desc = "Choose the visual theme for MidnightUI framework components.",
+                        order = 0.8,
+                        values = {
+                            ["MidnightGlass"] = "Midnight Dark Glass",
+                            ["NeonSciFi"] = "Neon Sci-Fi",
+                        },
+                        get = function(info) return self.db.profile.theme.active end,
+                        set = function(info, value)
+                            self.db.profile.theme.active = value
+                            if self.FrameFactory then
+                                self.FrameFactory:SetTheme(value)
+                            end
+                            if self.ColorPalette then
+                                self.ColorPalette:SetActiveTheme(value)
+                            end
+                            if self.FontKit then
+                                self.FontKit:SetActiveTheme(value)
+                            end
+                            self:Print("Theme changed to " .. value .. ". Some changes may require a /reload to take full effect.")
+                        end,
                     },
                     header = { type = "header", order = 1, name = "Modules" },
                     desc = { type = "description", order = 2, name = "Toggle modules. Requires Reload." },
