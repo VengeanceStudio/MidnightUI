@@ -58,9 +58,17 @@ function Demo:CreateDemoFrame()
     demoFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
     demoFrame:Hide()
     
-    -- Panel background
-    local panel = FrameFactory:CreatePanel(demoFrame, 800, 600)
-    panel:SetAllPoints()
+    -- Main background (ensure visibility)
+    demoFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 2,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    demoFrame:SetBackdropColor(ColorPalette:GetColor("panel-bg"))
+    demoFrame:SetBackdropBorderColor(ColorPalette:GetColor("panel-border"))
     
     -- Title bar
     local titleBg = demoFrame:CreateTexture(nil, "ARTWORK")
@@ -139,7 +147,41 @@ function Demo:CreateDemoFrame()
     
     local btn2 = FrameFactory:CreateButton(demoFrame, 140, 36, "Another Button")
     btn2:SetPoint("LEFT", btn1, "RIGHT", 10, 0)
-    btn2:SetScript("OnClick", function()
+    btn2
+    
+    -- Add borders to buttons for visibility
+    btn1:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    btn1:SetBackdropColor(ColorPalette:GetColor("button-bg"))
+    btn1:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
+    
+    btn2:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    btn2:SetBackdropColor(ColorPalette:GetColor("button-bg"))
+    btn2:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
+    
+    btn3:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    btn3:SetBackdropColor(ColorPalette:GetColor("button-bg"))
+    btn3:SetBackdropBorderColor(ColorPalette:GetColor("primary")):SetScript("OnClick", function()
         MidnightUI:Print("Button 2 clicked!")
     end)
     
