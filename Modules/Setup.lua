@@ -56,7 +56,7 @@ function Setup:ShowSetupWizard()
     end
     
     -- Create main wizard frame
-    local frame = CreateFrame("Frame", "MidnightUI_SetupWizard", UIParent, "BasicFrameTemplateWithInset")
+    local frame = CreateFrame("Frame", "MidnightUI_SetupWizard", UIParent, "BasicFrameTemplateWithInset,BackdropTemplate")
     frame:SetSize(600, 400)
     frame:SetPoint("CENTER")
     frame:SetFrameStrata("DIALOG")
