@@ -1,9 +1,8 @@
 -- MidnightUI Theme: Neon Sci-Fi
 -- Bright neon accents with holographic effects and futuristic styling
 
-local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
-local ColorPalette = MidnightUI.ColorPalette
-local FontKit = MidnightUI.FontKit
+local ColorPalette = _G.MidnightUI_ColorPalette
+local FontKit = _G.MidnightUI_FontKit
 
 if not ColorPalette or not FontKit then return end
 

@@ -1,10 +1,9 @@
 -- MidnightUI Font Kit System
 -- Font management and registration
 
-local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local LSM = LibStub("LibSharedMedia-3.0")
 local FontKit = {}
-MidnightUI.FontKit = FontKit
+_G.MidnightUI_FontKit = FontKit
 
 -- Font definitions per theme
 FontKit.fonts = {}

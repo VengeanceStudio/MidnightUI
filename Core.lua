@@ -78,8 +78,8 @@ function MidnightUI:OnEnable()
     end)
     
     -- Initialize Framework
-    if self.FrameFactory then
-        self.FrameFactory:Initialize()
+    if _G.MidnightUI_FrameFactory then
+        _G.MidnightUI_FrameFactory:Initialize(self)
     end
     
     -- Load Focus Frame if present

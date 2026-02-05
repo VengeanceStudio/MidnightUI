@@ -1,9 +1,8 @@
 -- MidnightUI Layout Helper System
 -- Grid system, anchoring, and responsive scaling
 
-local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local LayoutHelper = {}
-MidnightUI.LayoutHelper = LayoutHelper
+_G.MidnightUI_LayoutHelper = LayoutHelper
 
 -- Grid settings
 LayoutHelper.gridSize = 8

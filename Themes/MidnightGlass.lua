@@ -1,9 +1,8 @@
 -- MidnightUI Theme: Midnight Dark Glass
 -- Dark, translucent glass aesthetic with subtle gradients
 
-local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
-local ColorPalette = MidnightUI.ColorPalette
-local FontKit = MidnightUI.FontKit
+local ColorPalette = _G.MidnightUI_ColorPalette
+local FontKit = _G.MidnightUI_FontKit
 
 if not ColorPalette or not FontKit then return end
 

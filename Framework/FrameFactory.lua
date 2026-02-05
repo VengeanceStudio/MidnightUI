@@ -1,15 +1,34 @@
 -- MidnightUI Frame Factory
 -- Component creation system with theme support
 
-local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local FrameFactory = {}
-MidnightUI.FrameFactory = FrameFactory
 
 -- Cache framework systems
 local Atlas, ColorPalette, FontKit, LayoutHelper
+local MidnightUI
 
 -- Initialize on addon load
-function FrameFactory:Initialize()
+function FrameFactory:Initialize(addon)
+    MidnightUI = addon
+    
+    -- Register all framework systems with the addon
+    if not MidnightUI.Atlas then
+        MidnightUI.Atlas = Atlas
+    end
+    if not MidnightUI.ColorPalette then
+        MidnightUI.ColorPalette = ColorPalette
+    end
+    if not MidnightUI.FontKit then
+        MidnightUI.FontKit = FontKit
+    end
+    if not MidnightUI.LayoutHelper then
+        MidnightUI.LayoutHelper = LayoutHelper
+    end
+    if not MidnightUI.FrameFactory then
+        MidnightUI.FrameFactory = FrameFactory
+    end
+    
+    -- Cache references
     Atlas = MidnightUI.Atlas
     ColorPalette = MidnightUI.ColorPalette
     FontKit = MidnightUI.FontKit
@@ -237,5 +256,8 @@ function FrameFactory:ApplyTheme(frame, componentType)
     -- This would reapply theme textures and colors to an existing frame
     -- Implementation depends on frame type
 end
+
+-- Register in global namespace for Core.lua to find
+_G.MidnightUI_FrameFactory = FrameFactory
 
 return FrameFactory

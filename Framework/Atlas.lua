@@ -1,9 +1,8 @@
 -- MidnightUI Texture Atlas System
 -- Manages texture coordinates and atlas loading for efficient UI rendering
 
-local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local Atlas = {}
-MidnightUI.Atlas = Atlas
+_G.MidnightUI_Atlas = Atlas
 
 -- Atlas definitions - texture coordinates for each component in the atlas
 Atlas.atlases = {}

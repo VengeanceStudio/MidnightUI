@@ -1,9 +1,8 @@
 -- MidnightUI Color Palette System
 -- Theme color management with RGB/RGBA support
 
-local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local ColorPalette = {}
-MidnightUI.ColorPalette = ColorPalette
+_G.MidnightUI_ColorPalette = ColorPalette
 
 -- Active theme
 ColorPalette.activeTheme = "MidnightGlass"
