@@ -55,8 +55,8 @@ function BrokerBar:CreateFriendsFrame()
     friendsFrame:SetScript("OnShow", function()
         print("[Friends] OnShow handler executing...")
         -- Refresh backdrop with current theme
-        MidnightUI:SkinFrame(friendsFrame)
-        print("[Friends] SkinFrame call completed")
+        MidnightUI:ApplyThemedBackdrop(friendsFrame)
+        print("[Friends] ApplyThemedBackdrop call completed")
         
         local db = BrokerBar.db.profile
         local FontKit = _G.MidnightUI_FontKit

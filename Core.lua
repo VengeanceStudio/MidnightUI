@@ -223,13 +223,14 @@ function MidnightUI:OpenConfig()
     end
 end
 
-function MidnightUI:SkinFrame(frame)
+-- Apply themed backdrop to a frame using ColorPalette
+function MidnightUI:ApplyThemedBackdrop(frame)
     if not frame then 
-        print("[SkinFrame] ERROR: frame is nil!")
+        print("[ApplyThemedBackdrop] ERROR: frame is nil!")
         return 
     end
     
-    print("[SkinFrame] Called for frame:", frame:GetName() or "unnamed")
+    print("[ApplyThemedBackdrop] Called for frame:", frame:GetName() or "unnamed")
     
     -- Clear any backdrop on the parent frame itself
     if frame.SetBackdrop then
@@ -261,15 +262,15 @@ function MidnightUI:SkinFrame(frame)
     local ColorPalette = _G.MidnightUI_ColorPalette
     if ColorPalette then
         local r, g, b, a = ColorPalette:GetColor('panel-bg')
-        print(string.format("[SkinFrame] Using ColorPalette panel-bg: %.2f, %.2f, %.2f, %.2f", r, g, b, a))
+        print(string.format("[ApplyThemedBackdrop] Using ColorPalette panel-bg: %.2f, %.2f, %.2f, %.2f", r, g, b, a))
         frame.muiBackdrop:SetBackdropColor(r, g, b, a)
         frame.muiBackdrop:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     else
-        print("[SkinFrame] ColorPalette not available, using database defaults")
+        print("[ApplyThemedBackdrop] ColorPalette not available, using database defaults")
         -- Fallback to database colors
         local cfg = self.db.profile.theme
         local r, g, b, a = unpack(cfg.bgColor)
-        print(string.format("[SkinFrame] Using database bgColor: %.2f, %.2f, %.2f, %.2f", r, g, b, a))
+        print(string.format("[ApplyThemedBackdrop] Using database bgColor: %.2f, %.2f, %.2f, %.2f", r, g, b, a))
         frame.muiBackdrop:SetBackdropColor(unpack(cfg.bgColor))
         frame.muiBackdrop:SetBackdropBorderColor(unpack(cfg.borderColor))
     end

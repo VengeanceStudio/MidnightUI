@@ -56,8 +56,8 @@ function BrokerBar:CreateGuildFrame()
     guildFrame:SetScript("OnShow", function()
         print("[Guild] OnShow handler executing...")
         -- Refresh backdrop with current theme
-        MidnightUI:SkinFrame(guildFrame)
-        print("[Guild] SkinFrame call completed")
+        MidnightUI:ApplyThemedBackdrop(guildFrame)
+        print("[Guild] ApplyThemedBackdrop call completed")
         
         local db = BrokerBar.db.profile
         local FontKit = _G.MidnightUI_FontKit
