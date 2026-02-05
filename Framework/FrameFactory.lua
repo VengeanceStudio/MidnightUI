@@ -53,20 +53,28 @@ function FrameFactory:CreateButton(parent, width, height, text)
     -- Background texture
     button.normalTexture = button:CreateTexture(nil, "BACKGROUND")
     button.normalTexture:SetAllPoints()
-    Atlas:SetTexture(button.normalTexture, self.activeTheme, "button-normal")
-    ColorPalette:GetColor("button-normal")
-    button.normalTexture:SetVertexColor(ColorPalette:GetColor("button-bg"))
+    if not Atlas:SetTexture(button.normalTexture, self.activeTheme, "button-normal") then
+        button.normalTexture:SetColorTexture(ColorPalette:GetColor("button-bg"))
+    else
+        button.normalTexture:SetVertexColor(ColorPalette:GetColor("button-bg"))
+    end
     
     button.hoverTexture = button:CreateTexture(nil, "BACKGROUND")
     button.hoverTexture:SetAllPoints()
-    Atlas:SetTexture(button.hoverTexture, self.activeTheme, "button-hover")
-    button.hoverTexture:SetVertexColor(ColorPalette:GetColor("button-hover"))
+    if not Atlas:SetTexture(button.hoverTexture, self.activeTheme, "button-hover") then
+        button.hoverTexture:SetColorTexture(ColorPalette:GetColor("button-hover"))
+    else
+        button.hoverTexture:SetVertexColor(ColorPalette:GetColor("button-hover"))
+    end
     button.hoverTexture:Hide()
     
     button.pressedTexture = button:CreateTexture(nil, "BACKGROUND")
     button.pressedTexture:SetAllPoints()
-    Atlas:SetTexture(button.pressedTexture, self.activeTheme, "button-pressed")
-    button.pressedTexture:SetVertexColor(ColorPalette:GetColor("button-pressed"))
+    if not Atlas:SetTexture(button.pressedTexture, self.activeTheme, "button-pressed") then
+        button.pressedTexture:SetColorTexture(ColorPalette:GetColor("button-pressed"))
+    else
+        button.pressedTexture:SetVertexColor(ColorPalette:GetColor("button-pressed"))
+    end
     button.pressedTexture:Hide()
     
     -- Text
@@ -119,14 +127,21 @@ function FrameFactory:CreatePanel(parent, width, height)
     -- Background
     panel.bg = panel:CreateTexture(nil, "BACKGROUND")
     panel.bg:SetAllPoints()
-    Atlas:SetTexture(panel.bg, self.activeTheme, "panel-bg")
-    panel.bg:SetVertexColor(ColorPalette:GetColor("panel-bg"))
+    if not Atlas:SetTexture(panel.bg, self.activeTheme, "panel-bg") then
+        panel.bg:SetColorTexture(ColorPalette:GetColor("panel-bg"))
+    else
+        panel.bg:SetVertexColor(ColorPalette:GetColor("panel-bg"))
+    end
     
     -- Border
     panel.border = panel:CreateTexture(nil, "BORDER")
-    panel.border:SetAllPoints()
-    Atlas:SetTexture(panel.border, self.activeTheme, "panel-border")
-    panel.border:SetVertexColor(ColorPalette:GetColor("panel-border"))
+    panel.border:SetPoint("TOPLEFT", -2, 2)
+    panel.border:SetPoint("BOTTOMRIGHT", 2, -2)
+    if not Atlas:SetTexture(panel.border, self.activeTheme, "panel-border") then
+        panel.border:SetColorTexture(ColorPalette:GetColor("panel-border"))
+    else
+        panel.border:SetVertexColor(ColorPalette:GetColor("panel-border"))
+    end
     
     return panel
 end
@@ -142,14 +157,20 @@ function FrameFactory:CreateTab(parent, width, height, text)
     -- Inactive texture
     tab.inactiveTexture = tab:CreateTexture(nil, "BACKGROUND")
     tab.inactiveTexture:SetAllPoints()
-    Atlas:SetTexture(tab.inactiveTexture, self.activeTheme, "tab-inactive")
-    tab.inactiveTexture:SetVertexColor(ColorPalette:GetColor("tab-inactive"))
+    if not Atlas:SetTexture(tab.inactiveTexture, self.activeTheme, "tab-inactive") then
+        tab.inactiveTexture:SetColorTexture(ColorPalette:GetColor("tab-inactive"))
+    else
+        tab.inactiveTexture:SetVertexColor(ColorPalette:GetColor("tab-inactive"))
+    end
     
     -- Active texture
     tab.activeTexture = tab:CreateTexture(nil, "BACKGROUND")
     tab.activeTexture:SetAllPoints()
-    Atlas:SetTexture(tab.activeTexture, self.activeTheme, "tab-active")
-    tab.activeTexture:SetVertexColor(ColorPalette:GetColor("tab-active"))
+    if not Atlas:SetTexture(tab.activeTexture, self.activeTheme, "tab-active") then
+        tab.activeTexture:SetColorTexture(ColorPalette:GetColor("tab-active"))
+    else
+        tab.activeTexture:SetVertexColor(ColorPalette:GetColor("tab-active"))
+    end
     tab.activeTexture:Hide()
     
     -- Text
@@ -191,15 +212,21 @@ function FrameFactory:CreateScrollBar(parent, height)
     -- Track
     scrollbar.track = scrollbar:CreateTexture(nil, "BACKGROUND")
     scrollbar.track:SetAllPoints()
-    Atlas:SetTexture(scrollbar.track, self.activeTheme, "scrollbar-track")
-    scrollbar.track:SetVertexColor(ColorPalette:GetColor("scrollbar-track"))
+    if not Atlas:SetTexture(scrollbar.track, self.activeTheme, "scrollbar-track") then
+        scrollbar.track:SetColorTexture(ColorPalette:GetColor("scrollbar-track"))
+    else
+        scrollbar.track:SetVertexColor(ColorPalette:GetColor("scrollbar-track"))
+    end
     
     -- Thumb
     scrollbar.thumb = scrollbar:CreateTexture(nil, "OVERLAY")
     scrollbar.thumb:SetSize(16, 32)
     scrollbar:SetThumbTexture(scrollbar.thumb)
-    Atlas:SetTexture(scrollbar.thumb, self.activeTheme, "scrollbar-thumb")
-    scrollbar.thumb:SetVertexColor(ColorPalette:GetColor("scrollbar-thumb"))
+    if not Atlas:SetTexture(scrollbar.thumb, self.activeTheme, "scrollbar-thumb") then
+        scrollbar.thumb:SetColorTexture(ColorPalette:GetColor("scrollbar-thumb"))
+    else
+        scrollbar.thumb:SetVertexColor(ColorPalette:GetColor("scrollbar-thumb"))
+    end
     
     return scrollbar
 end
@@ -218,8 +245,11 @@ function FrameFactory:CreateTooltip(name)
     
     tooltip.bg = tooltip:CreateTexture(nil, "BACKGROUND")
     tooltip.bg:SetAllPoints()
-    Atlas:SetTexture(tooltip.bg, self.activeTheme, "tooltip-bg")
-    tooltip.bg:SetVertexColor(ColorPalette:GetColor("tooltip-bg"))
+    if not Atlas:SetTexture(tooltip.bg, self.activeTheme, "tooltip-bg") then
+        tooltip.bg:SetColorTexture(ColorPalette:GetColor("tooltip-bg"))
+    else
+        tooltip.bg:SetVertexColor(ColorPalette:GetColor("tooltip-bg"))
+    end
     
     -- Apply font to tooltip lines
     for i = 1, 30 do
