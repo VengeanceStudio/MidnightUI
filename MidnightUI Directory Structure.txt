@@ -22,6 +22,20 @@ MidnightUI/
 │   ├── UIButtons.lua                       # Menu & bag button styling
 │   ├── UnitFrames.lua                      # Unit frame core engine
 │   │
+│   ├── Brokers/                            # Data broker widget implementations
+│   │   ├── Bags.lua                        # Bag space tracker
+│   │   ├── Clock.lua                       # Time & date display
+│   │   ├── Difficulty.lua                  # Instance difficulty indicator
+│   │   ├── Durability.lua                  # Equipment durability monitor
+│   │   ├── Friends.lua                     # Friends list status
+│   │   ├── Gold.lua                        # Gold tracker
+│   │   ├── Guild.lua                       # Guild roster info
+│   │   ├── ItemLevel.lua                   # Character item level display
+│   │   ├── Location.lua                    # Zone & coordinates display
+│   │   ├── System.lua                      # System performance monitor
+│   │   ├── Token.lua                       # WoW Token pricing
+│   │   └── Volume.lua                      # Volume mixer control
+│   │
 │   └── Frames/                             # Individual unit frame implementations
 │       ├── Boss.lua                        # Boss frames 1-5 (unified settings)
 │       ├── Focus.lua                       # Focus target frame
