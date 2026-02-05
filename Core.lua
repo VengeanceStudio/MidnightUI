@@ -226,6 +226,11 @@ end
 function MidnightUI:SkinFrame(frame)
     if not frame then return end
     
+    -- Clear any backdrop on the parent frame itself
+    if frame.SetBackdrop then
+        frame:SetBackdrop(nil)
+    end
+    
     -- Force recreation of backdrop to apply new settings
     if frame.muiBackdrop then
         frame.muiBackdrop:Hide()
