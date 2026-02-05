@@ -141,15 +141,6 @@ function Demo:CreateDemoFrame()
     
     local btn1 = FrameFactory:CreateButton(demoFrame, 140, 36, "Normal Button")
     btn1:SetPoint("TOPLEFT", 20, -170)
-    btn1:SetScript("OnClick", function()
-        MidnightUI:Print("Button 1 clicked!")
-    end)
-    
-    local btn2 = FrameFactory:CreateButton(demoFrame, 140, 36, "Another Button")
-    btn2:SetPoint("LEFT", btn1, "RIGHT", 10, 0)
-    btn2
-    
-    -- Add borders to buttons for visibility
     btn1:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -160,7 +151,12 @@ function Demo:CreateDemoFrame()
     })
     btn1:SetBackdropColor(ColorPalette:GetColor("button-bg"))
     btn1:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
+    btn1:SetScript("OnClick", function()
+        MidnightUI:Print("Button 1 clicked!")
+    end)
     
+    local btn2 = FrameFactory:CreateButton(demoFrame, 140, 36, "Another Button")
+    btn2:SetPoint("LEFT", btn1, "RIGHT", 10, 0)
     btn2:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -171,7 +167,12 @@ function Demo:CreateDemoFrame()
     })
     btn2:SetBackdropColor(ColorPalette:GetColor("button-bg"))
     btn2:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
+    btn2:SetScript("OnClick", function()
+        MidnightUI:Print("Button 2 clicked!")
+    end)
     
+    local btn3 = FrameFactory:CreateButton(demoFrame, 140, 36, "Third Button")
+    btn3:SetPoint("LEFT", btn2, "RIGHT", 10, 0)
     btn3:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -181,12 +182,7 @@ function Demo:CreateDemoFrame()
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     btn3:SetBackdropColor(ColorPalette:GetColor("button-bg"))
-    btn3:SetBackdropBorderColor(ColorPalette:GetColor("primary")):SetScript("OnClick", function()
-        MidnightUI:Print("Button 2 clicked!")
-    end)
-    
-    local btn3 = FrameFactory:CreateButton(demoFrame, 140, 36, "Third Button")
-    btn3:SetPoint("LEFT", btn2, "RIGHT", 10, 0)
+    btn3:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
     btn3:SetScript("OnClick", function()
         MidnightUI:Print("Button 3 clicked!")
     end)
