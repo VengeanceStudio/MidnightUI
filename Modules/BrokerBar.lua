@@ -597,9 +597,9 @@ function BrokerBar:GetSafeConfig(name)
             ["MidnightSystem"] = 10,    -- LEFT side, first
             ["MidnightGold"] = 20,      -- LEFT side, second
             ["MidnightClock"] = 30,     -- CENTER
-            ["MidnightDiff"] = 40,      -- RIGHT side, first (leftmost)
+            ["MidnightDiff"] = 60,      -- RIGHT side, first (leftmost)
             ["MidnightLocation"] = 50,  -- RIGHT side, second
-            ["MidnightVolume"] = 60,    -- RIGHT side, third (rightmost)
+            ["MidnightVolume"] = 40,    -- RIGHT side, third (rightmost)
         }
         
         -- Check if this broker should be enabled by default

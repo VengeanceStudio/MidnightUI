@@ -240,7 +240,7 @@ function MidnightUI:GetOptions()
                             return "|cff00ccff MidnightUI|r version |cffffaa00" .. (C_AddOns.GetAddOnMetadata("MidnightUI", "Version") or "Unknown") .. "|r"
                         end,
                         order = 0.5,
-                        fontSize = "medium",
+                        fontSize = "large",
                     },
                     header = { type = "header", order = 1, name = "Modules" },
                     desc = { type = "description", order = 2, name = "Toggle modules. Requires Reload." },

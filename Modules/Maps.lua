@@ -21,14 +21,14 @@ local defaults = {
         showCoords = true,
         
         -- Icon Visibility
-        showCalendar = true,
+        showCalendar = false,
         showTracking = true,
         showMail = true,
         mailOffsetX = -25,
         mailOffsetY = -25,
-        showMissions = true,
+        showMissions = false,
         showQueue = true,
-        showDifficulty = true,
+        showDifficulty = false,
         difficultyOffsetX = -65,
         difficultyOffsetY = -5,
         
@@ -960,14 +960,44 @@ function Maps:GetOptions()
             },
             
             headerText = { type = "header", name = "Text Overlay", order = 10 },
-            showClock = { name = "Show Clock", type = "toggle", order = 11 },
-            showZone = { name = "Show Zone Text", type = "toggle", order = 12 },
-            showCoords = { name = "Show Coordinates", type = "toggle", order = 13 },
+            showClock = { 
+                name = "Show Clock", 
+                type = "toggle", 
+                order = 11,
+                set = function(_, v) self.db.profile.showClock = v; self:UpdateLayout() end
+            },
+            showZone = { 
+                name = "Show Zone Text", 
+                type = "toggle", 
+                order = 12,
+                set = function(_, v) self.db.profile.showZone = v; self:UpdateLayout() end
+            },
+            showCoords = { 
+                name = "Show Coordinates", 
+                type = "toggle", 
+                order = 13,
+                set = function(_, v) self.db.profile.showCoords = v; self:UpdateLayout() end
+            },
             
             headerIcons = { type = "header", name = "Icons & Buttons", order = 20 },
-            showCalendar = { name = "Calendar", type = "toggle", order = 21 },
-            showTracking = { name = "Tracking", type = "toggle", order = 22 },
-            showMail = { name = "Mail", type = "toggle", order = 23 },
+            showCalendar = { 
+                name = "Calendar", 
+                type = "toggle", 
+                order = 21,
+                set = function(_, v) self.db.profile.showCalendar = v; self:UpdateLayout() end
+            },
+            showTracking = { 
+                name = "Tracking", 
+                type = "toggle", 
+                order = 22,
+                set = function(_, v) self.db.profile.showTracking = v; self:UpdateLayout() end
+            },
+            showMail = { 
+                name = "Mail", 
+                type = "toggle", 
+                order = 23,
+                set = function(_, v) self.db.profile.showMail = v; self:UpdateLayout() end
+            },
             mailOffsetX = {
                 type = "range",
                 name = "Mail Icon X Offset",
@@ -986,9 +1016,24 @@ function Maps:GetOptions()
                 get = function() return self.db.profile.mailOffsetY or -25 end,
                 set = function(_, v) self.db.profile.mailOffsetY = v; self:UpdateLayout() end,
             },
-            showMissions = { name = "Missions / Landing Page", type = "toggle", order = 24 },
-            showQueue = { name = "LFG / PvP Queue", type = "toggle", order = 25 },
-            showDifficulty = { name = "Instance Difficulty", type = "toggle", order = 26 },
+            showMissions = { 
+                name = "Missions / Landing Page", 
+                type = "toggle", 
+                order = 24,
+                set = function(_, v) self.db.profile.showMissions = v; self:UpdateLayout() end
+            },
+            showQueue = { 
+                name = "LFG / PvP Queue", 
+                type = "toggle", 
+                order = 25,
+                set = function(_, v) self.db.profile.showQueue = v; self:UpdateLayout() end
+            },
+            showDifficulty = { 
+                name = "Instance Difficulty", 
+                type = "toggle", 
+                order = 26,
+                set = function(_, v) self.db.profile.showDifficulty = v; self:UpdateLayout() end
+            },
             difficultyOffsetX = {
                 type = "range",
                 name = "Difficulty Icon X Offset",
