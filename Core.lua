@@ -232,6 +232,9 @@ function MidnightUI:SkinFrame(frame)
         frame.muiBackdrop:SetFrameLevel(level > 0 and level - 1 or 0)
     end
     
+    -- Clear any existing backdrop first to ensure clean update
+    frame.muiBackdrop:SetBackdrop(nil)
+    
     -- Always update backdrop parameters to ensure correct texture/edge settings
     frame.muiBackdrop:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
