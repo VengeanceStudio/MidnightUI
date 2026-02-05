@@ -303,8 +303,9 @@ function ApplyTooltipStyle(tip)
         
         -- Use framework fonts if available
         if FontKit then
-            fontPath, fontSize, fontFlags = FontKit:GetFont('body')
-            fontSize = fontSize + 2  -- Slightly larger for tooltip header
+            fontPath = FontKit:GetFont('body')
+            fontSize = FontKit:GetSize('normal') + 2  -- Slightly larger for tooltip header
+            fontFlags = "OUTLINE"
         else
             fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
             fontSize = db.fontSize + 2
@@ -324,7 +325,9 @@ function ApplyTooltipStyle(tip)
         
         -- Use framework fonts for body if available
         if FontKit then
-            fontPath, fontSize, fontFlags = FontKit:GetFont('body')
+            fontPath = FontKit:GetFont('body')
+            fontSize = FontKit:GetSize('normal')
+            fontFlags = "OUTLINE"
         else
             fontSize = db.fontSize
         end
@@ -686,7 +689,9 @@ function BrokerBar:UpdateBarLayout(barID)
     
     local fontPath, fontSize, fontFlags
     if FontKit then
-        fontPath, fontSize, fontFlags = FontKit:GetFont('body')
+        fontPath = FontKit:GetFont('body')
+        fontSize = FontKit:GetSize('normal')
+        fontFlags = "OUTLINE"
     else
         fontPath = LSM:Fetch("font", self.db.profile.font) or "Fonts\\FRIZQT__.ttf"
         fontSize = self.db.profile.fontSize
