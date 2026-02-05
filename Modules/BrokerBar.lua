@@ -592,9 +592,20 @@ function BrokerBar:GetSafeConfig(name)
             ["MidnightClock"] = "CENTER",
         }
         
+        -- Default order values for positioning (lower = leftmost in their alignment group)
+        local defaultOrders = {
+            ["MidnightSystem"] = 10,    -- LEFT side, first
+            ["MidnightGold"] = 20,      -- LEFT side, second
+            ["MidnightClock"] = 30,     -- CENTER
+            ["MidnightDiff"] = 40,      -- RIGHT side, first (leftmost)
+            ["MidnightLocation"] = 50,  -- RIGHT side, second
+            ["MidnightVolume"] = 60,    -- RIGHT side, third (rightmost)
+        }
+        
         -- Check if this broker should be enabled by default
         local defaultBar = defaultEnabledBrokers[name] and "MainBar" or "None"
         local defaultAlign = defaultAlignments[name] or "CENTER"
+        local defaultOrder = defaultOrders[name] or 100
         
         -- Special case: Location should show coordinates by default
         local defaultShowCoords = (name == "MidnightLocation")
@@ -605,7 +616,7 @@ function BrokerBar:GetSafeConfig(name)
         self.db.profile.brokers[name] = { 
             bar = defaultBar, 
             align = defaultAlign, 
-            order = 10, 
+            order = defaultOrder, 
             showIcon = true, 
             showText = true, 
             showLabel = false, 
