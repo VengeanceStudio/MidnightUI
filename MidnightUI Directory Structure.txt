@@ -4,7 +4,6 @@ MidnightUI/
 ├── Core.lua                                # Main engine, database, & module loader
 ├── LICENSE.txt                             # MIT License
 ├── README.md                               # Complete documentation & feature list
-├── RELEASE_NOTES_v12.0.0.262.md           # Latest version release notes
 ├── MidnightUI Directory Structure.txt      # This file
 │
 ├── Media/                                  # Textures, fonts, and sounds
