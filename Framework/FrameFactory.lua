@@ -11,28 +11,18 @@ local MidnightUI
 function FrameFactory:Initialize(addon)
     MidnightUI = addon
     
-    -- Register all framework systems with the addon
-    if not MidnightUI.Atlas then
-        MidnightUI.Atlas = Atlas
-    end
-    if not MidnightUI.ColorPalette then
-        MidnightUI.ColorPalette = ColorPalette
-    end
-    if not MidnightUI.FontKit then
-        MidnightUI.FontKit = FontKit
-    end
-    if not MidnightUI.LayoutHelper then
-        MidnightUI.LayoutHelper = LayoutHelper
-    end
-    if not MidnightUI.FrameFactory then
-        MidnightUI.FrameFactory = FrameFactory
-    end
+    -- Get framework systems from global namespace
+    Atlas = _G.MidnightUI_Atlas
+    ColorPalette = _G.MidnightUI_ColorPalette
+    FontKit = _G.MidnightUI_FontKit
+    LayoutHelper = _G.MidnightUI_LayoutHelper
     
-    -- Cache references
-    Atlas = MidnightUI.Atlas
-    ColorPalette = MidnightUI.ColorPalette
-    FontKit = MidnightUI.FontKit
-    LayoutHelper = MidnightUI.LayoutHelper
+    -- Register all framework systems with the addon
+    MidnightUI.Atlas = Atlas
+    MidnightUI.ColorPalette = ColorPalette
+    MidnightUI.FontKit = FontKit
+    MidnightUI.LayoutHelper = LayoutHelper
+    MidnightUI.FrameFactory = FrameFactory
 end
 
 -- Current theme
