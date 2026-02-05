@@ -47,35 +47,20 @@ end
 -- ============================================================================
 
 function FrameFactory:CreateButton(parent, width, height, text)
-    local button = CreateFrame("Button", nil, parent)
+    local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
     button:SetSize(width or 120, height or 32)
     
-    -- Background texture
-    button.normalTexture = button:CreateTexture(nil, "BACKGROUND")
-    button.normalTexture:SetAllPoints()
-    if not Atlas:SetTexture(button.normalTexture, self.activeTheme, "button-normal") then
-        button.normalTexture:SetColorTexture(ColorPalette:GetColor("button-bg"))
-    else
-        button.normalTexture:SetVertexColor(ColorPalette:GetColor("button-bg"))
-    end
-    
-    button.hoverTexture = button:CreateTexture(nil, "BACKGROUND")
-    button.hoverTexture:SetAllPoints()
-    if not Atlas:SetTexture(button.hoverTexture, self.activeTheme, "button-hover") then
-        button.hoverTexture:SetColorTexture(ColorPalette:GetColor("button-hover"))
-    else
-        button.hoverTexture:SetVertexColor(ColorPalette:GetColor("button-hover"))
-    end
-    button.hoverTexture:Hide()
-    
-    button.pressedTexture = button:CreateTexture(nil, "BACKGROUND")
-    button.pressedTexture:SetAllPoints()
-    if not Atlas:SetTexture(button.pressedTexture, self.activeTheme, "button-pressed") then
-        button.pressedTexture:SetColorTexture(ColorPalette:GetColor("button-pressed"))
-    else
-        button.pressedTexture:SetVertexColor(ColorPalette:GetColor("button-pressed"))
-    end
-    button.pressedTexture:Hide()
+    -- Use backdrop for visibility
+    button:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    button:SetBackdropColor(ColorPalette:GetColor("button-bg"))
+    button:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
     
     -- Text
     button.text = FontKit:CreateFontString(button, "button", "normal")
@@ -83,28 +68,30 @@ function FrameFactory:CreateButton(parent, width, height, text)
     button.text:SetText(text or "Button")
     button.text:SetTextColor(ColorPalette:GetColor("text-primary"))
     
+    -- Store original colors
+    button.normalBgColor = {ColorPalette:GetColor("button-bg")}
+    button.hoverBgColor = {ColorPalette:GetColor("button-hover")}
+    button.pressedBgColor = {ColorPalette:GetColor("button-pressed")}
+    button.borderColor = {ColorPalette:GetColor("primary")}
+    
     -- Interactivity
     button:SetScript("OnEnter", function(self)
-        self.hoverTexture:Show()
-        self.normalTexture:Hide()
+        self:SetBackdropColor(unpack(self.hoverBgColor))
     end)
     
     button:SetScript("OnLeave", function(self)
-        self.hoverTexture:Hide()
-        self.normalTexture:Show()
+        self:SetBackdropColor(unpack(self.normalBgColor))
     end)
     
     button:SetScript("OnMouseDown", function(self)
-        self.pressedTexture:Show()
-        self.hoverTexture:Hide()
+        self:SetBackdropColor(unpack(self.pressedBgColor))
     end)
     
     button:SetScript("OnMouseUp", function(self)
-        self.pressedTexture:Hide()
         if self:IsMouseOver() then
-            self.hoverTexture:Show()
+            self:SetBackdropColor(unpack(self.hoverBgColor))
         else
-            self.normalTexture:Show()
+            self:SetBackdropColor(unpack(self.normalBgColor))
         end
     end)
     
@@ -164,14 +151,20 @@ function FrameFactory:CreateTab(parent, width, height, text)
     end
     
     -- Active texture
-    tab.activeTexture = tab:CreateTexture(nil, "BACKGROUND")
-    tab.activeTexture:SetAllPoints()
-    if not Atlas:SetTexture(tab.activeTexture, self.activeTheme, "tab-active") then
-        tab.activeTexture:SetColorTexture(ColorPalette:GetColor("tab-active"))
-    else
-        tab.activeTexture:SetVertexColor(ColorPalette:GetColor("tab-active"))
-    end
-    tab.activeTexture:Hide()
+    tab.activeTexture = tab:CreateTexture(nil, "B, "BackdropTemplate")
+    tab:SetSize(width or 120, height or 32)
+    
+    -- Use backdrop for visibility
+    tab:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    tab:SetBackdropColor(ColorPalette:GetColor("tab-inactive"))
+    tab:SetBackdropBorderColor(ColorPalette:GetColor("panel-border"))
     
     -- Text
     tab.text = FontKit:CreateFontString(tab, "tab", "normal")
@@ -180,60 +173,46 @@ function FrameFactory:CreateTab(parent, width, height, text)
     tab.text:SetTextColor(ColorPalette:GetColor("text-secondary"))
     
     tab.isActive = false
+    tab.inactiveColor = {ColorPalette:GetColor("tab-inactive")}
+    tab.activeColor = {ColorPalette:GetColor("tab-active")}
     
     function tab:SetActive(active)
         self.isActive = active
         if active then
-            self.activeTexture:Show()
-            self.inactiveTexture:Hide()
+            self:SetBackdropColor(unpack(self.activeColor))
             self.text:SetTextColor(ColorPalette:GetColor("text-primary"))
         else
-            self.activeTexture:Hide()
-            self.inactiveTexture:Show()
-            self.text:SetTextColor(ColorPalette:GetColor("text-secondary"))
-        end
-    end
-    
-    return tab
-end
-
--- ============================================================================
--- SCROLLBAR FACTORY
--- ============================================================================
-
-function FrameFactory:CreateScrollBar(parent, height)
-    local scrollbar = CreateFrame("Slider", nil, parent)
+            self:SetBackdropColor(unpack(self.inactiveColor)der", nil, parent)
     scrollbar:SetOrientation("VERTICAL")
     scrollbar:SetSize(16, height or 400)
     scrollbar:SetMinMaxValues(0, 100)
     scrollbar:SetValue(0)
     scrollbar:SetValueStep(1)
     
-    -- Track
-    scrollbar.track = scrollbar:CreateTexture(nil, "BACKGROUND")
-    scrollbar.track:SetAllPoints()
-    if not Atlas:SetTexture(scrollbar.track, self.activeTheme, "scrollbar-track") then
-        scrollbar.track:SetColorTexture(ColorPalette:GetColor("scrollbar-track"))
-    else
-        scrollbar.track:SetVertexColor(ColorPalette:GetColor("scrollbar-track"))
-    end
+    -- Track, "BackdropTemplate")
+    scrollbar:SetOrientation("VERTICAL")
+    scrollbar:SetSize(16, height or 400)
+    scrollbar:SetMinMaxValues(0, 100)
+    scrollbar:SetValue(0)
+    scrollbar:SetValueStep(1)
+    
+    -- Track backdrop
+    scrollbar:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    scrollbar:SetBackdropColor(ColorPalette:GetColor("scrollbar-track"))
+    scrollbar:SetBackdropBorderColor(ColorPalette:GetColor("panel-border"))
     
     -- Thumb
     scrollbar.thumb = scrollbar:CreateTexture(nil, "OVERLAY")
-    scrollbar.thumb:SetSize(16, 32)
-    scrollbar:SetThumbTexture(scrollbar.thumb)
-    if not Atlas:SetTexture(scrollbar.thumb, self.activeTheme, "scrollbar-thumb") then
-        scrollbar.thumb:SetColorTexture(ColorPalette:GetColor("scrollbar-thumb"))
-    else
-        scrollbar.thumb:SetVertexColor(ColorPalette:GetColor("scrollbar-thumb"))
-    end
-    
-    return scrollbar
-end
-
--- ============================================================================
--- TOOLTIP FACTORY
--- ============================================================================
+    scrollbar.thumb:SetSize(14, 32)
+    scrollbar.thumb:SetColorTexture(ColorPalette:GetColor("scrollbar-thumb"))
+    scrollbar:SetThumbTexture(scrollbar.thumb)========================================================================
 
 function FrameFactory:CreateTooltip(name)
     local tooltip = CreateFrame("GameTooltip", name or "MidnightUITooltip", UIParent, "GameTooltipTemplate")
