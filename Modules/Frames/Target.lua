@@ -28,8 +28,12 @@ function UnitFrames:CreateTargetFrame()
             UnregisterStateDriver(customTargetFrame, "visibility")
             RegisterStateDriver(customTargetFrame, "visibility", "[@target,exists] show; hide")
         end
-        -- If target exists right now, force update
+        -- If target exists right now, force show and update
         if UnitExists("target") then
+            customTargetFrame:Show()
+            if customTargetFrame.healthBar then customTargetFrame.healthBar:Show() end
+            if customTargetFrame.powerBar then customTargetFrame.powerBar:Show() end
+            if customTargetFrame.infoBar then customTargetFrame.infoBar:Show() end
             self:UpdateUnitFrame("TargetFrame", "target")
         end
     end
