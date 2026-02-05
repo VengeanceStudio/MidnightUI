@@ -138,20 +138,7 @@ end
 -- ============================================================================
 
 function FrameFactory:CreateTab(parent, width, height, text)
-    local tab = CreateFrame("Button", nil, parent)
-    tab:SetSize(width or 120, height or 32)
-    
-    -- Inactive texture
-    tab.inactiveTexture = tab:CreateTexture(nil, "BACKGROUND")
-    tab.inactiveTexture:SetAllPoints()
-    if not Atlas:SetTexture(tab.inactiveTexture, self.activeTheme, "tab-inactive") then
-        tab.inactiveTexture:SetColorTexture(ColorPalette:GetColor("tab-inactive"))
-    else
-        tab.inactiveTexture:SetVertexColor(ColorPalette:GetColor("tab-inactive"))
-    end
-    
-    -- Active texture
-    tab.activeTexture = tab:CreateTexture(nil, "B, "BackdropTemplate")
+    local tab = CreateFrame("Button", nil, parent, "BackdropTemplate")
     tab:SetSize(width or 120, height or 32)
     
     -- Use backdrop for visibility
@@ -182,14 +169,20 @@ function FrameFactory:CreateTab(parent, width, height, text)
             self:SetBackdropColor(unpack(self.activeColor))
             self.text:SetTextColor(ColorPalette:GetColor("text-primary"))
         else
-            self:SetBackdropColor(unpack(self.inactiveColor)der", nil, parent)
-    scrollbar:SetOrientation("VERTICAL")
-    scrollbar:SetSize(16, height or 400)
-    scrollbar:SetMinMaxValues(0, 100)
-    scrollbar:SetValue(0)
-    scrollbar:SetValueStep(1)
+            self:SetBackdropColor(unpack(self.inactiveColor))
+            self.text:SetTextColor(ColorPalette:GetColor("text-secondary"))
+        end
+    end
     
-    -- Track, "BackdropTemplate")
+    return tab
+end
+
+-- ============================================================================
+-- SCROLLBAR FACTORY
+-- ============================================================================
+
+function FrameFactory:CreateScrollBar(parent, height)
+    local scrollbar = CreateFrame("Slider", nil, parent, "BackdropTemplate")
     scrollbar:SetOrientation("VERTICAL")
     scrollbar:SetSize(16, height or 400)
     scrollbar:SetMinMaxValues(0, 100)
