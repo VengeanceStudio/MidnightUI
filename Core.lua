@@ -225,17 +225,21 @@ end
 
 function MidnightUI:SkinFrame(frame)
     if not frame then return end
-    if not frame.muiBackdrop then
-        frame.muiBackdrop = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-        frame.muiBackdrop:SetAllPoints()
-        local level = frame:GetFrameLevel()
-        frame.muiBackdrop:SetFrameLevel(level > 0 and level - 1 or 0)
+    
+    -- Force recreation of backdrop to apply new settings
+    if frame.muiBackdrop then
+        frame.muiBackdrop:Hide()
+        frame.muiBackdrop:SetParent(nil)
+        frame.muiBackdrop = nil
     end
     
-    -- Clear any existing backdrop first to ensure clean update
-    frame.muiBackdrop:SetBackdrop(nil)
+    -- Create new backdrop with correct settings
+    frame.muiBackdrop = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    frame.muiBackdrop:SetAllPoints()
+    local level = frame:GetFrameLevel()
+    frame.muiBackdrop:SetFrameLevel(level > 0 and level - 1 or 0)
     
-    -- Always update backdrop parameters to ensure correct texture/edge settings
+    -- Set backdrop parameters
     frame.muiBackdrop:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -254,6 +258,8 @@ function MidnightUI:SkinFrame(frame)
         frame.muiBackdrop:SetBackdropColor(unpack(cfg.bgColor))
         frame.muiBackdrop:SetBackdropBorderColor(unpack(cfg.borderColor))
     end
+    
+    frame.muiBackdrop:Show()
 end
 
 -- ============================================================================
