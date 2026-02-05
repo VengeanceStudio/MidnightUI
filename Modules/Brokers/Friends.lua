@@ -52,6 +52,9 @@ function BrokerBar:CreateFriendsFrame()
 
     -- Add OnShow script to update fonts/colors dynamically
     friendsFrame:SetScript("OnShow", function()
+        -- Refresh backdrop with current theme
+        MidnightUI:SkinFrame(friendsFrame)
+        
         local db = BrokerBar.db.profile
         local FontKit = _G.MidnightUI_FontKit
         local titleFont, titleSize, bodyFont, bodySize, fontFlags

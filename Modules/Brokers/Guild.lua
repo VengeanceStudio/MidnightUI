@@ -53,6 +53,9 @@ function BrokerBar:CreateGuildFrame()
 
     -- Add OnShow script to update fonts/colors dynamically
     guildFrame:SetScript("OnShow", function()
+        -- Refresh backdrop with current theme
+        MidnightUI:SkinFrame(guildFrame)
+        
         local db = BrokerBar.db.profile
         local FontKit = _G.MidnightUI_FontKit
         local titleFont, titleSize, bodyFont, bodySize, motdSize, fontFlags
