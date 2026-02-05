@@ -230,13 +230,15 @@ function MidnightUI:SkinFrame(frame)
         frame.muiBackdrop:SetAllPoints()
         local level = frame:GetFrameLevel()
         frame.muiBackdrop:SetFrameLevel(level > 0 and level - 1 or 0)
-        frame.muiBackdrop:SetBackdrop({
-            bgFile = "Interface\\Buttons\\WHITE8X8",
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            tile = false, tileSize = 0, edgeSize = 2,
-            insets = { left = 2, right = 2, top = 2, bottom = 2 }
-        })
     end
+    
+    -- Always update backdrop parameters to ensure correct texture/edge settings
+    frame.muiBackdrop:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 2,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
     
     -- Use framework colors if available
     local ColorPalette = _G.MidnightUI_ColorPalette
