@@ -106,7 +106,7 @@ function Setup:ShowSetupWizard()
     
     -- Navigation buttons
     if FrameFactory then
-        frame.backButton = FrameFactory:CreateButton(frame, "Back", 100, 25)
+        frame.backButton = FrameFactory:CreateButton(frame, 100, 25, "Back")
     else
         frame.backButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
         frame.backButton:SetSize(100, 25)
@@ -119,7 +119,7 @@ function Setup:ShowSetupWizard()
     end)
     
     if FrameFactory then
-        frame.nextButton = FrameFactory:CreateButton(frame, "Next", 100, 25)
+        frame.nextButton = FrameFactory:CreateButton(frame, 100, 25, "Next")
     else
         frame.nextButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
         frame.nextButton:SetSize(100, 25)
@@ -139,7 +139,7 @@ function Setup:ShowSetupWizard()
     end)
     
     if FrameFactory then
-        frame.skipButton = FrameFactory:CreateButton(frame, "Skip Setup", 100, 25)
+        frame.skipButton = FrameFactory:CreateButton(frame, 100, 25, "Skip Setup")
     else
         frame.skipButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
         frame.skipButton:SetSize(100, 25)
@@ -195,7 +195,7 @@ function Setup:CreateStep1(frame)
     for _, res in ipairs(resolutions) do
         local btn
         if FrameFactory then
-            btn = FrameFactory:CreateButton(step1, res.name, 300, 35)
+            btn = FrameFactory:CreateButton(step1, 300, 35, res.name)
         else
             btn = CreateFrame("Button", nil, step1, "UIPanelButtonTemplate")
             btn:SetSize(300, 35)
