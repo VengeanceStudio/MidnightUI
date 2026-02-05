@@ -5,6 +5,9 @@ local LDB = LibStub("LibDataBroker-1.1")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Masque = LibStub("Masque", true)
 
+-- Framework integration
+local FrameFactory, ColorPalette, FontKit
+
 -- Make BrokerBar globally accessible for broker files
 _G.BrokerBar = BrokerBar
 
@@ -208,6 +211,11 @@ function GetColor()
     -- FIX: Ensure DB is loaded if Helper is called early
     if not BrokerBar.db then return 1, 1, 1 end
     
+    -- Use theme colors if available
+    if ColorPalette then
+        return ColorPalette:GetColor('text-primary')
+    end
+    
     local db = BrokerBar.db.profile
     if db.useClassColor then
         local _, class = UnitClass("player")
@@ -291,16 +299,34 @@ function ApplyTooltipStyle(tip)
     -- Use pcall to safely apply styling without causing taint
     local success = pcall(function()
         local db = BrokerBar.db.profile
-        local fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+        local fontPath, fontSize, fontFlags
+        
+        -- Use framework fonts if available
+        if FontKit then
+            fontPath, fontSize, fontFlags = FontKit:GetFont('body')
+            fontSize = fontSize + 2  -- Slightly larger for tooltip header
+        else
+            fontPath = LSM:Fetch("font", db.font) or "Fonts\\FRIZQT__.ttf"
+            fontSize = db.fontSize + 2
+            fontFlags = "OUTLINE"
+        end
+        
         local name = tip:GetName()
         
         if not name then return end
         
         if _G[name.."TextLeft1"] then
-            _G[name.."TextLeft1"]:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
+            _G[name.."TextLeft1"]:SetFont(fontPath, fontSize, fontFlags or "OUTLINE")
         end
         if _G[name.."TextRight1"] then
-            _G[name.."TextRight1"]:SetFont(fontPath, db.fontSize + 2, "OUTLINE")
+            _G[name.."TextRight1"]:SetFont(fontPath, fontSize, fontFlags or "OUTLINE")
+        end
+        
+        -- Use framework fonts for body if available
+        if FontKit then
+            fontPath, fontSize, fontFlags = FontKit:GetFont('body')
+        else
+            fontSize = db.fontSize
         end
         
         local numLines = tip:NumLines()
@@ -308,10 +334,10 @@ function ApplyTooltipStyle(tip)
             for i = 2, numLines do
                 local l, r = _G[name.."TextLeft"..i], _G[name.."TextRight"..i]
                 if l then 
-                    l:SetFont(fontPath, db.fontSize, "OUTLINE") 
+                    l:SetFont(fontPath, fontSize, fontFlags or "OUTLINE") 
                 end
                 if r then 
-                    r:SetFont(fontPath, db.fontSize, "OUTLINE") 
+                    r:SetFont(fontPath, fontSize, fontFlags or "OUTLINE") 
                 end
             end
         end
@@ -658,7 +684,14 @@ function BrokerBar:UpdateBarLayout(barID)
         end
     end
     
-    local fontPath = LSM:Fetch("font", self.db.profile.font) or "Fonts\\FRIZQT__.ttf"
+    local fontPath, fontSize, fontFlags
+    if FontKit then
+        fontPath, fontSize, fontFlags = FontKit:GetFont('body')
+    else
+        fontPath = LSM:Fetch("font", self.db.profile.font) or "Fonts\\FRIZQT__.ttf"
+        fontSize = self.db.profile.fontSize
+        fontFlags = "OUTLINE"
+    end
     local r, g, b = GetColor()
     
     for align, list in pairs(layoutCache) do
@@ -690,7 +723,7 @@ function BrokerBar:UpdateBarLayout(barID)
                 
                 local displayString = (labelPart ~= "" and labelPart .. ": " or "") .. (bCfg.showText and textValue or "")
                 
-                w.text:SetFont(fontPath, self.db.profile.fontSize, "OUTLINE")
+                w.text:SetFont(fontPath, fontSize, fontFlags or "OUTLINE")
                 w.text:SetText(displayString)
                 
                 local iconSize = (db.height or 24) * 0.85
@@ -739,7 +772,7 @@ function BrokerBar:UpdateBarLayout(barID)
             w.text:SetText(displayString)
 
             -- FORCE GLOBAL FONT FOR ALL WIDGETS
-            w.text:SetFont(fontPath, self.db.profile.fontSize, "OUTLINE")
+            w.text:SetFont(fontPath, fontSize, fontFlags or "OUTLINE")
 
             local iconSize = (db.height or 24) * 0.85
             if bCfg.showIcon and obj.icon then 
@@ -857,8 +890,15 @@ function BrokerBar:ApplyBarSettings(barID)
     f.bg:SetTexture(LSM:Fetch("statusbar", db.texture or "Flat"))
     f.bg:SetVertexColor(db.color.r, db.color.g, db.color.b, db.alpha or 0.5)
     f:SetBackdrop(skin.backdrop)
-    f:SetBackdropColor(0,0,0,0)
-    f:SetBackdropBorderColor(1, 1, 1, skin.borderAlpha)
+    
+    -- Use theme colors if available
+    if ColorPalette then
+        f:SetBackdropColor(ColorPalette:GetColor("bg-primary"))
+        f:SetBackdropBorderColor(ColorPalette:GetColor("panel-border"))
+    else
+        f:SetBackdropColor(0, 0, 0, 0)
+        f:SetBackdropBorderColor(1, 1, 1, skin.borderAlpha)
+    end
     
     if db.enabled then 
         f:Show()
@@ -928,6 +968,11 @@ end
 
 function BrokerBar:OnDBReady()
     if not MidnightUI.db.profile.modules.bar then return end
+    
+    -- Get framework systems
+    FrameFactory = MidnightUI.FrameFactory
+    ColorPalette = MidnightUI.ColorPalette
+    FontKit = MidnightUI.FontKit
     
     -- Keep namespace as "Bar" for backwards compatibility with saved settings
     self.db = MidnightUI.db:RegisterNamespace("Bar", defaults)

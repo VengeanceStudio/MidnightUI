@@ -1,6 +1,9 @@
 local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local Setup = MidnightUI:NewModule("Setup", "AceEvent-3.0")
 
+-- Framework systems
+local FrameFactory, ColorPalette, FontKit
+
 local defaults = {
     profile = {
         hasCompletedSetup = false,
@@ -10,8 +13,8 @@ local defaults = {
 -- Edit Mode preset strings for each resolution
 local editModePresets = {
     ["4K"] = "YOUR_4K_EDIT_MODE_STRING_HERE",
-    ["1440p"] = "2 50 0 0 0 7 7 UIParent -0.0 2.0 -1 ##$$%/&%'%)$+#,$ 0 1 0 8 2 MainActionBar 0.0 4.0 -1 ##$$%/&%'%(#,$ 0 2 0 8 2 MultiBarBottomLeft 0.0 4.0 -1 ##$$%/&%'%(#,$ 0 3 0 7 7 UIParent 35.4 114.0 -1 ##$$%/&%'%(#,# 0 4 0 8 6 MainActionBar -4.0 0.0 -1 ##$%%/&%'%(#,$ 0 5 0 6 8 MainActionBar 4.0 0.0 -1 ##$%%/&%'%(#,$ 0 6 0 7 7 UIParent 500.1 0.7 -1 ##$&%/&%'%(#,$ 0 7 0 7 7 UIParent 37.0 150.3 -1 ##$$%/&%'%(#,# 0 10 0 4 4 UIParent 569.0 -440.0 -1 ##$$&('% 0 11 0 7 7 UIParent 447.2 201.7 -1 ##$$&('%,# 0 12 1 7 7 UIParent 0.0 45.0 -1 ##$$&('% 1 -1 1 4 4 UIParent 0.0 0.0 -1 ##$#%# 2 -1 0 2 2 UIParent 0.0 0.0 -1 ##$#%* 3 0 0 3 3 UIParent 454.5 -224.7 -1 $#3* 3 1 0 4 4 UIParent 812.3 -321.4 -1 %#3* 3 2 0 7 7 UIParent 753.5 328.0 -1 %#&#3# 3 3 0 0 0 UIParent 789.7 -969.0 -1 '$(#)$-I.7/#1#3#5#6+7-7$ 3 4 1 0 2 CompactRaidFrameManager 0.0 -5.0 -1 ,#-#.#/#0#1#2(5#6-6$7-7$ 3 5 0 2 2 UIParent -1730.7 -893.0 -1 &#*$3# 3 6 1 5 5 UIParent 0.0 0.0 -1 -#.#/#4$5#6-6$7-7$ 3 7 1 4 4 UIParent 0.0 0.0 -1 3# 4 -1 0 0 0 UIParent 581.7 -1084.0 -1 # 5 -1 0 4 4 UIParent -380.0 -420.0 -1 # 6 0 0 2 2 UIParent -233.9 -25.5 -1 ##$#%#&.(()( 6 1 0 2 8 BuffFrame -15.0 -4.0 -1 ##$#%#'+(()(-$ 6 2 1 1 1 UIParent 0.0 -25.0 -1 ##$#%$&.(()(+#,-,$ 7 -1 0 4 4 UIParent 0.0 -280.8 -1 # 8 -1 0 6 6 UIParent 32.0 32.0 -1 #&$g%%&# 9 -1 1 7 7 UIParent 0.0 45.0 -1 # 10 -1 1 0 0 UIParent 16.0 -116.0 -1 # 11 -1 0 8 2 BagsBar -0.5 3.5 -1 # 12 -1 0 5 5 UIParent -2.0 8.3 -1 #7$#%% 13 -1 0 8 8 UIParent -5.2 3.4 -1 ##$#%%&# 14 -1 0 8 2 MicroMenuContainer 0.5 3.5 -1 ##$#%# 15 0 0 1 1 UIParent 8.4 -46.3 -1 # 15 1 0 1 1 UIParent 8.3 -67.7 -1 # 16 -1 1 5 5 UIParent 0.0 0.0 -1 #( 17 -1 1 1 1 UIParent 0.0 -100.0 -1 ## 18 -1 1 5 5 UIParent 0.0 0.0 -1 #- 19 -1 1 7 7 UIParent 0.0 0.0 -1 ## 20 0 0 4 4 UIParent 2.0 -244.1 -1 ##$7%$&&'+(-($)#+$,$-$ 20 1 0 7 7 UIParent 1.8 285.8 -1 ##$7%$&&'%(-($)#+$,$-$ 20 2 0 4 4 UIParent -1.7 -181.7 -1 ##$$%#&''#(-($)#+$,$-$ 20 3 0 7 7 UIParent 3.3 218.5 -1 #+$,$-%#&('#(-($)#*%+$,$-$.U 21 -1 1 7 7 UIParent -410.0 380.0 -1 ##$# 22 0 0 7 7 UIParent -960.0 1.0 -1 #,$+%#&('#(#)#*$+#,$ 22 1 0 7 7 UIParent 18.0 962.0 -1 &('()#*#+$ 22 2 1 1 1 UIParent 0.0 -270.0 -1 &('()#*#+$ 22 3 1 1 1 UIParent 0.0 -315.0 -1 &('()#*#+$ 23 -1 0 8 8 UIParent -5.3 76.2 -1 ##$#%#&7'U(#)U+$,.-&.(/A",
-    ["1080p"] = "2 50 0 0 0 7 7 UIParent -0.0 2.0 -1 ##$$%/&$'%)$+#,$ 0 1 0 8 2 MainActionBar 0.0 4.0 -1 ##$$%/&%'%(#,$ 0 2 0 8 2 MultiBarBottomLeft 0.0 4.0 -1 ##$$%/&%'%(#,$ 0 3 0 7 7 UIParent 1.6 110.7 -1 ##$$%/&%'%(#,# 0 4 0 8 6 MainActionBar -4.0 0.0 -1 ##$%%/&$'%(#,$ 0 5 0 6 8 MainActionBar 4.0 0.0 -1 ##$%%/&$'%(#,$ 0 6 0 7 7 UIParent 431.7 1.5 -1 ##$&%/&$'%(#,$ 0 7 0 7 7 UIParent 1.1 147.9 -1 ##$$%/&%'%(#,# 0 10 0 4 4 UIParent 569.0 -440.0 -1 ##$$&('% 0 11 0 1 1 UIParent 459.0 -982.0 -1 ##$$&''%,# 0 12 1 7 7 UIParent 0.0 45.0 -1 ##$$&('% 1 -1 1 4 4 UIParent 0.0 0.0 -1 ##$#%# 2 -1 0 2 2 UIParent 0.0 0.0 -1 ##$#%* 3 0 0 3 3 UIParent 454.5 -224.7 -1 $#3* 3 1 0 4 4 UIParent 812.3 -321.4 -1 %#3* 3 2 0 7 7 UIParent 753.5 328.0 -1 %#&#3# 3 3 0 0 0 UIParent 789.7 -969.0 -1 '$(#)$-I.7/#1#3#5#6+7-7$ 3 4 1 0 2 CompactRaidFrameManager 0.0 -5.0 -1 ,#-#.#/#0#1#2(5#6-6$7-7$ 3 5 0 2 2 UIParent -1730.7 -893.0 -1 &#*$3# 3 6 1 5 5 UIParent 0.0 0.0 -1 -#.#/#4$5#6-6$7-7$ 3 7 1 4 4 UIParent 0.0 0.0 -1 3# 4 -1 0 0 0 UIParent 581.7 -1084.0 -1 # 5 -1 0 4 4 UIParent -380.0 -420.0 -1 # 6 0 0 2 2 UIParent -233.9 -25.5 -1 ##$#%#&.(')( 6 1 0 2 8 BuffFrame -15.0 -4.0 -1 ##$#%#'+(')(-$ 6 2 1 1 1 UIParent 0.0 -25.0 -1 ##$#%$&.(()(+#,-,$ 7 -1 0 4 4 UIParent 0.0 -280.8 -1 # 8 -1 0 6 6 UIParent 32.0 32.0 -1 #&$#%$&U 9 -1 1 7 7 UIParent 0.0 45.0 -1 # 10 -1 1 0 0 UIParent 16.0 -116.0 -1 # 11 -1 0 8 2 BagsBar -0.5 3.5 -1 # 12 -1 0 5 5 UIParent -2.0 -52.7 -1 #7$#%% 13 -1 0 8 8 UIParent -5.2 3.4 -1 ##$#%$&# 14 -1 0 8 2 MicroMenuContainer 0.5 3.5 -1 ##$#%# 15 0 0 1 1 UIParent 8.4 -46.3 -1 # 15 1 0 1 1 UIParent 8.3 -67.7 -1 # 16 -1 1 5 5 UIParent 0.0 0.0 -1 #( 17 -1 1 1 1 UIParent 0.0 -100.0 -1 ## 18 -1 1 5 5 UIParent 0.0 0.0 -1 #- 19 -1 1 7 7 UIParent 0.0 0.0 -1 ## 20 0 0 4 4 UIParent 2.0 -244.1 -1 ##$7%$&%'+(-($)#+$,$-$ 20 1 0 7 7 UIParent 0.8 250.8 -1 ##$7%$&%'%(-($)#+$,$-$ 20 2 0 4 4 UIParent -1.7 -181.7 -1 ##$$%#&&'#(-($)#+$,$-$ 20 3 0 7 7 UIParent -0.7 199.5 -1 #+$,$-%#&&'#(-($)#*%+$,$-$.U 21 -1 1 7 7 UIParent -410.0 380.0 -1 ##$# 22 0 0 7 7 UIParent -960.0 1.0 -1 #,$+%#&('#(#)#*$+#,$ 22 1 0 7 7 UIParent 18.0 962.0 -1 &('()#*#+$ 22 2 1 1 1 UIParent 0.0 -270.0 -1 &('()#*#+$ 22 3 1 1 1 UIParent 0.0 -315.0 -1 &('()#*#+$ 23 -1 0 8 8 UIParent -5.3 76.2 -1 ##$#%#&7'U(#)U+$,.-&.(/A",
+    ["1440p"] = "2 50 0 0 0 7 7 UIParent -0.0 2.0 -1 ##$$%/&%'%)$+#,$ 0 1 0 8 2 MainActionBar 0.0 4.0 -1 ##$$%/&%'%(#,$ 0 2 0 8 2 MultiBarBottomLeft 0.0 4.0 -1 ##$$%/&%'%(#,$ 0 3 0 7 7 UIParent -1.3 109.0 -1 ##$$%/&%'%(#,# 0 4 0 8 6 MainActionBar -4.0 0.0 -1 ##$%%/&%'%(#,$ 0 5 0 6 8 MainActionBar 4.0 0.0 -1 ##$%%/&%'%(#,$ 0 6 0 7 7 UIParent 500.1 0.7 -1 ##$&%/&%'%(#,$ 0 7 0 7 7 UIParent -1.3 145.3 -1 ##$$%/&%'%(#,# 0 10 0 4 4 UIParent 569.0 -440.0 -1 ##$$&('% 0 11 0 7 7 UIParent 447.2 201.7 -1 ##$$&('%,# 0 12 1 7 7 UIParent 0.0 45.0 -1 ##$$&('% 1 -1 1 4 4 UIParent 0.0 0.0 -1 ##$#%# 2 -1 0 2 2 UIParent 0.0 0.0 -1 ##$#%* 3 0 0 3 3 UIParent 454.5 -224.7 -1 $#3* 3 1 0 4 4 UIParent 812.3 -321.4 -1 %#3* 3 2 0 7 7 UIParent 753.5 328.0 -1 %#&#3# 3 3 0 0 0 UIParent 789.7 -969.0 -1 '$(#)$-I.7/#1#3#5#6+7-7$ 3 4 1 0 2 CompactRaidFrameManager 0.0 -5.0 -1 ,#-#.#/#0#1#2(5#6-6$7-7$ 3 5 0 2 2 UIParent -1894.0 -184.7 -1 &#*$3# 3 6 1 5 5 UIParent 0.0 0.0 -1 -#.#/#4$5#6-6$7-7$ 3 7 1 4 4 UIParent 0.0 0.0 -1 3# 4 -1 0 0 0 UIParent 581.7 -1084.0 -1 # 5 -1 0 4 4 UIParent -380.0 -420.0 -1 # 6 0 0 2 2 UIParent -233.9 -25.5 -1 ##$#%#&.(()( 6 1 0 2 8 BuffFrame -15.0 -4.0 -1 ##$#%#'+(()(-$ 6 2 1 1 1 UIParent 0.0 -25.0 -1 ##$#%$&.(()(+#,-,$ 7 -1 0 4 4 UIParent 0.0 -280.8 -1 # 8 -1 0 6 6 UIParent 32.0 32.0 -1 #&$g%%&# 9 -1 1 7 7 UIParent 0.0 45.0 -1 # 10 -1 1 0 0 UIParent 16.0 -116.0 -1 # 11 -1 0 8 2 BagsBar -0.5 3.5 -1 # 12 -1 0 5 5 UIParent -2.0 8.3 -1 #7$#%% 13 -1 0 8 8 UIParent -5.2 3.4 -1 ##$#%%&# 14 -1 0 8 2 MicroMenuContainer 0.5 3.5 -1 ##$#%# 15 0 0 1 1 UIParent 8.4 -46.3 -1 # 15 1 0 1 1 UIParent 8.3 -67.7 -1 # 16 -1 1 5 5 UIParent 0.0 0.0 -1 #( 17 -1 1 1 1 UIParent 0.0 -100.0 -1 ## 18 -1 1 5 5 UIParent 0.0 0.0 -1 #- 19 -1 1 7 7 UIParent 0.0 0.0 -1 ## 20 0 0 4 4 UIParent 4.9 -238.4 -1 ##$7%$&&'+(-($)#+$,$-$ 20 1 0 7 7 UIParent 0.6 272.1 -1 ##$7%$&''#(-($)#+$,$-$ 20 2 0 4 4 UIParent 0.5 -182.5 -1 ##$$%#&''-(-($)#+$,$-$ 20 3 0 7 7 UIParent 1.6 229.3 -1 #+$,$-%#&('#(-($)#*%+$,$-$.U 21 -1 1 7 7 UIParent -410.0 380.0 -1 ##$# 22 0 0 7 7 UIParent -960.0 1.0 -1 #,$+%#&('#(#)#*$+#,$ 22 1 0 7 7 UIParent 18.0 962.0 -1 &('()#*#+$ 22 2 1 1 1 UIParent 0.0 -270.0 -1 &('()#*#+$ 22 3 1 1 1 UIParent 0.0 -315.0 -1 &('()#*#+$ 23 -1 0 8 8 UIParent -5.3 76.2 -1 ##$#%#&7'U(#)U+$,.-&.(/A",
+    ["1080p"] = "2 50 0 0 0 7 7 UIParent -0.0 2.0 -1 ##$$%/&$'%)$+#,$ 0 1 0 8 2 MainActionBar 0.0 4.0 -1 ##$$%/&$'%(#,$ 0 2 0 8 2 MultiBarBottomLeft 0.0 4.0 -1 ##$$%/&$'%(#,$ 0 3 0 7 7 UIParent 0.8 96.5 -1 ##$$%/&$'%(#,# 0 4 0 8 6 MainActionBar -4.0 0.0 -1 ##$%%/&$'%(#,$ 0 5 0 6 8 MainActionBar 4.0 0.0 -1 ##$%%/&$'%(#,$ 0 6 0 7 7 UIParent 431.7 1.5 -1 ##$&%/&$'%(#,$ 0 7 0 7 7 UIParent 1.1 127.9 -1 ##$$%/&$'%(#,# 0 10 0 4 4 UIParent 569.0 -440.0 -1 ##$$&('% 0 11 0 1 1 UIParent 459.0 -982.0 -1 ##$$&''%,# 0 12 1 7 7 UIParent 0.0 45.0 -1 ##$$&('% 1 -1 1 4 4 UIParent 0.0 0.0 -1 ##$#%# 2 -1 0 2 2 UIParent 0.0 0.0 -1 ##$#%* 3 0 0 3 3 UIParent 454.5 -224.7 -1 $#3* 3 1 0 4 4 UIParent 812.3 -321.4 -1 %#3* 3 2 0 7 7 UIParent 753.5 328.0 -1 %#&#3# 3 3 0 0 0 UIParent 789.7 -969.0 -1 '$(#)$-I.7/#1#3#5#6+7-7$ 3 4 1 0 2 CompactRaidFrameManager 0.0 -5.0 -1 ,#-#.#/#0#1#2(5#6-6$7-7$ 3 5 0 2 2 UIParent -1730.7 -893.0 -1 &#*$3# 3 6 1 5 5 UIParent 0.0 0.0 -1 -#.#/#4$5#6-6$7-7$ 3 7 1 4 4 UIParent 0.0 0.0 -1 3# 4 -1 0 0 0 UIParent 581.7 -1084.0 -1 # 5 -1 0 4 4 UIParent -380.0 -420.0 -1 # 6 0 0 2 2 UIParent -233.9 -25.5 -1 ##$#%#&.(')( 6 1 0 2 8 BuffFrame -15.0 -4.0 -1 ##$#%#'+(')(-$ 6 2 1 1 1 UIParent 0.0 -25.0 -1 ##$#%$&.(()(+#,-,$ 7 -1 0 4 4 UIParent 0.0 -280.8 -1 # 8 -1 0 6 6 UIParent 32.0 32.0 -1 #&$#%$&U 9 -1 1 7 7 UIParent 0.0 45.0 -1 # 10 -1 1 0 0 UIParent 16.0 -116.0 -1 # 11 -1 0 8 2 BagsBar -0.5 3.5 -1 # 12 -1 0 5 5 UIParent -2.0 -52.7 -1 #7$#%% 13 -1 0 8 8 UIParent -5.2 3.4 -1 ##$#%$&# 14 -1 0 8 2 MicroMenuContainer 0.5 3.5 -1 ##$#%# 15 0 0 1 1 UIParent 8.4 -46.3 -1 # 15 1 0 1 1 UIParent 8.3 -67.7 -1 # 16 -1 1 5 5 UIParent 0.0 0.0 -1 #( 17 -1 1 1 1 UIParent 0.0 -100.0 -1 ## 18 -1 1 5 5 UIParent 0.0 0.0 -1 #- 19 -1 1 7 7 UIParent 0.0 0.0 -1 ## 20 0 0 4 4 UIParent 2.0 -244.1 -1 ##$7%$&%'+(-($)#+$,$-$ 20 1 0 7 7 UIParent 0.8 250.8 -1 ##$7%$&%'%(-($)#+$,$-$ 20 2 0 4 4 UIParent -1.7 -181.7 -1 ##$$%#&&'#(-($)#+$,$-$ 20 3 0 7 7 UIParent -0.7 199.5 -1 #+$,$-%#&&'#(-($)#*%+$,$-$.U 21 -1 1 7 7 UIParent -410.0 380.0 -1 ##$# 22 0 0 7 7 UIParent -960.0 1.0 -1 #,$+%#&('#(#)#*$+#,$ 22 1 0 7 7 UIParent 18.0 962.0 -1 &('()#*#+$ 22 2 1 1 1 UIParent 0.0 -270.0 -1 &('()#*#+$ 22 3 1 1 1 UIParent 0.0 -315.0 -1 &('()#*#+$ 23 -1 0 8 8 UIParent -5.3 76.2 -1 ##$#%#&7'U(#)U+$,.-&.(/A",
 }
 
 -- MidnightUI preset strings for each resolution
@@ -32,6 +35,11 @@ function Setup:OnDBReady()
     end
     
     self.db = MidnightUI.db:RegisterNamespace("Setup", defaults)
+    
+    -- Get framework systems
+    FrameFactory = _G.MidnightUI_FrameFactory
+    ColorPalette = _G.MidnightUI_ColorPalette
+    FontKit = _G.MidnightUI_FontKit
     
     -- Show wizard on first login
     if not self.db.profile.hasCompletedSetup then
@@ -58,9 +66,28 @@ function Setup:ShowSetupWizard()
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     
+    -- Apply themed backdrop
+    if ColorPalette then
+        frame:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 2,
+            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        })
+        frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+        frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    end
+    
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
     frame.title:SetPoint("TOP", 0, -5)
     frame.title:SetText("MidnightUI First Time Setup")
+    
+    -- Apply themed font
+    if FontKit then
+        FontKit:SetFont(frame.title, 'header', 'large')
+    end
     
     -- Current step tracker
     frame.currentStep = 1
@@ -78,19 +105,27 @@ function Setup:ShowSetupWizard()
     self:CreateStep2(frame)
     
     -- Navigation buttons
-    frame.backButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    frame.backButton:SetSize(100, 25)
+    if FrameFactory then
+        frame.backButton = FrameFactory:CreateButton(frame, "Back", 100, 25)
+    else
+        frame.backButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+        frame.backButton:SetSize(100, 25)
+        frame.backButton:SetText("Back")
+    end
     frame.backButton:SetPoint("BOTTOMLEFT", 15, 15)
-    frame.backButton:SetText("Back")
     frame.backButton:Hide()
     frame.backButton:SetScript("OnClick", function()
         self:GoToStep(frame, frame.currentStep - 1)
     end)
     
-    frame.nextButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    frame.nextButton:SetSize(100, 25)
+    if FrameFactory then
+        frame.nextButton = FrameFactory:CreateButton(frame, "Next", 100, 25)
+    else
+        frame.nextButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+        frame.nextButton:SetSize(100, 25)
+        frame.nextButton:SetText("Next")
+    end
     frame.nextButton:SetPoint("BOTTOMRIGHT", -15, 15)
-    frame.nextButton:SetText("Next")
     frame.nextButton:SetScript("OnClick", function()
         if frame.currentStep == 1 then
             if not frame.selectedResolution then
@@ -103,10 +138,14 @@ function Setup:ShowSetupWizard()
         end
     end)
     
-    frame.skipButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    frame.skipButton:SetSize(100, 25)
+    if FrameFactory then
+        frame.skipButton = FrameFactory:CreateButton(frame, "Skip Setup", 100, 25)
+    else
+        frame.skipButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+        frame.skipButton:SetSize(100, 25)
+        frame.skipButton:SetText("Skip Setup")
+    end
     frame.skipButton:SetPoint("BOTTOM", 0, 15)
-    frame.skipButton:SetText("Skip Setup")
     frame.skipButton:SetScript("OnClick", function()
         self.db.profile.hasCompletedSetup = true
         frame:Hide()
@@ -127,13 +166,23 @@ function Setup:CreateStep1(frame)
     local welcomeText = step1:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     welcomeText:SetPoint("TOP", 0, -20)
     welcomeText:SetText("Welcome to MidnightUI!")
-    welcomeText:SetTextColor(0, 1, 0)
+    if ColorPalette then
+        welcomeText:SetTextColor(ColorPalette:GetColor('accent-primary'))
+    else
+        welcomeText:SetTextColor(0, 1, 0)
+    end
+    if FontKit then
+        FontKit:SetFont(welcomeText, 'header', 'large')
+    end
     
     local infoText = step1:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     infoText:SetPoint("TOP", welcomeText, "BOTTOM", 0, -15)
     infoText:SetWidth(550)
     infoText:SetJustifyH("LEFT")
     infoText:SetText("This wizard will help you set up MidnightUI with optimized settings for your screen resolution.\n\nPlease select your monitor's resolution:")
+    if FontKit then
+        FontKit:SetFont(infoText, 'body', 'normal')
+    end
     
     -- Resolution selection buttons
     local resolutions = {
@@ -144,17 +193,26 @@ function Setup:CreateStep1(frame)
     
     step1.resButtons = {}
     for _, res in ipairs(resolutions) do
-        local btn = CreateFrame("Button", nil, step1, "UIPanelButtonTemplate")
-        btn:SetSize(300, 35)
+        local btn
+        if FrameFactory then
+            btn = FrameFactory:CreateButton(step1, res.name, 300, 35)
+        else
+            btn = CreateFrame("Button", nil, step1, "UIPanelButtonTemplate")
+            btn:SetSize(300, 35)
+            btn:SetText(res.name)
+        end
         btn:SetPoint("TOP", 0, res.y)
-        btn:SetText(res.name)
         btn.resKey = res.key
         
         -- Create selection highlight
         btn.highlight = btn:CreateTexture(nil, "BACKGROUND")
         btn.highlight:SetPoint("TOPLEFT", btn, "TOPLEFT", -4, 4)
         btn.highlight:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 4, -4)
-        btn.highlight:SetColorTexture(0, 1, 0, 0.6)
+        if ColorPalette then
+            btn.highlight:SetColorTexture(ColorPalette:GetColor('accent-primary'))
+        else
+            btn.highlight:SetColorTexture(0, 1, 0, 0.6)
+        end
         btn.highlight:Hide()
         
         btn:SetScript("OnClick", function(self)
@@ -182,18 +240,31 @@ function Setup:CreateStep2(frame)
     local titleText = step2:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     titleText:SetPoint("TOP", 0, -20)
     titleText:SetText("Ready to Configure")
-    titleText:SetTextColor(0, 1, 0)
+    if ColorPalette then
+        titleText:SetTextColor(ColorPalette:GetColor('accent-primary'))
+    else
+        titleText:SetTextColor(0, 1, 0)
+    end
+    if FontKit then
+        FontKit:SetFont(titleText, 'header', 'large')
+    end
     
     step2.infoText = step2:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     step2.infoText:SetPoint("TOP", titleText, "BOTTOM", 0, -20)
     step2.infoText:SetWidth(550)
     step2.infoText:SetJustifyH("LEFT")
+    if FontKit then
+        FontKit:SetFont(step2.infoText, 'body', 'normal')
+    end
     
     local detailsText = step2:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     detailsText:SetPoint("TOP", step2.infoText, "BOTTOM", 0, -30)
     detailsText:SetWidth(550)
     detailsText:SetJustifyH("LEFT")
     detailsText:SetText("The following will be configured:\n\n• WoW Edit Mode layout optimized for your resolution\n• MidnightUI bar positions and scaling\n• Unit frame positions\n\nClick 'Finish' to apply the configuration.\n\n|cffff0000Note: This will reload your UI.|r")
+    if FontKit then
+        FontKit:SetFont(detailsText, 'body', 'normal')
+    end
     
     frame.step2 = step2
 end
