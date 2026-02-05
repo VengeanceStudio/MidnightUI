@@ -149,14 +149,21 @@ function Setup:CreateStep1(frame)
         btn:SetPoint("TOP", 0, res.y)
         btn:SetText(res.name)
         btn.resKey = res.key
+        
+        -- Create selection highlight
+        btn.highlight = btn:CreateTexture(nil, "BACKGROUND")
+        btn.highlight:SetAllPoints()
+        btn.highlight:SetColorTexture(0, 1, 0, 0.3)
+        btn.highlight:Hide()
+        
         btn:SetScript("OnClick", function(self)
             frame.selectedResolution = self.resKey
             -- Update button states
             for _, b in ipairs(step1.resButtons) do
                 if b == self then
-                    b:SetText("|cff00ff00✓|r " .. b:GetText():gsub("|cff00ff00✓|r ", ""))
+                    b.highlight:Show()
                 else
-                    b:SetText(b:GetText():gsub("|cff00ff00✓|r ", ""))
+                    b.highlight:Hide()
                 end
             end
         end)
@@ -220,11 +227,19 @@ function Setup:CompleteSetup(frame)
     local res = frame.selectedResolution
     if not res then return end
     
+    -- Check if 4K is selected (not yet supported)
+    if res == "4K" then
+        print("|cffff0000MidnightUI:|r 4K presets are not available yet. Please choose 1440p or 1080p.")
+        return
+    end
+    
     print("MidnightUI: Applying " .. res .. " configuration...")
     
     -- Import Edit Mode preset
     if editModePresets[res] and editModePresets[res] ~= "YOUR_" .. res:upper():gsub("P", "") .. "_EDIT_MODE_STRING_HERE" then
-        local success = pcall(C_EditMode.SetLayouts, C_EditMode.ConvertStringToLayoutInfo(editModePresets[res]))
+        local success = pcall(function()
+            C_EditMode.SetLayouts(C_EditMode.ConvertStringToLayoutInfo(editModePresets[res]))
+        end)
         if success then
             print("MidnightUI: Edit Mode layout imported successfully")
         else
@@ -236,8 +251,15 @@ function Setup:CompleteSetup(frame)
     
     -- Import MidnightUI preset
     if midnightUIPresets[res] and midnightUIPresets[res] ~= "YOUR_" .. res:upper():gsub("P", "") .. "_MIDNIGHTUI_STRING_HERE" then
-        -- TODO: Implement MidnightUI profile import
-        print("MidnightUI: Profile preset imported successfully")
+        -- Use the DoImport function from Core to apply the preset
+        local success = pcall(function()
+            MidnightUI:DoImport(midnightUIPresets[res], nil)
+        end)
+        if success then
+            print("MidnightUI: Profile preset imported successfully")
+        else
+            print("MidnightUI: Failed to import profile preset")
+        end
     else
         print("MidnightUI: No MidnightUI preset configured for " .. res)
     end
