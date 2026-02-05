@@ -24,8 +24,10 @@ function BrokerBar:CreateVolumeFrame()
 
     -- Add OnShow script to update Title Font/Color dynamically based on current settings
     volFrame:SetScript("OnShow", function()
+        print("[Volume] OnShow handler executing...")
         -- Refresh backdrop with current theme
         MidnightUI:SkinFrame(volFrame)
+        print("[Volume] SkinFrame call completed")
         
         local db = BrokerBar.db.profile
         local fontPath, fontSize, fontFlags
