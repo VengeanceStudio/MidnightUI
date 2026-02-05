@@ -97,7 +97,7 @@ function Setup:ShowSetupWizard()
         -- Make the × larger for visibility
         if frame.closeButton.text then
             local font, _, flags = frame.closeButton.text:GetFont()
-            frame.closeButton.text:SetFont(font, 24, flags)
+            frame.closeButton.text:SetFont(font, 36, flags)
         end
     else
         frame.closeButton = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -114,7 +114,7 @@ function Setup:ShowSetupWizard()
         frame.closeButton:SetBackdropBorderColor(0.5, 0, 0, 1)
         
         local text = frame.closeButton:CreateFontString(nil, "OVERLAY")
-        text:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
+        text:SetFont("Fonts\\FRIZQT__.TTF", 36, "OUTLINE")
         text:SetText("×")
         text:SetPoint("CENTER", 0, 0)
         text:SetTextColor(1, 1, 1)
