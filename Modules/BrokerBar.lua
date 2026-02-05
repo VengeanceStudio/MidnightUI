@@ -582,17 +582,35 @@ function BrokerBar:GetSafeConfig(name)
             ["MidnightClock"] = true,
         }
         
+        -- Default alignments for each broker
+        local defaultAlignments = {
+            ["MidnightVolume"] = "RIGHT",
+            ["MidnightLocation"] = "RIGHT",
+            ["MidnightDiff"] = "RIGHT",
+            ["MidnightSystem"] = "LEFT",
+            ["MidnightGold"] = "LEFT",
+            ["MidnightClock"] = "CENTER",
+        }
+        
         -- Check if this broker should be enabled by default
         local defaultBar = defaultEnabledBrokers[name] and "MainBar" or "None"
+        local defaultAlign = defaultAlignments[name] or "CENTER"
+        
+        -- Special case: Location should show coordinates by default
+        local defaultShowCoords = (name == "MidnightLocation")
+        
+        -- Special case: Volume should default to 5% step size
+        local defaultVolumeStep = (name == "MidnightVolume") and 0.05 or nil
         
         self.db.profile.brokers[name] = { 
             bar = defaultBar, 
-            align = "CENTER", 
+            align = defaultAlign, 
             order = 10, 
             showIcon = true, 
             showText = true, 
             showLabel = false, 
-            showCoords = false 
+            showCoords = defaultShowCoords,
+            volumeStep = defaultVolumeStep
         } 
     end
     return self.db.profile.brokers[name]

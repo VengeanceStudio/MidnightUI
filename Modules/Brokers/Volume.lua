@@ -45,15 +45,18 @@ function BrokerBar:CreateVolumeFrame()
     local function CreateSlider(name, label, cvar, parent, yOffset)
         local s = CreateFrame("Slider", name, parent, "OptionsSliderTemplate")
         s:SetPoint("TOP", parent, "TOP", 0, yOffset); s:SetWidth(180)
-        s:SetMinMaxValues(0, 1); s:SetValueStep(0.05) -- Snap to 5% steps
+        local config = BrokerBar:GetSafeConfig("MidnightVolume")
+        local step = config.volumeStep or 0.05
+        s:SetMinMaxValues(0, 1); s:SetValueStep(step)
         _G[s:GetName().."Text"]:SetText(label)
         s:SetScript("OnShow", function(self) 
             self:SetValue(tonumber(GetCVar(cvar)) or 0) 
         end)
         s:SetScript("OnValueChanged", function(self, value) 
-            -- Snap to nearest multiple of 5% (0.05)
+            -- Snap to nearest multiple of step
             value = math.max(0, math.min(1, value))
-            value = math.floor((value * 20) + 0.5) / 20
+            local stepCount = math.floor(1 / step + 0.5)
+            value = math.floor((value * stepCount) + 0.5) / stepCount
             SetCVar(cvar, value)
             if cvar == "Sound_MasterVolume" then 
                 BrokerBar:UpdateAllModules() 
@@ -116,10 +119,13 @@ volObj = LDB:NewDataObject("MidnightVolume", {
         end
     end,
     OnMouseWheel = function(_, d) 
-        local v = (tonumber(GetCVar("Sound_MasterVolume")) or 0) + (d>0 and 0.05 or -0.05)
-        -- Snap to nearest multiple of 5% (0.05)
+        local config = BrokerBar:GetSafeConfig("MidnightVolume")
+        local step = config.volumeStep or 0.05
+        local v = (tonumber(GetCVar("Sound_MasterVolume")) or 0) + (d>0 and step or -step)
         v = math.max(0, math.min(1, v))
-        v = math.floor((v * 20) + 0.5) / 20 -- 20 steps in 0-1, each is 0.05
+        -- Snap to nearest multiple of step
+        local stepCount = math.floor(1 / step + 0.5)
+        v = math.floor((v * stepCount) + 0.5) / stepCount
         SetCVar("Sound_MasterVolume", v)
         BrokerBar:UpdateAllModules() 
     end
