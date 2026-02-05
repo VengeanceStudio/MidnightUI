@@ -91,8 +91,29 @@ function Setup:ShowSetupWizard()
         frame:SetBackdropColor(0, 0, 0, 1)
     end
     
-    -- Create close button
-    frame.closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    -- Create themed close button
+    if FrameFactory then
+        frame.closeButton = FrameFactory:CreateButton(frame, 24, 24, "×")
+    else
+        frame.closeButton = CreateFrame("Button", nil, frame, "BackdropTemplate")
+        frame.closeButton:SetSize(24, 24)
+        frame.closeButton:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        frame.closeButton:SetBackdropColor(0.3, 0, 0, 0.8)
+        frame.closeButton:SetBackdropBorderColor(0.5, 0, 0, 1)
+        
+        local text = frame.closeButton:CreateFontString(nil, "OVERLAY")
+        text:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+        text:SetText("×")
+        text:SetPoint("CENTER", 0, 1)
+        text:SetTextColor(1, 1, 1)
+    end
     frame.closeButton:SetPoint("TOPRIGHT", -5, -5)
     frame.closeButton:SetScript("OnClick", function()
         frame:Hide()
