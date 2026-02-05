@@ -572,9 +572,18 @@ function BrokerBar:GetSafeConfig(name)
     end
     
     if not self.db.profile.brokers[name] then
-        -- Determine if this is a MidnightUI broker or external addon
-        local isMidnightBroker = name and name:match("^Midnight")
-        local defaultBar = isMidnightBroker and "MainBar" or "None"
+        -- Default enabled brokers (only these are shown by default)
+        local defaultEnabledBrokers = {
+            ["MidnightVolume"] = true,
+            ["MidnightLocation"] = true,
+            ["MidnightGold"] = true,
+            ["MidnightDiff"] = true,
+            ["MidnightSystem"] = true,
+            ["MidnightClock"] = true,
+        }
+        
+        -- Check if this broker should be enabled by default
+        local defaultBar = defaultEnabledBrokers[name] and "MainBar" or "None"
         
         self.db.profile.brokers[name] = { 
             bar = defaultBar, 

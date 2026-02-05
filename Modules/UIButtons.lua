@@ -24,7 +24,11 @@ function UIButtons:OnDBReady()
             locked = false,
             font = "Friz Quadrata TT",
             fontSize = 16,
-            position = { point = "CENTER", x = 0, y = 0 },
+            position = { 
+                point = "TOPLEFT", 
+                x = math.floor(GetScreenWidth() * 0.75), 
+                y = -math.floor(GetScreenHeight() * 0.75) 
+            },
             backgroundColor = { 0.1, 0.1, 0.1, 0.8 },
             UIButtons = {
                 reload = { enabled = true, order = 1 },
