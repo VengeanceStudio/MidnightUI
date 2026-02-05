@@ -152,8 +152,9 @@ function Setup:CreateStep1(frame)
         
         -- Create selection highlight
         btn.highlight = btn:CreateTexture(nil, "BACKGROUND")
-        btn.highlight:SetAllPoints()
-        btn.highlight:SetColorTexture(0, 1, 0, 0.3)
+        btn.highlight:SetPoint("TOPLEFT", btn, "TOPLEFT", -4, 4)
+        btn.highlight:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 4, -4)
+        btn.highlight:SetColorTexture(0, 1, 0, 0.6)
         btn.highlight:Hide()
         
         btn:SetScript("OnClick", function(self)
