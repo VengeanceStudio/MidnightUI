@@ -296,6 +296,21 @@ function ApplyTooltipStyle(tip)
         return
     end
     
+    -- Apply themed backdrop
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if ColorPalette and tip.SetBackdrop then
+        tip:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 2,
+            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        })
+        tip:SetBackdropColor(ColorPalette:GetColor('tooltip-bg'))
+        tip:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    end
+    
     -- Use pcall to safely apply styling without causing taint
     local success = pcall(function()
         local db = BrokerBar.db.profile

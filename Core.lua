@@ -231,15 +231,24 @@ function MidnightUI:SkinFrame(frame)
         local level = frame:GetFrameLevel()
         frame.muiBackdrop:SetFrameLevel(level > 0 and level - 1 or 0)
         frame.muiBackdrop:SetBackdrop({
-            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+            bgFile = "Interface\\Buttons\\WHITE8X8",
             edgeFile = "Interface\\Buttons\\WHITE8X8",
-            tile = false, tileSize = 0, edgeSize = 1,
-            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+            tile = false, tileSize = 0, edgeSize = 2,
+            insets = { left = 2, right = 2, top = 2, bottom = 2 }
         })
     end
-    local cfg = self.db.profile.theme
-    frame.muiBackdrop:SetBackdropColor(unpack(cfg.bgColor))
-    frame.muiBackdrop:SetBackdropBorderColor(unpack(cfg.borderColor))
+    
+    -- Use framework colors if available
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if ColorPalette then
+        frame.muiBackdrop:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+        frame.muiBackdrop:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    else
+        -- Fallback to database colors
+        local cfg = self.db.profile.theme
+        frame.muiBackdrop:SetBackdropColor(unpack(cfg.bgColor))
+        frame.muiBackdrop:SetBackdropBorderColor(unpack(cfg.borderColor))
+    end
 end
 
 -- ============================================================================
