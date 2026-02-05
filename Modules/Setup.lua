@@ -56,7 +56,7 @@ function Setup:ShowSetupWizard()
     end
     
     -- Create main wizard frame
-    local frame = CreateFrame("Frame", "MidnightUI_SetupWizard", UIParent, "BasicFrameTemplateWithInset,BackdropTemplate")
+    local frame = CreateFrame("Frame", "MidnightUI_SetupWizard", UIParent, "BackdropTemplate")
     frame:SetSize(600, 400)
     frame:SetPoint("CENTER")
     frame:SetFrameStrata("DIALOG")
@@ -78,15 +78,36 @@ function Setup:ShowSetupWizard()
         })
         frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
         frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    else
+        -- Fallback backdrop
+        frame:SetBackdrop({
+            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+            edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+            tile = true,
+            tileSize = 32,
+            edgeSize = 32,
+            insets = { left = 8, right = 8, top = 8, bottom = 8 }
+        })
+        frame:SetBackdropColor(0, 0, 0, 1)
     end
     
+    -- Create close button
+    frame.closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.closeButton:SetPoint("TOPRIGHT", -5, -5)
+    frame.closeButton:SetScript("OnClick", function()
+        frame:Hide()
+    end)
+    
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    frame.title:SetPoint("TOP", 0, -5)
+    frame.title:SetPoint("TOP", 0, -10)
     frame.title:SetText("MidnightUI First Time Setup")
     
-    -- Apply themed font
+    -- Apply themed font and color
     if FontKit then
         FontKit:SetFont(frame.title, 'header', 'large')
+    end
+    if ColorPalette then
+        frame.title:SetTextColor(ColorPalette:GetColor('text-primary'))
     end
     
     -- Current step tracker
