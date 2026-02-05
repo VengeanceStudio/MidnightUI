@@ -269,13 +269,20 @@ function Setup:CompleteSetup(frame)
     self.db.profile.hasCompletedSetup = true
     frame:Hide()
     
-    -- Reload UI
-    C_Timer.After(1, function()
-        print("MidnightUI: Setup complete! Reloading UI...")
-        C_Timer.After(1, function()
+    -- Show reload confirmation with secure reload button
+    StaticPopupDialogs["MIDNIGHTUI_SETUP_COMPLETE"] = {
+        text = "MidnightUI: Setup complete! Your UI needs to reload to apply the changes.",
+        button1 = "Reload Now",
+        button2 = "Later",
+        OnAccept = function()
             ReloadUI()
-        end)
-    end)
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = 3,
+    }
+    StaticPopup_Show("MIDNIGHTUI_SETUP_COMPLETE")
 end
 
 function Setup:GetOptions()
