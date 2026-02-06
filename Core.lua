@@ -675,7 +675,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Slider" then
         if widget.slider then
-            -- Style the slider track
+            -- Style the slider track - make it thinner and teal
             if widget.slider.SetBackdrop then
                 widget.slider:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -683,15 +683,22 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tile = false, edgeSize = 1,
                     insets = { left = 0, right = 0, top = 0, bottom = 0 }
                 })
-                widget.slider:SetBackdropColor(ColorPalette:GetColor('input-bg'))
-                widget.slider:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                -- Use teal color for the slider bar
+                widget.slider:SetBackdropColor(0.1608, 0.5216, 0.5804, 0.5)
+                widget.slider:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+            end
+            
+            -- Make the slider track thinner
+            local height = widget.slider:GetHeight()
+            if height and height > 8 then
+                widget.slider:SetHeight(4)
             end
             
             -- Style the thumb
             widget.slider:SetThumbTexture("Interface\\Buttons\\WHITE8X8")
             local thumb = widget.slider:GetThumbTexture()
             if thumb then
-                thumb:SetVertexColor(ColorPalette:GetColor('accent-primary'))
+                thumb:SetVertexColor(ColorPalette:GetColor('text-primary'))
                 thumb:SetSize(12, 20)
             end
         end
