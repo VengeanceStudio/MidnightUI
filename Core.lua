@@ -209,24 +209,232 @@ function MidnightUI:HookConfigDialogFrames()
     local AceGUI = LibStub("AceGUI-3.0")
     if not AceGUI then return end
     
-    -- Hook the Frame widget creation
-    local oldCreateFrame = AceGUI.WidgetRegistry.Frame
-    if oldCreateFrame then
-        AceGUI.WidgetRegistry.Frame = function(...)
-            local frame = oldCreateFrame(...)
-            if frame and frame.frame then
-                C_Timer.After(0, function()
-                    self:SkinConfigFrame(frame.frame)
-                end)
-            end
-            return frame
+    -- Hook AceGUI:Create to skin widgets as they're created
+    local oldCreate = AceGUI.Create
+    AceGUI.Create = function(self, widgetType)
+        local widget = oldCreate(self, widgetType)
+        if widget then
+            C_Timer.After(0, function()
+                MidnightUI:SkinAceGUIWidget(widget, widgetType)
+            end)
         end
+        return widget
     end
 end
 
 function MidnightUI:SkinConfigFrame(frame)
     if not frame or not frame.SetBackdrop then return end
+    AceGUIWidget(widget, widgetType)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    if not ColorPalette then return end
     
+    -- Skin based on widget type
+    if widgetType == "Frame" then
+        self:SkinConfigFrame(widget.frame)
+        
+    elseif widgetType == "TabGroup" then
+        if widget.border then
+            widget.border:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, edgeSize = 1,
+                insets = { left = 1, right = 1, top = 26, bottom = 1 }
+            })
+            widget.border:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+            widget.border:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+        end
+        
+        -- Skin tabs
+        if widget.tabs then
+            for _, tab in pairs(widget.tabs) do
+                if tab.SetBackdrop then
+                    tab:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                    tab:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                end
+                
+                if tab.text and FontKit then
+                    FontKit:SetFont(tab.text, 'button', 'normal')
+                    tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                end
+            end
+        end
+        
+    elseif widgetType == "InlineGroup" or widgetType == "SimpleGroup" or widgetType == "TreeGroup" then
+        if widget.content and widget.content:GetObjectType() == "Frame" then
+            if widget.content.SetBackdrop then
+                widget.content:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                })
+                widget.content:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                widget.content:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+        end
+        
+    elseif widgetType == "Button" then
+        if widget.frame and widget.frame.SetBackdrop then
+            widget.frame:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, edgeSize = 1,
+                insets = { left = 2, right = 2, top = 2, bottom = 2 }
+            })
+            widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+            widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+            
+            -- Remove Blizzard textures
+            if widget.frame.Left then widget.frame.Left:Hide() end
+            if widget.frame.Right then widget.frame.Right:Hide() end
+            if widget.frame.Middle then widget.frame.Middle:Hide() end
+        end
+        
+        if widget.text and FontKit then
+            FontKit:SetFont(widget.text, 'button', 'normal')
+            widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+    elseif widgetType == "CheckBox" then
+        if widget.check then
+            widget.check:SetNormalTexture("")
+            widget.check:SetPushedTexture("")
+            widget.check:SetHighlightTexture("")
+            widget.check:SetCheckedTexture("")
+            widget.check:SetDisabledCheckedTexture("")
+            
+            if widget.check.SetBackdrop then
+                widget.check:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                })
+                widget.check:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                widget.check:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+            
+            -- Create custom check mark
+            if not widget.customCheck then
+                widget.customCheck = widget.check:CreateFontString(nil, "OVERLAY")
+                widget.customCheck:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+                widget.customCheck:SetText("✓")
+                widget.customCheck:SetPoint("CENTER", 0, 0)
+                widget.customCheck:SetTextColor(ColorPalette:GetColor('success'))
+            end
+            
+            -- Hook to show/hide check mark
+            hooksecurefunc(widget, "SetValue", function(self, value)
+                if widget.customCheck then
+                    widget.customCheck:SetShown(value)
+                end
+            end)
+        end
+        
+        if widget.text and FontKit then
+            FontKit:SetFont(widget.text, 'body', 'normal')
+            widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+    elseif widgetType == "Slider" then
+        if widget.slider then
+            -- Style the slider track
+            if widget.slider.SetBackdrop then
+                widget.slider:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                })
+                widget.slider:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                widget.slider:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+            
+            -- Style the thumb
+            widget.slider:SetThumbTexture("Interface\\Buttons\\WHITE8X8")
+            local thumb = widget.slider:GetThumbTexture()
+            if thumb then
+                thumb:SetVertexColor(ColorPalette:GetColor('accent-primary'))
+                thumb:SetSize(12, 20)
+            end
+        end
+        
+        if widget.label and FontKit then
+            FontKit:SetFont(widget.label, 'body', 'normal')
+            widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+    elseif widgetType == "EditBox" or widgetType == "MultiLineEditBox" then
+        if widget.editbox then
+            -- Remove Blizzard textures
+            if widget.editbox.Left then widget.editbox.Left:Hide() end
+            if widget.editbox.Right then widget.editbox.Right:Hide() end
+            if widget.editbox.Middle then widget.editbox.Middle:Hide() end
+            
+            if widget.editbox.SetBackdrop then
+                widget.editbox:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                })
+                widget.editbox:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                widget.editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+            
+            if FontKit then
+                FontKit:SetFont(widget.editbox, 'body', 'normal')
+                widget.editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
+            end
+        end
+        
+        if widget.label and FontKit then
+            FontKit:SetFont(widget.label, 'body', 'normal')
+            widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+    elseif widgetType == "DropDown" then
+        if widget.dropdown then
+            widget.dropdown:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, edgeSize = 1,
+                insets = { left = 2, right = 2, top = 2, bottom = 2 }
+            })
+            widget.dropdown:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+            widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+        end
+        
+        if widget.text and FontKit then
+            FontKit:SetFont(widget.text, 'body', 'normal')
+            widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+        if widget.label and FontKit then
+            FontKit:SetFont(widget.label, 'body', 'normal')
+            widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+    elseif widgetType == "Heading" or widgetType == "Label" then
+        if widget.label and FontKit then
+            if widgetType == "Heading" then
+                FontKit:SetFont(widget.label, 'heading', 'large')
+            else
+                FontKit:SetFont(widget.label, 'body', 'normal')
+            end
+            widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+    end
+end
+
+function MidnightUI:Skin
     local ColorPalette = _G.MidnightUI_ColorPalette
     if not ColorPalette then return end
     
