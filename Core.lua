@@ -877,13 +877,22 @@ function MidnightUI:SkinConfigFrame(frame)
     
     -- Skin the title frame and text
     if frame.obj then
+        -- Add logo texture
+        if not frame.logoTexture then
+            frame.logoTexture = frame:CreateTexture(nil, "ARTWORK")
+            frame.logoTexture:SetTexture("Interface\\AddOns\\MidnightUI\\Media\\Skull.tga")
+            frame.logoTexture:SetSize(32, 32)
+            frame.logoTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 12, -12)
+        end
+        
         -- Find and skin title text
         for _, region in ipairs({frame:GetRegions()}) do
             if region:GetObjectType() == "FontString" then
-                if FontKit then
-                    FontKit:SetFont(region, 'heading', 'large')
-                end
+                -- Make title larger and reposition next to logo
+                region:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
                 region:SetTextColor(ColorPalette:GetColor('text-primary'))
+                region:ClearAllPoints()
+                region:SetPoint("LEFT", frame.logoTexture, "RIGHT", 10, 0)
             elseif region:GetObjectType() == "Texture" and region:GetDrawLayer() == "OVERLAY" then
                 -- Hide title frame textures
                 region:Hide()
