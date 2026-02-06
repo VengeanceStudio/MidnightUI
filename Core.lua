@@ -892,14 +892,19 @@ function MidnightUI:SkinConfigFrame(frame)
             frame.logoTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -18)
         end
         
-        -- Find and skin title text
+        -- Add custom title text next to logo
+        if not frame.customTitle then
+            frame.customTitle = frame:CreateFontString(nil, "OVERLAY")
+            frame.customTitle:SetFont("Fonts\\FRIZQT__.TTF", 32, "OUTLINE")
+            frame.customTitle:SetText("Midnight UI")
+            frame.customTitle:SetTextColor(ColorPalette:GetColor('text-primary'))
+            frame.customTitle:SetPoint("LEFT", frame.logoTexture, "RIGHT", 15, 0)
+        end
+        
+        -- Find and hide default title text
         for _, region in ipairs({frame:GetRegions()}) do
-            if region:GetObjectType() == "FontString" then
-                -- Make title larger and reposition next to logo
-                region:SetFont("Fonts\\FRIZQT__.TTF", 28, "OUTLINE")
-                region:SetTextColor(ColorPalette:GetColor('text-primary'))
-                region:ClearAllPoints()
-                region:SetPoint("LEFT", frame.logoTexture, "RIGHT", 12, 0)
+            if region:GetObjectType() == "FontString" and region ~= frame.customTitle then
+                region:Hide()
             elseif region:GetObjectType() == "Texture" and region:GetDrawLayer() == "OVERLAY" then
                 -- Hide title frame textures
                 region:Hide()
