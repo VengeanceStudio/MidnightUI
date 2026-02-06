@@ -722,11 +722,21 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Dropdown" then
         if widget.frame then
-            -- Move dropdown frame slightly right to prevent border cutoff
+            -- Move dropdown frame to the right to prevent border/label cutoff
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs and yOfs then
                 widget.frame:ClearAllPoints()
-                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 17, yOfs)
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 27, yOfs)
+            end
+        end
+        
+        -- Move label to the right as well
+        if widget.label and not widget.customLabelMoved then
+            local point, relativeTo, relativePoint, xOfs, yOfs = widget.label:GetPoint()
+            if point and xOfs and yOfs then
+                widget.label:ClearAllPoints()
+                widget.label:SetPoint(point, relativeTo, relativePoint, xOfs + 10, yOfs)
+                widget.customLabelMoved = true
             end
         end
         
