@@ -265,6 +265,14 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
+            -- Ensure frame has BackdropTemplate
+            if not widget.frame.SetBackdrop and BackdropTemplateMixin then
+                Mixin(widget.frame, BackdropTemplateMixin)
+                if widget.frame.OnBackdropLoaded then
+                    widget.frame:OnBackdropLoaded()
+                end
+            end
+            
             -- Hide Blizzard textures
             if widget.frame.Left then widget.frame.Left:Hide() end
             if widget.frame.Right then widget.frame.Right:Hide() end
@@ -292,11 +300,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 })
                 widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
-                
-                -- Force backdrop to show
-                if widget.frame.Show then
-                    widget.frame:Show()
-                end
                 
                 -- Create custom hover effect
                 widget.frame:HookScript("OnEnter", function(self)
@@ -339,8 +342,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.toggleBg:SetSize(40, 20)
                 widget.toggleBg:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 4, -4)
                 widget.toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-                local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                widget.toggleBg:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, a)  -- Much darker for off state
+                -- Very dark off state - almost black
+                widget.toggleBg:SetVertexColor(0.1, 0.1, 0.1, 1)
                 
                 -- Add border
                 widget.toggleBorder = widget.frame:CreateTexture(nil, "BORDER")
@@ -365,8 +368,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                         else
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                            local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                            widget.toggleBg:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, a)  -- Much darker for off
+                            -- Very dark off state
+                            widget.toggleBg:SetVertexColor(0.1, 0.1, 0.1, 1)
                         end
                     end
                 end)
@@ -378,8 +381,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                 else
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                    local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                    widget.toggleBg:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, a)
+                    widget.toggleBg:SetVertexColor(0.1, 0.1, 0.1, 1)
                 end
             end
         end
@@ -446,20 +448,19 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
         end
         
-    elseif widgetType == "DropDown" then
-        if widget.dropdown then
-            -- Hide Blizzard dropdown textures completely
-            if widget.dropdown.Left then 
-                widget.dropdown.Left:Hide() 
-                widget.dropdown.Left:SetAlpha(0)
+    elseif widgEnsure dropdown has BackdropTemplate
+            if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
+                Mixin(widget.dropdown, BackdropTemplateMixin)
+                if widget.dropdown.OnBackdropLoaded then
+                    widget.dropdown:OnBackdropLoaded()
+                end
             end
-            if widget.dropdown.Middle then 
-                widget.dropdown.Middle:Hide()
-                widget.dropdown.Middle:SetAlpha(0)
-            end
-            if widget.dropdown.Right then 
-                widget.dropdown.Right:Hide()
-                widget.dropdown.Right:SetAlpha(0)
+            
+            -- Hide all Blizzard dropdown frame elements
+            for _, region in ipairs({widget.dropdown:GetRegions()}) do
+                if region:GetObjectType() == "Texture" then
+                    region:Hide()
+                end
             end
             
             -- Apply themed backdrop
@@ -477,30 +478,26 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             
             -- Style the dropdown button
             if widget.button then
-                -- Clear all button textures
-                if widget.button.SetNormalTexture then 
-                    widget.button:SetNormalTexture("")
-                    local tex = widget.button:GetNormalTexture()
-                    if tex then tex:SetTexture(nil) end
-                end
-                if widget.button.SetHighlightTexture then 
-                    widget.button:SetHighlightTexture("")
-                    local tex = widget.button:GetHighlightTexture()
-                    if tex then tex:SetTexture(nil) end
-                end
-                if widget.button.SetPushedTexture then 
-                    widget.button:SetPushedTexture("")
-                    local tex = widget.button:GetPushedTexture()
-                    if tex then tex:SetTexture(nil) end
-                end
-                if widget.button.SetDisabledTexture then 
-                    widget.button:SetDisabledTexture("")
-                    local tex = widget.button:GetDisabledTexture()
-                    if tex then tex:SetTexture(nil) end
+                -- Ensure button has BackdropTemplate
+                if not widget.button.SetBackdrop and BackdropTemplateMixin then
+                    Mixin(widget.button, BackdropTemplateMixin)
+                    if widget.button.OnBackdropLoaded then
+                        widget.button:OnBackdropLoaded()
+                    end
                 end
                 
-                -- Hide button texture children
-                if widget.button.Left then widget.button.Left:Hide() end
+                -- Hide all button textures
+                for _, region in ipairs({widget.button:GetRegions()}) do
+                    if region:GetObjectType() == "Texture" then
+                        region:Hide()
+                    end
+                end
+                
+                -- Clear texture methods
+                if widget.button.SetNormalTexture then widget.button:SetNormalTexture("") end
+                if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
+                if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
+                if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture(""end
                 if widget.button.Middle then widget.button.Middle:Hide() end
                 if widget.button.Right then widget.button.Right:Hide() end
                 
