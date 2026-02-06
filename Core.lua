@@ -305,13 +305,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.frame:HookScript("OnEnter", function(self)
                     if widget.frame.SetBackdropColor then
                         local r, g, b, a = ColorPalette:GetColor('button-bg')
-                        r = math.min((r * 1.5) + 0.05, 1)
-                        g = math.min((g * 1.5) + 0.05, 1)
-                        b = math.min((b * 1.5) + 0.05, 1)
+                        r = math.min((r * 2) + 0.15, 1)
+                        g = math.min((g * 2) + 0.15, 1)
+                        b = math.min((b * 2) + 0.15, 1)
                         widget.frame:SetBackdropColor(r, g, b, a)
                     end
                     if widget.frame.SetBackdropBorderColor then
-                        widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('text-primary'))
+                        widget.frame:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
                     end
                 end)
                 widget.frame:HookScript("OnLeave", function(self)
