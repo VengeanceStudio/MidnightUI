@@ -1799,7 +1799,7 @@ function MidnightUI:GetOptions()
                     },
                     scaleToResolution = {
                         type = "execute",
-                        name = "Scale Layout to My Resolution",
+                        name = "Scale Resolution",
                         desc = "Automatically adjusts all element positions from 2133x1200 to your current resolution",
                         order = 1.02,
                         func = function()
