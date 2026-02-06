@@ -499,7 +499,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 if widget.button.SetNormalTexture then widget.button:SetNormalTexture("") end
                 if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
                 if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
-                if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture(""end
+                if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture("") end
                 if widget.button.Middle then widget.button.Middle:Hide() end
                 if widget.button.Right then widget.button.Right:Hide() end
                 
