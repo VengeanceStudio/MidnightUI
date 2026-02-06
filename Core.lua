@@ -699,7 +699,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             local thumb = widget.slider:GetThumbTexture()
             if thumb then
                 thumb:SetVertexColor(ColorPalette:GetColor('text-primary'))
-                thumb:SetSize(8, 14)
+                thumb:SetSize(6, 10)
             end
         end
         
