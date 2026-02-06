@@ -320,6 +320,21 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         insets = { left = 2, right = 2, top = 2, bottom = 2 }
                     })
                     
+                    -- Create a persistent overlay frame with border that can't be removed
+                    if not tab.persistentBorder then
+                        local overlay = CreateFrame("Frame", nil, tab, BackdropTemplateMixin and "BackdropTemplate")
+                        overlay:SetAllPoints(tab)
+                        overlay:SetFrameLevel(tab:GetFrameLevel() + 10)
+                        overlay:SetBackdrop({
+                            bgFile = nil,
+                            edgeFile = "Interface\\Buttons\\WHITE8X8",
+                            tile = false, edgeSize = 2,
+                            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                        })
+                        overlay:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                        tab.persistentBorder = overlay
+                    end
+                    
                     -- Explicitly show all backdrop texture regions
                     C_Timer.After(0, function()
                         if tab.Center then tab.Center:Show() end
@@ -331,6 +346,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         if tab.TopRightCorner then tab.TopRightCorner:Show() end
                         if tab.BottomLeftCorner then tab.BottomLeftCorner:Show() end
                         if tab.BottomRightCorner then tab.BottomRightCorner:Show() end
+                        if tab.persistentBorder then
+                            tab.persistentBorder:Show()
+                        end
                     end)
                     
                     -- Check if this tab is selected
