@@ -1072,27 +1072,37 @@ function MidnightUI:SkinConfigFrame(frame)
         end
         
         -- Hide all status bar elements completely - try multiple approaches
-        if frame.obj.statusbg then
+        if frame.obj.statusbg and frame.obj.statusbg.Hide then
             frame.obj.statusbg:Hide()
             frame.obj.statusbg:SetAlpha(0)
-            frame.obj.statusbg:SetParent(nil)
+            if frame.obj.statusbg.SetParent then
+                frame.obj.statusbg:SetParent(nil)
+            end
         end
-        if frame.obj.statustext then
+        if frame.obj.statustext and frame.obj.statustext.Hide then
             frame.obj.statustext:Hide()
-            frame.obj.statustext:SetParent(nil)
+            if frame.obj.statustext.SetParent then
+                frame.obj.statustext:SetParent(nil)
+            end
         end
         
         -- Hide the status frame that contains the close button (if it exists)
         if frame.obj.status and frame.obj.status.Hide then
             frame.obj.status:Hide()
-            frame.obj.status:SetAlpha(0)
-            frame.obj.status:SetParent(nil)
+            if frame.obj.status.SetAlpha then
+                frame.obj.status:SetAlpha(0)
+            end
+            if frame.obj.status.SetParent then
+                frame.obj.status:SetParent(nil)
+            end
         end
         
         -- Also hide the line/closebutton container at the bottom
-        if frame.obj.line then
+        if frame.obj.line and frame.obj.line.Hide then
             frame.obj.line:Hide()
-            frame.obj.line:SetParent(nil)
+            if frame.obj.line.SetParent then
+                frame.obj.line:SetParent(nil)
+            end
         end
         
         -- Hide all children that might be status-related (one-time check)
