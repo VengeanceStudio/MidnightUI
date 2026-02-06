@@ -351,11 +351,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 local alpha = t:GetAlpha()
                                 local shown = t:IsShown()
                                 local br, bg, bb, ba = 0, 0, 0, 0
+                                local borderr, borderg, borderb, bordera = 0, 0, 0, 0
                                 if hasBackdrop then
                                     br, bg, bb, ba = t:GetBackdropColor()
+                                    borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
                                 end
-                                print(string.format("DEBUG: Tab %d value=%s backdrop=%s alpha=%.2f shown=%s bgColor=(%.2f,%.2f,%.2f,%.2f)", 
-                                    idx, tostring(t.value), tostring(hasBackdrop), alpha, tostring(shown), br, bg, bb, ba))
+                                print(string.format("DEBUG: Tab %d value=%s backdrop=%s alpha=%.2f shown=%s", 
+                                    idx, tostring(t.value), tostring(hasBackdrop), alpha, tostring(shown)))
+                                print(string.format("  bgColor=(%.2f,%.2f,%.2f,%.2f) borderColor=(%.2f,%.2f,%.2f,%.2f)", 
+                                    br, bg, bb, ba, borderr, borderg, borderb, bordera))
                             end
                         end)
                         
