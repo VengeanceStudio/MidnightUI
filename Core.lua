@@ -305,12 +305,21 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.frame:HookScript("OnEnter", function(self)
                     if widget.frame.SetBackdropColor then
                         local r, g, b, a = ColorPalette:GetColor('button-bg')
-                        widget.frame:SetBackdropColor(r * 1.3, g * 1.3, b * 1.3, a)
+                        r = math.min((r * 1.5) + 0.05, 1)
+                        g = math.min((g * 1.5) + 0.05, 1)
+                        b = math.min((b * 1.5) + 0.05, 1)
+                        widget.frame:SetBackdropColor(r, g, b, a)
+                    end
+                    if widget.frame.SetBackdropBorderColor then
+                        widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('text-primary'))
                     end
                 end)
                 widget.frame:HookScript("OnLeave", function(self)
                     if widget.frame.SetBackdropColor then
                         widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                    end
+                    if widget.frame.SetBackdropBorderColor then
+                        widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                     end
                 end)
                 
@@ -342,8 +351,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.toggleBg:SetSize(40, 20)
                 widget.toggleBg:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 4, -4)
                 widget.toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-                -- Very dark off state - almost black
-                widget.toggleBg:SetVertexColor(0.1, 0.1, 0.1, 1)
+                -- Very dark off state - match panel background
+                widget.toggleBg:SetVertexColor(ColorPalette:GetColor('panel-bg'))
                 
                 -- Add border
                 widget.toggleBorder = widget.frame:CreateTexture(nil, "BORDER")
@@ -368,8 +377,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                         else
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                            -- Very dark off state
-                            widget.toggleBg:SetVertexColor(0.1, 0.1, 0.1, 1)
+                            -- Very dark off state - match panel background
+                            widget.toggleBg:SetVertexColor(ColorPalette:GetColor('panel-bg'))
                         end
                     end
                 end)
@@ -381,7 +390,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                 else
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                    widget.toggleBg:SetVertexColor(0.1, 0.1, 0.1, 1)
+                    widget.toggleBg:SetVertexColor(ColorPalette:GetColor('panel-bg'))
                 end
             end
         end
@@ -516,14 +525,52 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 end
                 
                 -- Create custom dropdown arrow
+                if widget.customArrow and widget.customArrow.SetText then
+                    widget.customArrow:Hide()
+                    widget.customArrow = nil
+                end
                 if not widget.customArrow then
-                    widget.customArrow = widget.button:CreateFontString(nil, "OVERLAY")
-                    widget.customArrow:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
-                    widget.customArrow:SetText("▼")
+                    widget.customArrow = widget.button:CreateTexture(nil, "OVERLAY")
+                    widget.customArrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+                    widget.customArrow:SetSize(10, 10)
                     widget.customArrow:SetPoint("CENTER")
-                    widget.customArrow:SetTextColor(ColorPalette:GetColor('text-secondary'))
+                    widget.customArrow:SetRotation(-1.57)
+                    widget.customArrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
                 end
             end
+        end
+
+        -- Skin the dropdown pullout list
+        if widget.pullout and widget.pullout.frame then
+            local function ApplyPulloutSkin()
+                local frame = widget.pullout.frame
+                if not frame.SetBackdrop and BackdropTemplateMixin then
+                    Mixin(frame, BackdropTemplateMixin)
+                    if frame.OnBackdropLoaded then
+                        frame:OnBackdropLoaded()
+                    end
+                end
+                for _, region in ipairs({frame:GetRegions()}) do
+                    if region:GetObjectType() == "Texture" then
+                        region:Hide()
+                    end
+                end
+                if frame.SetBackdrop then
+                    frame:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, edgeSize = 1,
+                        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                    })
+                    frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                    frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                end
+            end
+            if not widget.customPulloutHooked then
+                widget.customPulloutHooked = true
+                widget.pullout.frame:HookScript("OnShow", ApplyPulloutSkin)
+            end
+            ApplyPulloutSkin()
         end
         
         if widget.text and FontKit then
