@@ -351,9 +351,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     -- Check if this tab is selected
                     local isSelected = (widget.selected == tab.value)
                     if isSelected then
-                        -- Selected tab: brighter background, accent border
-                        local r, g, b, a = ColorPalette:GetColor('button-bg')
-                        tab:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
+                        -- Selected tab: much brighter background, accent border
+                        tab:SetBackdropColor(0.2, 0.25, 0.3, 0.9)
                         tab:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1) -- Teal accent
                     else
                         -- Unselected tab: normal colors
@@ -364,23 +363,64 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
                 if tab.text and FontKit then
                     FontKit:SetFont(tab.text, 'button', 'normal')
-                    tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                    -- Set text color based on selection
+                    local isSelected = (widget.selected == tab.value)
+                    if isSelected then
+                        tab.text:SetTextColor(0.1608, 0.5216, 0.5804, 1) -- Teal accent for selected
+                    else
+                        tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                    end
+                    
+                    -- Auto-adjust tab width based on text width
+                    if not tab.customWidthAdjusted then
+                        C_Timer.After(0, function()
+                            if tab.text then
+                                local textWidth = tab.text:GetStringWidth()
+                                local padding = 30 -- Padding on each side
+                                local minWidth = textWidth + padding
+                                
+                                -- Get current width
+                                local currentWidth = tab:GetWidth()
+                                
+                                -- Only increase if text is wider than current
+                                if minWidth > currentWidth then
+                                    tab:SetWidth(minWidth)
+                                end
+                            end
+                        end)
+                        tab.customWidthAdjusted = true
+                    end
                 end
                 
                 -- Hook tab click to update styling
                 if not tab.customTabHooked then
                     tab:HookScript("OnClick", function()
+                        -- Hide Blizzard textures immediately
+                        for _, t in pairs(widget.tabs) do
+                            HideTabTextures(t)
+                        end
+                        
                         -- Wait for widget.selected to update, then reskin colors only
                         C_Timer.After(0.01, function()
                             for _, t in pairs(widget.tabs) do
+                                HideTabTextures(t)
+                                
                                 local selected = (widget.selected == t.value)
                                 if selected then
-                                    local r, g, b, a = ColorPalette:GetColor('button-bg')
-                                    t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
+                                    -- Much brighter background for selected tab
+                                    t:SetBackdropColor(0.2, 0.25, 0.3, 0.9)
                                     t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                    -- Set text color to teal accent for selected tab
+                                    if t.text then
+                                        t.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
+                                    end
                                 else
                                     t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                                     t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                                    -- Reset text color to normal for unselected tabs
+                                    if t.text then
+                                        t.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                    end
                                 end
                             end
                         end)
