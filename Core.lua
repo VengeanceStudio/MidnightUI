@@ -991,11 +991,26 @@ function MidnightUI:SkinConfigFrame(frame)
         -- Hide the status frame that contains the close button (if it exists)
         if frame.obj.status and frame.obj.status.Hide then
             frame.obj.status:Hide()
+            frame.obj.status:SetAlpha(0)
         end
         
         -- Also hide the line/closebutton container at the bottom
         if frame.obj.line then
             frame.obj.line:Hide()
+        end
+        
+        -- Continuously hide status bar elements (they might recreate themselves)
+        if not frame.statusHideHooked then
+            frame:HookScript("OnShow", function()
+                C_Timer.After(0.1, function()
+                    if frame.obj.statusbg then frame.obj.statusbg:Hide() end
+                    if frame.obj.statustext then frame.obj.statustext:Hide() end
+                    if frame.obj.status then frame.obj.status:Hide() end
+                    if frame.obj.line then frame.obj.line:Hide() end
+                    if frame.obj.closebutton then frame.obj.closebutton:Hide() end
+                end)
+            end)
+            frame.statusHideHooked = true
         end
     end
     
