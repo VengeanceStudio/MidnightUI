@@ -716,8 +716,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 C_Timer.After(0.05, function()
                     if widget.slider and widget.label then
                         widget.slider:ClearAllPoints()
-                        widget.slider:SetPoint("TOPLEFT", widget.label, "BOTTOMLEFT", 0, -8)
-                        widget.slider:SetPoint("TOPRIGHT", widget.label, "BOTTOMRIGHT", 0, -8)
+                        widget.slider:SetPoint("TOPLEFT", widget.label, "BOTTOMLEFT", 10, -8)
+                        widget.slider:SetPoint("TOPRIGHT", widget.label, "BOTTOMRIGHT", -10, -8)
                     end
                 end)
                 widget.customSliderSpacing = true
@@ -750,7 +750,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
             
             if FontKit then
-                FontKit:SetFont(widget.editbox, 'small', 'normal')
+                local fontPath = FontKit:GetFontPath('body')
+                if fontPath then
+                    widget.editbox:SetFont(fontPath, 10, "OUTLINE")
+                end
                 widget.editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
             end
             
