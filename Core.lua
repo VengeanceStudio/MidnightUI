@@ -674,6 +674,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "Slider" then
+        -- Increase the overall frame height to add spacing
+        if widget.frame and not widget.customFrameHeight then
+            local currentHeight = widget.frame:GetHeight()
+            if currentHeight then
+                widget.frame:SetHeight(currentHeight + 10)
+            end
+            widget.customFrameHeight = true
+        end
+        
         if widget.slider then
             -- Style the slider track - make it thinner and teal
             if widget.slider.SetBackdrop then
@@ -701,31 +710,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 thumb:SetVertexColor(ColorPalette:GetColor('text-primary'))
                 thumb:SetSize(6, 10)
             end
-            
-            -- Add vertical spacing - move slider down from label
-            if not widget.customSliderSpacing then
-                local point, relativeTo, relativePoint, xOfs, yOfs = widget.slider:GetPoint()
-                if point and yOfs then
-                    widget.slider:ClearAllPoints()
-                    widget.slider:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 5)
-                end
-                widget.customSliderSpacing = true
-            end
         end
         
         if widget.label and FontKit then
             FontKit:SetFont(widget.label, 'body', 'normal')
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
-        end
-        
-        -- Add spacing for the editbox below the slider
-        if widget.editbox and not widget.customEditboxSpacing then
-            local point, relativeTo, relativePoint, xOfs, yOfs = widget.editbox:GetPoint()
-            if point and yOfs then
-                widget.editbox:ClearAllPoints()
-                widget.editbox:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 5)
-            end
-            widget.customEditboxSpacing = true
         end
         
     elseif widgetType == "EditBox" or widgetType == "MultiLineEditBox" then
