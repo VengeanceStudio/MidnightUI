@@ -498,7 +498,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
                     tile = false, edgeSize = 1,
-                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -583,108 +583,126 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.customButtonTextureHook = true
                 end
             end
-        end
-
-        -- Skin the dropdown pullout list
-        if widget.pullout and widget.pullout.frame then
-            local function ApplyPulloutSkin()
-                local frame = widget.pullout.frame
-                local scrollFrame = widget.pullout.scrollFrame
-                
-                -- Apply backdrop to scrollFrame for better visibility
-                if scrollFrame then
-                    if not scrollFrame.SetBackdrop and BackdropTemplateMixin then
-                        Mixin(scrollFrame, BackdropTemplateMixin)
-                        if scrollFrame.OnBackdropLoaded then
-                            scrollFrame:OnBackdropLoaded()
-                        end
+            
+            -- Hook to restore styling after tab switches
+            if not widget.customDropdownShowHook then
+                widget.dropdown:HookScript("OnShow", function()
+                    -- Reapply backdrop
+                    if widget.dropdown.SetBackdrop then
+                        widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                        widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
                     end
-                    
-                    if scrollFrame.SetBackdrop then
-                        scrollFrame:SetBackdrop({
-                            bgFile = "Interface\\Buttons\\WHITE8X8",
-                            edgeFile = "Interface\\Buttons\\WHITE8X8",
-                            tile = false, edgeSize = 2,
-                            insets = { left = 0, right = 0, top = 0, bottom = 0 }
-                        })
-                        scrollFrame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-                        scrollFrame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    -- Ensure arrow is visible
+                    if widget.customArrow then
+                        widget.customArrow:Show()
                     end
-                end
-                
-                -- Also apply to main frame
-                if not frame.SetBackdrop and BackdropTemplateMixin then
-                    Mixin(frame, BackdropTemplateMixin)
-                    if frame.OnBackdropLoaded then
-                        frame:OnBackdropLoaded()
-                    end
-                end
-                
-                -- Hide all frame textures
-                for _, region in ipairs({frame:GetRegions()}) do
-                    if region:GetObjectType() == "Texture" then
-                        region:SetTexture(nil)
-                        region:Hide()
-                    end
-                end
-                
-                if frame.SetBackdrop then
-                    frame:SetBackdrop({
-                        bgFile = "Interface\\Buttons\\WHITE8X8",
-                        edgeFile = "Interface\\Buttons\\WHITE8X8",
-                        tile = false, edgeSize = 2,
-                        insets = { left = 0, right = 0, top = 0, bottom = 0 }
-                    })
-                    frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-                    frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                end
-                
-                -- Skin scrollbar if it exists
-                if widget.pullout.scrollFrame and widget.pullout.scrollFrame.scrollBar then
-                    local scrollBar = widget.pullout.scrollFrame.scrollBar
-                    for _, region in ipairs({scrollBar:GetRegions()}) do
+                    -- Hide Blizzard textures again
+                    for _, region in ipairs({widget.dropdown:GetRegions()}) do
                         if region:GetObjectType() == "Texture" then
                             region:Hide()
                         end
                     end
-                end
-                
-                -- Skin individual pullout items
-                if widget.pullout.items then
-                    for _, item in pairs(widget.pullout.items) do
-                        if item.frame then
-                            -- Hide Blizzard textures on items
-                            for _, region in ipairs({item.frame:GetRegions()}) do
+                end)
+                widget.customDropdownShowHook = true
+            end
+        end
+
+        -- Hook to skin the dropdown pullout list when it opens
+        if not widget.customPulloutSetup then
+            local originalOpen = widget.Open
+            if originalOpen then
+                widget.Open = function(self)
+                    originalOpen(self)
+                    
+                    -- Now skin the pullout that was just created
+                    if self.pullout and self.pullout.frame then
+                        local frame = self.pullout.frame
+                        local scrollFrame = self.pullout.scrollFrame
+                        
+                        -- Apply backdrop to scrollFrame for better visibility
+                        if scrollFrame and not scrollFrame.customSkinned then
+                            if not scrollFrame.SetBackdrop and BackdropTemplateMixin then
+                                Mixin(scrollFrame, BackdropTemplateMixin)
+                                if scrollFrame.OnBackdropLoaded then
+                                    scrollFrame:OnBackdropLoaded()
+                                end
+                            end
+                            
+                            if scrollFrame.SetBackdrop then
+                                scrollFrame:SetBackdrop({
+                                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                    tile = false, edgeSize = 2,
+                                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                                })
+                                scrollFrame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                                scrollFrame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                            end
+                            scrollFrame.customSkinned = true
+                        end
+                        
+                        -- Also apply to main frame
+                        if not frame.customSkinned then
+                            if not frame.SetBackdrop and BackdropTemplateMixin then
+                                Mixin(frame, BackdropTemplateMixin)
+                                if frame.OnBackdropLoaded then
+                                    frame:OnBackdropLoaded()
+                                end
+                            end
+                            
+                            -- Hide all frame textures
+                            for _, region in ipairs({frame:GetRegions()}) do
                                 if region:GetObjectType() == "Texture" then
+                                    region:SetTexture(nil)
                                     region:Hide()
                                 end
                             end
                             
-                            -- Style item text
-                            if item.text and FontKit then
-                                FontKit:SetFont(item.text, 'body', 'normal')
-                                item.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                            if frame.SetBackdrop then
+                                frame:SetBackdrop({
+                                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                    tile = false, edgeSize = 2,
+                                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                                })
+                                frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                                frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
                             end
-                            
-                            -- Add hover effect to items
-                            if not item.customHooked then
-                                item.frame:HookScript("OnEnter", function()
-                                    item.frame:SetAlpha(0.7)
-                                end)
-                                item.frame:HookScript("OnLeave", function()
-                                    item.frame:SetAlpha(1)
-                                end)
-                                item.customHooked = true
+                            frame.customSkinned = true
+                        end
+                        
+                        -- Skin individual pullout items
+                        if self.pullout.items then
+                            for _, item in pairs(self.pullout.items) do
+                                if item.frame and not item.customSkinned then
+                                    -- Hide Blizzard textures on items
+                                    for _, region in ipairs({item.frame:GetRegions()}) do
+                                        if region:GetObjectType() == "Texture" then
+                                            region:Hide()
+                                        end
+                                    end
+                                    
+                                    -- Style item text
+                                    if item.text and FontKit then
+                                        FontKit:SetFont(item.text, 'body', 'normal')
+                                        item.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                    end
+                                    
+                                    -- Add hover effect to items
+                                    item.frame:HookScript("OnEnter", function()
+                                        item.frame:SetAlpha(0.7)
+                                    end)
+                                    item.frame:HookScript("OnLeave", function()
+                                        item.frame:SetAlpha(1)
+                                    end)
+                                    item.customSkinned = true
+                                end
                             end
                         end
                     end
                 end
             end
-            if not widget.customPulloutHooked then
-                widget.customPulloutHooked = true
-                widget.pullout.frame:HookScript("OnShow", ApplyPulloutSkin)
-            end
-            ApplyPulloutSkin()
+            widget.customPulloutSetup = true
         end
         
         if widget.text and FontKit then
