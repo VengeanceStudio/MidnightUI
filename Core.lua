@@ -988,8 +988,8 @@ function MidnightUI:SkinConfigFrame(frame)
             frame.obj.statustext:Hide()
         end
         
-        -- Hide the status frame that contains the close button
-        if frame.obj.status then
+        -- Hide the status frame that contains the close button (if it exists)
+        if frame.obj.status and frame.obj.status.Hide then
             frame.obj.status:Hide()
         end
     end
