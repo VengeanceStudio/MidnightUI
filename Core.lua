@@ -331,7 +331,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             tile = false, edgeSize = 2,
                             insets = { left = 0, right = 0, top = 0, bottom = 0 }
                         })
-                        overlay:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                        -- Use the same border color as the tab
+                        local isSelected = (widget.selected == tab.value)
+                        if isSelected then
+                            overlay:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                        else
+                            overlay:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                        end
                         tab.persistentBorder = overlay
                     end
                     
@@ -394,9 +400,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         local r, g, b, a = ColorPalette:GetColor('button-bg')
                                         t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
                                         t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                        if t.persistentBorder then
+                                            t.persistentBorder:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                        end
                                     else
                                         t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                                         t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                                        if t.persistentBorder then
+                                            t.persistentBorder:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                                        end
                                     end
                                 end
                             end
@@ -958,6 +970,21 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                
+                -- Create persistent overlay border for dropdown
+                if not widget.dropdown.persistentBorder then
+                    local overlay = CreateFrame("Frame", nil, widget.dropdown, BackdropTemplateMixin and "BackdropTemplate")
+                    overlay:SetAllPoints(widget.dropdown)
+                    overlay:SetFrameLevel(widget.dropdown:GetFrameLevel() + 10)
+                    overlay:SetBackdrop({
+                        bgFile = nil,
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, edgeSize = 2,
+                        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                    })
+                    overlay:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    widget.dropdown.persistentBorder = overlay
+                end
             end
             
             -- Style the dropdown button
@@ -1033,8 +1060,19 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     end
                     
                     widget.button:HookScript("OnClick", ClearButtonTextures)
-                    widget.button:HookScript("OnShow", ClearButtonTextures)
-                    widget.button:HookScript("OnUpdate", ClearButtonTextures)
+                    widget.button:HookScript("OnShow", function()
+                        ClearButtonTextures()
+                        if widget.customArrow then
+                            widget.customArrow:Show()
+                            widget.customArrow:SetAlpha(1)
+                        end
+                    end)
+                    widget.button:HookScript("OnUpdate", function()
+                        if widget.customArrow and not widget.customArrow:IsShown() then
+                            widget.customArrow:Show()
+                            widget.customArrow:SetAlpha(1)
+                        end
+                    end)
                     widget.customButtonTextureHook = true
                 end
             end
