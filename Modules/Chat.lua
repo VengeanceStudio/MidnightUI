@@ -4,6 +4,12 @@ local ChatCopy = MidnightUI:NewModule("ChatCopy", "AceEvent-3.0", "AceHook-3.0")
 
 local frames = {}
 local copyFrame, copyEditBox, copyTopBar, closeButton, bottomButton
+local ColorPalette, FontKit
+
+function ChatCopy:OnInitialize()
+    ColorPalette = _G.MidnightUI_ColorPalette
+    FontKit = _G.MidnightUI_FontKit
+end
 
 -- Create the copy frame and edit box
 local function CreateCopyFrame()
@@ -12,7 +18,12 @@ local function CreateCopyFrame()
     copyFrame:SetSize(400, 245)
     copyFrame:SetPoint("CENTER", UIParent, -100, 100)
     copyFrame:SetBackdrop({bgFile = "Interface\\Buttons\\WHITE8x8", insets = {top = 0, left = 0, bottom = 0, right = 0}})
-    copyFrame:SetBackdropColor(0,0,0,.5)
+    
+    if ColorPalette then
+        copyFrame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+    else
+        copyFrame:SetBackdropColor(0, 0, 0, .5)
+    end
     copyFrame:SetFrameLevel(129)
     copyFrame:SetFrameStrata("TOOLTIP")
     copyFrame:SetMovable(true)
@@ -28,6 +39,13 @@ local function CreateCopyFrame()
     copyTopBar.fs = copyTopBar:CreateFontString(nil, "OVERLAY", "NumberFont_Shadow_Tiny")
     copyTopBar.fs:SetText("Chat Copy")
     copyTopBar.fs:SetPoint("CENTER", 0, 0)
+    
+    if FontKit then
+        FontKit:SetFont(copyTopBar.fs, "heading", "normal")
+    end
+    if ColorPalette then
+        copyTopBar.fs:SetTextColor(ColorPalette:GetColor("text-primary"))
+    end
     copyTopBar:SetMovable(true)
     copyTopBar:EnableMouse(true)
     copyTopBar:SetScript("OnMouseDown", function(self, button)

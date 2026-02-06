@@ -96,8 +96,15 @@ function UIButtons:CreateContainer()
         tile = false, edgeSize = 1,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
-    container:SetBackdropColor(unpack(self.db.profile.backgroundColor))
-    container:SetBackdropBorderColor(0, 0, 0, 1)
+    
+    -- Use ColorPalette if available, fallback to database
+    if ColorPalette then
+        container:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+        container:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    else
+        container:SetBackdropColor(unpack(self.db.profile.backgroundColor))
+        container:SetBackdropBorderColor(0, 0, 0, 1)
+    end
     
     -- Use Movable for drag functionality
     Movable:MakeFrameDraggable(
@@ -229,14 +236,28 @@ function UIButtons:CreateButtons()
                         tile = false, edgeSize = 1,
                         insets = { left = 0, right = 0, top = 0, bottom = 0 }
                     })
-                    btn:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
-                    btn:SetBackdropBorderColor(0, 0, 0, 1)
+                    
+                    if ColorPalette then
+                        btn:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                        btn:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    else
+                        btn:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
+                        btn:SetBackdropBorderColor(0, 0, 0, 1)
+                    end
                     
                     btn.text = btn:CreateFontString(nil, "OVERLAY")
-                    btn.text:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+                    if FontKit then
+                        FontKit:SetFont(btn.text, "button", "normal")
+                    else
+                        btn.text:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+                    end
                     btn.text:SetPoint("CENTER")
                     btn.text:SetText(data.text)
-                    btn.text:SetTextColor(1, 1, 1, 1)
+                    if ColorPalette then
+                        btn.text:SetTextColor(ColorPalette:GetColor("text-primary"))
+                    else
+                        btn.text:SetTextColor(1, 1, 1, 1)
+                    end
                 end
             end
             
@@ -325,8 +346,19 @@ function UIButtons:OnMoveModeChanged(event, enabled)
     -- Update move button color
     local moveBtn = uiButtons.move
     if moveBtn and moveBtn.text then
-        local color = enabled and {0, 1, 0} or {1, 1, 1}
-        moveBtn.text:SetTextColor(unpack(color))
+        if enabled then
+            if ColorPalette then
+                moveBtn.text:SetTextColor(ColorPalette:GetColor('success'))
+            else
+                moveBtn.text:SetTextColor(0, 1, 0)
+            end
+        else
+            if ColorPalette then
+                moveBtn.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+            else
+                moveBtn.text:SetTextColor(1, 1, 1)
+            end
+        end
     end
     
     -- Update container arrows

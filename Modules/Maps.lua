@@ -1,6 +1,7 @@
 local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local Maps = MidnightUI:NewModule("Maps", "AceEvent-3.0", "AceHook-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
+local ColorPalette, FontKit
 
 -- -----------------------------------------------------------------------------
 -- DATABASE DEFAULTS
@@ -75,6 +76,10 @@ function Maps:OnDBReady()
         self:Disable()
         return 
     end
+    
+    -- Get framework systems
+    ColorPalette = _G.MidnightUI_ColorPalette
+    FontKit = _G.MidnightUI_FontKit
     
     self.db = MidnightUI.db:RegisterNamespace("Maps", defaults)
     
@@ -300,9 +305,17 @@ function Maps:SetupElements()
         return
     end
     
-    local font = LSM:Fetch("font", self.db.profile.font)
-    local size = self.db.profile.fontSize
-    local flag = self.db.profile.fontOutline
+    local font, size, flag
+    
+    if FontKit then
+        font = FontKit:GetFont('body')
+        size = FontKit:GetSize('normal')
+        flag = "OUTLINE"
+    else
+        font = LSM:Fetch("font", self.db.profile.font)
+        size = self.db.profile.fontSize
+        flag = self.db.profile.fontOutline
+    end
 
     -- 1. CLOCK
     if not self.clock then
@@ -448,14 +461,14 @@ function Maps:UpdateLayout()
         self.clock:ClearAllPoints()
         self.clock:SetPoint(db.clock.point, Minimap, db.clock.point, db.clock.x, db.clock.y)
         self.clock:SetShown(db.showClock)
-        self.clock:SetTextColor(unpack(db.clock.color))
+        self.clock:SetTextColor(ColorPalette and ColorPalette:GetColor("text-secondary") or unpack(db.clock.color))
     end
     
     if self.coords then
         self.coords:ClearAllPoints()
         self.coords:SetPoint(db.coords.point, Minimap, db.coords.point, db.coords.x, db.coords.y)
         self.coords:SetShown(db.showCoords)
-        self.coords:SetTextColor(unpack(db.coords.color))
+        self.coords:SetTextColor(ColorPalette and ColorPalette:GetColor("text-secondary") or unpack(db.coords.color))
     end
     
     if self.zone then
