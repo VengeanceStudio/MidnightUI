@@ -76,6 +76,9 @@ function MidnightUI:OnEnable()
         if AceConfigDialog.SetDefaultSize then
             AceConfigDialog:SetDefaultSize("MidnightUI", 900, 700)
         end
+        
+        -- Hook AceConfigDialog to apply themed backdrop
+        self:HookConfigDialogFrames()
     end)
     
     -- Initialize Framework
@@ -200,6 +203,61 @@ function MidnightUI:ScaleLayoutToResolution()
     
     print("|cff00ff00MidnightUI:|r Layout scaled to your resolution!")
     StaticPopup_Show("MIDNIGHTUI_RELOAD_CONFIRM")
+end
+
+function MidnightUI:HookConfigDialogFrames()
+    local AceGUI = LibStub("AceGUI-3.0")
+    if not AceGUI then return end
+    
+    -- Hook the Frame widget creation
+    local oldCreateFrame = AceGUI.WidgetRegistry.Frame
+    if oldCreateFrame then
+        AceGUI.WidgetRegistry.Frame = function(...)
+            local frame = oldCreateFrame(...)
+            if frame and frame.frame then
+                C_Timer.After(0, function()
+                    self:SkinConfigFrame(frame.frame)
+                end)
+            end
+            return frame
+        end
+    end
+end
+
+function MidnightUI:SkinConfigFrame(frame)
+    if not frame or not frame.SetBackdrop then return end
+    
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then return end
+    
+    -- Apply themed backdrop
+    frame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 16,
+        edgeSize = 2,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    
+    frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+    frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Skin the close button if it exists
+    if frame.obj and frame.obj.closebutton then
+        local closeBtn = frame.obj.closebutton
+        if ColorPalette then
+            closeBtn:SetNormalTexture("")
+            closeBtn:SetPushedTexture("")
+            closeBtn:SetHighlightTexture("")
+            
+            local text = closeBtn:CreateFontString(nil, "OVERLAY")
+            text:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+            text:SetText("×")
+            text:SetPoint("CENTER", 0, 1)
+            text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+    end
 end
 
 function MidnightUI:OpenConfig()
