@@ -292,9 +292,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     local offsetX = 0
                     local offsetY = -20
                     
-                    -- "Scale Layout" button should not move right
+                    -- "Scale Layout" button should not move right and should move up
                     if buttonText:find("Scale Layout") then
                         offsetX = 0
+                        offsetY = 100
                     -- "Apply to All" button should move right but not down (same row as dropdown)
                     elseif buttonText:find("Apply") then
                         offsetX = 30
@@ -805,13 +806,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if widgetType == "Heading" then
                 FontKit:SetFont(widget.label, 'heading', 'large')
                 
-                -- Add spacing after "Global Font" heading
+                -- Move "Global Font" heading up
                 if widget.label:GetText() and widget.label:GetText():find("Global Font") then
                     if widget.frame and not widget.customHeadingSpaced then
                         local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                         if point and yOfs then
                             widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 50)
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + 100)
                             widget.customHeadingSpaced = true
                         end
                     end
@@ -821,7 +822,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                         if point and yOfs then
                             widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 150)
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 250)
                             widget.customHeadingSpaced = true
                         end
                     end
@@ -835,7 +836,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                         if point and yOfs then
                             widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 150)
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 250)
                             widget.customLabelSpaced = true
                         end
                     end
