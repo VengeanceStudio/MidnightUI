@@ -293,6 +293,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                 
+                -- Force backdrop to show
+                if widget.frame.Show then
+                    widget.frame:Show()
+                end
+                
                 -- Create custom hover effect
                 widget.frame:HookScript("OnEnter", function(self)
                     if widget.frame.SetBackdropColor then
@@ -335,7 +340,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.toggleBg:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 4, -4)
                 widget.toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
                 local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                widget.toggleBg:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, a)  -- Darker for off state
+                widget.toggleBg:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, a)  -- Much darker for off state
                 
                 -- Add border
                 widget.toggleBorder = widget.frame:CreateTexture(nil, "BORDER")
@@ -361,7 +366,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         else
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
                             local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                            widget.toggleBg:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, a)  -- Darker for off
+                            widget.toggleBg:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, a)  -- Much darker for off
                         end
                     end
                 end)
@@ -374,7 +379,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 else
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
                     local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                    widget.toggleBg:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, a)
+                    widget.toggleBg:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, a)
                 end
             end
         end
@@ -472,15 +477,44 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             
             -- Style the dropdown button
             if widget.button then
-                if widget.button.SetNormalTexture then widget.button:SetNormalTexture("") end
-                if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
-                if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
-                if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture("") end
+                -- Clear all button textures
+                if widget.button.SetNormalTexture then 
+                    widget.button:SetNormalTexture("")
+                    local tex = widget.button:GetNormalTexture()
+                    if tex then tex:SetTexture(nil) end
+                end
+                if widget.button.SetHighlightTexture then 
+                    widget.button:SetHighlightTexture("")
+                    local tex = widget.button:GetHighlightTexture()
+                    if tex then tex:SetTexture(nil) end
+                end
+                if widget.button.SetPushedTexture then 
+                    widget.button:SetPushedTexture("")
+                    local tex = widget.button:GetPushedTexture()
+                    if tex then tex:SetTexture(nil) end
+                end
+                if widget.button.SetDisabledTexture then 
+                    widget.button:SetDisabledTexture("")
+                    local tex = widget.button:GetDisabledTexture()
+                    if tex then tex:SetTexture(nil) end
+                end
                 
-                -- Hide button textures
+                -- Hide button texture children
                 if widget.button.Left then widget.button.Left:Hide() end
                 if widget.button.Middle then widget.button.Middle:Hide() end
                 if widget.button.Right then widget.button.Right:Hide() end
+                
+                -- Apply backdrop to button itself
+                if widget.button.SetBackdrop then
+                    widget.button:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    widget.button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                    widget.button:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                end
                 
                 -- Create custom dropdown arrow
                 if not widget.customArrow then
