@@ -444,14 +444,29 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     
                                     -- Hover effect
                                     button:HookScript("OnEnter", function(self)
-                                        if button.SetBackdropColor and not button.selected then
-                                            local r, g, b = ColorPalette:GetColor('button-bg')
-                                            button:SetBackdropColor(r, g, b, 0.3)
+                                        if button.SetBackdropColor then
+                                            if button.selected then
+                                                -- Selected item hover: brighter background
+                                                local r, g, b = ColorPalette:GetColor('button-bg')
+                                                button:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, 1)
+                                                button:SetBackdropBorderColor(0.2, 0.65, 0.72, 1)
+                                            else
+                                                -- Non-selected item hover
+                                                local r, g, b = ColorPalette:GetColor('button-bg')
+                                                button:SetBackdropColor(r, g, b, 0.5)
+                                            end
                                         end
                                     end)
                                     button:HookScript("OnLeave", function(self)
-                                        if button.SetBackdropColor and not button.selected then
-                                            button:SetBackdropColor(0, 0, 0, 0)
+                                        if button.SetBackdropColor then
+                                            if button.selected then
+                                                -- Restore selected appearance
+                                                button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                                button:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                            else
+                                                -- Clear non-selected appearance
+                                                button:SetBackdropColor(0, 0, 0, 0)
+                                            end
                                         end
                                     end)
                                     
@@ -463,9 +478,17 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                             if selected then
                                                 button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                                                 button:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                                -- Change text color to teal for selected item
+                                                if button.text then
+                                                    button.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
+                                                end
                                             else
                                                 button:SetBackdropColor(0, 0, 0, 0)
                                                 button:SetBackdropBorderColor(0, 0, 0, 0)
+                                                -- Restore normal text color for non-selected items
+                                                if button.text then
+                                                    button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                                end
                                             end
                                         end
                                         button.selected = selected
