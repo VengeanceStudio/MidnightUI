@@ -434,7 +434,9 @@ function MidnightUI:SkinConfigFrame(frame)
     end
 end
 
-function MidnightUI:Skin
+function MidnightUI:SkinConfigFrame(frame)
+    if not frame or not frame.SetBackdrop then return end
+    
     local ColorPalette = _G.MidnightUI_ColorPalette
     if not ColorPalette then return end
     
