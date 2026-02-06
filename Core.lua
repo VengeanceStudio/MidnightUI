@@ -296,10 +296,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     if buttonText:find("Scale Layout") then
                         offsetX = 0
                         offsetY = 100
-                    -- "Apply to All" button should move right but not down (same row as dropdown)
+                    -- "Apply to All" button should move right and up to align with Global Font dropdown
                     elseif buttonText:find("Apply") then
                         offsetX = 30
-                        offsetY = 0
+                        offsetY = 40
                     else
                         offsetX = 50
                     end
@@ -526,10 +526,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs and yOfs then
                 widget.frame:ClearAllPoints()
-                -- Add extra vertical spacing if this appears after Global Font heading
+                -- Move Global Font dropdown up
                 local extraY = 0
                 if widget.label and widget.label:GetText() and widget.label:GetText():find("Font") then
-                    extraY = -50
+                    extraY = 40
                 end
                 widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 17, yOfs + extraY)
             end
@@ -806,13 +806,23 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if widgetType == "Heading" then
                 FontKit:SetFont(widget.label, 'heading', 'large')
                 
-                -- Move "Global Font" heading up
+                -- Move "Global Font" heading down
                 if widget.label:GetText() and widget.label:GetText():find("Global Font") then
                     if widget.frame and not widget.customHeadingSpaced then
                         local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                         if point and yOfs then
                             widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + 100)
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 50)
+                            widget.customHeadingSpaced = true
+                        end
+                    end
+                -- Move "Resolution Scaling" heading up
+                elseif widget.label:GetText() and widget.label:GetText():find("Resolution Scaling") then
+                    if widget.frame and not widget.customHeadingSpaced then
+                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+                        if point and yOfs then
+                            widget.frame:ClearAllPoints()
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + 50)
                             widget.customHeadingSpaced = true
                         end
                     end
