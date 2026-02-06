@@ -351,8 +351,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     -- Check if this tab is selected
                     local isSelected = (widget.selected == tab.value)
                     if isSelected then
-                        -- Selected tab: much brighter background, accent border
-                        tab:SetBackdropColor(0.28, 0.33, 0.38, 0.9)
+                        -- Selected tab: white background, accent border
+                        tab:SetBackdropColor(1, 1, 1, 1)
                         tab:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1) -- Teal accent
                     else
                         -- Unselected tab: normal colors
