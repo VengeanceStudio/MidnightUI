@@ -284,32 +284,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
-            -- Add spacing and positioning based on button text
-            if not widget.customButtonSpaced then
-                local buttonText = widget.text and widget.text:GetText() or ""
-                local currentPoint, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
-                if currentPoint and yOfs then
-                    local offsetX = 0
-                    local offsetY = -20
-                    
-                    -- "Scale Layout" button should not move right and should move up
-                    if buttonText:find("Scale Layout") then
-                        offsetX = 0
-                        offsetY = 105
-                    -- "Apply to All" button should move right and up to align with Global Font dropdown
-                    elseif buttonText:find("Apply") then
-                        offsetX = 30
-                        offsetY = 40
-                    else
-                        offsetX = 50
-                    end
-                    
-                    widget.frame:ClearAllPoints()
-                    widget.frame:SetPoint(currentPoint, relativeTo, relativePoint, xOfs + offsetX, yOfs + offsetY)
-                    widget.customButtonSpaced = true
-                end
-            end
-            
             -- Ensure frame has BackdropTemplate
             if not widget.frame.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.frame, BackdropTemplateMixin)
@@ -379,16 +353,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "CheckBox" then
         if widget.frame then
-            -- Move checkbox frame down on General tab
-            if not widget.customCheckboxMoved then
-                local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
-                if point and yOfs then
-                    widget.frame:ClearAllPoints()
-                    widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 50)
-                    widget.customCheckboxMoved = true
-                end
-            end
-            
             -- Hide original checkbox elements
             if widget.checkbg then widget.checkbg:Hide() end
             if widget.highlight then widget.highlight:Hide() end
@@ -526,12 +490,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs and yOfs then
                 widget.frame:ClearAllPoints()
-                -- Move Global Font dropdown up
-                local extraY = 0
-                if widget.label and widget.label:GetText() and widget.label:GetText():find("Font") then
-                    extraY = 30
-                end
-                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 17, yOfs + extraY)
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 17, yOfs)
             end
         end
         
@@ -805,52 +764,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.label and FontKit then
             if widgetType == "Heading" then
                 FontKit:SetFont(widget.label, 'heading', 'large')
-                
-                -- Move "Global Font" heading down
-                if widget.label:GetText() and widget.label:GetText():find("Global Font") then
-                    if widget.frame and not widget.customHeadingSpaced then
-                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
-                        if point and yOfs then
-                            widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
-                            widget.customHeadingSpaced = true
-                        end
-                    end
-                -- Move "Resolution Scaling" heading up
-                elseif widget.label:GetText() and widget.label:GetText():find("Resolution Scaling") then
-                    if widget.frame and not widget.customHeadingSpaced then
-                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
-                        if point and yOfs then
-                            widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + 42)
-                            widget.customHeadingSpaced = true
-                        end
-                    end
-                -- Move "Modules" heading down significantly to position above Data Brokers
-                elseif widget.label:GetText() and widget.label:GetText():find("Modules") then
-                    if widget.frame and not widget.customHeadingSpaced then
-                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
-                        if point and yOfs then
-                            widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 250)
-                            widget.customHeadingSpaced = true
-                        end
-                    end
-                end
             else
                 FontKit:SetFont(widget.label, 'body', 'normal')
-                
-                -- Move "Toggle modules" label down to position above Data Brokers
-                if widget.label:GetText() and widget.label:GetText():find("Toggle modules") then
-                    if widget.frame and not widget.customLabelSpaced then
-                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
-                        if point and yOfs then
-                            widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 250)
-                            widget.customLabelSpaced = true
-                        end
-                    end
-                end
             end
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
         end
@@ -1048,12 +963,10 @@ function MidnightUI:GetOptions()
                             self:Print("Theme changed to " .. value .. ". Some changes may require a /reload to take full effect.")
                         end,
                     },
-                    header = { type = "header", order = 1, name = "Modules" },
-                    desc = { type = "description", order = 2, name = "Toggle modules. Requires Reload." },
                     resolutionHeader = {
                         type = "header",
                         name = "Resolution Scaling",
-                        order = 2.05,
+                        order = 1.0,
                     },
                     resolutionDesc = {
                         type = "description",
@@ -1082,14 +995,14 @@ function MidnightUI:GetOptions()
                                        "|cffaaaaIf you imported a profile from someone using " .. refWidth .. "x" .. refHeight .. ", use the button below to automatically scale all element positions to your UI resolution.|r"
                             end
                         end,
-                        order = 2.06,
+                        order = 1.01,
                         fontSize = "medium",
                     },
                     scaleToResolution = {
                         type = "execute",
                         name = "Scale Layout to My Resolution",
                         desc = "Automatically adjusts all element positions from 2133x1200 to your current resolution",
-                        order = 2.07,
+                        order = 1.02,
                         func = function()
                             MidnightUI:ScaleLayoutToResolution()
                         end,
@@ -1102,13 +1015,13 @@ function MidnightUI:GetOptions()
                     fontHeader = {
                         type = "header",
                         name = "Global Font",
-                        order = 2.08,
+                        order = 1.1,
                     },
                     globalFont = {
                         type = "select",
                         name = "Global Font",
                         desc = "Select a font to apply to all MidnightUI elements.",
-                        order = 2.1,
+                        order = 1.11,
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
@@ -1122,7 +1035,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Apply to All",
                         desc = "Apply the selected global font to all MidnightUI modules and bars.",
-                        order = 2.2,
+                        order = 1.12,
                         func = function()
                             local font = MidnightUI.db.profile.theme.font or "Friz Quadrata TT"
                             -- UnitFrames
@@ -1182,25 +1095,27 @@ function MidnightUI:GetOptions()
                             -- Add update calls for other modules as needed
                         end,
                     },
-                    bar = { name = "Data Brokers", type = "toggle", order = 3, width = "full",
+                    modulesHeader = { type = "header", order = 2.0, name = "Modules" },
+                    modulesDesc = { type = "description", order = 2.01, name = "Toggle modules. Requires Reload." },
+                    bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full",
                         get = function() return self.db.profile.modules.bar end,
                         set = function(_, v) self.db.profile.modules.bar = v; C_UI.Reload() end },
-                    UIButtons = { name = "UI Buttons", type = "toggle", order = 4, width = "full",
+                    UIButtons = { name = "UI Buttons", type = "toggle", order = 2.2, width = "full",
                         get = function() return self.db.profile.modules.UIButtons end,
                         set = function(_, v) self.db.profile.modules.UIButtons = v; C_UI.Reload() end },
-                    chatcopy = { name = "Chat Copy", type = "toggle", order = 4.5, width = "full",
+                    chatcopy = { name = "Chat Copy", type = "toggle", order = 2.3, width = "full",
                         get = function() return self.db.profile.modules.chatcopy ~= false end,
                         set = function(_, v) self.db.profile.modules.chatcopy = v; C_UI.Reload() end },
-                    maps = { name = "Maps", type = "toggle", order = 5, width = "full",
+                    maps = { name = "Maps", type = "toggle", order = 2.4, width = "full",
                         get = function() return self.db.profile.modules.maps end,
                         set = function(_, v) self.db.profile.modules.maps = v; C_UI.Reload() end },
-                    actionbars = { name = "Action Bars", type = "toggle", order = 6, width = "full",
+                    actionbars = { name = "Action Bars", type = "toggle", order = 2.5, width = "full",
                         get = function() return self.db.profile.modules.actionbars end,
                         set = function(_, v) self.db.profile.modules.actionbars = v; C_UI.Reload() end },
-                    unitframes = { name = "Unit Frames", type = "toggle", order = 7, width = "full",
+                    unitframes = { name = "Unit Frames", type = "toggle", order = 2.6, width = "full",
                         get = function() return self.db.profile.modules.unitframes end,
                         set = function(_, v) self.db.profile.modules.unitframes = v; C_UI.Reload() end },
-                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 8, width = "full",
+                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full",
                         desc = "Work in progress - Cannot be enabled at this time.",
                         get = function() return self.db.profile.modules.cooldowns end,
                         set = function(_, v)
