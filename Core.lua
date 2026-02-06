@@ -434,6 +434,25 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tab.customTabHooked = true
                 end
             end
+            
+            -- Delayed check to ensure initial selected tab gets correct styling
+            if not widget.customInitialSelectionApplied then
+                C_Timer.After(0.1, function()
+                    if widget.tabs then
+                        for _, t in pairs(widget.tabs) do
+                            local selected = (widget.selected == t.value) or (t.selected == true)
+                            if selected then
+                                t:SetBackdropColor(1, 1, 1, 1)
+                                t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                if t.text then
+                                    t.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
+                                end
+                            end
+                        end
+                    end
+                end)
+                widget.customInitialSelectionApplied = true
+            end
         end
         
     elseif widgetType == "InlineGroup" or widgetType == "SimpleGroup" or widgetType == "TreeGroup" then
