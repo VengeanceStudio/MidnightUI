@@ -678,7 +678,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.frame and not widget.customFrameHeight then
             local currentHeight = widget.frame:GetHeight()
             if currentHeight then
-                widget.frame:SetHeight(currentHeight + 20)
+                widget.frame:SetHeight(currentHeight + 40)
             end
             widget.customFrameHeight = true
         end
@@ -710,11 +710,36 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 thumb:SetVertexColor(ColorPalette:GetColor('text-primary'))
                 thumb:SetSize(6, 10)
             end
+            
+            -- Add vertical spacing by moving the slider down from the label
+            if not widget.customSliderSpacing then
+                C_Timer.After(0.1, function()
+                    if widget.slider then
+                        local _, _, _, _, yOfs = widget.slider:GetPoint()
+                        widget.slider:ClearAllPoints()
+                        widget.slider:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 15, (yOfs or -20) - 8)
+                        widget.slider:SetPoint("TOPRIGHT", widget.frame, "TOPRIGHT", -15, (yOfs or -20) - 8)
+                    end
+                end)
+                widget.customSliderSpacing = true
+            end
         end
         
         if widget.label and FontKit then
             FontKit:SetFont(widget.label, 'body', 'normal')
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+        -- Add spacing for the editbox below the slider
+        if widget.editbox and not widget.customEditBoxSpacing then
+            C_Timer.After(0.1, function()
+                if widget.editbox then
+                    local _, _, _, _, yOfs = widget.editbox:GetPoint()
+                    widget.editbox:ClearAllPoints()
+                    widget.editbox:SetPoint("TOP", widget.frame, "BOTTOM", 0, (yOfs or 0) - 8)
+                end
+            end)
+            widget.customEditBoxSpacing = true
         end
         
     elseif widgetType == "EditBox" or widgetType == "MultiLineEditBox" then
