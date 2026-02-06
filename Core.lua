@@ -442,12 +442,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                                     end
                                     
-                                    -- Hover effect
+                                    -- Hover effect - make it more visible
                                     button:HookScript("OnEnter", function(self)
                                         if button.SetBackdropColor then
-                                            -- Show hover background for all items (selected or not)
+                                            -- Show brighter hover background
                                             local r, g, b = ColorPalette:GetColor('button-bg')
-                                            button:SetBackdropColor(r, g, b, 0.5)
+                                            button:SetBackdropColor(r * 1.8, g * 1.8, b * 1.8, 0.8)
+                                            button:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 0.5)
                                         end
                                     end)
                                     button:HookScript("OnLeave", function(self)
@@ -458,18 +459,18 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         end
                                     end)
                                     
-                                    -- Selected state
+                                    -- Selected state - make text color very distinct
                                     local origSetSelected = button.SetSelected
                                     button.SetSelected = function(self, selected)
                                         origSetSelected(self, selected)
                                         button.selected = selected
-                                        -- Only change text color, no background/border
+                                        -- Change text color for clear visual indication
                                         if button.text then
                                             if selected then
-                                                -- Teal text for selected item
-                                                button.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
+                                                -- Bright teal text for selected item
+                                                button.text:SetTextColor(0.2, 0.7, 0.8, 1)
                                             else
-                                                -- Normal text color for non-selected items
+                                                -- Normal white/gray text for non-selected items
                                                 button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                                             end
                                         end
