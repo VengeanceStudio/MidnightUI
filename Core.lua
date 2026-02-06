@@ -988,7 +988,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     -- Style item text with larger font
                                     if item.text then
                                         -- Use larger font size for better readability
-                                        item.text:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+                                        local font, _, flags = item.text:GetFont()
+                                        item.text:SetFont(font or "Fonts\\FRIZQT__.TTF", 16, flags or "OUTLINE")
                                         item.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                                     end
                                     
@@ -1002,6 +1003,23 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     item.customSkinned = true
                                 end
                             end
+                        end
+                        
+                        -- Also hook SetScroll to catch items added after initial open
+                        if self.pullout and not self.pullout.customScrollHook then
+                            hooksecurefunc(self.pullout, "SetScroll", function()
+                                if self.pullout.items then
+                                    for _, item in pairs(self.pullout.items) do
+                                        if item.text and not item.fontResized then
+                                            local font, _, flags = item.text:GetFont()
+                                            item.text:SetFont(font or "Fonts\\FRIZQT__.TTF", 16, flags or "OUTLINE")
+                                            item.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                            item.fontResized = true
+                                        end
+                                    end
+                                end
+                            end)
+                            self.pullout.customScrollHook = true
                         end
                     end
                 end
@@ -1050,16 +1068,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
     elseif widgetType == "Dropdown-Pullout" then
         -- Skin the dropdown pullout menu
         if widget.frame then
-            -- Make the pullout wider and taller
-            local width = widget.frame:GetWidth()
-            local height = widget.frame:GetHeight()
-            if width and width < 250 then
-                widget.frame:SetWidth(250)
-            end
-            if height and height < 300 then
-                widget.frame:SetHeight(300)
-            end
-            
             -- Add BackdropTemplate if needed
             if not widget.frame.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.frame, BackdropTemplateMixin)
@@ -1090,11 +1098,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
         end
         
-        -- Style the scroll frame and make it larger
+        -- Style the scroll frame
         if widget.scrollFrame then
-            widget.scrollFrame:SetWidth(246)
-            widget.scrollFrame:SetHeight(296)
-            
             if not widget.scrollFrame.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.scrollFrame, BackdropTemplateMixin)
                 if widget.scrollFrame.OnBackdropLoaded then
