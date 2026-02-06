@@ -694,12 +694,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.slider:SetHeight(4)
             end
             
-            -- Style the thumb
+            -- Style the thumb - make it smaller
             widget.slider:SetThumbTexture("Interface\\Buttons\\WHITE8X8")
             local thumb = widget.slider:GetThumbTexture()
             if thumb then
                 thumb:SetVertexColor(ColorPalette:GetColor('text-primary'))
-                thumb:SetSize(12, 20)
+                thumb:SetSize(8, 14)
             end
         end
         
