@@ -288,6 +288,14 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     tile = false, edgeSize = 2,
                                     insets = { left = 2, right = 2, top = 2, bottom = 2 }
                                 }
+                            else
+                                -- Force edgeSize to 2 if backdrop exists
+                                if backdrop.edgeFile and backdrop.edgeSize ~= 2 then
+                                    backdrop.edgeSize = 2
+                                    if not backdrop.insets then
+                                        backdrop.insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                    end
+                                end
                             end
                             originalSetBackdrop(self, backdrop)
                             
@@ -903,9 +911,17 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             backdrop = {
                                 bgFile = "Interface\\Buttons\\WHITE8X8",
                                 edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                tile = false, edgeSize = 1,
-                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                                tile = false, edgeSize = 2,
+                                insets = { left = 2, right = 2, top = 2, bottom = 2 }
                             }
+                        else
+                            -- Force edgeSize to 2 if backdrop exists
+                            if backdrop.edgeFile and backdrop.edgeSize ~= 2 then
+                                backdrop.edgeSize = 2
+                                if not backdrop.insets then
+                                    backdrop.insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                end
+                            end
                         end
                         originalSetBackdrop(self, backdrop)
                         
