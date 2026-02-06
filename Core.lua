@@ -880,7 +880,7 @@ function MidnightUI:SkinConfigFrame(frame)
         -- Add logo texture
         if not frame.logoTexture then
             frame.logoTexture = frame:CreateTexture(nil, "ARTWORK")
-            frame.logoTexture:SetTexture("Interface\\AddOns\\MidnightUI\\Media\\Skull.tga")
+            frame.logoTexture:SetTexture("Interface\\AddOns\\MidnightUI\\Media\\midnightUI_icon.tga")
             frame.logoTexture:SetSize(32, 32)
             frame.logoTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 12, -12)
         end
