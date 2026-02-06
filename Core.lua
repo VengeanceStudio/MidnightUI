@@ -815,9 +815,31 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             widget.customHeadingSpaced = true
                         end
                     end
+                -- Move "Modules" heading down significantly to position above Data Brokers
+                elseif widget.label:GetText() and widget.label:GetText():find("Modules") then
+                    if widget.frame and not widget.customHeadingSpaced then
+                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+                        if point and yOfs then
+                            widget.frame:ClearAllPoints()
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 150)
+                            widget.customHeadingSpaced = true
+                        end
+                    end
                 end
             else
                 FontKit:SetFont(widget.label, 'body', 'normal')
+                
+                -- Move "Toggle modules" label down to position above Data Brokers
+                if widget.label:GetText() and widget.label:GetText():find("Toggle modules") then
+                    if widget.frame and not widget.customLabelSpaced then
+                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+                        if point and yOfs then
+                            widget.frame:ClearAllPoints()
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 150)
+                            widget.customLabelSpaced = true
+                        end
+                    end
+                end
             end
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
         end
