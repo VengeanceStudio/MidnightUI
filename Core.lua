@@ -1003,7 +1003,7 @@ function MidnightUI:SkinConfigFrame(frame)
             frame.obj.line:SetParent(nil)
         end
         
-        -- Hide all children that might be status-related
+        -- Hide all children that might be status-related (one-time check)
         local children = {frame:GetChildren()}
         for _, child in ipairs(children) do
             if child:GetName() and (child:GetName():find("Status") or child:GetName():find("Close")) then
@@ -1025,20 +1025,6 @@ function MidnightUI:SkinConfigFrame(frame)
                     end
                 end
             end
-        end
-        
-        -- Continuously hide status bar elements (they might recreate themselves)
-        if not frame.statusHideHooked then
-            frame:HookScript("OnShow", function()
-                C_Timer.After(0.1, function()
-                    if frame.obj.statusbg then frame.obj.statusbg:Hide() end
-                    if frame.obj.statustext then frame.obj.statustext:Hide() end
-                    if frame.obj.status then frame.obj.status:Hide() end
-                    if frame.obj.line then frame.obj.line:Hide() end
-                    if frame.obj.closebutton then frame.obj.closebutton:Hide() end
-                end)
-            end)
-            frame.statusHideHooked = true
         end
     end
     
