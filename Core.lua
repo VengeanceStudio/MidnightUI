@@ -276,6 +276,35 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 end
                 
                 if tab.SetBackdrop then
+                    -- Hook SetBackdrop to intercept and prevent clearing
+                    if not tab.backdropHooked then
+                        local originalSetBackdrop = tab.SetBackdrop
+                        tab.SetBackdrop = function(self, backdrop)
+                            -- If trying to clear backdrop, apply our styled one instead
+                            if not backdrop or backdrop == {} then
+                                backdrop = {
+                                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                    tile = false, edgeSize = 1,
+                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                                }
+                            end
+                            originalSetBackdrop(self, backdrop)
+                            
+                            -- Reapply colors immediately after backdrop change
+                            local selected = (widget.selected == self.value)
+                            if selected then
+                                local r, g, b, a = ColorPalette:GetColor('button-bg')
+                                self:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
+                                self:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                            else
+                                self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                self:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                            end
+                        end
+                        tab.backdropHooked = true
+                    end
+                    
                     tab:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
                         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -834,6 +863,28 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             
             -- Apply themed backdrop
             if widget.dropdown.SetBackdrop then
+                -- Hook SetBackdrop to intercept and prevent clearing
+                if not widget.dropdown.backdropHooked then
+                    local originalSetBackdrop = widget.dropdown.SetBackdrop
+                    widget.dropdown.SetBackdrop = function(self, backdrop)
+                        -- If trying to clear backdrop, apply our styled one instead
+                        if not backdrop or backdrop == {} then
+                            backdrop = {
+                                bgFile = "Interface\\Buttons\\WHITE8X8",
+                                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                tile = false, edgeSize = 1,
+                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                            }
+                        end
+                        originalSetBackdrop(self, backdrop)
+                        
+                        -- Reapply colors immediately after backdrop change
+                        self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                        self:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    end
+                    widget.dropdown.backdropHooked = true
+                end
+                
                 widget.dropdown:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
