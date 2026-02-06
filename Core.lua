@@ -339,6 +339,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
                 -- Hook tab click to update styling
                 if not tab.customTabHooked then
+                    -- Store original frame reference
+                    tab._originalFrameID = tostring(tab)
+                    
                     tab:HookScript("OnClick", function()
                         print("DEBUG: Tab clicked:", tab.value, "widget.selected=", widget.selected)
                         
@@ -346,6 +349,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         print("DEBUG: IMMEDIATE check of first tab:")
                         local t = widget.tabs[1]
                         if t then
+                            print("  Frame ID:", tostring(t), "Original:", t._originalFrameID)
                             local hasBackdrop = t:GetBackdrop() ~= nil
                             local borderr, borderg, borderb, bordera = 0, 0, 0, 0
                             if hasBackdrop then
@@ -388,6 +392,20 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         tostring(backdrop.edgeSize), borderr, borderg, borderb, bordera))
                                 else
                                     print("  At 0.1s: backdrop is NIL!")
+                                end
+                            end
+                        end)
+                        
+                        C_Timer.After(0.5, function()
+                            print("DEBUG: After 0.5s, checking ALL tabs:")
+                            for idx, t in pairs(widget.tabs) do
+                                local backdrop = t:GetBackdrop()
+                                if backdrop then
+                                    local borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
+                                    print(string.format("  Tab %d: edgeSize=%s borderAlpha=%.2f", 
+                                        idx, tostring(backdrop.edgeSize), bordera))
+                                else
+                                    print(string.format("  Tab %d: backdrop is NIL!", idx))
                                 end
                             end
                         end)
