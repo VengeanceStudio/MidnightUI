@@ -476,6 +476,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         end
                                     end
                                     
+                                    -- Apply color immediately if already selected
+                                    if button.selected and button.text then
+                                        button.text:SetTextColor(0.2, 0.7, 0.8, 1)
+                                    end
+                                    
                                     button.customStyled = true
                                 end
                             end
