@@ -370,41 +370,20 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 -- Hook tab click to update styling
                 if not tab.customTabHooked then
                     tab:HookScript("OnClick", function()
-                        -- Reskin all tabs multiple times with different delays
-                        local function reskinAllTabs()
+                        -- Wait for widget.selected to update, then reskin colors only
+                        C_Timer.After(0.01, function()
                             for _, t in pairs(widget.tabs) do
-                                -- Hide Blizzard textures again
-                                HideTabTextures(t)
-                                
-                                if t.SetBackdrop then
-                                    -- Force backdrop reapplication
-                                    t:SetBackdrop(nil)
-                                    t:SetBackdrop({
-                                        bgFile = "Interface\\Buttons\\WHITE8X8",
-                                        edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                        tile = false, edgeSize = 2,
-                                        insets = { left = 2, right = 2, top = 2, bottom = 2 }
-                                    })
-                                    
-                                    local selected = (widget.selected == t.value)
-                                    if selected then
-                                        local r, g, b, a = ColorPalette:GetColor('button-bg')
-                                        t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
-                                        t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                    else
-                                        t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                                        t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                                    end
+                                local selected = (widget.selected == t.value)
+                                if selected then
+                                    local r, g, b, a = ColorPalette:GetColor('button-bg')
+                                    t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
+                                    t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                else
+                                    t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                    t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
                                 end
                             end
-                        end
-                        
-                        -- Apply immediately and at multiple intervals
-                        reskinAllTabs()
-                        C_Timer.After(0.01, reskinAllTabs)
-                        C_Timer.After(0.05, reskinAllTabs)
-                        C_Timer.After(0.1, reskinAllTabs)
-                        C_Timer.After(0.2, reskinAllTabs)
+                        end)
                     end)
                     
                     -- Also hook OnShow to prevent textures from reappearing
