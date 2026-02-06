@@ -295,7 +295,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     -- "Scale Layout" button should not move right and should move up
                     if buttonText:find("Scale Layout") then
                         offsetX = 0
-                        offsetY = 100
+                        offsetY = 105
                     -- "Apply to All" button should move right and up to align with Global Font dropdown
                     elseif buttonText:find("Apply") then
                         offsetX = 30
@@ -529,7 +529,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 -- Move Global Font dropdown up
                 local extraY = 0
                 if widget.label and widget.label:GetText() and widget.label:GetText():find("Font") then
-                    extraY = 40
+                    extraY = 30
                 end
                 widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 17, yOfs + extraY)
             end
@@ -812,7 +812,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                         if point and yOfs then
                             widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 50)
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
                             widget.customHeadingSpaced = true
                         end
                     end
@@ -822,7 +822,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                         if point and yOfs then
                             widget.frame:ClearAllPoints()
-                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + 50)
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + 42)
                             widget.customHeadingSpaced = true
                         end
                     end
