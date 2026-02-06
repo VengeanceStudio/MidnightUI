@@ -750,9 +750,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
             
             if FontKit then
-                local fontPath = FontKit:GetFontPath('body')
-                if fontPath then
-                    widget.editbox:SetFont(fontPath, 10, "OUTLINE")
+                -- Get the font from FontKit and apply with smaller size
+                local fontData = FontKit.fonts['body']
+                if fontData and fontData.path then
+                    widget.editbox:SetFont(fontData.path, 10, "OUTLINE")
                 end
                 widget.editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
             end
