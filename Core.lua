@@ -284,12 +284,27 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
-            -- Add spacing above button and move right
+            -- Add spacing and positioning based on button text
             if not widget.customButtonSpaced then
+                local buttonText = widget.text and widget.text:GetText() or ""
                 local currentPoint, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                 if currentPoint and yOfs then
+                    local offsetX = 0
+                    local offsetY = -20
+                    
+                    -- "Scale Layout" button should not move right
+                    if buttonText:find("Scale Layout") then
+                        offsetX = 0
+                    -- "Apply to All" button should move right but not down (same row as dropdown)
+                    elseif buttonText:find("Apply") then
+                        offsetX = 50
+                        offsetY = 0
+                    else
+                        offsetX = 50
+                    end
+                    
                     widget.frame:ClearAllPoints()
-                    widget.frame:SetPoint(currentPoint, relativeTo, relativePoint, xOfs + 50, yOfs - 20)
+                    widget.frame:SetPoint(currentPoint, relativeTo, relativePoint, xOfs + offsetX, yOfs + offsetY)
                     widget.customButtonSpaced = true
                 end
             end
@@ -515,7 +530,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 if widget.label and widget.label:GetText() and widget.label:GetText():find("Font") then
                     extraY = -50
                 end
-                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 15, yOfs + extraY)
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 17, yOfs + extraY)
             end
         end
         
