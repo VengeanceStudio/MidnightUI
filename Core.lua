@@ -730,12 +730,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
         end
         
-        -- Move label to the right as well
+        -- Move label up and adjust horizontal position
         if widget.label and not widget.customLabelMoved then
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.label:GetPoint()
             if point and xOfs and yOfs then
                 widget.label:ClearAllPoints()
-                widget.label:SetPoint(point, relativeTo, relativePoint, xOfs + 1, yOfs)
+                widget.label:SetPoint(point, relativeTo, relativePoint, xOfs + 5, yOfs + 3)
                 widget.customLabelMoved = true
             end
         end
