@@ -376,7 +376,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         C_Timer.After(0, function()
                             if tab.text then
                                 local textWidth = tab.text:GetStringWidth()
-                                local padding = 30 -- Padding on each side
+                                local padding = 20 -- Reduced padding to prevent overlap
                                 local minWidth = textWidth + padding
                                 
                                 -- Get current width
@@ -400,12 +400,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             HideTabTextures(t)
                         end
                         
-                        -- Wait for widget.selected to update, then reskin colors only
-                        C_Timer.After(0.01, function()
+                        -- Wait longer for widget.selected to update
+                        C_Timer.After(0.05, function()
                             for _, t in pairs(widget.tabs) do
                                 HideTabTextures(t)
                                 
-                                local selected = (widget.selected == t.value)
+                                -- Check both widget.selected and the tab's own selected property
+                                local selected = (widget.selected == t.value) or (t.selected == true)
                                 if selected then
                                     -- Much brighter background for selected tab
                                     t:SetBackdropColor(0.2, 0.25, 0.3, 0.9)
