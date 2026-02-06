@@ -392,6 +392,92 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.treeframe:ClearAllPoints()
                 widget.treeframe:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 6, -76)
                 widget.treeframe:SetPoint("BOTTOMLEFT", widget.frame, "BOTTOMLEFT", 6, 6)
+                
+                -- Style tree buttons (navigation items)
+                if not widget.treeButtonsStyled then
+                    -- Hook to style buttons as they're created/shown
+                    hooksecurefunc(widget, "RefreshTree", function()
+                        if widget.buttons then
+                            for _, button in pairs(widget.buttons) do
+                                if button and not button.customStyled then
+                                    -- Hide Blizzard textures
+                                    if button.toggle then
+                                        button.toggle:SetNormalTexture("")
+                                        button.toggle:SetPushedTexture("")
+                                        button.toggle:SetHighlightTexture("")
+                                    end
+                                    
+                                    -- Hide all button textures
+                                    for _, region in ipairs({button:GetRegions()}) do
+                                        if region:GetObjectType() == "Texture" and region ~= button.icon then
+                                            region:Hide()
+                                        end
+                                    end
+                                    
+                                    -- Add BackdropTemplate if needed
+                                    if not button.SetBackdrop and BackdropTemplateMixin then
+                                        Mixin(button, BackdropTemplateMixin)
+                                        if button.OnBackdropLoaded then
+                                            button:OnBackdropLoaded()
+                                        end
+                                    end
+                                    
+                                    -- Apply themed backdrop
+                                    if button.SetBackdrop then
+                                        button:SetBackdrop({
+                                            bgFile = "Interface\\Buttons\\WHITE8X8",
+                                            edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                            tile = false, edgeSize = 1,
+                                            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                                        })
+                                        button:SetBackdropColor(0, 0, 0, 0)
+                                        button:SetBackdropBorderColor(0, 0, 0, 0)
+                                    end
+                                    
+                                    -- Style text
+                                    if button.text then
+                                        if FontKit then
+                                            FontKit:SetFont(button.text, 'body', 'normal')
+                                        end
+                                        button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                    end
+                                    
+                                    -- Hover effect
+                                    button:HookScript("OnEnter", function(self)
+                                        if button.SetBackdropColor and not button.selected then
+                                            local r, g, b = ColorPalette:GetColor('button-bg')
+                                            button:SetBackdropColor(r, g, b, 0.3)
+                                        end
+                                    end)
+                                    button:HookScript("OnLeave", function(self)
+                                        if button.SetBackdropColor and not button.selected then
+                                            button:SetBackdropColor(0, 0, 0, 0)
+                                        end
+                                    end)
+                                    
+                                    -- Selected state
+                                    local origSetSelected = button.SetSelected
+                                    button.SetSelected = function(self, selected)
+                                        origSetSelected(self, selected)
+                                        if button.SetBackdropColor then
+                                            if selected then
+                                                button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                                button:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                            else
+                                                button:SetBackdropColor(0, 0, 0, 0)
+                                                button:SetBackdropBorderColor(0, 0, 0, 0)
+                                            end
+                                        end
+                                        button.selected = selected
+                                    end
+                                    
+                                    button.customStyled = true
+                                end
+                            end
+                        end
+                    end)
+                    widget.treeButtonsStyled = true
+                end
             end
             
             -- Style the content area border
