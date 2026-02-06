@@ -500,7 +500,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tile = false, edgeSize = 1,
                     insets = { left = 2, right = 2, top = 2, bottom = 2 }
                 })
-                widget.dropdown:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
                 widget.customDropdownSkinned = true
             end
@@ -561,6 +561,28 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.customArrow:SetRotation(-1.57)
                     widget.customArrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
                 end
+                
+                -- Hook to prevent textures from reappearing
+                if not widget.customButtonTextureHook then
+                    widget.button:HookScript("OnClick", function()
+                        for _, region in ipairs({widget.button:GetRegions()}) do
+                            if region:GetObjectType() == "Texture" and region ~= widget.customArrow then
+                                region:Hide()
+                            end
+                        end
+                        if widget.button.SetNormalTexture then widget.button:SetNormalTexture("") end
+                        if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
+                        if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
+                    end)
+                    widget.button:HookScript("OnShow", function()
+                        for _, region in ipairs({widget.button:GetRegions()}) do
+                            if region:GetObjectType() == "Texture" and region ~= widget.customArrow then
+                                region:Hide()
+                            end
+                        end
+                    end)
+                    widget.customButtonTextureHook = true
+                end
             end
         end
 
@@ -574,11 +596,14 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         frame:OnBackdropLoaded()
                     end
                 end
+                
+                -- Hide all frame textures
                 for _, region in ipairs({frame:GetRegions()}) do
                     if region:GetObjectType() == "Texture" then
                         region:Hide()
                     end
                 end
+                
                 if frame.SetBackdrop then
                     frame:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -588,6 +613,47 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     })
                     frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                     frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                end
+                
+                -- Skin scrollbar if it exists
+                if widget.pullout.scrollFrame and widget.pullout.scrollFrame.scrollBar then
+                    local scrollBar = widget.pullout.scrollFrame.scrollBar
+                    for _, region in ipairs({scrollBar:GetRegions()}) do
+                        if region:GetObjectType() == "Texture" then
+                            region:Hide()
+                        end
+                    end
+                end
+                
+                -- Skin individual pullout items
+                if widget.pullout.items then
+                    for _, item in pairs(widget.pullout.items) do
+                        if item.frame then
+                            -- Hide Blizzard textures on items
+                            for _, region in ipairs({item.frame:GetRegions()}) do
+                                if region:GetObjectType() == "Texture" then
+                                    region:Hide()
+                                end
+                            end
+                            
+                            -- Style item text
+                            if item.text and FontKit then
+                                FontKit:SetFont(item.text, 'body', 'normal')
+                                item.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                            end
+                            
+                            -- Add hover effect to items
+                            if not item.customHooked then
+                                item.frame:HookScript("OnEnter", function()
+                                    item.frame:SetAlpha(0.7)
+                                end)
+                                item.frame:HookScript("OnLeave", function()
+                                    item.frame:SetAlpha(1)
+                                end)
+                                item.customHooked = true
+                            end
+                        end
+                    end
                 end
             end
             if not widget.customPulloutHooked then
