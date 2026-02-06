@@ -448,7 +448,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
         end
         
-    elseif widgEnsure dropdown has BackdropTemplate
+    elseif widgetType == "Dropdown" then
+        if widget.dropdown then
+            -- Ensure dropdown has BackdropTemplate
             if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.dropdown, BackdropTemplateMixin)
                 if widget.dropdown.OnBackdropLoaded then
