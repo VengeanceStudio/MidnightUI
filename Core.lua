@@ -992,14 +992,25 @@ function MidnightUI:SkinConfigFrame(frame)
         if frame.obj.status and frame.obj.status.Hide then
             frame.obj.status:Hide()
         end
+        
+        -- Also hide the line/closebutton container at the bottom
+        if frame.obj.line then
+            frame.obj.line:Hide()
+        end
     end
     
     -- Create custom close button
     if frame.obj and not frame.customCloseBtn then
-        -- Hide original close button completely
+        -- Hide ALL original close buttons (both bottom and any other positions)
         if frame.obj.closebutton then
             frame.obj.closebutton:Hide()
             frame.obj.closebutton:SetAlpha(0)
+        end
+        
+        -- Hide close buttons in status container
+        if frame.obj.status and frame.obj.status.closebutton then
+            frame.obj.status.closebutton:Hide()
+            frame.obj.status.closebutton:SetAlpha(0)
         end
         
         -- Create new themed close button
