@@ -520,12 +520,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
-            -- Move button to the right
+            -- Move button to the right and down slightly to avoid label overlap
             if not widget.customButtonMoved then
                 local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                 if point and xOfs and yOfs then
                     widget.frame:ClearAllPoints()
-                    widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 20, yOfs)
+                    widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 20, yOfs - 10)
                     widget.customButtonMoved = true
                 end
             end
