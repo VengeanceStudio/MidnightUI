@@ -726,7 +726,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs and yOfs then
                 widget.frame:ClearAllPoints()
-                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 30, yOfs)
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 25, yOfs)
             end
         end
         
