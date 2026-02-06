@@ -1045,6 +1045,60 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widgetType == "Label" and widget.frame then
             widget.frame:SetHeight(widget.frame:GetHeight() + 20)
         end
+        
+    elseif widgetType == "Dropdown-Pullout" then
+        -- Skin the dropdown pullout menu
+        if widget.frame then
+            -- Add BackdropTemplate if needed
+            if not widget.frame.SetBackdrop and BackdropTemplateMixin then
+                Mixin(widget.frame, BackdropTemplateMixin)
+                if widget.frame.OnBackdropLoaded then
+                    widget.frame:OnBackdropLoaded()
+                end
+            end
+            
+            -- Hide all Blizzard textures
+            for _, region in ipairs({widget.frame:GetRegions()}) do
+                if region:GetObjectType() == "Texture" then
+                    region:SetTexture(nil)
+                    region:Hide()
+                    region:SetAlpha(0)
+                end
+            end
+            
+            -- Apply themed backdrop
+            if widget.frame.SetBackdrop then
+                widget.frame:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 2,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                })
+                widget.frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+        end
+        
+        -- Style the scroll frame
+        if widget.scrollFrame then
+            if not widget.scrollFrame.SetBackdrop and BackdropTemplateMixin then
+                Mixin(widget.scrollFrame, BackdropTemplateMixin)
+                if widget.scrollFrame.OnBackdropLoaded then
+                    widget.scrollFrame:OnBackdropLoaded()
+                end
+            end
+            
+            if widget.scrollFrame.SetBackdrop then
+                widget.scrollFrame:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                })
+                widget.scrollFrame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                widget.scrollFrame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+        end
     end
 end
 
