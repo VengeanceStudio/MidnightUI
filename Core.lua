@@ -229,6 +229,32 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             widget.customBuildTabsHooked = true
         end
         
+        -- Hook Fire to catch tab selection and reskin after callback completes
+        if widget.Fire and not widget.customFireHooked then
+            local originalFire = widget.Fire
+            widget.Fire = function(self, event, ...)
+                local result = originalFire(self, event, ...)
+                if event == "OnGroupSelected" then
+                    -- Tab was selected, reskin everything after a slight delay
+                    C_Timer.After(0.05, function()
+                        -- Reskin the tab group itself
+                        MidnightUI:SkinAceGUIWidget(self, "TabGroup")
+                        
+                        -- Reskin all child widgets in content area
+                        if self.content then
+                            for _, child in pairs({self.content:GetChildren()}) do
+                                if child.obj and child.obj.type then
+                                    MidnightUI:SkinAceGUIWidget(child.obj, child.obj.type)
+                                end
+                            end
+                        end
+                    end)
+                end
+                return result
+            end
+            widget.customFireHooked = true
+        end
+        
         if widget.border then
             widget.border:SetBackdrop({
                 bgFile = "Interface\\Buttons\\WHITE8X8",
