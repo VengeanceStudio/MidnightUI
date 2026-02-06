@@ -217,8 +217,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "TabGroup" then
-        print("DEBUG: Skinning TabGroup widget")
-        
         if widget.border then
             widget.border:SetBackdrop({
                 bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -280,18 +278,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 if tab.SetBackdrop then
                     -- Hook SetBackdrop to intercept and prevent clearing
                     if not tab.backdropHooked then
-                        print("DEBUG: Hooking SetBackdrop for tab:", tab.value)
                         local originalSetBackdrop = tab.SetBackdrop
                         tab.SetBackdrop = function(self, backdrop)
-                            print("DEBUG: Tab SetBackdrop called for", self.value, "backdrop=", backdrop)
                             -- If trying to clear backdrop, apply our styled one instead
                             if not backdrop or backdrop == {} then
-                                print("DEBUG: Backdrop was nil/empty, applying styled backdrop")
                                 backdrop = {
                                     bgFile = "Interface\\Buttons\\WHITE8X8",
                                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                    tile = false, edgeSize = 1,
-                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                                    tile = false, edgeSize = 2,
+                                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
                                 }
                             end
                             originalSetBackdrop(self, backdrop)
@@ -310,12 +305,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         tab.backdropHooked = true
                     end
                     
-                    print("DEBUG: Setting initial backdrop for tab:", tab.value)
                     tab:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
                         edgeFile = "Interface\\Buttons\\WHITE8X8",
-                        tile = false, edgeSize = 1,
-                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                        tile = false, edgeSize = 2,
+                        insets = { left = 2, right = 2, top = 2, bottom = 2 }
                     })
                     
                     -- Check if this tab is selected
@@ -339,77 +333,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
                 -- Hook tab click to update styling
                 if not tab.customTabHooked then
-                    -- Store original frame reference
-                    tab._originalFrameID = tostring(tab)
-                    
                     tab:HookScript("OnClick", function()
-                        print("DEBUG: Tab clicked:", tab.value, "widget.selected=", widget.selected)
-                        
-                        -- Check state IMMEDIATELY
-                        print("DEBUG: IMMEDIATE check of first tab:")
-                        local t = widget.tabs[1]
-                        if t then
-                            print("  Frame ID:", tostring(t), "Original:", t._originalFrameID)
-                            local hasBackdrop = t:GetBackdrop() ~= nil
-                            local borderr, borderg, borderb, bordera = 0, 0, 0, 0
-                            if hasBackdrop then
-                                borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
-                            end
-                            print(string.format("  IMMEDIATE: backdrop=%s borderColor=(%.2f,%.2f,%.2f,%.2f)", 
-                                tostring(hasBackdrop), borderr, borderg, borderb, bordera))
-                        end
-                        
-                        -- Use a timer to check after selection updates
-                        C_Timer.After(0.05, function()
-                            print("DEBUG: After delay, widget.selected=", widget.selected)
-                            print("DEBUG: Checking if tabs still exist...")
-                            for idx, t in pairs(widget.tabs) do
-                                local hasBackdrop = t:GetBackdrop() ~= nil
-                                local alpha = t:GetAlpha()
-                                local shown = t:IsShown()
-                                local br, bg, bb, ba = 0, 0, 0, 0
-                                local borderr, borderg, borderb, bordera = 0, 0, 0, 0
-                                if hasBackdrop then
-                                    br, bg, bb, ba = t:GetBackdropColor()
-                                    borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
-                                end
-                                print(string.format("DEBUG: Tab %d value=%s backdrop=%s alpha=%.2f shown=%s", 
-                                    idx, tostring(t.value), tostring(hasBackdrop), alpha, tostring(shown)))
-                                print(string.format("  bgColor=(%.2f,%.2f,%.2f,%.2f) borderColor=(%.2f,%.2f,%.2f,%.2f)", 
-                                    br, bg, bb, ba, borderr, borderg, borderb, bordera))
-                            end
-                        end)
-                        
-                        C_Timer.After(0.1, function()
-                            print("DEBUG: After 0.1s, checking first tab again:")
-                            local t = widget.tabs[1]
-                            if t then
-                                local backdrop = t:GetBackdrop()
-                                local borderr, borderg, borderb, bordera = 0, 0, 0, 0
-                                if backdrop then
-                                    borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
-                                    print(string.format("  At 0.1s: edgeSize=%s borderColor=(%.2f,%.2f,%.2f,%.2f)", 
-                                        tostring(backdrop.edgeSize), borderr, borderg, borderb, bordera))
-                                else
-                                    print("  At 0.1s: backdrop is NIL!")
-                                end
-                            end
-                        end)
-                        
-                        C_Timer.After(0.5, function()
-                            print("DEBUG: After 0.5s, checking ALL tabs:")
-                            for idx, t in pairs(widget.tabs) do
-                                local backdrop = t:GetBackdrop()
-                                if backdrop then
-                                    local borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
-                                    print(string.format("  Tab %d: edgeSize=%s borderAlpha=%.2f", 
-                                        idx, tostring(backdrop.edgeSize), bordera))
-                                else
-                                    print(string.format("  Tab %d: backdrop is NIL!", idx))
-                                end
-                            end
-                        end)
-                        
                         -- Reskin all tabs to update selected state
                         for _, t in pairs(widget.tabs) do
                             -- Hide Blizzard textures again
@@ -417,7 +341,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             
                             if t.SetBackdrop then
                                 local selected = (widget.selected == t.value)
-                                print("DEBUG: Updating tab colors for", t.value, "selected=", selected)
                                 if selected then
                                     local r, g, b, a = ColorPalette:GetColor('button-bg')
                                     t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
@@ -965,8 +888,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.dropdown:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    tile = false, edgeSize = 1,
-                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    tile = false, edgeSize = 2,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -1330,11 +1253,9 @@ function MidnightUI:HookConfigDialogFrames()
     if FrameMT and FrameMT.SetBackdrop then
         hooksecurefunc(FrameMT, "SetBackdrop", function(frame, backdrop)
             if styledFrames[frame] and (not backdrop or backdrop == {}) then
-                print("DEBUG: Global hook detected backdrop clearing on styled frame")
                 -- This frame had styling and is being cleared, restore it immediately
                 C_Timer.After(0, function()
                     if styledFrames[frame] and frame.SetBackdrop then
-                        print("DEBUG: Restoring backdrop from global hook")
                         local info = styledFrames[frame]
                         frame:SetBackdrop(info.backdrop)
                         if info.bgColor then
@@ -1354,7 +1275,6 @@ function MidnightUI:HookConfigDialogFrames()
     AceGUI.Create = function(self, widgetType)
         local widget = oldCreate(self, widgetType)
         if widget then
-            print("DEBUG: AceGUI creating widget type:", widgetType)
             C_Timer.After(0, function()
                 MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
