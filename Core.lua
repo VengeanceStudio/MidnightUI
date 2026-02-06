@@ -924,7 +924,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if not widget.dropdown.customWidthSet then
                 local currentWidth = widget.dropdown:GetWidth()
                 if currentWidth and currentWidth > 0 then
-                    widget.dropdown:SetWidth(currentWidth - 30)
+                    widget.dropdown:SetWidth(currentWidth - 60)
                     widget.dropdown.customWidthSet = true
                 end
             end
