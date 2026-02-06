@@ -340,7 +340,17 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 -- Hook tab click to update styling
                 if not tab.customTabHooked then
                     tab:HookScript("OnClick", function()
-                        print("DEBUG: Tab clicked:", tab.value)
+                        print("DEBUG: Tab clicked:", tab.value, "widget.selected=", widget.selected)
+                        
+                        -- Use a timer to check after selection updates
+                        C_Timer.After(0.05, function()
+                            print("DEBUG: After delay, widget.selected=", widget.selected)
+                            print("DEBUG: Checking if tabs still exist...")
+                            for idx, t in pairs(widget.tabs) do
+                                print("DEBUG: Tab", idx, "value=", t.value, "backdrop hooked?", t.backdropHooked, "has backdrop?", t:GetBackdrop() ~= nil)
+                            end
+                        end)
+                        
                         -- Reskin all tabs to update selected state
                         for _, t in pairs(widget.tabs) do
                             -- Hide Blizzard textures again
