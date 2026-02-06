@@ -735,7 +735,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.label:GetPoint()
             if point and xOfs and yOfs then
                 widget.label:ClearAllPoints()
-                widget.label:SetPoint(point, relativeTo, relativePoint, xOfs + 10, yOfs)
+                widget.label:SetPoint(point, relativeTo, relativePoint, xOfs + 1, yOfs)
                 widget.customLabelMoved = true
             end
         end
