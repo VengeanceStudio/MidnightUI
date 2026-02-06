@@ -525,7 +525,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                 if point and xOfs and yOfs then
                     widget.frame:ClearAllPoints()
-                    widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 15, yOfs)
+                    widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 20, yOfs)
                     widget.customButtonMoved = true
                 end
             end
