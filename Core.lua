@@ -713,12 +713,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             
             -- Add vertical spacing by moving the slider down from the label
             if not widget.customSliderSpacing then
-                C_Timer.After(0.1, function()
-                    if widget.slider then
-                        local _, _, _, _, yOfs = widget.slider:GetPoint()
+                C_Timer.After(0.05, function()
+                    if widget.slider and widget.label then
                         widget.slider:ClearAllPoints()
-                        widget.slider:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 15, (yOfs or -20) - 8)
-                        widget.slider:SetPoint("TOPRIGHT", widget.frame, "TOPRIGHT", -15, (yOfs or -20) - 8)
+                        widget.slider:SetPoint("TOPLEFT", widget.label, "BOTTOMLEFT", 0, -8)
+                        widget.slider:SetPoint("TOPRIGHT", widget.label, "BOTTOMRIGHT", 0, -8)
                     end
                 end)
                 widget.customSliderSpacing = true
@@ -732,11 +731,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
         -- Add spacing for the editbox below the slider
         if widget.editbox and not widget.customEditBoxSpacing then
-            C_Timer.After(0.1, function()
-                if widget.editbox then
-                    local _, _, _, _, yOfs = widget.editbox:GetPoint()
+            C_Timer.After(0.05, function()
+                if widget.editbox and widget.slider then
                     widget.editbox:ClearAllPoints()
-                    widget.editbox:SetPoint("TOP", widget.frame, "BOTTOM", 0, (yOfs or 0) - 8)
+                    widget.editbox:SetPoint("TOP", widget.slider, "BOTTOM", 0, -8)
                 end
             end)
             widget.customEditBoxSpacing = true
