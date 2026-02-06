@@ -380,13 +380,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             print("DEBUG: After 0.1s, checking first tab again:")
                             local t = widget.tabs[1]
                             if t then
-                                local hasBackdrop = t:GetBackdrop() ~= nil
+                                local backdrop = t:GetBackdrop()
                                 local borderr, borderg, borderb, bordera = 0, 0, 0, 0
-                                if hasBackdrop then
+                                if backdrop then
                                     borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
+                                    print(string.format("  At 0.1s: edgeSize=%s borderColor=(%.2f,%.2f,%.2f,%.2f)", 
+                                        tostring(backdrop.edgeSize), borderr, borderg, borderb, bordera))
+                                else
+                                    print("  At 0.1s: backdrop is NIL!")
                                 end
-                                print(string.format("  At 0.1s: backdrop=%s borderColor=(%.2f,%.2f,%.2f,%.2f)", 
-                                    tostring(hasBackdrop), borderr, borderg, borderb, bordera))
                             end
                         end)
                         
