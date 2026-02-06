@@ -938,11 +938,26 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 end
                             end
                             
-                            -- Hide all frame textures
+                            -- Hide all frame textures and children textures
                             for _, region in ipairs({frame:GetRegions()}) do
                                 if region:GetObjectType() == "Texture" then
                                     region:SetTexture(nil)
                                     region:Hide()
+                                    region:SetAlpha(0)
+                                end
+                            end
+                            
+                            -- Hide textures in all child frames
+                            local children = {frame:GetChildren()}
+                            for _, child in ipairs(children) do
+                                if child ~= scrollFrame then
+                                    for _, region in ipairs({child:GetRegions()}) do
+                                        if region:GetObjectType() == "Texture" then
+                                            region:SetTexture(nil)
+                                            region:Hide()
+                                            region:SetAlpha(0)
+                                        end
+                                    end
                                 end
                             end
                             
