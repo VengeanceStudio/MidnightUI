@@ -905,7 +905,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if not widget.frame.customWidthSet then
                 local currentWidth = widget.frame:GetWidth()
                 if currentWidth and currentWidth > 0 then
-                    widget.frame:SetWidth(currentWidth - 60)
+                    widget.frame:SetWidth(currentWidth - 30)
                     widget.frame.customWidthSet = true
                 end
             end
