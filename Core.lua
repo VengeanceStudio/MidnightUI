@@ -302,8 +302,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             -- Reapply colors immediately after backdrop change
                             local selected = (widget.selected == self.value)
                             if selected then
-                                local r, g, b, a = ColorPalette:GetColor('button-bg')
-                                self:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
+                                self:SetBackdropColor(1, 1, 1, 1)
                                 self:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
                             else
                                 self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
