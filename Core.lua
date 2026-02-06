@@ -320,42 +320,33 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         insets = { left = 2, right = 2, top = 2, bottom = 2 }
                     })
                     
-                    -- Create a persistent overlay frame with border that can't be removed
-                    if not tab.persistentBorder then
-                        local overlay = CreateFrame("Frame", nil, tab, BackdropTemplateMixin and "BackdropTemplate")
-                        overlay:SetAllPoints(tab)
-                        overlay:SetFrameLevel(tab:GetFrameLevel() + 10)
-                        overlay:SetBackdrop({
-                            bgFile = nil,
-                            edgeFile = "Interface\\Buttons\\WHITE8X8",
-                            tile = false, edgeSize = 2,
-                            insets = { left = 0, right = 0, top = 0, bottom = 0 }
-                        })
-                        -- Use the same border color as the tab
-                        local isSelected = (widget.selected == tab.value)
-                        if isSelected then
-                            overlay:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                        else
-                            overlay:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    -- Protect backdrop texture regions from being hidden
+                    if not tab.backdropProtected then
+                        local protectTexture = function(texture)
+                            if texture and texture.Hide and not texture.originalHide then
+                                texture.originalHide = texture.Hide
+                                texture.Hide = function(self)
+                                    -- Don't allow hiding of backdrop textures
+                                    -- Only allow if parent tab is being hidden
+                                    if not tab:IsShown() then
+                                        texture.originalHide(self)
+                                    end
+                                end
+                            end
                         end
-                        tab.persistentBorder = overlay
+                        
+                        -- Protect all backdrop edge textures
+                        protectTexture(tab.TopEdge)
+                        protectTexture(tab.BottomEdge)
+                        protectTexture(tab.LeftEdge)
+                        protectTexture(tab.RightEdge)
+                        protectTexture(tab.TopLeftCorner)
+                        protectTexture(tab.TopRightCorner)
+                        protectTexture(tab.BottomLeftCorner)
+                        protectTexture(tab.BottomRightCorner)
+                        
+                        tab.backdropProtected = true
                     end
-                    
-                    -- Explicitly show all backdrop texture regions
-                    C_Timer.After(0, function()
-                        if tab.Center then tab.Center:Show() end
-                        if tab.TopEdge then tab.TopEdge:Show() end
-                        if tab.BottomEdge then tab.BottomEdge:Show() end
-                        if tab.LeftEdge then tab.LeftEdge:Show() end
-                        if tab.RightEdge then tab.RightEdge:Show() end
-                        if tab.TopLeftCorner then tab.TopLeftCorner:Show() end
-                        if tab.TopRightCorner then tab.TopRightCorner:Show() end
-                        if tab.BottomLeftCorner then tab.BottomLeftCorner:Show() end
-                        if tab.BottomRightCorner then tab.BottomRightCorner:Show() end
-                        if tab.persistentBorder then
-                            tab.persistentBorder:Show()
-                        end
-                    end)
                     
                     -- Check if this tab is selected
                     local isSelected = (widget.selected == tab.value)
@@ -400,15 +391,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         local r, g, b, a = ColorPalette:GetColor('button-bg')
                                         t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
                                         t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                        if t.persistentBorder then
-                                            t.persistentBorder:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                        end
                                     else
                                         t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                                         t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                                        if t.persistentBorder then
-                                            t.persistentBorder:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                                        end
                                     end
                                 end
                             end
@@ -971,19 +956,30 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
                 
-                -- Create persistent overlay border for dropdown
-                if not widget.dropdown.persistentBorder then
-                    local overlay = CreateFrame("Frame", nil, widget.dropdown, BackdropTemplateMixin and "BackdropTemplate")
-                    overlay:SetAllPoints(widget.dropdown)
-                    overlay:SetFrameLevel(widget.dropdown:GetFrameLevel() + 10)
-                    overlay:SetBackdrop({
-                        bgFile = nil,
-                        edgeFile = "Interface\\Buttons\\WHITE8X8",
-                        tile = false, edgeSize = 2,
-                        insets = { left = 0, right = 0, top = 0, bottom = 0 }
-                    })
-                    overlay:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                    widget.dropdown.persistentBorder = overlay
+                -- Protect dropdown backdrop texture regions from being hidden
+                if not widget.dropdown.backdropProtected then
+                    local protectTexture = function(texture)
+                        if texture and texture.Hide and not texture.originalHide then
+                            texture.originalHide = texture.Hide
+                            texture.Hide = function(self)
+                                -- Don't allow hiding unless parent is being hidden
+                                if not widget.dropdown:IsShown() then
+                                    texture.originalHide(self)
+                                end
+                            end
+                        end
+                    end
+                    
+                    protectTexture(widget.dropdown.TopEdge)
+                    protectTexture(widget.dropdown.BottomEdge)
+                    protectTexture(widget.dropdown.LeftEdge)
+                    protectTexture(widget.dropdown.RightEdge)
+                    protectTexture(widget.dropdown.TopLeftCorner)
+                    protectTexture(widget.dropdown.TopRightCorner)
+                    protectTexture(widget.dropdown.BottomLeftCorner)
+                    protectTexture(widget.dropdown.BottomRightCorner)
+                    
+                    widget.dropdown.backdropProtected = true
                 end
             end
             
