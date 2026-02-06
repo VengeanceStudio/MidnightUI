@@ -270,12 +270,20 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if widget.frame.Right then widget.frame.Right:Hide() end
             if widget.frame.Middle then widget.frame.Middle:Hide() end
             if widget.frame.SetNormalTexture then widget.frame:SetNormalTexture("") end
-            if widget.frame.SetHighlightTexture then widget.frame:SetHighlightTexture("") end
+            if widget.frame.SetHighlightTexture then 
+                widget.frame:SetHighlightTexture("")
+                -- Remove the highlight texture entirely
+                local highlight = widget.frame:GetHighlightTexture()
+                if highlight then
+                    highlight:SetTexture(nil)
+                    highlight:SetAlpha(0)
+                end
+            end
             if widget.frame.SetPushedTexture then widget.frame:SetPushedTexture("") end
             if widget.frame.SetDisabledTexture then widget.frame:SetDisabledTexture("") end
             
             -- Apply themed backdrop
-            if widget.frame.SetBackdrop then
+            if widget.frame.SetBackdrop and not widget.customButtonSkinned then
                 widget.frame:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -284,6 +292,21 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 })
                 widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                
+                -- Create custom hover effect
+                widget.frame:HookScript("OnEnter", function(self)
+                    if widget.frame.SetBackdropColor then
+                        local r, g, b, a = ColorPalette:GetColor('button-bg')
+                        widget.frame:SetBackdropColor(r * 1.3, g * 1.3, b * 1.3, a)
+                    end
+                end)
+                widget.frame:HookScript("OnLeave", function(self)
+                    if widget.frame.SetBackdropColor then
+                        widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                    end
+                end)
+                
+                widget.customButtonSkinned = true
             end
         end
         
@@ -299,13 +322,20 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if widget.highlight then widget.highlight:Hide() end
             if widget.check then widget.check:Hide() end
             
+            -- Adjust text position to make room for toggle slider
+            if widget.text then
+                widget.text:ClearAllPoints()
+                widget.text:SetPoint("LEFT", widget.frame, "LEFT", 50, 0)
+            end
+            
             -- Create toggle slider background
             if not widget.toggleBg then
                 widget.toggleBg = widget.frame:CreateTexture(nil, "BACKGROUND")
                 widget.toggleBg:SetSize(40, 20)
                 widget.toggleBg:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 4, -4)
                 widget.toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-                widget.toggleBg:SetVertexColor(ColorPalette:GetColor('input-bg'))
+                local r, g, b, a = ColorPalette:GetColor('panel-bg')
+                widget.toggleBg:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, a)  -- Darker for off state
                 
                 -- Add border
                 widget.toggleBorder = widget.frame:CreateTexture(nil, "BORDER")
@@ -330,7 +360,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                         else
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                            widget.toggleBg:SetVertexColor(ColorPalette:GetColor('input-bg'))
+                            local r, g, b, a = ColorPalette:GetColor('panel-bg')
+                            widget.toggleBg:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, a)  -- Darker for off
                         end
                     end
                 end)
@@ -342,6 +373,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                 else
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
+                    local r, g, b, a = ColorPalette:GetColor('panel-bg')
+                    widget.toggleBg:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, a)
                 end
             end
         end
@@ -410,13 +443,22 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "DropDown" then
         if widget.dropdown then
-            -- Hide Blizzard dropdown textures
-            if widget.dropdown.Left then widget.dropdown.Left:Hide() end
-            if widget.dropdown.Middle then widget.dropdown.Middle:Hide() end
-            if widget.dropdown.Right then widget.dropdown.Right:Hide() end
+            -- Hide Blizzard dropdown textures completely
+            if widget.dropdown.Left then 
+                widget.dropdown.Left:Hide() 
+                widget.dropdown.Left:SetAlpha(0)
+            end
+            if widget.dropdown.Middle then 
+                widget.dropdown.Middle:Hide()
+                widget.dropdown.Middle:SetAlpha(0)
+            end
+            if widget.dropdown.Right then 
+                widget.dropdown.Right:Hide()
+                widget.dropdown.Right:SetAlpha(0)
+            end
             
             -- Apply themed backdrop
-            if widget.dropdown.SetBackdrop then
+            if widget.dropdown.SetBackdrop and not widget.customDropdownSkinned then
                 widget.dropdown:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -425,6 +467,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('input-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                widget.customDropdownSkinned = true
             end
             
             -- Style the dropdown button
@@ -433,6 +476,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
                 if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
                 if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture("") end
+                
+                -- Hide button textures
+                if widget.button.Left then widget.button.Left:Hide() end
+                if widget.button.Middle then widget.button.Middle:Hide() end
+                if widget.button.Right then widget.button.Right:Hide() end
                 
                 -- Create custom dropdown arrow
                 if not widget.customArrow then
