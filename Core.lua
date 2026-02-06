@@ -74,7 +74,7 @@ function MidnightUI:OnEnable()
         AceConfigDialog:AddToBlizOptions("MidnightUI", "Midnight UI")
         -- Set a larger default size for the options window
         if AceConfigDialog.SetDefaultSize then
-            AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 700)
+            AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
         -- Hook AceConfigDialog to apply themed backdrop
@@ -346,6 +346,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.content:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                 widget.content:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
             end
+        end
+        
+        -- Add top padding to TreeGroup tree container
+        if widgetType == "TreeGroup" and widget.treeframe then
+            widget.treeframe:ClearAllPoints()
+            widget.treeframe:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 0, -70)
+            widget.treeframe:SetPoint("BOTTOMLEFT", widget.frame, "BOTTOMLEFT", 0, 0)
         end
         
     elseif widgetType == "Button" then
