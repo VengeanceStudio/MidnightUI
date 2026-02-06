@@ -374,44 +374,25 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 -- Hook tab click to update styling
                 if not tab.customTabHooked then
                     tab:HookScript("OnClick", function()
-                        -- Try multiple times with different delays to catch the right moment
-                        for _, delay in ipairs({0.01, 0.05, 0.1, 0.2}) do
-                            C_Timer.After(delay, function()
-                                -- Reskin all tabs to update selected state
-                                for _, t in pairs(widget.tabs) do
-                                    -- Hide Blizzard textures again
-                                    HideTabTextures(t)
-                                    
-                                    if t.SetBackdrop then
-                                        t:SetBackdrop({
-                                            bgFile = "Interface\\Buttons\\WHITE8X8",
-                                            edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                            tile = false, edgeSize = 1,
-                                            insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                                        })
-                                        
-                                        local selected = (widget.selected == t.value)
-                                        if selected then
-                                            local r, g, b, a = ColorPalette:GetColor('button-bg')
-                                            t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
-                                            t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                        else
-                                            t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                                            t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                                        end
-                                    end
-                                end
+                        C_Timer.After(0.01, function()
+                            -- Reskin all tabs to update selected state
+                            for _, t in pairs(widget.tabs) do
+                                -- Hide Blizzard textures again
+                                HideTabTextures(t)
                                 
-                                -- Also reskin dropdown widgets in content
-                                if widget.content then
-                                    for _, child in pairs({widget.content:GetChildren()}) do
-                                        if child.obj and child.obj.type == "Dropdown" then
-                                            MidnightUI:SkinAceGUIWidget(child.obj, "Dropdown")
-                                        end
+                                if t.SetBackdrop then
+                                    local selected = (widget.selected == t.value)
+                                    if selected then
+                                        local r, g, b, a = ColorPalette:GetColor('button-bg')
+                                        t:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
+                                        t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                    else
+                                        t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                        t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
                                     end
                                 end
-                            end)
-                        end
+                            end
+                        end)
                     end)
                     
                     -- Also hook OnShow to prevent textures from reappearing
