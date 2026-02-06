@@ -312,6 +312,20 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         insets = { left = 2, right = 2, top = 2, bottom = 2 }
                     })
                     
+                    -- Explicitly show all regions to prevent them from being hidden
+                    C_Timer.After(0, function()
+                        for _, region in ipairs({tab:GetRegions()}) do
+                            if region:GetObjectType() == "Texture" then
+                                local texture = region:GetTexture()
+                                -- Show backdrop textures (the border), hide Blizzard textures
+                                if texture and texture:find("WHITE8X8") then
+                                    region:Show()
+                                    region:SetAlpha(1)
+                                end
+                            end
+                        end
+                    end)
+                    
                     -- Check if this tab is selected
                     local isSelected = (widget.selected == tab.value)
                     if isSelected then
