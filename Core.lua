@@ -474,8 +474,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                             end
                                         end
                                     end
-                                        button.selected = selected
-                                    end
                                     
                                     button.customStyled = true
                                 end
