@@ -325,7 +325,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
                     tile = false, edgeSize = 1,
-                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
                 })
                 widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
@@ -496,11 +496,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Dropdown" then
         if widget.frame then
-            -- Move dropdown frame significantly right to prevent border cutoff
+            -- Move dropdown frame slightly right to prevent border cutoff
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs then
                 widget.frame:ClearAllPoints()
-                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 50, yOfs)
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 10, yOfs)
             end
         end
         
@@ -525,8 +525,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.dropdown:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    tile = false, edgeSize = 2,
-                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                    tile = false, edgeSize = 1,
+                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -761,6 +761,18 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.label and FontKit then
             if widgetType == "Heading" then
                 FontKit:SetFont(widget.label, 'heading', 'large')
+                
+                -- Add spacing after "Global Font" heading
+                if widget.label:GetText() and widget.label:GetText():find("Global Font") then
+                    if widget.frame and not widget.customHeadingSpaced then
+                        local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+                        if point and yOfs then
+                            widget.frame:ClearAllPoints()
+                            widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 50)
+                            widget.customHeadingSpaced = true
+                        end
+                    end
+                end
             else
                 FontKit:SetFont(widget.label, 'body', 'normal')
             end
