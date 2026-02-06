@@ -1354,6 +1354,7 @@ function MidnightUI:HookConfigDialogFrames()
     AceGUI.Create = function(self, widgetType)
         local widget = oldCreate(self, widgetType)
         if widget then
+            print("DEBUG: AceGUI creating widget type:", widgetType)
             C_Timer.After(0, function()
                 MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
