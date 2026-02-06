@@ -403,7 +403,14 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
         end
         
-        if w-- Hide Blizzard dropdown textures
+        if widget.label and FontKit then
+            FontKit:SetFont(widget.label, 'body', 'normal')
+            widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        
+    elseif widgetType == "DropDown" then
+        if widget.dropdown then
+            -- Hide Blizzard dropdown textures
             if widget.dropdown.Left then widget.dropdown.Left:Hide() end
             if widget.dropdown.Middle then widget.dropdown.Middle:Hide() end
             if widget.dropdown.Right then widget.dropdown.Right:Hide() end
@@ -436,13 +443,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.customArrow:SetTextColor(ColorPalette:GetColor('text-secondary'))
                 end
             end
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                tile = false, edgeSize = 1,
-                insets = { left = 2, right = 2, top = 2, bottom = 2 }
-            })
-            widget.dropdown:SetBackdropColor(ColorPalette:GetColor('input-bg'))
-            widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
         end
         
         if widget.text and FontKit then
