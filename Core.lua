@@ -286,39 +286,49 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "CheckBox" then
-        if widget.check then
-            widget.check:SetNormalTexture("")
-            widget.check:SetPushedTexture("")
-            widget.check:SetHighlightTexture("")
-            widget.check:SetCheckedTexture("")
-            widget.check:SetDisabledCheckedTexture("")
+        if widget.frame then
+            -- Remove Blizzard textures
+            if widget.checkbg then widget.checkbg:SetAlpha(0) end
+            if widget.highlight then widget.highlight:SetAlpha(0) end
+            if widget.check then widget.check:SetAlpha(0) end
             
-            if widget.check.SetBackdrop then
-                widget.check:SetBackdrop({
+            -- Create custom checkbox background
+            if not widget.customBg and widget.frame.SetBackdrop then
+                widget.frame:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
                     tile = false, edgeSize = 1,
                     insets = { left = 1, right = 1, top = 1, bottom = 1 }
                 })
-                widget.check:SetBackdropColor(ColorPalette:GetColor('input-bg'))
-                widget.check:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                widget.frame:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                widget.customBg = true
             end
             
             -- Create custom check mark
             if not widget.customCheck then
-                widget.customCheck = widget.check:CreateFontString(nil, "OVERLAY")
+                widget.customCheck = widget.frame:CreateFontString(nil, "OVERLAY")
                 widget.customCheck:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
                 widget.customCheck:SetText("✓")
-                widget.customCheck:SetPoint("CENTER", 0, 0)
+                widget.customCheck:SetPoint("CENTER", widget.frame, "TOPLEFT", 12, -12)
                 widget.customCheck:SetTextColor(ColorPalette:GetColor('success'))
+                widget.customCheck:Hide()
             end
             
             -- Hook to show/hide check mark
-            hooksecurefunc(widget, "SetValue", function(self, value)
-                if widget.customCheck then
-                    widget.customCheck:SetShown(value)
+            if not widget.customCheckHooked then
+                hooksecurefunc(widget, "SetValue", function(self, value)
+                    if widget.customCheck then
+                        widget.customCheck:SetShown(value)
+                    end
+                end)
+                widget.customCheckHooked = true
+                
+                -- Set initial state
+                if widget.checked then
+                    widget.customCheck:Show()
                 end
-            end)
+            end
         end
         
         if widget.text and FontKit then
