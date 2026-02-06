@@ -445,28 +445,16 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     -- Hover effect
                                     button:HookScript("OnEnter", function(self)
                                         if button.SetBackdropColor then
-                                            if button.selected then
-                                                -- Selected item hover: brighter background
-                                                local r, g, b = ColorPalette:GetColor('button-bg')
-                                                button:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, 1)
-                                                button:SetBackdropBorderColor(0.2, 0.65, 0.72, 1)
-                                            else
-                                                -- Non-selected item hover
-                                                local r, g, b = ColorPalette:GetColor('button-bg')
-                                                button:SetBackdropColor(r, g, b, 0.5)
-                                            end
+                                            -- Show hover background for all items (selected or not)
+                                            local r, g, b = ColorPalette:GetColor('button-bg')
+                                            button:SetBackdropColor(r, g, b, 0.5)
                                         end
                                     end)
                                     button:HookScript("OnLeave", function(self)
                                         if button.SetBackdropColor then
-                                            if button.selected then
-                                                -- Restore selected appearance
-                                                button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                                                button:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                            else
-                                                -- Clear non-selected appearance
-                                                button:SetBackdropColor(0, 0, 0, 0)
-                                            end
+                                            -- Always clear background on leave
+                                            button:SetBackdropColor(0, 0, 0, 0)
+                                            button:SetBackdropBorderColor(0, 0, 0, 0)
                                         end
                                     end)
                                     
@@ -474,23 +462,18 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     local origSetSelected = button.SetSelected
                                     button.SetSelected = function(self, selected)
                                         origSetSelected(self, selected)
-                                        if button.SetBackdropColor then
+                                        button.selected = selected
+                                        -- Only change text color, no background/border
+                                        if button.text then
                                             if selected then
-                                                button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                                                button:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                                -- Change text color to teal for selected item
-                                                if button.text then
-                                                    button.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
-                                                end
+                                                -- Teal text for selected item
+                                                button.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
                                             else
-                                                button:SetBackdropColor(0, 0, 0, 0)
-                                                button:SetBackdropBorderColor(0, 0, 0, 0)
-                                                -- Restore normal text color for non-selected items
-                                                if button.text then
-                                                    button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
-                                                end
+                                                -- Normal text color for non-selected items
+                                                button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                                             end
                                         end
+                                    end
                                         button.selected = selected
                                     end
                                     
