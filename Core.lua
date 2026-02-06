@@ -229,6 +229,67 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             widget.customBuildTabsHooked = true
         end
         
+        -- Add persistent styling maintenance
+        if widget.frame and not widget.customPersistentStyling then
+            local lastCheck = 0
+            widget.frame:SetScript("OnUpdate", function(self, elapsed)
+                lastCheck = lastCheck + elapsed
+                if lastCheck > 0.1 then -- Check every 0.1 seconds
+                    lastCheck = 0
+                    
+                    -- Reskin all tabs
+                    if widget.tabs then
+                        for _, tab in pairs(widget.tabs) do
+                            if tab.SetBackdrop then
+                                -- Check if backdrop is missing
+                                local backdrop = tab:GetBackdrop()
+                                if not backdrop or not backdrop.bgFile then
+                                    tab:SetBackdrop({
+                                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                        tile = false, edgeSize = 1,
+                                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                                    })
+                                    
+                                    local isSelected = (widget.selected == tab.value)
+                                    if isSelected then
+                                        local r, g, b, a = ColorPalette:GetColor('button-bg')
+                                        tab:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
+                                        tab:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                    else
+                                        tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                        tab:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    
+                    -- Reskin all dropdown frames in content
+                    if widget.content then
+                        for _, child in pairs({widget.content:GetChildren()}) do
+                            if child.obj and child.obj.type == "Dropdown" and child.obj.dropdown then
+                                if child.obj.dropdown.SetBackdrop then
+                                    local backdrop = child.obj.dropdown:GetBackdrop()
+                                    if not backdrop or not backdrop.bgFile then
+                                        child.obj.dropdown:SetBackdrop({
+                                            bgFile = "Interface\\Buttons\\WHITE8X8",
+                                            edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                            tile = false, edgeSize = 1,
+                                            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                        })
+                                        child.obj.dropdown:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                                        child.obj.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+            widget.customPersistentStyling = true
+        end
+        
         if widget.border then
             widget.border:SetBackdrop({
                 bgFile = "Interface\\Buttons\\WHITE8X8",
