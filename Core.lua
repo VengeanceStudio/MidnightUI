@@ -423,6 +423,17 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     end
                                 end
                             end
+                            
+                            -- Force another update slightly later to override any backdrop resets
+                            C_Timer.After(0.02, function()
+                                for _, t in pairs(widget.tabs) do
+                                    local selected = (widget.selected == t.value) or (t.selected == true)
+                                    if selected then
+                                        t:SetBackdropColor(1, 1, 1, 1)
+                                        t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                    end
+                                end
+                            end)
                         end)
                     end)
                     
