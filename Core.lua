@@ -985,9 +985,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         end
                                     end
                                     
-                                    -- Style item text
-                                    if item.text and FontKit then
-                                        FontKit:SetFont(item.text, 'body', 'normal')
+                                    -- Style item text with larger font
+                                    if item.text then
+                                        -- Use larger font size for better readability
+                                        item.text:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
                                         item.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                                     end
                                     
