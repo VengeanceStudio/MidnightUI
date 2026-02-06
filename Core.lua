@@ -376,7 +376,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         C_Timer.After(0, function()
                             if tab.text then
                                 local textWidth = tab.text:GetStringWidth()
-                                local padding = 20 -- Reduced padding to prevent overlap
+                                local padding = 32 -- Enough padding to prevent text wrapping
                                 local minWidth = textWidth + padding
                                 
                                 -- Get current width
@@ -1266,6 +1266,14 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.text and FontKit then
             FontKit:SetFont(widget.text, 'body', 'normal')
             widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+            
+            -- Reposition dropdown text to reduce left padding
+            if widgetType == "Dropdown" and widget.dropdown and widget.button then
+                widget.text:ClearAllPoints()
+                widget.text:SetPoint("LEFT", widget.dropdown, "LEFT", 4, 0)
+                widget.text:SetPoint("RIGHT", widget.button, "LEFT", -2, 0)
+                widget.text:SetJustifyH("LEFT")
+            end
         end
         
         if widget.label and FontKit then
