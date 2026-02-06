@@ -265,6 +265,16 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
+            -- Add spacing above button to prevent text overlap
+            if not widget.customButtonSpaced then
+                local currentPoint, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+                if currentPoint and yOfs then
+                    widget.frame:ClearAllPoints()
+                    widget.frame:SetPoint(currentPoint, relativeTo, relativePoint, xOfs, yOfs - 10)
+                    widget.customButtonSpaced = true
+                end
+            end
+            
             -- Ensure frame has BackdropTemplate
             if not widget.frame.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.frame, BackdropTemplateMixin)
@@ -497,6 +507,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             
             -- Style the dropdown button
             if widget.button then
+                -- Reposition button to align with dropdown right edge
+                widget.button:ClearAllPoints()
+                widget.button:SetPoint("TOPRIGHT", widget.dropdown, "TOPRIGHT", 0, 0)
+                widget.button:SetPoint("BOTTOMRIGHT", widget.dropdown, "BOTTOMRIGHT", 0, 0)
+                widget.button:SetWidth(20)
+                
                 -- Ensure button has BackdropTemplate
                 if not widget.button.SetBackdrop and BackdropTemplateMixin then
                     Mixin(widget.button, BackdropTemplateMixin)
