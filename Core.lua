@@ -382,7 +382,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     if widget.toggleKnob and widget.toggleBg then
                         if value then
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", 10, 0)
-                            widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
+                            widget.toggleBg:SetVertexColor(0.1608, 0.5216, 0.5804, 1)
                         else
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
                             -- Very dark off state - near black
@@ -395,7 +395,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 -- Set initial state
                 if widget.checked then
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", 10, 0)
-                    widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
+                    widget.toggleBg:SetVertexColor(0.1608, 0.5216, 0.5804, 1)
                 else
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
                     widget.toggleBg:SetVertexColor(0.02, 0.02, 0.02, 1)
