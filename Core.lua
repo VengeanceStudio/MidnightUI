@@ -255,13 +255,23 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     local point, relativeTo, relativePoint, xOfs, yOfs = tab:GetPoint()
                     if point and xOfs then
                         tab:ClearAllPoints()
-                        -- Add 5px spacing between each tab
-                        tab:SetPoint(point, relativeTo, relativePoint, xOfs + ((i - 1) * 5), yOfs)
+                        -- Add consistent 3px spacing to each tab
+                        tab:SetPoint(point, relativeTo, relativePoint, xOfs + 3, yOfs)
                         tab.customTabSpaced = true
                     end
                 end
                 
+                -- Function to hide Blizzard textures
+                local function HideTabTextures(t)
+                    for _, region in ipairs({t:GetRegions()}) do
+                        if region:GetObjectType() == "Texture" and region ~= t.text then
+                            region:Hide()
+                        end
+                    end
+                end
+                
                 -- Hide all Blizzard textures on tab
+                HideTabTextures(tab)
                 for _, region in ipairs({tab:GetRegions()}) do
                     if region:GetObjectType() == "Texture" and region ~= tab.text then
                         region:Hide()
@@ -308,6 +318,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tab:HookScript("OnClick", function()
                         -- Reskin all tabs to update selected state
                         for _, t in pairs(widget.tabs) do
+                            -- Hide Blizzard textures again
+                            HideTabTextures(t)
+                            
                             if t.SetBackdrop then
                                 local selected = (widget.selected == t.value)
                                 if selected then
@@ -321,6 +334,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             end
                         end
                     end)
+                    
+                    -- Also hook OnShow to prevent textures from reappearing
+                    tab:HookScript("OnShow", function()
+                        HideTabTextures(tab)
+                    end)
+                    
                     tab.customTabHooked = true
                 end
             end
