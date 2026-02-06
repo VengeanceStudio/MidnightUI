@@ -674,11 +674,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "Slider" then
-        -- Increase the overall frame height to add spacing
+        -- Increase the overall frame height significantly to add spacing
         if widget.frame and not widget.customFrameHeight then
             local currentHeight = widget.frame:GetHeight()
             if currentHeight then
-                widget.frame:SetHeight(currentHeight + 10)
+                widget.frame:SetHeight(currentHeight + 20)
             end
             widget.customFrameHeight = true
         end
@@ -715,35 +715,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.label and FontKit then
             FontKit:SetFont(widget.label, 'body', 'normal')
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
-            
-            -- Move label up to create space between label and slider
-            if not widget.customLabelSpacing then
-                local point, relativeTo, relativePoint, xOfs, yOfs = widget.label:GetPoint()
-                if point and yOfs then
-                    widget.label:ClearAllPoints()
-                    widget.label:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs + 3)
-                end
-                widget.customLabelSpacing = true
-            end
-        end
-        
-        -- Add spacing to low/high text labels if they exist
-        if widget.lowtext and not widget.customLowTextSpacing then
-            local point, relativeTo, relativePoint, xOfs, yOfs = widget.lowtext:GetPoint()
-            if point and yOfs then
-                widget.lowtext:ClearAllPoints()
-                widget.lowtext:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 2)
-            end
-            widget.customLowTextSpacing = true
-        end
-        
-        if widget.hightext and not widget.customHighTextSpacing then
-            local point, relativeTo, relativePoint, xOfs, yOfs = widget.hightext:GetPoint()
-            if point and yOfs then
-                widget.hightext:ClearAllPoints()
-                widget.hightext:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 2)
-            end
-            widget.customHighTextSpacing = true
         end
         
     elseif widgetType == "EditBox" or widgetType == "MultiLineEditBox" then
