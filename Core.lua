@@ -1177,16 +1177,16 @@ function MidnightUI:SkinConfigFrame(frame)
         frame.customCloseBtn:SetBackdropColor(ColorPalette:GetColor('button-bg'))
         frame.customCloseBtn:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
         
-        -- Add × text
+        -- Add × text (standard theme size: 26)
         local closeText = frame.customCloseBtn:CreateFontString(nil, "OVERLAY")
-        closeText:SetFont("Fonts\\FRIZQT__.TTF", 36, "OUTLINE")
+        closeText:SetFont("Fonts\\FRIZQT__.TTF", 26, "OUTLINE")
         closeText:SetText("×")
         closeText:SetPoint("CENTER", 0, 0)
         closeText:SetTextColor(ColorPalette:GetColor('text-primary'))
         
-        -- Hover effects - use teal accent color
+        -- Hover effects - highlight full background like Setup window
         frame.customCloseBtn:SetScript("OnEnter", function(self)
-            self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+            self:SetBackdropColor(ColorPalette:GetColor('button-hover'))
             self:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
         end)
         frame.customCloseBtn:SetScript("OnLeave", function(self)
