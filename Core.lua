@@ -351,8 +351,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.toggleBg:SetSize(40, 20)
                 widget.toggleBg:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 4, -4)
                 widget.toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-                -- Very dark off state - match panel background
-                widget.toggleBg:SetVertexColor(ColorPalette:GetColor('panel-bg'))
+                -- Very dark off state - near black
+                widget.toggleBg:SetVertexColor(0.03, 0.03, 0.03, 1)
                 
                 -- Add border
                 widget.toggleBorder = widget.frame:CreateTexture(nil, "BORDER")
@@ -377,8 +377,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                         else
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                            -- Very dark off state - match panel background
-                            widget.toggleBg:SetVertexColor(ColorPalette:GetColor('panel-bg'))
+                            -- Very dark off state - near black
+                            widget.toggleBg:SetVertexColor(0.03, 0.03, 0.03, 1)
                         end
                     end
                 end)
@@ -390,7 +390,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                 else
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                    widget.toggleBg:SetVertexColor(ColorPalette:GetColor('panel-bg'))
+                    widget.toggleBg:SetVertexColor(0.03, 0.03, 0.03, 1)
                 end
             end
         end
