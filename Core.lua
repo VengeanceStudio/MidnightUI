@@ -901,6 +901,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Dropdown" then
         if widget.frame then
+            -- Reduce overall dropdown widget width for more compact appearance
+            if not widget.frame.customWidthSet then
+                local currentWidth = widget.frame:GetWidth()
+                if currentWidth and currentWidth > 0 then
+                    widget.frame:SetWidth(currentWidth - 60)
+                    widget.frame.customWidthSet = true
+                end
+            end
+            
             -- Move dropdown frame to the right to prevent border/label cutoff
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs and yOfs then
@@ -920,15 +929,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
         if widget.dropdown then
-            -- Reduce dropdown width for more compact appearance
-            if not widget.dropdown.customWidthSet then
-                local currentWidth = widget.dropdown:GetWidth()
-                if currentWidth and currentWidth > 0 then
-                    widget.dropdown:SetWidth(currentWidth - 60)
-                    widget.dropdown.customWidthSet = true
-                end
-            end
-            
             -- Ensure dropdown has BackdropTemplate
             if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.dropdown, BackdropTemplateMixin)
