@@ -520,6 +520,16 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
+            -- Move button to the right
+            if not widget.customButtonMoved then
+                local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+                if point and xOfs and yOfs then
+                    widget.frame:ClearAllPoints()
+                    widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 10, yOfs)
+                    widget.customButtonMoved = true
+                end
+            end
+            
             -- Ensure frame has BackdropTemplate
             if not widget.frame.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.frame, BackdropTemplateMixin)
