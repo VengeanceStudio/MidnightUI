@@ -348,11 +348,72 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
         end
         
-        -- Add top padding to TreeGroup tree container
-        if widgetType == "TreeGroup" and widget.treeframe then
-            widget.treeframe:ClearAllPoints()
-            widget.treeframe:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 0, -70)
-            widget.treeframe:SetPoint("BOTTOMLEFT", widget.frame, "BOTTOMLEFT", 0, 0)
+        -- Style TreeGroup specifically
+        if widgetType == "TreeGroup" then
+            -- Hide all Blizzard border textures
+            if widget.border then
+                for _, region in ipairs({widget.border:GetRegions()}) do
+                    if region:GetObjectType() == "Texture" then
+                        region:Hide()
+                    end
+                end
+            end
+            
+            -- Style the tree frame (vertical navigation)
+            if widget.treeframe then
+                -- Add BackdropTemplate if needed
+                if not widget.treeframe.SetBackdrop and BackdropTemplateMixin then
+                    Mixin(widget.treeframe, BackdropTemplateMixin)
+                    if widget.treeframe.OnBackdropLoaded then
+                        widget.treeframe:OnBackdropLoaded()
+                    end
+                end
+                
+                -- Apply themed backdrop to tree navigation
+                if widget.treeframe.SetBackdrop then
+                    widget.treeframe:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    widget.treeframe:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                    widget.treeframe:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                end
+                
+                -- Hide Blizzard textures in tree frame
+                for _, region in ipairs({widget.treeframe:GetRegions()}) do
+                    if region:GetObjectType() == "Texture" then
+                        region:Hide()
+                    end
+                end
+                
+                -- Position tree frame below logo
+                widget.treeframe:ClearAllPoints()
+                widget.treeframe:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 6, -76)
+                widget.treeframe:SetPoint("BOTTOMLEFT", widget.frame, "BOTTOMLEFT", 6, 6)
+            end
+            
+            -- Style the content area border
+            if widget.border then
+                if not widget.border.SetBackdrop and BackdropTemplateMixin then
+                    Mixin(widget.border, BackdropTemplateMixin)
+                    if widget.border.OnBackdropLoaded then
+                        widget.border:OnBackdropLoaded()
+                    end
+                end
+                
+                if widget.border.SetBackdrop then
+                    widget.border:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    widget.border:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                    widget.border:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                end
+            end
         end
         
     elseif widgetType == "Button" then
@@ -918,29 +979,75 @@ function MidnightUI:SkinConfigFrame(frame)
             titleBG:SetVertexColor(ColorPalette:GetColor('button-bg'))
         end
         
-        -- Hide the status bar (placeholder bar before close button)
+        -- Hide all status bar elements completely
         if frame.obj.statusbg then
             frame.obj.statusbg:Hide()
+            frame.obj.statusbg:SetAlpha(0)
         end
         if frame.obj.statustext then
             frame.obj.statustext:Hide()
         end
+        
+        -- Hide the status frame that contains the close button
+        if frame.obj.status then
+            frame.obj.status:Hide()
+        end
     end
     
-    -- Skin the close button if it exists
-    if frame.obj and frame.obj.closebutton then
-        local closeBtn = frame.obj.closebutton
-        if ColorPalette then
-            closeBtn:SetNormalTexture("")
-            closeBtn:SetPushedTexture("")
-            closeBtn:SetHighlightTexture("")
-            
-            local text = closeBtn:CreateFontString(nil, "OVERLAY")
-            text:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
-            text:SetText("×")
-            text:SetPoint("CENTER", 0, 1)
-            text:SetTextColor(ColorPalette:GetColor('text-primary'))
+    -- Create custom close button
+    if frame.obj and not frame.customCloseBtn then
+        -- Hide original close button completely
+        if frame.obj.closebutton then
+            frame.obj.closebutton:Hide()
+            frame.obj.closebutton:SetAlpha(0)
         end
+        
+        -- Create new themed close button
+        frame.customCloseBtn = CreateFrame("Button", nil, frame)
+        frame.customCloseBtn:SetSize(28, 28)
+        frame.customCloseBtn:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -12, -12)
+        
+        -- Add BackdropTemplate
+        if BackdropTemplateMixin then
+            Mixin(frame.customCloseBtn, BackdropTemplateMixin)
+            if frame.customCloseBtn.OnBackdropLoaded then
+                frame.customCloseBtn:OnBackdropLoaded()
+            end
+        end
+        
+        -- Apply themed backdrop
+        frame.customCloseBtn:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        frame.customCloseBtn:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+        frame.customCloseBtn:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+        
+        -- Add × text
+        local closeText = frame.customCloseBtn:CreateFontString(nil, "OVERLAY")
+        closeText:SetFont("Fonts\\FRIZQT__.TTF", 20, "OUTLINE")
+        closeText:SetText("×")
+        closeText:SetPoint("CENTER", 0, 0)
+        closeText:SetTextColor(ColorPalette:GetColor('text-primary'))
+        
+        -- Hover effects
+        frame.customCloseBtn:SetScript("OnEnter", function(self)
+            self:SetBackdropColor(0.8, 0.1, 0.1, 1)
+            self:SetBackdropBorderColor(1, 0.2, 0.2, 1)
+        end)
+        frame.customCloseBtn:SetScript("OnLeave", function(self)
+            self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+            self:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+        end)
+        
+        -- Click to close
+        frame.customCloseBtn:SetScript("OnClick", function()
+            if frame.obj and frame.obj.Hide then
+                frame.obj:Hide()
+            end
+        end)
     end
 end
 
