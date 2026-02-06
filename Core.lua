@@ -342,6 +342,19 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tab:HookScript("OnClick", function()
                         print("DEBUG: Tab clicked:", tab.value, "widget.selected=", widget.selected)
                         
+                        -- Check state IMMEDIATELY
+                        print("DEBUG: IMMEDIATE check of first tab:")
+                        local t = widget.tabs[1]
+                        if t then
+                            local hasBackdrop = t:GetBackdrop() ~= nil
+                            local borderr, borderg, borderb, bordera = 0, 0, 0, 0
+                            if hasBackdrop then
+                                borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
+                            end
+                            print(string.format("  IMMEDIATE: backdrop=%s borderColor=(%.2f,%.2f,%.2f,%.2f)", 
+                                tostring(hasBackdrop), borderr, borderg, borderb, bordera))
+                        end
+                        
                         -- Use a timer to check after selection updates
                         C_Timer.After(0.05, function()
                             print("DEBUG: After delay, widget.selected=", widget.selected)
@@ -360,6 +373,20 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     idx, tostring(t.value), tostring(hasBackdrop), alpha, tostring(shown)))
                                 print(string.format("  bgColor=(%.2f,%.2f,%.2f,%.2f) borderColor=(%.2f,%.2f,%.2f,%.2f)", 
                                     br, bg, bb, ba, borderr, borderg, borderb, bordera))
+                            end
+                        end)
+                        
+                        C_Timer.After(0.1, function()
+                            print("DEBUG: After 0.1s, checking first tab again:")
+                            local t = widget.tabs[1]
+                            if t then
+                                local hasBackdrop = t:GetBackdrop() ~= nil
+                                local borderr, borderg, borderb, bordera = 0, 0, 0, 0
+                                if hasBackdrop then
+                                    borderr, borderg, borderb, bordera = t:GetBackdropBorderColor()
+                                end
+                                print(string.format("  At 0.1s: backdrop=%s borderColor=(%.2f,%.2f,%.2f,%.2f)", 
+                                    tostring(hasBackdrop), borderr, borderg, borderb, bordera))
                             end
                         end)
                         
