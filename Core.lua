@@ -217,16 +217,29 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "TabGroup" then
-        -- Hook BuildTabs to reapply styling after tabs are rebuilt
-        if widget.BuildTabs and not widget.customBuildTabsHooked then
-            local originalBuildTabs = widget.BuildTabs
-            widget.BuildTabs = function(self)
-                originalBuildTabs(self)
-                C_Timer.After(0.01, function()
-                    MidnightUI:SkinAceGUIWidget(self, "TabGroup")
+        -- Hook SelectTab to reapply styling after tab switches
+        if widget.SelectTab and not widget.customSelectTabHooked then
+            local originalSelectTab = widget.SelectTab
+            widget.SelectTab = function(self, value)
+                originalSelectTab(self, value)
+                C_Timer.After(0.05, function()
+                    -- Reskin all widgets in the content area
+                    if self.content then
+                        for _, child in pairs({self.content:GetChildren()}) do
+                            if child.obj and child.obj.type then
+                                MidnightUI:SkinAceGUIWidget(child.obj, child.obj.type)
+                            end
+                        end
+                    end
+                    -- Reskin all tabs
+                    if self.tabs then
+                        for _, tab in pairs(self.tabs) do
+                            MidnightUI:SkinAceGUIWidget(self, "TabGroup")
+                        end
+                    end
                 end)
             end
-            widget.customBuildTabsHooked = true
+            widget.customSelectTabHooked = true
         end
         
         if widget.border then
