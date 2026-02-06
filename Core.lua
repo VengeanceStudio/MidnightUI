@@ -1028,7 +1028,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
         -- Add bottom spacing for Labels/descriptions to prevent overlap with next element
         if widgetType == "Label" and widget.frame then
-            widget.frame:SetHeight(widget.frame:GetHeight() + 10)
+            widget.frame:SetHeight(widget.frame:GetHeight() + 20)
         end
     end
 end
