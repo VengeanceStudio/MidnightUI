@@ -264,20 +264,27 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "Button" then
-        if widget.frame and widget.frame.SetBackdrop then
-            widget.frame:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                tile = false, edgeSize = 1,
-                insets = { left = 2, right = 2, top = 2, bottom = 2 }
-            })
-            widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-            widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
-            
-            -- Remove Blizzard textures
+        if widget.frame then
+            -- Hide Blizzard textures
             if widget.frame.Left then widget.frame.Left:Hide() end
             if widget.frame.Right then widget.frame.Right:Hide() end
             if widget.frame.Middle then widget.frame.Middle:Hide() end
+            if widget.frame.SetNormalTexture then widget.frame:SetNormalTexture("") end
+            if widget.frame.SetHighlightTexture then widget.frame:SetHighlightTexture("") end
+            if widget.frame.SetPushedTexture then widget.frame:SetPushedTexture("") end
+            if widget.frame.SetDisabledTexture then widget.frame:SetDisabledTexture("") end
+            
+            -- Apply themed backdrop
+            if widget.frame.SetBackdrop then
+                widget.frame:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                })
+                widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+            end
         end
         
         if widget.text and FontKit then
@@ -287,46 +294,54 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "CheckBox" then
         if widget.frame then
-            -- Remove Blizzard textures
-            if widget.checkbg then widget.checkbg:SetAlpha(0) end
-            if widget.highlight then widget.highlight:SetAlpha(0) end
-            if widget.check then widget.check:SetAlpha(0) end
+            -- Hide original checkbox elements
+            if widget.checkbg then widget.checkbg:Hide() end
+            if widget.highlight then widget.highlight:Hide() end
+            if widget.check then widget.check:Hide() end
             
-            -- Create custom checkbox background
-            if not widget.customBg and widget.frame.SetBackdrop then
-                widget.frame:SetBackdrop({
-                    bgFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    tile = false, edgeSize = 1,
-                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                })
-                widget.frame:SetBackdropColor(ColorPalette:GetColor('input-bg'))
-                widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                widget.customBg = true
+            -- Create toggle slider background
+            if not widget.toggleBg then
+                widget.toggleBg = widget.frame:CreateTexture(nil, "BACKGROUND")
+                widget.toggleBg:SetSize(40, 20)
+                widget.toggleBg:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 4, -4)
+                widget.toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
+                widget.toggleBg:SetVertexColor(ColorPalette:GetColor('input-bg'))
+                
+                -- Add border
+                widget.toggleBorder = widget.frame:CreateTexture(nil, "BORDER")
+                widget.toggleBorder:SetSize(42, 22)
+                widget.toggleBorder:SetPoint("CENTER", widget.toggleBg, "CENTER")
+                widget.toggleBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
+                widget.toggleBorder:SetVertexColor(ColorPalette:GetColor('panel-border'))
+                
+                -- Create slider knob
+                widget.toggleKnob = widget.frame:CreateTexture(nil, "OVERLAY")
+                widget.toggleKnob:SetSize(16, 16)
+                widget.toggleKnob:SetTexture("Interface\\Buttons\\WHITE8X8")
+                widget.toggleKnob:SetVertexColor(ColorPalette:GetColor('text-primary'))
             end
             
-            -- Create custom check mark
-            if not widget.customCheck then
-                widget.customCheck = widget.frame:CreateFontString(nil, "OVERLAY")
-                widget.customCheck:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
-                widget.customCheck:SetText("✓")
-                widget.customCheck:SetPoint("CENTER", widget.frame, "TOPLEFT", 12, -12)
-                widget.customCheck:SetTextColor(ColorPalette:GetColor('success'))
-                widget.customCheck:Hide()
-            end
-            
-            -- Hook to show/hide check mark
+            -- Hook to animate toggle
             if not widget.customCheckHooked then
                 hooksecurefunc(widget, "SetValue", function(self, value)
-                    if widget.customCheck then
-                        widget.customCheck:SetShown(value)
+                    if widget.toggleKnob and widget.toggleBg then
+                        if value then
+                            widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", 10, 0)
+                            widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
+                        else
+                            widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
+                            widget.toggleBg:SetVertexColor(ColorPalette:GetColor('input-bg'))
+                        end
                     end
                 end)
                 widget.customCheckHooked = true
                 
                 -- Set initial state
                 if widget.checked then
-                    widget.customCheck:Show()
+                    widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", 10, 0)
+                    widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
+                else
+                    widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
                 end
             end
         end
@@ -388,14 +403,39 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
         end
         
-        if widget.label and FontKit then
-            FontKit:SetFont(widget.label, 'body', 'normal')
-            widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
-        end
-        
-    elseif widgetType == "DropDown" then
-        if widget.dropdown then
-            widget.dropdown:SetBackdrop({
+        if w-- Hide Blizzard dropdown textures
+            if widget.dropdown.Left then widget.dropdown.Left:Hide() end
+            if widget.dropdown.Middle then widget.dropdown.Middle:Hide() end
+            if widget.dropdown.Right then widget.dropdown.Right:Hide() end
+            
+            -- Apply themed backdrop
+            if widget.dropdown.SetBackdrop then
+                widget.dropdown:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                })
+                widget.dropdown:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+            
+            -- Style the dropdown button
+            if widget.button then
+                if widget.button.SetNormalTexture then widget.button:SetNormalTexture("") end
+                if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
+                if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
+                if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture("") end
+                
+                -- Create custom dropdown arrow
+                if not widget.customArrow then
+                    widget.customArrow = widget.button:CreateFontString(nil, "OVERLAY")
+                    widget.customArrow:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+                    widget.customArrow:SetText("▼")
+                    widget.customArrow:SetPoint("CENTER")
+                    widget.customArrow:SetTextColor(ColorPalette:GetColor('text-secondary'))
+                end
+            end
                 bgFile = "Interface\\Buttons\\WHITE8X8",
                 edgeFile = "Interface\\Buttons\\WHITE8X8",
                 tile = false, edgeSize = 1,
