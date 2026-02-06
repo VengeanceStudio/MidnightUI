@@ -234,8 +234,14 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if tabParent then
                 for _, region in ipairs({tabParent:GetRegions()}) do
                     if region:GetObjectType() == "Texture" then
-                        region:SetTexture("Interface\\Buttons\\WHITE8X8")
-                        region:SetVertexColor(ColorPalette:GetColor('panel-border'))
+                        -- Check if this is a thin horizontal line (separator) not a background
+                        local width = region:GetWidth()
+                        local height = region:GetHeight()
+                        if height and height < 10 and width and width > 100 then
+                            -- This is likely the horizontal separator line
+                            region:SetTexture("Interface\\Buttons\\WHITE8X8")
+                            region:SetVertexColor(ColorPalette:GetColor('panel-border'))
+                        end
                     end
                 end
             end
