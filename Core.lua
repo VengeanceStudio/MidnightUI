@@ -564,23 +564,22 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
                 -- Hook to prevent textures from reappearing
                 if not widget.customButtonTextureHook then
-                    widget.button:HookScript("OnClick", function()
+                    local function ClearButtonTextures()
                         for _, region in ipairs({widget.button:GetRegions()}) do
                             if region:GetObjectType() == "Texture" and region ~= widget.customArrow then
+                                region:SetTexture(nil)
                                 region:Hide()
                             end
                         end
-                        if widget.button.SetNormalTexture then widget.button:SetNormalTexture("") end
-                        if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
-                        if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
-                    end)
-                    widget.button:HookScript("OnShow", function()
-                        for _, region in ipairs({widget.button:GetRegions()}) do
-                            if region:GetObjectType() == "Texture" and region ~= widget.customArrow then
-                                region:Hide()
-                            end
-                        end
-                    end)
+                        if widget.button.SetNormalTexture then widget.button:SetNormalTexture(nil) end
+                        if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture(nil) end
+                        if widget.button.SetPushedTexture then widget.button:SetPushedTexture(nil) end
+                        if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture(nil) end
+                    end
+                    
+                    widget.button:HookScript("OnClick", ClearButtonTextures)
+                    widget.button:HookScript("OnShow", ClearButtonTextures)
+                    widget.button:HookScript("OnUpdate", ClearButtonTextures)
                     widget.customButtonTextureHook = true
                 end
             end
@@ -590,6 +589,30 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.pullout and widget.pullout.frame then
             local function ApplyPulloutSkin()
                 local frame = widget.pullout.frame
+                local scrollFrame = widget.pullout.scrollFrame
+                
+                -- Apply backdrop to scrollFrame for better visibility
+                if scrollFrame then
+                    if not scrollFrame.SetBackdrop and BackdropTemplateMixin then
+                        Mixin(scrollFrame, BackdropTemplateMixin)
+                        if scrollFrame.OnBackdropLoaded then
+                            scrollFrame:OnBackdropLoaded()
+                        end
+                    end
+                    
+                    if scrollFrame.SetBackdrop then
+                        scrollFrame:SetBackdrop({
+                            bgFile = "Interface\\Buttons\\WHITE8X8",
+                            edgeFile = "Interface\\Buttons\\WHITE8X8",
+                            tile = false, edgeSize = 2,
+                            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                        })
+                        scrollFrame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                        scrollFrame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    end
+                end
+                
+                -- Also apply to main frame
                 if not frame.SetBackdrop and BackdropTemplateMixin then
                     Mixin(frame, BackdropTemplateMixin)
                     if frame.OnBackdropLoaded then
@@ -600,6 +623,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 -- Hide all frame textures
                 for _, region in ipairs({frame:GetRegions()}) do
                     if region:GetObjectType() == "Texture" then
+                        region:SetTexture(nil)
                         region:Hide()
                     end
                 end
@@ -608,8 +632,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     frame:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
                         edgeFile = "Interface\\Buttons\\WHITE8X8",
-                        tile = false, edgeSize = 1,
-                        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                        tile = false, edgeSize = 2,
+                        insets = { left = 0, right = 0, top = 0, bottom = 0 }
                     })
                     frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                     frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
