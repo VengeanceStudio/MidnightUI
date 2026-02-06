@@ -623,6 +623,16 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
+            -- Reduce button width for more compact appearance
+            C_Timer.After(0, function()
+                if widget.frame and widget.frame.GetWidth then
+                    local currentWidth = widget.frame:GetWidth()
+                    if currentWidth and currentWidth > 0 then
+                        widget.frame:SetWidth(currentWidth - 25)
+                    end
+                end
+            end)
+            
             -- Move button to the right and down slightly to avoid label overlap
             if not widget.customButtonMoved then
                 local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
