@@ -888,7 +888,7 @@ function MidnightUI:SkinConfigFrame(frame)
         if not frame.logoTexture then
             frame.logoTexture = frame:CreateTexture(nil, "ARTWORK")
             frame.logoTexture:SetTexture("Interface\\AddOns\\MidnightUI\\Media\\midnightUI_icon.tga")
-            frame.logoTexture:SetSize(40, 40)
+            frame.logoTexture:SetSize(60, 60)
             frame.logoTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -18)
         end
         
