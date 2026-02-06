@@ -338,6 +338,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if widget.checkbg then widget.checkbg:Hide() end
             if widget.highlight then widget.highlight:Hide() end
             if widget.check then widget.check:Hide() end
+            for _, region in ipairs({widget.frame:GetRegions()}) do
+                if region:GetObjectType() == "Texture" and region ~= widget.toggleBg and region ~= widget.toggleBorder and region ~= widget.toggleKnob then
+                    region:SetTexture(nil)
+                    region:Hide()
+                end
+            end
             
             -- Adjust text position to make room for toggle slider
             if widget.text then
@@ -351,8 +357,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.toggleBg:SetSize(40, 20)
                 widget.toggleBg:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 4, -4)
                 widget.toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
+                widget.toggleBg:SetDrawLayer("ARTWORK")
+                widget.toggleBg:SetAlpha(1)
                 -- Very dark off state - near black
-                widget.toggleBg:SetVertexColor(0.03, 0.03, 0.03, 1)
+                widget.toggleBg:SetVertexColor(0.02, 0.02, 0.02, 1)
                 
                 -- Add border
                 widget.toggleBorder = widget.frame:CreateTexture(nil, "BORDER")
@@ -378,7 +386,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         else
                             widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
                             -- Very dark off state - near black
-                            widget.toggleBg:SetVertexColor(0.03, 0.03, 0.03, 1)
+                            widget.toggleBg:SetVertexColor(0.02, 0.02, 0.02, 1)
                         end
                     end
                 end)
@@ -390,7 +398,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     widget.toggleBg:SetVertexColor(ColorPalette:GetColor('success'))
                 else
                     widget.toggleKnob:SetPoint("CENTER", widget.toggleBg, "CENTER", -10, 0)
-                    widget.toggleBg:SetVertexColor(0.03, 0.03, 0.03, 1)
+                    widget.toggleBg:SetVertexColor(0.02, 0.02, 0.02, 1)
                 end
             end
         end
