@@ -992,15 +992,27 @@ function MidnightUI:SkinConfigFrame(frame)
         if frame.obj.status and frame.obj.status.Hide then
             frame.obj.status:Hide()
         end
-    end
-    
-    -- Create custom close button
-    if frame.obj and not frame.customCloseBtn then
+        
         -- Hide original close button completely
         if frame.obj.closebutton then
             frame.obj.closebutton:Hide()
             frame.obj.closebutton:SetAlpha(0)
         end
+        
+        -- Hide the bottom status bar line/texture
+        for _, region in ipairs({frame:GetRegions()}) do
+            if region:GetObjectType() == "Texture" then
+                local point, relativeTo, relativePoint, xOfs, yOfs = region:GetPoint(1)
+                -- Hide textures anchored to the bottom (status bar line)
+                if relativePoint and (relativePoint:find("BOTTOM") or point:find("BOTTOM")) then
+                    region:Hide()
+                end
+            end
+        end
+    end
+    
+    -- Create custom close button in top-right
+    if frame.obj and not frame.customCloseBtn then
         
         -- Create new themed close button
         frame.customCloseBtn = CreateFrame("Button", nil, frame)
