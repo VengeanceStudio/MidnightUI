@@ -395,6 +395,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
                 -- Style tree buttons (navigation items)
                 if not widget.treeButtonsStyled then
+                    -- Store reference to widget for button click handling
+                    local treeWidget = widget
+                    
                     -- Hook to style buttons as they're created/shown
                     hooksecurefunc(widget, "RefreshTree", function()
                         if widget.buttons then
@@ -459,24 +462,25 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         end
                                     end)
                                     
-                                    -- Selected state - make text color very distinct
-                                    local origSetSelected = button.SetSelected
-                                    button.SetSelected = function(self, selected)
-                                        origSetSelected(self, selected)
-                                        button.selected = selected
-                                        -- Force text color change AFTER original SetSelected
-                                        C_Timer.After(0, function()
-                                            if button.text then
-                                                if selected then
-                                                    -- Bright teal text for selected item
-                                                    button.text:SetTextColor(0.2, 0.7, 0.8, 1)
-                                                else
-                                                    -- Normal white/gray text for non-selected items
-                                                    button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                    -- Hook button click to update all button colors
+                                    button:HookScript("OnClick", function(self)
+                                        C_Timer.After(0.05, function()
+                                            -- Update all buttons in the tree
+                                            if treeWidget.buttons then
+                                                for _, btn in pairs(treeWidget.buttons) do
+                                                    if btn and btn.text then
+                                                        if btn.selected then
+                                                            -- Bright teal text for selected item
+                                                            btn.text:SetTextColor(0.2, 0.7, 0.8, 1)
+                                                        else
+                                                            -- Normal white/gray text for non-selected items
+                                                            btn.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                                        end
+                                                    end
                                                 end
                                             end
                                         end)
-                                    end
+                                    end)
                                     
                                     -- Apply color immediately if already selected
                                     if button.selected and button.text then
