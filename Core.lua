@@ -250,17 +250,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         -- Skin tabs
         if widget.tabs then
             for i, tab in pairs(widget.tabs) do
-                -- Add spacing between tabs to prevent overlap
-                if not tab.customTabSpaced then
-                    local point, relativeTo, relativePoint, xOfs, yOfs = tab:GetPoint()
-                    if point and xOfs then
-                        tab:ClearAllPoints()
-                        -- Add consistent 3px spacing to each tab
-                        tab:SetPoint(point, relativeTo, relativePoint, xOfs + 3, yOfs)
-                        tab.customTabSpaced = true
-                    end
-                end
-                
                 -- Function to hide Blizzard textures
                 local function HideTabTextures(t)
                     for _, region in ipairs({t:GetRegions()}) do
