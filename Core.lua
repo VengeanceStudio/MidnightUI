@@ -205,33 +205,16 @@ function MidnightUI:ScaleLayoutToResolution()
     StaticPopup_Show("MIDNIGHTUI_RELOAD_CONFIRM")
 end
 
-function MidnightUI:HookConfigDialogFrames()
-    local AceGUI = LibStub("AceGUI-3.0")
-    if not AceGUI then return end
-    
-    -- Hook AceGUI:Create to skin widgets as they're created
-    local oldCreate = AceGUI.Create
-    AceGUI.Create = function(self, widgetType)
-        local widget = oldCreate(self, widgetType)
-        if widget then
-            C_Timer.After(0, function()
-                MidnightUI:SkinAceGUIWidget(widget, widgetType)
-            end)
-        end
-        return widget
-    end
-end
-
-function MidnightUI:SkinConfigFrame(frame)
-    if not frame or not frame.SetBackdrop then return end
-    AceGUIWidget(widget, widgetType)
+function MidnightUI:SkinAceGUIWidget(widget, widgetType)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
     -- Skin based on widget type
     if widgetType == "Frame" then
-        self:SkinConfigFrame(widget.frame)
+        if widget.frame then
+            self:SkinConfigFrame(widget.frame)
+        end
         
     elseif widgetType == "TabGroup" then
         if widget.border then
@@ -431,6 +414,23 @@ function MidnightUI:SkinConfigFrame(frame)
             end
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
         end
+    end
+end
+
+function MidnightUI:HookConfigDialogFrames()
+    local AceGUI = LibStub("AceGUI-3.0")
+    if not AceGUI then return end
+    
+    -- Hook AceGUI:Create to skin widgets as they're created
+    local oldCreate = AceGUI.Create
+    AceGUI.Create = function(self, widgetType)
+        local widget = oldCreate(self, widgetType)
+        if widget then
+            C_Timer.After(0, function()
+                MidnightUI:SkinAceGUIWidget(widget, widgetType)
+            end)
+        end
+        return widget
     end
 end
 
