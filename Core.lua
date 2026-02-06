@@ -250,6 +250,21 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         -- Skin tabs
         if widget.tabs then
             for _, tab in pairs(widget.tabs) do
+                -- Hide all Blizzard textures on tab
+                for _, region in ipairs({tab:GetRegions()}) do
+                    if region:GetObjectType() == "Texture" and region ~= tab.text then
+                        region:Hide()
+                    end
+                end
+                
+                -- Add BackdropTemplate if needed
+                if not tab.SetBackdrop and BackdropTemplateMixin then
+                    Mixin(tab, BackdropTemplateMixin)
+                    if tab.OnBackdropLoaded then
+                        tab:OnBackdropLoaded()
+                    end
+                end
+                
                 if tab.SetBackdrop then
                     tab:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -830,6 +845,14 @@ function MidnightUI:SkinConfigFrame(frame)
             titleBG:SetTexture("Interface\\Buttons\\WHITE8X8")
             titleBG:SetVertexColor(ColorPalette:GetColor('button-bg'))
         end
+        
+        -- Hide the status bar (placeholder bar before close button)
+        if frame.obj.statusbg then
+            frame.obj.statusbg:Hide()
+        end
+        if frame.obj.statustext then
+            frame.obj.statustext:Hide()
+        end
     end
     
     -- Skin the close button if it exists
@@ -938,7 +961,7 @@ function MidnightUI:GetOptions()
                         order = 0.5,
                         fontSize = "large",
                     },
-                    themeHeader = { type = "header", order = 0.7, name = "Framework Theme" },
+                    themeHeader = { type = "header", order = 0.7, name = "UI Theme" },
                     themeSelect = {
                         type = "select",
                         name = "Active Theme",
