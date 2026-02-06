@@ -347,7 +347,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             print("DEBUG: After delay, widget.selected=", widget.selected)
                             print("DEBUG: Checking if tabs still exist...")
                             for idx, t in pairs(widget.tabs) do
-                                print("DEBUG: Tab", idx, "value=", t.value, "backdrop hooked?", t.backdropHooked, "has backdrop?", t:GetBackdrop() ~= nil)
+                                local hasBackdrop = t:GetBackdrop() ~= nil
+                                local alpha = t:GetAlpha()
+                                local shown = t:IsShown()
+                                local br, bg, bb, ba = 0, 0, 0, 0
+                                if hasBackdrop then
+                                    br, bg, bb, ba = t:GetBackdropColor()
+                                end
+                                print(string.format("DEBUG: Tab %d value=%s backdrop=%s alpha=%.2f shown=%s bgColor=(%.2f,%.2f,%.2f,%.2f)", 
+                                    idx, tostring(t.value), tostring(hasBackdrop), alpha, tostring(shown), br, bg, bb, ba))
                             end
                         end)
                         
