@@ -74,7 +74,7 @@ function MidnightUI:OnEnable()
         AceConfigDialog:AddToBlizOptions("MidnightUI", "Midnight UI")
         -- Set a larger default size for the options window
         if AceConfigDialog.SetDefaultSize then
-            AceConfigDialog:SetDefaultSize("MidnightUI", 900, 700)
+            AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 700)
         end
         
         -- Hook AceConfigDialog to apply themed backdrop
@@ -997,7 +997,7 @@ function MidnightUI:GetOptions()
     local options = {
         name = "Midnight UI",
         type = "group",
-        childGroups = "tab",
+        childGroups = "tree",
         args = {
             general = {
                 name = "General",
