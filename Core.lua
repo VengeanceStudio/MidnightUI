@@ -233,8 +233,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             local tabParent = widget.tabs[1]:GetParent()
             if tabParent then
                 for _, region in ipairs({tabParent:GetRegions()}) do
-                    if region:GetObjectType() == "Texture" and region:GetDrawLayer() == "BACKGROUND" then
-                        region:SetColorTexture(ColorPalette:GetColor('panel-border'))
+                    if region:GetObjectType() == "Texture" then
+                        region:SetTexture("Interface\\Buttons\\WHITE8X8")
+                        region:SetVertexColor(ColorPalette:GetColor('panel-border'))
                     end
                 end
             end
@@ -277,12 +278,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
-            -- Add spacing above button to prevent text overlap
+            -- Add spacing above button and move right
             if not widget.customButtonSpaced then
                 local currentPoint, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
                 if currentPoint and yOfs then
                     widget.frame:ClearAllPoints()
-                    widget.frame:SetPoint(currentPoint, relativeTo, relativePoint, xOfs, yOfs - 10)
+                    widget.frame:SetPoint(currentPoint, relativeTo, relativePoint, xOfs + 50, yOfs - 20)
                     widget.customButtonSpaced = true
                 end
             end
@@ -489,11 +490,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Dropdown" then
         if widget.frame then
-            -- Move dropdown frame slightly right to prevent border cutoff
+            -- Move dropdown frame significantly right to prevent border cutoff
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs then
                 widget.frame:ClearAllPoints()
-                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 5, yOfs)
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 50, yOfs)
             end
         end
         
