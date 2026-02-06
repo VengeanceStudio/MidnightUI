@@ -464,16 +464,18 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     button.SetSelected = function(self, selected)
                                         origSetSelected(self, selected)
                                         button.selected = selected
-                                        -- Change text color for clear visual indication
-                                        if button.text then
-                                            if selected then
-                                                -- Bright teal text for selected item
-                                                button.text:SetTextColor(0.2, 0.7, 0.8, 1)
-                                            else
-                                                -- Normal white/gray text for non-selected items
-                                                button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                        -- Force text color change AFTER original SetSelected
+                                        C_Timer.After(0, function()
+                                            if button.text then
+                                                if selected then
+                                                    -- Bright teal text for selected item
+                                                    button.text:SetTextColor(0.2, 0.7, 0.8, 1)
+                                                else
+                                                    -- Normal white/gray text for non-selected items
+                                                    button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                                end
                                             end
-                                        end
+                                        end)
                                     end
                                     
                                     -- Apply color immediately if already selected
