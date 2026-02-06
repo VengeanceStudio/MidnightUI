@@ -461,14 +461,22 @@ function Maps:UpdateLayout()
         self.clock:ClearAllPoints()
         self.clock:SetPoint(db.clock.point, Minimap, db.clock.point, db.clock.x, db.clock.y)
         self.clock:SetShown(db.showClock)
-        self.clock:SetTextColor(ColorPalette and ColorPalette:GetColor("text-secondary") or unpack(db.clock.color))
+        if ColorPalette then
+            self.clock:SetTextColor(ColorPalette:GetColor("text-secondary"))
+        else
+            self.clock:SetTextColor(unpack(db.clock.color))
+        end
     end
     
     if self.coords then
         self.coords:ClearAllPoints()
         self.coords:SetPoint(db.coords.point, Minimap, db.coords.point, db.coords.x, db.coords.y)
         self.coords:SetShown(db.showCoords)
-        self.coords:SetTextColor(ColorPalette and ColorPalette:GetColor("text-secondary") or unpack(db.coords.color))
+        if ColorPalette then
+            self.coords:SetTextColor(ColorPalette:GetColor("text-secondary"))
+        else
+            self.coords:SetTextColor(unpack(db.coords.color))
+        end
     end
     
     if self.zone then
