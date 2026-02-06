@@ -288,37 +288,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 end
                 
                 if tab.SetBackdrop then
-                    -- Hook SetBackdrop to prevent it from being cleared
-                    if not tab.customBackdropProtected then
-                        local originalSetBackdrop = tab.SetBackdrop
-                        tab.SetBackdrop = function(self, backdrop)
-                            if backdrop == nil then
-                                -- Don't allow clearing the backdrop, reapply our styling instead
-                                backdrop = {
-                                    bgFile = "Interface\\Buttons\\WHITE8X8",
-                                    edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                    tile = false, edgeSize = 1,
-                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                                }
-                            end
-                            originalSetBackdrop(self, backdrop)
-                            
-                            -- Reapply colors after backdrop is set
-                            C_Timer.After(0, function()
-                                local isSelected = (widget.selected == self.value)
-                                if isSelected then
-                                    local r, g, b, a = ColorPalette:GetColor('button-bg')
-                                    self:SetBackdropColor(r * 1.5, g * 1.5, b * 1.5, a)
-                                    self:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                else
-                                    self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                                    self:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                                end
-                            end)
-                        end
-                        tab.customBackdropProtected = true
-                    end
-                    
                     tab:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
                         edgeFile = "Interface\\Buttons\\WHITE8X8",
