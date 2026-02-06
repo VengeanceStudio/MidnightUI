@@ -731,6 +731,28 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
         -- Add spacing for the editbox below the slider
         if widget.editbox and not widget.customEditBoxSpacing then
+            -- Remove Blizzard textures from slider editbox
+            if widget.editbox.Left then widget.editbox.Left:Hide() end
+            if widget.editbox.Right then widget.editbox.Right:Hide() end
+            if widget.editbox.Middle then widget.editbox.Middle:Hide() end
+            
+            -- Style the slider editbox
+            if widget.editbox.SetBackdrop then
+                widget.editbox:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                })
+                widget.editbox:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                widget.editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            end
+            
+            if FontKit then
+                FontKit:SetFont(widget.editbox, 'body', 'normal')
+                widget.editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
+            end
+            
             C_Timer.After(0.05, function()
                 if widget.editbox and widget.slider then
                     widget.editbox:ClearAllPoints()
