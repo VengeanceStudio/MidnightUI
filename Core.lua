@@ -571,10 +571,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 region:Hide()
                             end
                         end
-                        if widget.button.SetNormalTexture then widget.button:SetNormalTexture(nil) end
-                        if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture(nil) end
-                        if widget.button.SetPushedTexture then widget.button:SetPushedTexture(nil) end
-                        if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture(nil) end
+                        if widget.button.SetNormalTexture then widget.button:SetNormalTexture("") end
+                        if widget.button.SetHighlightTexture then widget.button:SetHighlightTexture("") end
+                        if widget.button.SetPushedTexture then widget.button:SetPushedTexture("") end
+                        if widget.button.SetDisabledTexture then widget.button:SetDisabledTexture("") end
                     end
                     
                     widget.button:HookScript("OnClick", ClearButtonTextures)
