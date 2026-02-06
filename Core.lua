@@ -228,6 +228,18 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             widget.border:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
         end
         
+        -- Style the horizontal bar at the top (tab separator)
+        if widget.tabs and widget.tabs[1] then
+            local tabParent = widget.tabs[1]:GetParent()
+            if tabParent then
+                for _, region in ipairs({tabParent:GetRegions()}) do
+                    if region:GetObjectType() == "Texture" and region:GetDrawLayer() == "BACKGROUND" then
+                        region:SetColorTexture(ColorPalette:GetColor('panel-border'))
+                    end
+                end
+            end
+        end
+        
         -- Skin tabs
         if widget.tabs then
             for _, tab in pairs(widget.tabs) do
@@ -476,6 +488,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "Dropdown" then
+        if widget.frame then
+            -- Move dropdown frame slightly right to prevent border cutoff
+            local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+            if point and xOfs then
+                widget.frame:ClearAllPoints()
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 5, yOfs)
+            end
+        end
+        
         if widget.dropdown then
             -- Ensure dropdown has BackdropTemplate
             if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
@@ -762,6 +783,7 @@ function MidnightUI:SkinConfigFrame(frame)
     if not frame or not frame.SetBackdrop then return end
     
     local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
     -- Apply themed backdrop
@@ -776,6 +798,29 @@ function MidnightUI:SkinConfigFrame(frame)
     
     frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
     frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Skin the title frame and text
+    if frame.obj then
+        -- Find and skin title text
+        for _, region in ipairs({frame:GetRegions()}) do
+            if region:GetObjectType() == "FontString" then
+                if FontKit then
+                    FontKit:SetFont(region, 'heading', 'large')
+                end
+                region:SetTextColor(ColorPalette:GetColor('text-primary'))
+            elseif region:GetObjectType() == "Texture" and region:GetDrawLayer() == "OVERLAY" then
+                -- Hide title frame textures
+                region:Hide()
+            end
+        end
+        
+        -- Skin titlebar background if it exists
+        local titleBG = frame.obj.titlebg
+        if titleBG then
+            titleBG:SetTexture("Interface\\Buttons\\WHITE8X8")
+            titleBG:SetVertexColor(ColorPalette:GetColor('button-bg'))
+        end
+    end
     
     -- Skin the close button if it exists
     if frame.obj and frame.obj.closebutton then
