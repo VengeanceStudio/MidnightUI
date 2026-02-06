@@ -352,7 +352,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     local isSelected = (widget.selected == tab.value)
                     if isSelected then
                         -- Selected tab: much brighter background, accent border
-                        tab:SetBackdropColor(0.2, 0.25, 0.3, 0.9)
+                        tab:SetBackdropColor(0.28, 0.33, 0.38, 0.9)
                         tab:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1) -- Teal accent
                     else
                         -- Unselected tab: normal colors
@@ -920,6 +920,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
         if widget.dropdown then
+            -- Reduce dropdown width for more compact appearance
+            if not widget.dropdown.customWidthSet then
+                local currentWidth = widget.dropdown:GetWidth()
+                if currentWidth and currentWidth > 0 then
+                    widget.dropdown:SetWidth(currentWidth - 30)
+                    widget.dropdown.customWidthSet = true
+                end
+            end
+            
             -- Ensure dropdown has BackdropTemplate
             if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.dropdown, BackdropTemplateMixin)
