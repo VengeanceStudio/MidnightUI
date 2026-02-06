@@ -493,25 +493,24 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
             
             -- Apply themed backdrop
-            if widget.dropdown.SetBackdrop and not widget.customDropdownSkinned then
+            if widget.dropdown.SetBackdrop then
                 widget.dropdown:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    tile = false, edgeSize = 1,
-                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                    tile = false, edgeSize = 2,
+                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                widget.customDropdownSkinned = true
             end
             
             -- Style the dropdown button
             if widget.button then
-                -- Reposition button to align with dropdown right edge
+                -- Reposition button to align with dropdown right edge (inside the border)
                 widget.button:ClearAllPoints()
-                widget.button:SetPoint("TOPRIGHT", widget.dropdown, "TOPRIGHT", 0, 0)
-                widget.button:SetPoint("BOTTOMRIGHT", widget.dropdown, "BOTTOMRIGHT", 0, 0)
-                widget.button:SetWidth(20)
+                widget.button:SetPoint("TOPRIGHT", widget.dropdown, "TOPRIGHT", -2, -2)
+                widget.button:SetPoint("BOTTOMRIGHT", widget.dropdown, "BOTTOMRIGHT", -2, 2)
+                widget.button:SetWidth(18)
                 
                 -- Ensure button has BackdropTemplate
                 if not widget.button.SetBackdrop and BackdropTemplateMixin then
@@ -587,20 +586,35 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             -- Hook to restore styling after tab switches
             if not widget.customDropdownShowHook then
                 widget.dropdown:HookScript("OnShow", function()
-                    -- Reapply backdrop
-                    if widget.dropdown.SetBackdrop then
-                        widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                        widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                    end
-                    -- Ensure arrow is visible
-                    if widget.customArrow then
-                        widget.customArrow:Show()
-                    end
                     -- Hide Blizzard textures again
                     for _, region in ipairs({widget.dropdown:GetRegions()}) do
                         if region:GetObjectType() == "Texture" then
                             region:Hide()
                         end
+                    end
+                    
+                    -- Reapply full backdrop
+                    if widget.dropdown.SetBackdrop then
+                        widget.dropdown:SetBackdrop({
+                            bgFile = "Interface\\Buttons\\WHITE8X8",
+                            edgeFile = "Interface\\Buttons\\WHITE8X8",
+                            tile = false, edgeSize = 2,
+                            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                        })
+                        widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                        widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    end
+                    
+                    -- Ensure button and arrow are visible
+                    if widget.button then
+                        widget.button:Show()
+                        if widget.customArrow then
+                            widget.customArrow:Show()
+                        end
+                        -- Reposition button
+                        widget.button:ClearAllPoints()
+                        widget.button:SetPoint("TOPRIGHT", widget.dropdown, "TOPRIGHT", -2, -2)
+                        widget.button:SetPoint("BOTTOMRIGHT", widget.dropdown, "BOTTOMRIGHT", -2, 2)
                     end
                 end)
                 widget.customDropdownShowHook = true
