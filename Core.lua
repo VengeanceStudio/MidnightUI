@@ -1242,6 +1242,34 @@ function MidnightUI:HookConfigDialogFrames()
     local AceGUI = LibStub("AceGUI-3.0")
     if not AceGUI then return end
     
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then return end
+    
+    -- Track styled frames to restore their backdrops
+    local styledFrames = {}
+    
+    -- Global backdrop monitor - hook the frame metatable
+    local FrameMT = getmetatable(CreateFrame("Frame")).__index
+    if FrameMT and FrameMT.SetBackdrop then
+        hooksecurefunc(FrameMT, "SetBackdrop", function(frame, backdrop)
+            if styledFrames[frame] and (not backdrop or backdrop == {}) then
+                -- This frame had styling and is being cleared, restore it immediately
+                C_Timer.After(0, function()
+                    if styledFrames[frame] and frame.SetBackdrop then
+                        local info = styledFrames[frame]
+                        frame:SetBackdrop(info.backdrop)
+                        if info.bgColor then
+                            frame:SetBackdropColor(unpack(info.bgColor))
+                        end
+                        if info.borderColor then
+                            frame:SetBackdropBorderColor(unpack(info.borderColor))
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+    
     -- Hook AceGUI:Create to skin widgets as they're created
     local oldCreate = AceGUI.Create
     AceGUI.Create = function(self, widgetType)
@@ -1249,6 +1277,46 @@ function MidnightUI:HookConfigDialogFrames()
         if widget then
             C_Timer.After(0, function()
                 MidnightUI:SkinAceGUIWidget(widget, widgetType)
+                
+                -- Register frames that we've styled
+                if widgetType == "TabGroup" and widget.tabs then
+                    for _, tab in pairs(widget.tabs) do
+                        if tab.SetBackdrop then
+                            local isSelected = (widget.selected == tab.value)
+                            local r, g, b, a
+                            if isSelected then
+                                r, g, b, a = ColorPalette:GetColor('button-bg')
+                                r, g, b = r * 1.5, g * 1.5, b * 1.5
+                            else
+                                r, g, b, a = ColorPalette:GetColor('button-bg')
+                            end
+                            
+                            styledFrames[tab] = {
+                                backdrop = {
+                                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                    tile = false, edgeSize = 1,
+                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                                },
+                                bgColor = {r, g, b, a},
+                                borderColor = isSelected and {0.1608, 0.5216, 0.5804, 1} or {ColorPalette:GetColor('panel-border')}
+                            }
+                        end
+                    end
+                elseif widgetType == "Dropdown" and widget.dropdown then
+                    if widget.dropdown.SetBackdrop then
+                        styledFrames[widget.dropdown] = {
+                            backdrop = {
+                                bgFile = "Interface\\Buttons\\WHITE8X8",
+                                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                tile = false, edgeSize = 1,
+                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                            },
+                            bgColor = {ColorPalette:GetColor('button-bg')},
+                            borderColor = {ColorPalette:GetColor('panel-border')}
+                        }
+                    end
+                end
             end)
         end
         return widget
