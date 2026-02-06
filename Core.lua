@@ -1221,20 +1221,6 @@ function MidnightUI:HookConfigDialogFrames()
     AceGUI.Create = function(self, widgetType)
         local widget = oldCreate(self, widgetType)
         if widget then
-            -- Hook OnAcquire to reskin when widget is reused from pool
-            if widget.OnAcquire and not widget.customAcquireHooked then
-                local originalOnAcquire = widget.OnAcquire
-                widget.OnAcquire = function(self)
-                    if originalOnAcquire then
-                        originalOnAcquire(self)
-                    end
-                    C_Timer.After(0.01, function()
-                        MidnightUI:SkinAceGUIWidget(self, widgetType)
-                    end)
-                end
-                widget.customAcquireHooked = true
-            end
-            
             C_Timer.After(0, function()
                 MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end)
