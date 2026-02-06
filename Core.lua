@@ -363,6 +363,16 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "CheckBox" then
         if widget.frame then
+            -- Move checkbox frame down on General tab
+            if not widget.customCheckboxMoved then
+                local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
+                if point and yOfs then
+                    widget.frame:ClearAllPoints()
+                    widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs - 50)
+                    widget.customCheckboxMoved = true
+                end
+            end
+            
             -- Hide original checkbox elements
             if widget.checkbg then widget.checkbg:Hide() end
             if widget.highlight then widget.highlight:Hide() end
@@ -498,9 +508,14 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.frame then
             -- Move dropdown frame slightly right to prevent border cutoff
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
-            if point and xOfs then
+            if point and xOfs and yOfs then
                 widget.frame:ClearAllPoints()
-                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 10, yOfs)
+                -- Add extra vertical spacing if this appears after Global Font heading
+                local extraY = 0
+                if widget.label and widget.label:GetText() and widget.label:GetText():find("Font") then
+                    extraY = -50
+                end
+                widget.frame:SetPoint(point, relativeTo, relativePoint, xOfs + 15, yOfs + extraY)
             end
         end
         
