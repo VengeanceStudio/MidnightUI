@@ -979,24 +979,52 @@ function MidnightUI:SkinConfigFrame(frame)
             titleBG:SetVertexColor(ColorPalette:GetColor('button-bg'))
         end
         
-        -- Hide all status bar elements completely
+        -- Hide all status bar elements completely - try multiple approaches
         if frame.obj.statusbg then
             frame.obj.statusbg:Hide()
             frame.obj.statusbg:SetAlpha(0)
+            frame.obj.statusbg:SetParent(nil)
         end
         if frame.obj.statustext then
             frame.obj.statustext:Hide()
+            frame.obj.statustext:SetParent(nil)
         end
         
         -- Hide the status frame that contains the close button (if it exists)
         if frame.obj.status and frame.obj.status.Hide then
             frame.obj.status:Hide()
             frame.obj.status:SetAlpha(0)
+            frame.obj.status:SetParent(nil)
         end
         
         -- Also hide the line/closebutton container at the bottom
         if frame.obj.line then
             frame.obj.line:Hide()
+            frame.obj.line:SetParent(nil)
+        end
+        
+        -- Hide all children that might be status-related
+        local children = {frame:GetChildren()}
+        for _, child in ipairs(children) do
+            if child:GetName() and (child:GetName():find("Status") or child:GetName():find("Close")) then
+                child:Hide()
+                child:SetAlpha(0)
+            end
+            -- Check if child is positioned at bottom
+            local numPoints = child:GetNumPoints()
+            if numPoints > 0 then
+                for i = 1, numPoints do
+                    local point, relativeTo, relativePoint = child:GetPoint(i)
+                    if point and (point:find("BOTTOM") or (relativePoint and relativePoint:find("BOTTOM"))) then
+                        -- This might be a status bar element - check its height
+                        local height = child:GetHeight()
+                        if height and height < 40 then
+                            child:Hide()
+                            child:SetAlpha(0)
+                        end
+                    end
+                end
+            end
         end
         
         -- Continuously hide status bar elements (they might recreate themselves)
