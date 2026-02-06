@@ -744,12 +744,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tile = false, edgeSize = 1,
                     insets = { left = 2, right = 2, top = 2, bottom = 2 }
                 })
-                widget.editbox:SetBackdropColor(ColorPalette:GetColor('input-bg'))
+                -- Use a darker background color
+                widget.editbox:SetBackdropColor(0.15, 0.15, 0.15, 1)
                 widget.editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
             end
             
             if FontKit then
-                FontKit:SetFont(widget.editbox, 'body', 'normal')
+                FontKit:SetFont(widget.editbox, 'small', 'normal')
                 widget.editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
             end
             
