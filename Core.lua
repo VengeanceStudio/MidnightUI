@@ -1049,6 +1049,16 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
     elseif widgetType == "Dropdown-Pullout" then
         -- Skin the dropdown pullout menu
         if widget.frame then
+            -- Make the pullout wider and taller
+            local width = widget.frame:GetWidth()
+            local height = widget.frame:GetHeight()
+            if width and width < 250 then
+                widget.frame:SetWidth(250)
+            end
+            if height and height < 300 then
+                widget.frame:SetHeight(300)
+            end
+            
             -- Add BackdropTemplate if needed
             if not widget.frame.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.frame, BackdropTemplateMixin)
@@ -1079,8 +1089,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             end
         end
         
-        -- Style the scroll frame
+        -- Style the scroll frame and make it larger
         if widget.scrollFrame then
+            widget.scrollFrame:SetWidth(246)
+            widget.scrollFrame:SetHeight(296)
+            
             if not widget.scrollFrame.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.scrollFrame, BackdropTemplateMixin)
                 if widget.scrollFrame.OnBackdropLoaded then
