@@ -200,6 +200,20 @@ local methods = {
         local tabs = self.tablist
         if not tabs then return end
         
+        -- Ensure content has width/height set if the frame has been sized
+        local frameWidth = self.frame:GetWidth()
+        local frameHeight = self.frame:GetHeight()
+        if frameWidth and frameWidth > 0 and (not self.content.width or self.content.width == 0) then
+            local contentwidth = frameWidth - 20
+            self.content:SetWidth(contentwidth)
+            self.content.width = contentwidth
+        end
+        if frameHeight and frameHeight > 0 and (not self.content.height or self.content.height == 0) then
+            local contentheight = frameHeight - 42
+            self.content:SetHeight(contentheight)
+            self.content.height = contentheight
+        end
+        
         local spacing = 2
         
         for i, v in ipairs(tabs) do
