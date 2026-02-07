@@ -1111,13 +1111,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.dropdown then
             -- Skip if this is a MidnightUI custom dropdown widget
             local dropdownName = widget.dropdown:GetName() or ""
-            if dropdownName:match("^Midnight") then
-                -- This is a Midnight custom widget, skip all backdrop styling
-                goto continueWidgetProcessing
-            end
+            if not dropdownName:match("^Midnight") then
+                -- Not a Midnight widget, apply standard dropdown styling
             
-            -- Ensure dropdown has BackdropTemplate
-            if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
+                -- Ensure dropdown has BackdropTemplate
+                if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.dropdown, BackdropTemplateMixin)
                 if widget.dropdown.OnBackdropLoaded then
                     widget.dropdown:OnBackdropLoaded()
@@ -1337,9 +1335,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 end)
                 widget.customDropdownShowHook = true
             end
+            end -- end of "not Midnight" check
         end
-        
-        ::continueWidgetProcessing::
 
         -- Hook to skin the dropdown pullout list when it opens
         if not widget.customPulloutSetup then
