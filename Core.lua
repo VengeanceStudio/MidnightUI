@@ -93,21 +93,32 @@ function MidnightUI:OnEnable()
                 -- Always destroy swatches when changing pages in MidnightUI
                 if appName == "MidnightUI" then
                     C_Timer.After(0.01, function()
+                        print("DEBUG: SelectGroup triggered for MidnightUI")
                         if self.colorSwatchContainer then
+                            print("DEBUG: Swatch container exists, attempting to destroy")
+                            print("DEBUG: Container is showing:", self.colorSwatchContainer:IsShown())
+                            print("DEBUG: Container parent:", self.colorSwatchContainer:GetParent())
                             self.colorSwatchContainer:Hide()
                             self.colorSwatchContainer:ClearAllPoints()
                             self.colorSwatchContainer:SetParent(nil)
                             self.colorSwatchContainer = nil
+                            print("DEBUG: Container destroyed")
+                        else
+                            print("DEBUG: No swatch container to destroy")
                         end
                         self.themeColorSwatches = nil
                         
                         -- Recreate only if we're on the themes page
                         local status = AceConfigDialog.OpenFrames["MidnightUI"]
                         if status and status.status and status.status.groups then
+                            print("DEBUG: Selected page:", status.status.groups.selected)
                             if status.status.groups.selected == "themes" then
+                                print("DEBUG: On themes page, will create swatches")
                                 C_Timer.After(0.15, function()
                                     self:CreateColorPaletteSwatches()
                                 end)
+                            else
+                                print("DEBUG: Not on themes page, swatches should not appear")
                             end
                         end
                     end)
@@ -2630,8 +2641,11 @@ function MidnightUI:CreateColorPaletteSwatches()
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette or not FontKit then return end
     
+    print("DEBUG: CreateColorPaletteSwatches called")
+    
     -- Clean up old container if it exists
     if self.colorSwatchContainer then
+        print("DEBUG: Destroying existing container")
         self.colorSwatchContainer:Hide()
         self.colorSwatchContainer:SetParent(nil)
         self.colorSwatchContainer = nil
@@ -2650,13 +2664,17 @@ function MidnightUI:CreateColorPaletteSwatches()
     -- Check if we're on the Themes tab
     local status = appName.status
     if not status or not status.groups or not status.groups.selected then
+        print("DEBUG: No status or groups found")
         return
     end
     
     -- Only show on Themes tab
     if status.groups.selected ~= "themes" then
+        print("DEBUG: Not on themes page, aborting swatch creation")
         return
     end
+    
+    print("DEBUG: On themes page, creating swatches")
     
     local container = appName.frame.obj
     if not container or not container.content then return end
@@ -2780,6 +2798,7 @@ function MidnightUI:CreateColorPaletteSwatches()
     end
     
     swatchContainer:Show()
+    print("DEBUG: Swatches created and shown, container ID:", tostring(swatchContainer))
 end
 
 function MidnightUI:OpenColorEditorFrame()
