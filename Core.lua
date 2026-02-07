@@ -2472,18 +2472,76 @@ function MidnightUI:GetThemeOptions()
         },
         colorsDesc = {
             type = "description",
-            name = "Click 'Open Theme Editor' to open an interactive preview where you can click on any element to change its color.",
+            name = "Click any color below to edit it directly, or use the Theme Editor for a visual preview.",
             order = 10,
         },
-        openColorEditor = {
-            type = "execute",
-            name = "Open Theme Editor",
-            desc = "Opens a visual mockup window where you can click on elements to edit their colors",
-            order = 11,
-            func = function()
-                self:OpenColorEditorFrame()
+    }
+    
+    -- Add color picker swatches for the 8 core colors
+    local coreColors = {
+        {key = "panel-bg", name = "Panel Background", order = 11},
+        {key = "panel-border", name = "Panel Border", order = 12},
+        {key = "accent-primary", name = "Accent", order = 13},
+        {key = "button-bg", name = "Button Background", order = 14},
+        {key = "button-hover", name = "Button Hover", order = 15},
+        {key = "text-primary", name = "Primary Text", order = 16},
+        {key = "text-secondary", name = "Secondary Text", order = 17},
+        {key = "tab-active", name = "Active Tab", order = 18},
+    }
+    
+    for _, colorInfo in ipairs(coreColors) do
+        options[colorInfo.key] = {
+            type = "color",
+            name = colorInfo.name,
+            desc = "Click to change the " .. colorInfo.name:lower() .. " color",
+            order = colorInfo.order,
+            hasAlpha = true,
+            width = "half",
+            get = function()
+                local r, g, b, a = ColorPalette:GetColor(colorInfo.key)
+                return r, g, b, a
             end,
-        },
+            set = function(_, r, g, b, a)
+                -- Store in temp colors for this session
+                if not self.tempThemeColors then
+                    self.tempThemeColors = {}
+                end
+                self.tempThemeColors[colorInfo.key] = {r = r, g = g, b = b, a = a}
+                
+                -- Apply the color immediately to preview
+                if ColorPalette then
+                    local activeTheme = self.db.profile.theme.active
+                    -- Get the full palette
+                    local fullPalette = ColorPalette:GetPalette(activeTheme)
+                    if fullPalette then
+                        -- Update with temp colors
+                        for tempKey, tempColor in pairs(self.tempThemeColors) do
+                            fullPalette[tempKey] = tempColor
+                        end
+                        -- Re-register the theme with updated colors
+                        ColorPalette:RegisterPalette(activeTheme, fullPalette)
+                    end
+                end
+                
+                self:Print("Color updated. Use 'Save Custom Theme' to preserve these changes.")
+            end,
+        }
+    end
+    
+    options.spacer2 = {
+        type = "description",
+        name = " ",
+        order = 19,
+    }
+    
+    options.openColorEditor = {
+        type = "execute",
+        name = "Open Theme Editor",
+        desc = "Opens a visual mockup window where you can click on elements to edit their colors",
+        order = 20,
+        func = function()
+            self:OpenColorEditorFrame()
+        end,
     }
     
     return options
