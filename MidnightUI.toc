@@ -2,7 +2,7 @@
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
 ## Author: Vengeance
-## Version: 12.0.0.209
+## Version: 12.0.0.210
 ## IconTexture: Interface\AddOns\MidnightUI\icon.png
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
@@ -57,11 +57,10 @@ Widgets\MidnightSlider.lua
 Widgets\MidnightCheckBox.lua
 Widgets\MidnightEditBox.lua
 
-Modules\Chat.lua
-
 # ------------------------------------------------------------------------------
 # MODULES
 # ------------------------------------------------------------------------------
+Modules\Chat.lua
 Modules\Skins.lua
 Modules\Movable.lua
 Modules\BrokerBar.lua

@@ -236,6 +236,20 @@ local function Constructor()
     button:SetPoint("BOTTOMRIGHT", dropdown, "BOTTOMRIGHT", -2, 2)
     button:SetWidth(18)
     
+    local arrow = button:CreateTexture(nil, "OVERLAY")
+    arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+    arrow:SetSize(10, 10)
+    arrow:SetPoint("CENTER")
+    arrow:SetRotation(-1.57)
+    arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
+    
+    local text = dropdown:CreateFontString(nil, "OVERLAY")
+    FontKit:SetFont(text, 'body', 'normal')
+    text:SetTextColor(ColorPalette:GetColor('text-primary'))
+    text:SetPoint("LEFT", dropdown, "LEFT", 4, 0)
+    text:SetPoint("RIGHT", button, "LEFT", -2, 0)
+    text:SetJustifyH("LEFT")
+    
     button:SetScript("OnClick", function(self)
         local widget = self.obj
         if widget.open then
@@ -247,6 +261,21 @@ local function Constructor()
             widget.pullout:SetWidth(widget.pulloutWidth or widget.frame:GetWidth())
             widget.pullout:Open("TOPLEFT", widget.frame, "BOTTOMLEFT", 0, widget.label:IsShown() and -2 or 0)
             AceGUI:SetFocus(widget)
+        end
+    end)
+    
+    button:SetScript("OnEnter", function(self)
+        self.obj:Fire("OnEnter")
+    end)
+    
+    button:SetScript("OnLeave", function(self)
+        self.obj:Fire("OnLeave")
+    end)
+    
+    frame:SetScript("OnHide", function(self)
+        local widget = self.obj
+        if widget.open then
+            widget.pullout:Close()
         end
     end)
     
@@ -282,35 +311,6 @@ local function Constructor()
     setmetatable(registeredWidget, mt)
     
     return registeredWidget
-    arrow:SetPoint("CENTER")
-    arrow:SetRotation(-1.57)
-    arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
-    
-    local text = dropdown:CreateFontString(nil, "OVERLAY")
-    FontKit:SetFont(text, 'body', 'normal')
-    text:SetTextColor(ColorPalette:GetColor('text-primary'))
-    text:SetPoint("LEFT", dropdown, "LEFT", 4, 0)
-    text:SetPoint("RIGHT", button, "LEFT", -2, 0)
-    text:SetJustifyH("LEFT")
-    
-    button:SetScript("OnClick", function()
-        -- Placeholder for pullout menu
-    end)
-    
-    local widget = {
-        frame = frame,
-        dropdown = dropdown,
-        button = button,
-        text = text,
-        label = label,
-        type = Type
-    }
-    
-    for method, func in pairs(methods) do
-        widget[method] = func
-    end
-    
-    return AceGUI:RegisterAsWidget(widget)
 end
 
 AceGUI:RegisterWidgetType(Type, Constructor, Version)
