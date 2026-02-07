@@ -163,11 +163,9 @@ local methods = {
         self:LayoutChildren(contentwidth, contentheight)
     end,
     
-    ["LayoutChildren"] = function(self, width, height)
-        local obj = self.obj
-        if obj and obj.LayoutFinished then
-            obj:LayoutFinished(width, height)
-        end
+    ["LayoutFinished"] = function(self, width, height)
+        if self.noAutoHeight then return end
+        self:SetHeight((height or 0) + 42)
     end,
     
     ["SetTitle"] = function(self, text)
@@ -182,14 +180,23 @@ local methods = {
     
     ["OnWidthSet"] = function(self, width)
         local content = self.content
-        content:SetWidth(width - 20)
-        self:DoLayout()
+        local contentwidth = width - 20
+        if contentwidth < 0 then
+            contentwidth = 0
+        end
+        content:SetWidth(contentwidth)
+        content.width = contentwidth
+        self:BuildTabs()
     end,
     
     ["OnHeightSet"] = function(self, height)
         local content = self.content
-        content:SetHeight(height - 42)
-        self:DoLayout()
+        local contentheight = height - 42
+        if contentheight < 0 then
+            contentheight = 0
+        end
+        content:SetHeight(contentheight)
+        content.height = contentheight
     end,
     
     ["BuildTabs"] = function(self)
