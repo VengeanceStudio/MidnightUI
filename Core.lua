@@ -170,8 +170,7 @@ function MidnightUI:OnEnable()
                     else
                         print("DEBUG: Could not find treeGroup to hook")
                     end
-                    end)
-                end
+                end)
                 
                 return result
             end
