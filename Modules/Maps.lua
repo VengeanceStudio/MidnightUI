@@ -132,12 +132,12 @@ function Maps:SetupMinimapBorder()
             insets = { left = 0, right = 0, top = 0, bottom = 0 }
         })
         
-        -- Use accent color from ColorPalette
+        -- Use background color from ColorPalette
         if ColorPalette then
-            self.minimapBorder:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+            self.minimapBorder:SetBackdropBorderColor(ColorPalette:GetColor('panel-bg'))
         else
-            -- Fallback to teal
-            self.minimapBorder:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+            -- Fallback to dark background
+            self.minimapBorder:SetBackdropBorderColor(0.05, 0.05, 0.05, 1)
         end
     end
     
