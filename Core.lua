@@ -167,33 +167,43 @@ function MidnightUI:StyleLSMWidget(widget)
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
-    -- Add backdrop support if missing (modern WoW)
-    if not frame.SetBackdrop and frame.SetBackdropColor then
-        -- Frame has backdrop methods but not SetBackdrop, might need mixin
-        Mixin(frame, BackdropTemplateMixin)
-        print("Added BackdropTemplateMixin to frame")
-    end
-    
-    -- Style the main dropdown button frame BEFORE marking as LSM widget
-    if frame.SetBackdrop then
-        print("Setting dropdown box backdrop...")
-        frame:SetBackdrop({
-            bgFile = "Interface\\Buttons\\WHITE8X8",
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            tile = false,
-            edgeSize = 1,
-            insets = { left = 1, right = 1, top = 1, bottom = 1 }
-        })
-        local r, g, b, a = ColorPalette:GetColor('button-bg')
-        frame:SetBackdropColor(r, g, b, a or 1)
-        print("  BG color:", r, g, b, a)
-        local br, bg, bb, ba = ColorPalette:GetColor('accent-primary')
-        frame:SetBackdropBorderColor(br, bg, bb, ba or 1)
-        print("  Border color:", br, bg, bb, ba)
-        print("Backdrop applied to dropdown box")
-    else
-        print("frame.SetBackdrop still nil after mixin attempt")
-        print("  frame type:", frame:GetObjectType())
+    -- Style the main dropdown button frame - create manual border since no backdrop support
+    if not frame.midnightBorder then
+        print("Creating manual border for dropdown box...")
+        -- Create background
+        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND")
+        frame.midnightBg:SetAllPoints(frame)
+        frame.midnightBg:SetColorTexture(ColorPalette:GetColor('button-bg'))
+        
+        -- Create borders (1px each side)
+        local borderColor = {ColorPalette:GetColor('accent-primary')}
+        
+        frame.midnightBorderTop = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderTop:SetHeight(1)
+        frame.midnightBorderTop:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+        frame.midnightBorderTop:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+        frame.midnightBorderTop:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
+        
+        frame.midnightBorderBottom = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderBottom:SetHeight(1)
+        frame.midnightBorderBottom:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+        frame.midnightBorderBottom:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        frame.midnightBorderBottom:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
+        
+        frame.midnightBorderLeft = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderLeft:SetWidth(1)
+        frame.midnightBorderLeft:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+        frame.midnightBorderLeft:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+        frame.midnightBorderLeft:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
+        
+        frame.midnightBorderRight = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderRight:SetWidth(1)
+        frame.midnightBorderRight:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+        frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        frame.midnightBorderRight:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
+        
+        frame.midnightBorder = true
+        print("Manual border created for dropdown box")
     end
     
     -- NOW mark this widget so backdrop hooks can identify it
