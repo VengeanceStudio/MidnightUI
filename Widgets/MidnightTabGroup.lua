@@ -179,6 +179,15 @@ local methods = {
             tab:SetWidth(calculatedWidth)
             tab:SetHeight(24)
             
+            -- Ensure backdrop is properly set after sizing
+            tab:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false,
+                edgeSize = 1,
+                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+            })
+            
             -- Position tab
             if i == 1 then
                 tab:SetPoint("TOPLEFT", self.border, "TOPLEFT", 10, -6)
