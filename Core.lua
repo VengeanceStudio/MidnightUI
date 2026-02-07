@@ -174,6 +174,27 @@ function MidnightUI:OnEnable()
             AceConfigDialog.MidnightOpenHooked = true
         end
         
+        -- Create a simple repeating check to clean up swatches when not on themes page
+        if not self.swatchCleanupTimer then
+            print("DEBUG: Setting up repeating cleanup check")
+            self.swatchCleanupTimer = C_Timer.NewTicker(0.5, function()
+                if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() then
+                    local status = AceConfigDialog.OpenFrames and AceConfigDialog.OpenFrames["MidnightUI"]
+                    if status and status.status and status.status.groups then
+                        local currentPage = status.status.groups.selected
+                        if currentPage ~= "themes" then
+                            print("DEBUG: Cleanup timer detected swatches on non-themes page:", currentPage)
+                            self.colorSwatchContainer:Hide()
+                            self.colorSwatchContainer:ClearAllPoints()
+                            self.colorSwatchContainer:SetParent(nil)
+                            self.colorSwatchContainer = nil
+                            self.themeColorSwatches = nil
+                        end
+                    end
+                end
+            end)
+        end
+        
         -- Hook AceGUI:Create to use our custom widgets
         local AceGUI = LibStub("AceGUI-3.0")
         if AceGUI and not AceGUI.MidnightCreateHooked then
