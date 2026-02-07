@@ -158,16 +158,29 @@ end
 
 -- Style LibSharedMedia widgets (LSM30_Font, LSM30_Statusbar, etc.)
 function MidnightUI:StyleLSMWidget(widget)
-    if not widget or not widget.frame then return end
+    if not widget or not widget.frame then 
+        print("StyleLSMWidget: no widget or frame")
+        return 
+    end
+    
+    print("StyleLSMWidget called for", widget.type)
     
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
-    if not ColorPalette then return end
+    if not ColorPalette then 
+        print("StyleLSMWidget: no ColorPalette")
+        return 
+    end
     
     -- Mark this widget so backdrop hooks can identify it
     widget.isLSMWidget = true
     frame.isLSMWidget = true
+    
+    print("  Checking frame properties:")
+    print("    button:", widget.button ~= nil)
+    print("    label:", widget.label ~= nil)
+    print("    text:", widget.text ~= nil)
     
     -- Style the main dropdown button frame
     if frame.SetBackdrop then
@@ -180,6 +193,7 @@ function MidnightUI:StyleLSMWidget(widget)
         })
         frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
         frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        print("  Set frame backdrop")
     end
     
     -- Hide all Blizzard textures on main frame
