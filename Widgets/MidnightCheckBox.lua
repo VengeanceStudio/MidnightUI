@@ -229,7 +229,23 @@ local function Constructor()
     
     frame.obj = widget
     
-    return AceGUI:RegisterAsWidget(widget)
+    local registeredWidget = AceGUI:RegisterAsWidget(widget)
+    
+    -- Protect the type field from being set to nil
+    local widgetType = Type
+    local mt = getmetatable(registeredWidget) or {}
+    local oldIndex = mt.__index
+    mt.__newindex = function(t, k, v)
+        if k == "type" and v == nil then
+            -- Prevent type from being set to nil
+            rawset(t, k, widgetType)
+        else
+            rawset(t, k, v)
+        end
+    end
+    setmetatable(registeredWidget, mt)
+    
+    return registeredWidget
 end
 
 AceGUI:RegisterWidgetType(Type, Constructor, Version)
