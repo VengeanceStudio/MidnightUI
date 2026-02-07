@@ -60,15 +60,24 @@ local methods = {
     end,
     
     ["SetDisabled"] = function(self, disabled)
+        print("MidnightDropdown: SetDisabled called with", disabled)
         self.disabled = disabled
         if disabled then
             self.button:Disable()
             self.text:SetTextColor(ColorPalette:GetColor('text-disabled'))
             self.label:SetTextColor(ColorPalette:GetColor('text-disabled'))
+            -- Update border color for disabled state
+            local r, g, b = ColorPalette:GetColor('panel-border')
+            self.dropdown:SetBackdropBorderColor(r, g, b, 1)
+            print("MidnightDropdown: Set border to disabled color")
         else
             self.button:Enable()
             self.text:SetTextColor(ColorPalette:GetColor('text-primary'))
             self.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+            -- Restore border color
+            local r, g, b = ColorPalette:GetColor('accent-primary')
+            self.dropdown:SetBackdropBorderColor(r, g, b, 1)
+            print("MidnightDropdown: Set border to accent-primary color")
         end
     end,
     
