@@ -313,8 +313,10 @@ function MidnightUI:StyleLSMWidget(widget)
     
     -- Hook ToggleDrop to style the pullout menu
     if widget.ToggleDrop and not widget.lsmToggleHooked then
+        print("  Setting up ToggleDrop hook...")
         local originalToggleDrop = widget.ToggleDrop
         widget.ToggleDrop = function(self, ...)
+            print("ToggleDrop HOOKED CALLED!")
             local result = originalToggleDrop(self, ...)
             
             print("ToggleDrop called, dropdown:", widget.dropdown, "pullout:", widget.pullout)
