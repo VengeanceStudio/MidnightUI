@@ -108,7 +108,7 @@ function MidnightUI:OnEnable()
                 
                 -- Style LSM widgets after creation
                 if widget and type and (type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound") then
-                    self:StyleLSMWidget(widget)
+                    MidnightUI:StyleLSMWidget(widget)
                 end
                 
                 return widget
