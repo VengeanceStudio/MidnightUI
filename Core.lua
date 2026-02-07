@@ -178,9 +178,10 @@ function MidnightUI:StyleLSMWidget(widget)
             edgeSize = 1,
             insets = { left = 1, right = 1, top = 1, bottom = 1 }
         })
-        frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-        frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
-        print("  Applied frame backdrop")
+        local r, g, b, a = ColorPalette:GetColor('button-bg')
+        frame:SetBackdropColor(r, g, b, a or 1)
+        local br, bg, bb, ba = ColorPalette:GetColor('accent-primary')
+        frame:SetBackdropBorderColor(br, bg, bb, ba or 1)
     end
     
     -- Hide Blizzard textures (DLeft, DMiddle, DRight)
@@ -313,8 +314,10 @@ function MidnightUI:StyleLSMWidget(widget)
                                 edgeSize = 1,
                                 insets = { left = 1, right = 1, top = 1, bottom = 1 }
                             })
-                            pullout:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-                            pullout:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                            local r, g, b = ColorPalette:GetColor('panel-bg')
+                            pullout:SetBackdropColor(r, g, b, 1)  -- Full opacity
+                            local br, bg, bb = ColorPalette:GetColor('accent-primary')
+                            pullout:SetBackdropBorderColor(br, bg, bb, 1)
                         end
                         
                         -- Style the scrollframe if it exists
