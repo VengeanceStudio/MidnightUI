@@ -273,8 +273,22 @@ local function Constructor()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
+    -- Style slider track with dark background and subtle border
+    local r, g, b = ColorPalette:GetColor('panel-bg')
+    slider:SetBackdropColor(r, g, b, 0.5)
+    r, g, b = ColorPalette:GetColor('panel-border')
+    slider:SetBackdropBorderColor(r, g, b, 0.3)
+    
     slider:SetWidth(8)
-    slider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Vertical")
+    
+    -- Create custom thumb texture
+    local thumb = slider:CreateTexture(nil, "OVERLAY")
+    thumb:SetTexture("Interface\\Buttons\\WHITE8X8")
+    thumb:SetSize(8, 16)
+    r, g, b = ColorPalette:GetColor('accent-primary')
+    thumb:SetVertexColor(r, g, b, 1)
+    slider:SetThumbTexture(thumb)
+    
     slider:SetFrameStrata("FULLSCREEN_DIALOG")
     slider:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", -16, 0)
     slider:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", -16, 0)
