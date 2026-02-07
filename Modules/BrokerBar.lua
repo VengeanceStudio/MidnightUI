@@ -1333,7 +1333,12 @@ function BrokerBar:GetOptions()
                 type = "select", 
                 order = 1, 
                 dialogControl = "Dropdown", 
-                values = LSM:HashTable("font"), 
+                values = function()
+                    local fonts = LSM:List("font")
+                    local out = {}
+                    for _, font in ipairs(fonts) do out[font] = font end
+                    return out
+                end,
                 get = function() return self.db.profile.font end, 
                 set = function(_, v) self.db.profile.font = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
             },
@@ -1467,7 +1472,12 @@ function BrokerBar:GetOptions()
                     type = "select", 
                     order = 6, 
                     dialogControl = "Dropdown", 
-                    values = LSM:HashTable("statusbar"), 
+                    values = function()
+                        local textures = LSM:List("statusbar")
+                        local out = {}
+                        for _, tex in ipairs(textures) do out[tex] = tex end
+                        return out
+                    end,
                     get = function() return self.db.profile.bars[id].texture end, 
                     set = function(_, v) self.db.profile.bars[id].texture = v; self:ApplyBarSettings(id) end 
                 },
