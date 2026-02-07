@@ -3667,11 +3667,15 @@ end
 
 function MidnightUI:GetOptions()
     -- Cleanup check every time options are fetched
+    print("DEBUG: GetOptions called")
     if self.colorSwatchContainer then
+        print("DEBUG: GetOptions - colorSwatchContainer exists")
         local AceConfigDialog = LibStub("AceConfigDialog-3.0")
         if AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"] then
             local status = AceConfigDialog.OpenFrames["MidnightUI"].status
+            print("DEBUG: GetOptions - current page:", status and status.groups and status.groups.selected)
             if status and status.groups and status.groups.selected ~= "themes" then
+                print("DEBUG: GetOptions - destroying swatches (not on themes page)")
                 self.colorSwatchContainer:Hide()
                 self.colorSwatchContainer:SetParent(nil)
                 self.colorSwatchContainer = nil
