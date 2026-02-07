@@ -165,11 +165,9 @@ function MidnightUI:StyleLSMWidget(widget)
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
-    -- Give frame a Midnight name so backdrop hooks skip it
-    if not frame:GetName() or not frame:GetName():match("^Midnight") then
-        local frameName = "MidnightLSMWidget" .. (widget.type or "") .. math.random(1000, 9999)
-        frame:SetName(frameName)
-    end
+    -- Mark this widget so backdrop hooks can identify it
+    widget.isLSMWidget = true
+    frame.isLSMWidget = true
     
     -- Style the main dropdown button frame
     if frame.SetBackdrop then
@@ -229,11 +227,7 @@ function MidnightUI:StyleLSMWidget(widget)
             -- Style the pullout frame
             if self.pullout and self.pullout.frame then
                 local pullout = self.pullout.frame
-                
-                -- Give pullout a Midnight name
-                if not pullout:GetName() or not pullout:GetName():match("^Midnight") then
-                    pullout:SetName("MidnightLSMPullout" .. math.random(1000, 9999))
-                end
+                pullout.isLSMWidget = true
                 
                 -- Style pullout backdrop
                 if pullout.SetBackdrop then
@@ -472,10 +466,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     if not tab.backdropHooked then
                         local originalSetBackdrop = tab.SetBackdrop
                         tab.SetBackdrop = function(self, backdrop)
-                            -- Check if this is one of our custom widgets by checking the frame name
+                            -- Check if this is one of our custom widgets by checking the frame name or LSM flag
                             local frameName = self:GetName() or ""
-                            if frameName:match("^Midnight") then
-                                -- This is a Midnight widget, don't interfere
+                            if frameName:match("^Midnight") or self.isLSMWidget then
+                                -- This is a Midnight widget or LSM widget, don't interfere
                                 return originalSetBackdrop(self, backdrop)
                             end
                             
@@ -1272,10 +1266,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 if not widget.dropdown.backdropHooked then
                     local originalSetBackdrop = widget.dropdown.SetBackdrop
                     widget.dropdown.SetBackdrop = function(self, backdrop)
-                        -- Check if this is one of our custom widgets by checking the frame name
+                        -- Check if this is one of our custom widgets by checking the frame name or LSM flag
                         local frameName = self:GetName() or ""
-                        if frameName:match("^Midnight") then
-                            -- This is a Midnight widget, don't interfere
+                        if frameName:match("^Midnight") or self.isLSMWidget then
+                            -- This is a Midnight widget or LSM widget, don't interfere
                             return originalSetBackdrop(self, backdrop)
                         end
                         
