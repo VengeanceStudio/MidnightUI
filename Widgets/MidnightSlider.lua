@@ -124,8 +124,7 @@ local function Constructor()
     editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     
     -- Set font directly on editbox
-    local fontPath = FontKit.fonts['body'].path
-    editbox:SetFont(fontPath, 10, "")
+    editbox:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
     editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
     editbox:SetTextInsets(4, 4, 0, 0)
     editbox:SetJustifyH("CENTER")
