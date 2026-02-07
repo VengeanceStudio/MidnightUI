@@ -59,6 +59,10 @@ local methods = {
         return self.slider:GetValue()
     end,
     
+    ["SetIsPercent"] = function(self, value)
+        self.ispercent = value
+    end,
+    
     ["OnWidthSet"] = function(self, width)
         self.slider:SetWidth(width - 20)
     end,
