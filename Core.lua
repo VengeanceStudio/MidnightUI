@@ -2425,7 +2425,6 @@ function MidnightUI:GetOptions()
                         name = "Global Font",
                         desc = "Select a font to apply to all MidnightUI elements.",
                         order = 1.11,
-                        width = "full",
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
@@ -2434,6 +2433,12 @@ function MidnightUI:GetOptions()
                         end,
                         get = function() return self.db.profile.theme.font or "Friz Quadrata TT" end,
                         set = function(_, v) self.db.profile.theme.font = v end,
+                    },
+                    fontSpacer = {
+                        type = "description",
+                        name = "",
+                        order = 1.115,
+                        width = "full",
                     },
                     applyGlobalFont = {
                         type = "execute",
