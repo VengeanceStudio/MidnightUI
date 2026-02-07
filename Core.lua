@@ -82,10 +82,8 @@ function MidnightUI:OnEnable()
         if AceGUI and not AceGUI.MidnightCreateHooked then
             local originalCreate = AceGUI.Create
             AceGUI.Create = function(self, type, ...)
-                -- Replace standard widgets with Midnight versions
-                if type == "TabGroup" then
-                    type = "MidnightTabGroup"
-                elseif type == "Dropdown" then
+                -- Replace standard widgets with Midnight versions (except TabGroup for now)
+                if type == "Dropdown" then
                     type = "MidnightDropdown"
                 elseif type == "Button" then
                     type = "MidnightButton"

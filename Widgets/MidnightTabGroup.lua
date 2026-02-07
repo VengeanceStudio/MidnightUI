@@ -75,6 +75,11 @@ local methods = {
         end
     end,
     
+    ["SetGroup"] = function(self, group)
+        self.status.selected = group
+        self:Fire("OnGroupSelected", group)
+    end,
+    
     ["SelectTab"] = function(self, value)
         self.status.selected = value
         self:DoLayout()
@@ -119,6 +124,16 @@ local methods = {
         if obj and obj.LayoutFinished then
             obj:LayoutFinished(width, height)
         end
+    end,
+    
+    ["SetTitle"] = function(self, text)
+        self.titletext:SetText(text or "")
+        if text and text ~= "" then
+            self.alignoffset = 25
+        else
+            self.alignoffset = 18
+        end
+        self:DoLayout()
     end,
     
     ["OnWidthSet"] = function(self, width)
