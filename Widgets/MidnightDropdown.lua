@@ -229,14 +229,16 @@ local function Constructor()
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
         tileSize = 16,
-        edgeSize = 1,
+        edgeSize = 3,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     
     local r, g, b = ColorPalette:GetColor('button-bg')
     dropdown:SetBackdropColor(r, g, b, 1)
-    r, g, b = ColorPalette:GetColor('accent-primary')
-    dropdown:SetBackdropBorderColor(r, g, b, 1)
+    
+    -- TEST: Bright red thick border to see if it's visible at all
+    dropdown:SetBackdropBorderColor(1, 0, 0, 1)
+    print("MidnightDropdown: TEST - Set THICK RED border (edgeSize=3)")
     
     -- Debug: Check actual dimensions after frame update
     C_Timer.After(0.1, function()
@@ -244,8 +246,12 @@ local function Constructor()
         local height = dropdown:GetHeight()
         print(string.format("MidnightDropdown: Frame size = %.1f x %.1f", width or 0, height or 0))
         
-        -- Try to force a redraw
-        dropdown:SetBackdropBorderColor(r, g, b, 1)
+        -- Check if background is visible
+        local bgR, bgG, bgB, bgA = dropdown:GetBackdropColor()
+        local edgeR, edgeG, edgeB, edgeA = dropdown:GetBackdropBorderColor()
+        print(string.format("MidnightDropdown: BG color = %.2f,%.2f,%.2f,%.2f | Border = %.2f,%.2f,%.2f,%.2f", 
+            bgR or 0, bgG or 0, bgB or 0, bgA or 0,
+            edgeR or 0, edgeG or 0, edgeB or 0, edgeA or 0))
     end)
     
     dropdown:Show()
