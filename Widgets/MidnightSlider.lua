@@ -123,11 +123,12 @@ local function Constructor()
     editbox:SetBackdropColor(0.15, 0.15, 0.15, 1)
     editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     
-    local ebText = editbox:CreateFontString(nil, "OVERLAY")
-    FontKit:SetFont(ebText, 'body', 'normal')
-    ebText:SetTextColor(ColorPalette:GetColor('text-primary'))
-    editbox:SetFontObject(ebText)
+    -- Set font directly on editbox
+    local fontPath = FontKit.fonts['body'].path
+    editbox:SetFont(fontPath, 10, "")
+    editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
     editbox:SetTextInsets(4, 4, 0, 0)
+    editbox:SetJustifyH("CENTER")
     
     slider:SetScript("OnValueChanged", function(self, value)
         editbox:SetText(tostring(math.floor(value + 0.5)))
