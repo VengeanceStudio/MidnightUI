@@ -160,6 +160,8 @@ end
 function MidnightUI:StyleLSMWidget(widget)
     if not widget or not widget.frame then return end
     
+    print("StyleLSMWidget called for", widget.type)
+    
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
@@ -182,6 +184,8 @@ function MidnightUI:StyleLSMWidget(widget)
         frame:SetBackdropBorderColor(br, bg, bb, ba or 1)
         print("  Border color:", br, bg, bb, ba)
         print("Backdrop applied to dropdown box")
+    else
+        print("frame.SetBackdrop is nil!")
     end
     
     -- NOW mark this widget so backdrop hooks can identify it
