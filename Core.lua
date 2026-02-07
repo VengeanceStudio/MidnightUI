@@ -87,19 +87,22 @@ function MidnightUI:OnEnable()
         if AceConfigDialog.SelectGroup and not AceConfigDialog.MidnightSelectGroupHooked then
             local originalSelectGroup = AceConfigDialog.SelectGroup
             AceConfigDialog.SelectGroup = function(appName, ...)
-                -- Clean up swatches immediately when changing pages
-                if appName == "MidnightUI" and self.colorSwatchContainer then
-                    self.colorSwatchContainer:Hide()
-                    self.colorSwatchContainer:SetParent(nil)
-                    self.colorSwatchContainer = nil
+                -- Always clean up swatches when changing pages in MidnightUI
+                if appName == "MidnightUI" then
+                    if self.colorSwatchContainer then
+                        self.colorSwatchContainer:Hide()
+                        self.colorSwatchContainer:SetParent(nil)
+                        self.colorSwatchContainer = nil
+                    end
                     self.themeColorSwatches = nil
                 end
                 
+                -- Call the original function
                 originalSelectGroup(appName, ...)
                 
-                -- Recreate swatches if we're on the themes page
+                -- Recreate swatches only if we're on the themes page
                 if appName == "MidnightUI" then
-                    C_Timer.After(0.1, function()
+                    C_Timer.After(0.15, function()
                         local status = AceConfigDialog.OpenFrames["MidnightUI"]
                         if status and status.status and status.status.groups then
                             if status.status.groups.selected == "themes" then
@@ -2515,23 +2518,6 @@ function MidnightUI:GetThemeOptions()
             end,
             order = 11,
             width = "full",
-        },
-        paletteHider = {
-            type = "description",
-            name = "",
-            order = 11.1,
-            width = "full",
-            hidden = false,
-            dialogHidden = function()
-                -- Clean up swatches when this element is hidden (page change)
-                if self.colorSwatchContainer then
-                    self.colorSwatchContainer:Hide()
-                    self.colorSwatchContainer:SetParent(nil)
-                    self.colorSwatchContainer = nil
-                    self.themeColorSwatches = nil
-                end
-                return false
-            end,
         },
         spacer2 = {
             type = "description",
