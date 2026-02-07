@@ -719,18 +719,18 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                                     end
                                     
-                                    -- Hover effect - make it more visible
+                                    -- Hover effect - subtle and modern
                                     button:HookScript("OnEnter", function(self)
                                         if button.SetBackdropColor then
-                                            -- Show brighter hover background
-                                            local r, g, b = ColorPalette:GetColor('button-bg')
-                                            button:SetBackdropColor(r * 1.8, g * 1.8, b * 1.8, 0.8)
-                                            button:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 0.5)
+                                            -- Very subtle teal glow on hover, no border
+                                            local r, g, b = ColorPalette:GetColor('accent-primary')
+                                            button:SetBackdropColor(r, g, b, 0.15)
+                                            button:SetBackdropBorderColor(0, 0, 0, 0)
                                         end
                                     end)
                                     button:HookScript("OnLeave", function(self)
                                         if button.SetBackdropColor then
-                                            -- Always clear background on leave
+                                            -- Clear background on leave
                                             button:SetBackdropColor(0, 0, 0, 0)
                                             button:SetBackdropBorderColor(0, 0, 0, 0)
                                         end
