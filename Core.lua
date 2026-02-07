@@ -95,6 +95,33 @@ function MidnightUI:OnEnable()
             AceGUI.MidnightCreateHooked = true
         end
         
+        -- Register theme change callback to refresh widget colors
+        if ColorPalette and not ColorPalette.MidnightCallbackRegistered then
+            ColorPalette:RegisterCallback(function(themeName)
+                -- Refresh all active AceGUI widgets
+                if AceGUI then
+                    for widgetType in pairs(AceGUI.WidgetRegistry or {}) do
+                        for i = 1, AceGUI:GetWidgetCount(widgetType) do
+                            local widget = AceGUI:GetWidgetByNum(widgetType, i)
+                            if widget and widget.RefreshColors then
+                                widget:RefreshColors()
+                            end
+                        end
+                    end
+                end
+                
+                -- Trigger a config frame refresh if it exists
+                if AceConfigDialog then
+                    local frame = AceConfigDialog.OpenFrames["MidnightUI"]
+                    if frame then
+                        AceConfigDialog:Close("MidnightUI")
+                        AceConfigDialog:Open("MidnightUI")
+                    end
+                end
+            end)
+            ColorPalette.MidnightCallbackRegistered = true
+        end
+        
         -- Hook AceConfigDialog to apply themed backdrop
         self:HookConfigDialogFrames()
     end)
@@ -1021,8 +1048,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tile = false, edgeSize = 1,
                     insets = { left = 2, right = 2, top = 2, bottom = 2 }
                 })
-                widget.editbox:SetBackdropColor(ColorPalette:GetColor('input-bg'))
-                widget.editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                widget.editbox:SetBackdropColor(0.15, 0.15, 0.15, 1)
+                widget.editbox:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
             end
             
             if FontKit then

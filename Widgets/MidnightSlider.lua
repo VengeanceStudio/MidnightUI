@@ -63,6 +63,19 @@ local methods = {
         self.ispercent = value
     end,
     
+    ["RefreshColors"] = function(self)
+        local r, g, b, a = ColorPalette:GetColor('accent-primary')
+        if self.track then self.track:SetVertexColor(r, g, b, a) end
+        if self.thumb then self.thumb:SetVertexColor(r, g, b, a) end
+        if self.editbox then
+            self.editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            self.editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+        if self.label then
+            self.label:SetTextColor(self.disabled and ColorPalette:GetColor('text-disabled') or ColorPalette:GetColor('text-primary'))
+        end
+    end,
+    
     ["OnWidthSet"] = function(self, width)
         self.slider:SetWidth(width - 20)
     end,
@@ -150,6 +163,8 @@ local function Constructor()
         slider = slider,
         editbox = editbox,
         label = label,
+        track = track,
+        thumb = thumb,
         type = Type
     }
     

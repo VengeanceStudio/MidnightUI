@@ -10,6 +10,9 @@ ColorPalette.activeTheme = "MidnightGlass"
 -- Color palette storage
 ColorPalette.palettes = {}
 
+-- Theme change callbacks
+ColorPalette.callbacks = {}
+
 -- ============================================================================
 -- COLOR HELPERS
 -- ============================================================================
@@ -96,6 +99,10 @@ end
 function ColorPalette:SetActiveTheme(themeName)
     if self.palettes[themeName] then
         self.activeTheme = themeName
+        -- Fire theme change callbacks
+        for _, callback in ipairs(self.callbacks) do
+            callback(themeName)
+        end
         return true
     end
     return false
@@ -103,6 +110,10 @@ end
 
 function ColorPalette:GetActiveTheme()
     return self.activeTheme
+end
+
+function ColorPalette:RegisterCallback(callback)
+    table.insert(self.callbacks, callback)
 end
 
 function ColorPalette:GetAvailableThemes()

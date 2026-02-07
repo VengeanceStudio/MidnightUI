@@ -113,30 +113,42 @@ local methods = {
     
     ["SetLabel"] = function(self, label)
         self.text:SetText(label or "")
-        if label and label ~= "" then
-            self.text:Show()
-        else
-            self.text:Hide()
-        end
     end,
     
     ["SetDescription"] = function(self, desc)
         if desc and desc ~= "" then
             if not self.desc then
-                local desc = self.frame:CreateFontString(nil, "OVERLAY")
-                desc:SetPoint("TOPLEFT", self.checkbg, "TOPRIGHT", 5, -21)
-                desc:SetWidth(self.frame:GetWidth() - 30)
-                desc:SetJustifyH("LEFT")
-                desc:SetJustifyV("TOP")
-                FontKit:SetFont(desc, 'body', 'small')
-                desc:SetTextColor(ColorPalette:GetColor('text-secondary'))
-                self.desc = desc
+                local descText = self.frame:CreateFontString(nil, "OVERLAY")
+                descText:SetPoint("TOPLEFT", self.checkbg, "TOPRIGHT", 5, -21)
+                descText:SetWidth(self.frame:GetWidth() - 30)
+                descText:SetJustifyH("LEFT")
+                descText:SetJustifyV("TOP")
+                FontKit:SetFont(descText, 'body', 'small')
+                descText:SetTextColor(ColorPalette:GetColor('text-secondary'))
+                self.desc = descText
             end
             self.desc:Show()
             self.desc:SetText(desc)
+            self:OnWidthSet(self.frame:GetWidth())
         else
             if self.desc then
                 self.desc:Hide()
+                self.desc:SetText("")
+            end
+            self:SetHeight(24)
+        end
+    end,
+    
+    ["RefreshColors"] = function(self)
+        if self.disabled then
+            self.text:SetTextColor(ColorPalette:GetColor('text-disabled'))
+            if self.desc then
+                self.desc:SetTextColor(ColorPalette:GetColor('text-disabled'))
+            end
+        else
+            self.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+            if self.desc then
+                self.desc:SetTextColor(ColorPalette:GetColor('text-secondary'))
             end
         end
     end,
@@ -173,12 +185,33 @@ local function Constructor()
     FontKit:SetFont(text, 'body', 'normal')
     text:SetTextColor(ColorPalette:GetColor('text-primary'))
     
-    frame:SetScript("OnClick", function(self)
+    frame:SetScript("OnMouseDown", function(self)
         local widget = self.obj
         if not widget.disabled then
-            widget:SetValue(not widget:GetValue())
-            widget:Fire("OnValueChanged", widget:GetValue())
+            widget.text:SetPoint("LEFT", widget.checkbg, "RIGHT", 6, 0)
         end
+    end)
+    
+    frame:SetScript("OnMouseUp", function(self)
+        local widget = self.obj
+        if not widget.disabled then
+            widget:ToggleChecked()
+            if widget.checked then
+                PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+            else
+                PlaySound(857) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
+            end
+            widget:Fire("OnValueChanged", widget.checked)
+            widget.text:SetPoint("LEFT", widget.checkbg, "RIGHT", 5, 1)
+        end
+    end)
+    
+    frame:SetScript("OnEnter", function(self)
+        self.obj:Fire("OnEnter")
+    end)
+    
+    frame:SetScript("OnLeave", function(self)
+        self.obj:Fire("OnLeave")
     end)
     
     local widget = {

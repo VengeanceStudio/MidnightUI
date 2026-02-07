@@ -21,15 +21,6 @@ local methods = {
         self:SetLabel()
         self:SetText()
         self:SetMaxLetters(0)
-        self.editbox:SetCursorPosition(0)
-        self.editbox:SetScript("OnChar", nil)
-        self.editbox:SetScript("OnKeyUp", nil)
-        self:SetCallback("OnEnter", nil)
-        self:SetCallback("OnLeave", nil)
-        self.editbox:SetScript("OnEnterPressed", function(frame)
-            local self = frame.obj
-            self:Fire("OnEnterPressed", self.editbox:GetText())
-        end)
     end,
     
     ["OnRelease"] = function(self)
@@ -37,11 +28,11 @@ local methods = {
     end,
     
     ["OnWidthSet"] = function(self, width)
-        -- Width is set by the frame
+        -- Width handled by frame
     end,
     
     ["OnHeightSet"] = function(self, height)
-        -- Height is set by the frame
+        -- Height controlled by SetLabel
     end,
     
     ["SetDisabled"] = function(self, disabled)
@@ -59,6 +50,7 @@ local methods = {
     end,
     
     ["SetText"] = function(self, text)
+        self.lasttext = text or ""
         self.editbox:SetText(text or "")
         self.editbox:SetCursorPosition(0)
     end,
@@ -72,10 +64,14 @@ local methods = {
             self.label:SetText(text)
             self.label:Show()
             self.editbox:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -18)
+            self:SetHeight(44)
+            self.alignoffset = 30
         else
             self.label:SetText("")
             self.label:Hide()
             self.editbox:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, 0)
+            self:SetHeight(26)
+            self.alignoffset = 12
         end
     end,
     
@@ -85,10 +81,12 @@ local methods = {
     
     ["ClearFocus"] = function(self)
         self.editbox:ClearFocus()
+        self.frame:SetScript("OnShow", nil)
     end,
     
     ["SetFocus"] = function(self)
         self.editbox:SetFocus()
+        self.frame:SetScript("OnShow", nil)
     end,
     
     ["HighlightText"] = function(self, from, to)
@@ -101,6 +99,17 @@ local methods = {
     
     ["SetCursorPosition"] = function(self, ...)
         return self.editbox:SetCursorPosition(...)
+    end,
+    
+    ["RefreshColors"] = function(self)
+        self.editbox:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        if self.disabled then
+            self.editbox:SetTextColor(ColorPalette:GetColor('text-disabled'))
+            self.label:SetTextColor(ColorPalette:GetColor('text-disabled'))
+        else
+            self.editbox:SetTextColor(ColorPalette:GetColor('text-primary'))
+            self.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
     end,
 }
 
@@ -145,6 +154,15 @@ local function Constructor()
         frame:ClearFocus()
     end)
     
+    editbox:SetScript("OnEnterPressed", function(frame)
+        local self = frame.obj
+        local value = frame:GetText()
+        local cancel = self:Fire("OnEnterPressed", value)
+        if not cancel then
+            PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+        end
+    end)
+    
     editbox:SetScript("OnEnter", function(frame)
         frame.obj:Fire("OnEnter")
     end)
@@ -154,9 +172,16 @@ local function Constructor()
     end)
     
     editbox:SetScript("OnTextChanged", function(frame)
-        if frame:HasFocus() then
-            frame.obj:Fire("OnTextChanged", frame:GetText())
+        local self = frame.obj
+        local value = frame:GetText()
+        if tostring(value) ~= tostring(self.lasttext) then
+            self:Fire("OnTextChanged", value)
+            self.lasttext = value
         end
+    end)
+    
+    editbox:SetScript("OnEditFocusGained", function(frame)
+        AceGUI:SetFocus(frame.obj)
     end)
     
     local widget = {
