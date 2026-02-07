@@ -2425,6 +2425,7 @@ function MidnightUI:GetOptions()
                         name = "Global Font",
                         desc = "Select a font to apply to all MidnightUI elements.",
                         order = 1.11,
+                        width = "full",
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
