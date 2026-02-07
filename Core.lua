@@ -1134,8 +1134,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local frameName = self:GetName() or ""
                         if frameName:match("^Midnight") then
                             -- This is a Midnight widget, don't interfere
+                            print("Core.lua: Skipping backdrop hook for Midnight widget:", frameName)
                             return originalSetBackdrop(self, backdrop)
                         end
+                        
+                        print("Core.lua: Applying backdrop hook to non-Midnight widget:", frameName)
                         
                         -- If trying to clear backdrop, apply our styled one instead
                         if not backdrop or backdrop == {} then
