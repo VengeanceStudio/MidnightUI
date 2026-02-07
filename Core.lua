@@ -454,22 +454,12 @@ function MidnightUI:StyleScrollFrame(widget)
     if scrollbar.ScrollUpButton then
         local upBtn = scrollbar.ScrollUpButton
         
-        -- Hide default textures
-        if upBtn.GetNormalTexture then
-            local tex = upBtn:GetNormalTexture()
-            if tex then tex:SetTexture(nil) end
-        end
-        if upBtn.GetPushedTexture then
-            local tex = upBtn:GetPushedTexture()
-            if tex then tex:SetTexture(nil) end
-        end
-        if upBtn.GetDisabledTexture then
-            local tex = upBtn:GetDisabledTexture()
-            if tex then tex:SetTexture(nil) end
-        end
-        if upBtn.GetHighlightTexture then
-            local tex = upBtn:GetHighlightTexture()
-            if tex then tex:SetTexture(nil) end
+        -- Hide all texture regions
+        for _, region in pairs({upBtn:GetRegions()}) do
+            if region:GetObjectType() == "Texture" then
+                region:SetTexture(nil)
+                region:Hide()
+            end
         end
         
         -- Create custom up arrow
@@ -489,22 +479,12 @@ function MidnightUI:StyleScrollFrame(widget)
     if scrollbar.ScrollDownButton then
         local downBtn = scrollbar.ScrollDownButton
         
-        -- Hide default textures
-        if downBtn.GetNormalTexture then
-            local tex = downBtn:GetNormalTexture()
-            if tex then tex:SetTexture(nil) end
-        end
-        if downBtn.GetPushedTexture then
-            local tex = downBtn:GetPushedTexture()
-            if tex then tex:SetTexture(nil) end
-        end
-        if downBtn.GetDisabledTexture then
-            local tex = downBtn:GetDisabledTexture()
-            if tex then tex:SetTexture(nil) end
-        end
-        if downBtn.GetHighlightTexture then
-            local tex = downBtn:GetHighlightTexture()
-            if tex then tex:SetTexture(nil) end
+        -- Hide all texture regions
+        for _, region in pairs({downBtn:GetRegions()}) do
+            if region:GetObjectType() == "Texture" then
+                region:SetTexture(nil)
+                region:Hide()
+            end
         end
         
         -- Create custom down arrow
