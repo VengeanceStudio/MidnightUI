@@ -190,26 +190,32 @@ function MidnightUI:StyleLSMWidget(widget)
     if frame.DMiddle then frame.DMiddle:Hide() print("  Hid DMiddle") end
     if frame.DRight then frame.DRight:Hide() print("  Hid DRight") end
     
-    -- Style label (the dropdown name) - try multiple approaches
+    -- Style label (the dropdown name) - FORCE white color and prevent yellow
     if frame.label then
         print("  Found label, applying style...")
         if FontKit then
             FontKit:SetFont(frame.label, 'body', 'normal')
         end
-        local r, g, b, a = ColorPalette:GetColor('text-primary')
-        frame.label:SetTextColor(r, g, b, a or 1)
-        print("  Label color set to:", r, g, b, a)
         
-        -- Also hook SetText on label to reapply color
+        -- Hook SetTextColor itself to block yellow (NORMAL_FONT_COLOR is yellow)
         if not frame.label.colorHooked then
-            local originalSetText = frame.label.SetText
-            frame.label.SetText = function(self, text)
-                originalSetText(self, text)
-                local r, g, b, a = ColorPalette:GetColor('text-primary')
-                self:SetTextColor(r, g, b, a or 1)
+            local originalSetTextColor = frame.label.SetTextColor
+            frame.label.SetTextColor = function(self, r, g, b, a)
+                -- If it's trying to set yellow (normal font color ~1, 0.82, 0), override to white
+                if r and r > 0.9 and g and g > 0.7 and g < 0.9 and b and b < 0.1 then
+                    print("  Blocked yellow label color, forcing white")
+                    local wr, wg, wb, wa = ColorPalette:GetColor('text-primary')
+                    return originalSetTextColor(self, wr, wg, wb, wa or 1)
+                end
+                return originalSetTextColor(self, r, g, b, a)
             end
             frame.label.colorHooked = true
         end
+        
+        -- Set initial color
+        local r, g, b, a = ColorPalette:GetColor('text-primary')
+        frame.label:SetTextColor(r, g, b, a or 1)
+        print("  Label color set to:", r, g, b, a)
     end
     
     -- Hook SetLabel to force color
@@ -305,49 +311,72 @@ function MidnightUI:StyleLSMWidget(widget)
         widget.ToggleDrop = function(self, ...)
             local result = originalToggleDrop(self, ...)
             
-            -- Style the dropdown after it's created
-            if widget.dropdown then
-                local dd = widget.dropdown
-                dd.isLSMWidget = true
+            print("ToggleDrop called, dropdown:", widget.dropdown, "pullout:", widget.pullout)
+            
+            -- Style the pullout (LSM widgets use .pullout not .dropdown)
+            local pullout = widget.pullout or widget.dropdown
+            if pullout then
+                print("  Found pullout, styling...")
+                pullout.isLSMWidget = true
                 
                 -- Apply themed backdrop
-                if dd.SetBackdrop then
-                    dd:SetBackdrop({
+                if pullout.SetBackdrop then
+                    pullout:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
                         edgeFile = "Interface\\Buttons\\WHITE8X8",
                         tile = false,
                         edgeSize = 1,
                         insets = { left = 1, right = 1, top = 1, bottom = 1 }
                     })
-                    dd:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-                    dd:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                    pullout:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                    pullout:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                    print("  Applied pullout backdrop")
+                end
+                
+                -- Style the scrollframe if it exists
+                if pullout.frame then
+                    pullout.frame.isLSMWidget = true
                 end
                 
                 -- Hide Blizzard textures
-                for _, region in ipairs({dd:GetRegions()}) do
+                for _, region in ipairs({pullout:GetRegions()}) do
                     if region:GetObjectType() == "Texture" then
                         region:Hide()
                     end
                 end
                 
-                -- Style all item buttons in dropdown
-                for _, child in ipairs({dd:GetChildren()}) do
-                    if child:GetObjectType() == "Button" then
+                -- Style all item buttons in pullout
+                local buttonCount = 0
+                for _, child in ipairs({pullout:GetChildren()}) do
+                    if child:GetObjectType() == "Button" or child:GetObjectType() == "CheckButton" then
+                        buttonCount = buttonCount + 1
+                        child.isLSMWidget = true
+                        
                         -- Style item text
                         local text = child:GetFontString()
                         if text and FontKit then
                             FontKit:SetFont(text, 'body', 'normal')
-                            text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                            local r, g, b, a = ColorPalette:GetColor('text-primary')
+                            text:SetTextColor(r, g, b, a or 1)
                         end
                         
-                        -- Hide highlight texture, we'll use the default
+                        -- Remove Blizzard backdrop
+                        if child.SetBackdrop then
+                            child:SetBackdrop(nil)
+                        end
+                        
+                        -- Style highlight
                         local highlight = child:GetHighlightTexture()
                         if highlight then
                             highlight:SetTexture("Interface\\Buttons\\WHITE8X8")
-                            highlight:SetVertexColor(ColorPalette:GetColor('accent-primary', 0.15))
+                            local r, g, b = ColorPalette:GetColor('accent-primary')
+                            highlight:SetVertexColor(r, g, b, 0.15)
                         end
                     end
                 end
+                print("  Styled", buttonCount, "item buttons in pullout")
+            else
+                print("  No pullout found!")
             end
             
             return result
