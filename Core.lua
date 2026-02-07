@@ -434,6 +434,17 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     end
                                 end
                             end)
+                            
+                            -- And one more final check to ensure it sticks
+                            C_Timer.After(0.1, function()
+                                for _, t in pairs(widget.tabs) do
+                                    local selected = (widget.selected == t.value) or (t.selected == true)
+                                    if selected then
+                                        t:SetBackdropColor(1, 1, 1, 1)
+                                        t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                    end
+                                end
+                            end)
                         end)
                     end)
                     
