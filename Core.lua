@@ -1109,6 +1109,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
         if widget.dropdown then
+            -- Skip if this is a MidnightUI custom dropdown widget
+            local dropdownName = widget.dropdown:GetName() or ""
+            if dropdownName:match("^Midnight") then
+                -- This is a Midnight custom widget, skip all backdrop styling
+                goto continueWidgetProcessing
+            end
+            
             -- Ensure dropdown has BackdropTemplate
             if not widget.dropdown.SetBackdrop and BackdropTemplateMixin then
                 Mixin(widget.dropdown, BackdropTemplateMixin)
@@ -1134,11 +1141,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local frameName = self:GetName() or ""
                         if frameName:match("^Midnight") then
                             -- This is a Midnight widget, don't interfere
-                            print("Core.lua: Skipping backdrop hook for Midnight widget:", frameName)
                             return originalSetBackdrop(self, backdrop)
                         end
-                        
-                        print("Core.lua: Applying backdrop hook to non-Midnight widget:", frameName)
                         
                         -- If trying to clear backdrop, apply our styled one instead
                         if not backdrop or backdrop == {} then
@@ -1334,6 +1338,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.customDropdownShowHook = true
             end
         end
+        
+        ::continueWidgetProcessing::
 
         -- Hook to skin the dropdown pullout list when it opens
         if not widget.customPulloutSetup then
