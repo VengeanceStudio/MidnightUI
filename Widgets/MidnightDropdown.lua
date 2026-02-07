@@ -282,6 +282,16 @@ local function Constructor()
     
     dropdown:Show()
     
+    -- Hook SetBackdrop to detect if something is clearing it
+    local originalSetBackdrop = dropdown.SetBackdrop
+    dropdown.SetBackdrop = function(self, backdrop)
+        print("MidnightDropdown: SetBackdrop called! backdrop =", backdrop)
+        if backdrop then
+            print("  edgeFile =", backdrop.edgeFile, "edgeSize =", backdrop.edgeSize)
+        end
+        return originalSetBackdrop(self, backdrop)
+    end
+    
     local button = CreateFrame("Button", nil, dropdown)
     button:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", -2, -2)
     button:SetPoint("BOTTOMRIGHT", dropdown, "BOTTOMRIGHT", -2, 2)
