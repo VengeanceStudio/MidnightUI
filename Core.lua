@@ -2503,9 +2503,9 @@ function MidnightUI:OpenColorEditorFrame()
         return
     end
     
-    -- Create main frame
+    -- Create main frame styled like a real MidnightUI window
     local frame = CreateFrame("Frame", "MidnightUI_ColorEditorFrame", UIParent, "BackdropTemplate")
-    frame:SetSize(700, 550)
+    frame:SetSize(800, 600)
     frame:SetPoint("CENTER")
     frame:SetFrameStrata("DIALOG")
     frame:EnableMouse(true)
@@ -2529,61 +2529,128 @@ function MidnightUI:OpenColorEditorFrame()
         frame:SetBackdropColor(GetCurrentColor("panel-bg"))
         frame:SetBackdropBorderColor(GetCurrentColor("panel-border"))
         
-        -- Update all labeled sections
-        if frame.mockPanel then
-            frame.mockPanel:SetBackdropColor(GetCurrentColor("panel-bg"))
-            frame.mockPanel:SetBackdropBorderColor(GetCurrentColor("panel-border"))
+        -- Update title bar
+        if frame.titleBg then
+            frame.titleBg:SetColorTexture(GetCurrentColor("panel-bg"))
         end
-        if frame.mockButton then
-            frame.mockButton:SetBackdropColor(GetCurrentColor("button-bg"))
-            frame.mockButton:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
+        
+        -- Update inner panel
+        if frame.innerPanel then
+            frame.innerPanel:SetBackdropColor(GetCurrentColor("panel-bg"))
+            frame.innerPanel:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
         end
-        if frame.mockTab then
-            frame.mockTab:SetBackdropColor(GetCurrentColor("tab-active"))
-            frame.mockTab:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
+        
+        -- Update buttons
+        for _, btn in ipairs(frame.mockButtons or {}) do
+            btn:SetBackdropColor(GetCurrentColor("button-bg"))
+            btn:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
         end
-        if frame.primaryText then
-            frame.primaryText:SetTextColor(GetCurrentColor("text-primary"))
+        
+        -- Update tabs
+        for i, tab in ipairs(frame.mockTabs or {}) do
+            if i == 2 then
+                tab:SetBackdropColor(GetCurrentColor("tab-active"))
+            else
+                tab:SetBackdropColor(GetCurrentColor("button-bg"))
+            end
+            tab:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
         end
-        if frame.secondaryText then
-            frame.secondaryText:SetTextColor(GetCurrentColor("text-secondary"))
+        
+        -- Update text
+        if frame.titleText then
+            frame.titleText:SetTextColor(GetCurrentColor("text-primary"))
         end
-        if frame.buttonText then
-            frame.buttonText:SetTextColor(GetCurrentColor("text-primary"))
+        if frame.headerText then
+            frame.headerText:SetTextColor(GetCurrentColor("text-primary"))
         end
-        if frame.tabText then
-            frame.tabText:SetTextColor(GetCurrentColor("text-primary"))
+        if frame.descText then
+            frame.descText:SetTextColor(GetCurrentColor("text-secondary"))
+        end
+        for _, btn in ipairs(frame.mockButtons or {}) do
+            if btn.text then
+                btn.text:SetTextColor(GetCurrentColor("text-primary"))
+            end
+        end
+        for _, tab in ipairs(frame.mockTabs or {}) do
+            if tab.text then
+                tab.text:SetTextColor(GetCurrentColor("text-primary"))
+            end
         end
     end
     
-    -- Apply backdrop
+    -- Apply backdrop styled like settings window
     frame:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
-        edgeSize = 2,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    UpdateFrameColors()
     
-    -- Title
-    local title = FontKit:CreateFontString(frame, "heading", "large")
-    title:SetPoint("TOP", 0, -15)
-    title:SetText("Click Elements to Edit Colors")
-    title:SetTextColor(GetCurrentColor("text-primary"))
-    frame.primaryText = title
+    -- Title bar background (clickable for panel-bg)
+    local titleBg = frame:CreateTexture(nil, "ARTWORK")
+    titleBg:SetPoint("TOPLEFT", 0, 0)
+    titleBg:SetPoint("TOPRIGHT", 0, 0)
+    titleBg:SetHeight(60)
+    frame.titleBg = titleBg
     
-    -- Instructions
+    -- Make title bar clickable for panel-bg color
+    local titleClickArea = CreateFrame("Frame", nil, frame)
+    titleClickArea:SetPoint("TOPLEFT", 0, 0)
+    titleClickArea:SetPoint("TOPRIGHT", 0, 0)
+    titleClickArea:SetHeight(60)
+    titleClickArea:EnableMouse(true)
+    titleClickArea:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(titleClickArea, "ANCHOR_TOP")
+        GameTooltip:SetText("Panel Background", 1, 1, 1)
+        GameTooltip:AddLine("Main background color for windows and panels", 0.7, 0.7, 0.7, true)
+        GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+        GameTooltip:Show()
+    end)
+    titleClickArea:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    titleClickArea:SetScript("OnMouseDown", function()
+        local r, g, b, a = GetCurrentColor("panel-bg")
+        ColorPickerFrame:SetupColorPickerAndShow({
+            r = r, g = g, b = b,
+            opacity = a,
+            hasOpacity = true,
+            swatchFunc = function()
+                local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                local na = ColorPickerFrame:GetColorAlpha()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["panel-bg"] = {r = nr, g = ng, b = nb, a = na}
+                UpdateFrameColors()
+            end,
+            cancelFunc = function()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["panel-bg"] = {r = r, g = g, b = b, a = a}
+                UpdateFrameColors()
+            end,
+        })
+    end)
+    
+    -- Title text
+    local title = FontKit:CreateFontString(frame, "title", "large")
+    title:SetPoint("LEFT", 20, 20)
+    title:SetText("Theme Color Editor")
+    frame.titleText = title
+    
+    -- Instructions in title area
     local instructions = FontKit:CreateFontString(frame, "body", "small")
-    instructions:SetPoint("TOP", title, "BOTTOM", 0, -5)
-    instructions:SetText("Click on any colored area below to change its color")
-    instructions:SetTextColor(GetCurrentColor("text-secondary"))
-    frame.secondaryText = instructions
+    instructions:SetPoint("TOPLEFT", 20, -38)
+    instructions:SetText("Click on any element below to change its color")
+    frame.descText = instructions
     
     -- Close button
     local closeBtn = CreateFrame("Button", nil, frame, "BackdropTemplate")
-    closeBtn:SetSize(24, 24)
-    closeBtn:SetPoint("TOPRIGHT", -8, -8)
+    closeBtn:SetSize(28, 28)
+    closeBtn:SetPoint("TOPRIGHT", -12, -12)
     closeBtn:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -2594,49 +2661,111 @@ function MidnightUI:OpenColorEditorFrame()
     closeBtn:SetBackdropColor(GetCurrentColor("button-bg"))
     closeBtn:SetBackdropBorderColor(GetCurrentColor("panel-border"))
     local closeTxt = closeBtn:CreateFontString(nil, "OVERLAY")
-    closeTxt:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+    closeTxt:SetFont("Fonts\\FRIZQT__.TTF", 26, "OUTLINE")
     closeTxt:SetText("×")
     closeTxt:SetPoint("CENTER", 0, 0)
     closeTxt:SetTextColor(GetCurrentColor("text-primary"))
+    closeBtn:SetScript("OnEnter", function(self)
+        self:SetBackdropColor(GetCurrentColor("button-hover"))
+        self:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
+    end)
+    closeBtn:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(GetCurrentColor("button-bg"))
+        self:SetBackdropBorderColor(GetCurrentColor("panel-border"))
+    end)
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
     
-    -- Helper function to create clickable color area
-    local function CreateColorArea(parent, width, height, colorKey, labelText, desc)
-        local area = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-        area:SetSize(width, height)
-        area:EnableMouse(true)
-        
-        area:SetBackdrop({
+    -- Create inner panel to demonstrate panel border
+    local innerPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    innerPanel:SetSize(760, 450)
+    innerPanel:SetPoint("TOP", 0, -75)
+    innerPanel:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    innerPanel:EnableMouse(true)
+    innerPanel:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(innerPanel, "ANCHOR_TOP")
+        GameTooltip:SetText("Panel Border", 1, 1, 1)
+        GameTooltip:AddLine("Border color for panels, frames, and minimap", 0.7, 0.7, 0.7, true)
+        GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+        GameTooltip:Show()
+    end)
+    innerPanel:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    innerPanel:SetScript("OnMouseDown", function()
+        local r, g, b, a = GetCurrentColor("accent-primary")
+        ColorPickerFrame:SetupColorPickerAndShow({
+            r = r, g = g, b = b,
+            opacity = a,
+            hasOpacity = true,
+            swatchFunc = function()
+                local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                local na = ColorPickerFrame:GetColorAlpha()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["accent-primary"] = {r = nr, g = ng, b = nb, a = na}
+                UpdateFrameColors()
+            end,
+            cancelFunc = function()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["accent-primary"] = {r = r, g = g, b = b, a = a}
+                UpdateFrameColors()
+            end,
+        })
+    end)
+    frame.innerPanel = innerPanel
+    
+    -- Header text in panel
+    local headerText = FontKit:CreateFontString(innerPanel, "heading", "medium")
+    headerText:SetPoint("TOPLEFT", 20, -20)
+    headerText:SetText("Sample UI Elements")
+    frame.headerText = headerText
+    
+    -- Tab group mockup
+    local tabs = {}
+    local tabNames = {"General", "Settings", "Advanced"}
+    for i, name in ipairs(tabNames) do
+        local tab = CreateFrame("Button", nil, innerPanel, "BackdropTemplate")
+        tab:SetSize(120, 32)
+        if i == 1 then
+            tab:SetPoint("TOPLEFT", 20, -50)
+        else
+            tab:SetPoint("LEFT", tabs[i-1], "RIGHT", 5, 0)
+        end
+        tab:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
             edgeFile = "Interface\\Buttons\\WHITE8X8",
             tile = false,
-            edgeSize = 2,
-            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
         })
+        tab.text = tab:CreateFontString(nil, "OVERLAY")
+        tab.text:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+        tab.text:SetText(name)
+        tab.text:SetPoint("CENTER")
+        tab:EnableMouse(true)
         
-        -- Label
-        local label = FontKit:CreateFontString(area, "body", "small")
-        label:SetPoint("CENTER")
-        label:SetText(labelText)
-        area.label = label
-        
-        -- Hover highlight
-        area:SetScript("OnEnter", function(self)
-            self:SetBackdropBorderColor(1, 1, 1, 1)
+        -- Click handler for tab color
+        local colorKey = i == 2 and "tab-active" or "button-bg"
+        tab:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_TOP")
-            GameTooltip:SetText(labelText, 1, 1, 1)
-            GameTooltip:AddLine(desc, 0.7, 0.7, 0.7, true)
-            GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+            GameTooltip:SetText(i == 2 and "Active Tab" or "Inactive Tab", 1, 1, 1)
+            GameTooltip:AddLine(i == 2 and "Background color for the currently selected tab" or "Background color for inactive tabs", 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine("Click to change " .. (i == 2 and "active tab" or "button") .. " color", 0.0, 1.0, 0.5)
             GameTooltip:Show()
         end)
-        
-        area:SetScript("OnLeave", function(self)
-            UpdateFrameColors()
+        tab:SetScript("OnLeave", function()
             GameTooltip:Hide()
         end)
-        
-        -- Click to open color picker
-        area:SetScript("OnMouseDown", function(self)
+        tab:SetScript("OnMouseDown", function()
             local r, g, b, a = GetCurrentColor(colorKey)
             ColorPickerFrame:SetupColorPickerAndShow({
                 r = r, g = g, b = b,
@@ -2661,50 +2790,161 @@ function MidnightUI:OpenColorEditorFrame()
             })
         end)
         
-        return area
+        table.insert(tabs, tab)
     end
+    frame.mockTabs = tabs
     
-    -- Layout mockup elements
-    local yOffset = -80
+    -- Text samples
+    local textLabel1 = FontKit:CreateFontString(innerPanel, "body", "normal")
+    textLabel1:SetPoint("TOPLEFT", 20, -100)
+    textLabel1:SetText("Primary Text: Main labels and headers")
+    textLabel1:EnableMouse(true)
     
-    -- Panel Background (large area)
-    local panelBg = CreateColorArea(frame, 300, 200, "panel-bg", "Panel Background", "Main background color for windows and panels")
-    panelBg:SetPoint("TOPLEFT", 20, yOffset)
-    frame.mockPanel = panelBg
+    local textClick1 = CreateFrame("Frame", nil, innerPanel)
+    textClick1:SetAllPoints(textLabel1)
+    textClick1:EnableMouse(true)
+    textClick1:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(textClick1, "ANCHOR_TOP")
+        GameTooltip:SetText("Primary Text", 1, 1, 1)
+        GameTooltip:AddLine("Main text color for labels and headers", 0.7, 0.7, 0.7, true)
+        GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+        GameTooltip:Show()
+    end)
+    textClick1:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    textClick1:SetScript("OnMouseDown", function()
+        local r, g, b, a = GetCurrentColor("text-primary")
+        ColorPickerFrame:SetupColorPickerAndShow({
+            r = r, g = g, b = b,
+            opacity = a,
+            hasOpacity = true,
+            swatchFunc = function()
+                local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                local na = ColorPickerFrame:GetColorAlpha()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["text-primary"] = {r = nr, g = ng, b = nb, a = na}
+                UpdateFrameColors()
+            end,
+            cancelFunc = function()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["text-primary"] = {r = r, g = g, b = b, a = a}
+                UpdateFrameColors()
+            end,
+        })
+    end)
     
-    -- Panel Border (shown on the panel background)
-    local panelBorder = CreateColorArea(frame, 280, 30, "panel-border", "Panel Border", "Border color for all panels and frames")
-    panelBorder:SetPoint("TOP", panelBg, "BOTTOM", 0, 15)
+    local textLabel2 = FontKit:CreateFontString(innerPanel, "body", "normal")
+    textLabel2:SetPoint("TOPLEFT", 20, -125)
+    textLabel2:SetText("Secondary Text: Descriptions and hints")
+    textLabel2:EnableMouse(true)
     
-    -- Right column
-    local rightX = 340
+    local textClick2 = CreateFrame("Frame", nil, innerPanel)
+    textClick2:SetAllPoints(textLabel2)
+    textClick2:EnableMouse(true)
+    textClick2:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(textClick2, "ANCHOR_TOP")
+        GameTooltip:SetText("Secondary Text", 1, 1, 1)
+        GameTooltip:AddLine("Text color for descriptions and supporting information", 0.7, 0.7, 0.7, true)
+        GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+        GameTooltip:Show()
+    end)
+    textClick2:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    textClick2:SetScript("OnMouseDown", function()
+        local r, g, b, a = GetCurrentColor("text-secondary")
+        ColorPickerFrame:SetupColorPickerAndShow({
+            r = r, g = g, b = b,
+            opacity = a,
+            hasOpacity = true,
+            swatchFunc = function()
+                local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                local na = ColorPickerFrame:GetColorAlpha()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["text-secondary"] = {r = nr, g = ng, b = nb, a = na}
+                UpdateFrameColors()
+            end,
+            cancelFunc = function()
+                if not MidnightUI.tempThemeColors then
+                    MidnightUI.tempThemeColors = {}
+                end
+                MidnightUI.tempThemeColors["text-secondary"] = {r = r, g = g, b = b, a = a}
+                UpdateFrameColors()
+            end,
+        })
+    end)
     
-    -- Accent color
-    local accent = CreateColorArea(frame, 340, 60, "accent-primary", "Accent Color (Borders & Highlights)", "Signature color used for borders, highlights, and active states")
-    accent:SetPoint("TOPLEFT", rightX, yOffset)
-    
-    -- Button background
-    local buttonBg = CreateColorArea(frame, 160, 50, "button-bg", "Button Background", "Background color for all buttons")
-    buttonBg:SetPoint("TOPLEFT", rightX, yOffset - 70)
-    frame.mockButton = buttonBg
-    frame.buttonText = buttonBg.label
-    
-    -- Button hover
-    local buttonHover = CreateColorArea(frame, 160, 50, "button-hover", "Button Hover", "Button color when hovering with mouse")
-    buttonHover:SetPoint("LEFT", buttonBg, "RIGHT", 20, 0)
-    
-    -- Text colors
-    local textPrimary = CreateColorArea(frame, 160, 50, "text-primary", "Primary Text", "Main text color for labels and headers")
-    textPrimary:SetPoint("TOPLEFT", rightX, yOffset - 130)
-    
-    local textSecondary = CreateColorArea(frame, 160, 50, "text-secondary", "Secondary Text", "Text color for descriptions and hints")
-    textSecondary:SetPoint("LEFT", textPrimary, "RIGHT", 20, 0)
-    
-    -- Tab active
-    local tabActive = CreateColorArea(frame, 340, 50, "tab-active", "Active Tab", "Background color for the currently selected tab")
-    tabActive:SetPoint("TOPLEFT", rightX, yOffset - 190)
-    frame.mockTab = tabActive
-    frame.tabText = tabActive.label
+    -- Button mockups
+    local buttons = {}
+    local buttonNames = {"Button Background", "Button Hover"}
+    local buttonKeys = {"button-bg", "button-hover"}
+    for i, name in ipairs(buttonNames) do
+        local btn = CreateFrame("Button", nil, innerPanel, "BackdropTemplate")
+        btn:SetSize(180, 36)
+        if i == 1 then
+            btn:SetPoint("TOPLEFT", 20, -170)
+        else
+            btn:SetPoint("LEFT", buttons[i-1], "RIGHT", 20, 0)
+        end
+        btn:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        btn.text = btn:CreateFontString(nil, "OVERLAY")
+        btn.text:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+        btn.text:SetText(name)
+        btn.text:SetPoint("CENTER")
+        btn:EnableMouse(true)
+        
+        local colorKey = buttonKeys[i]
+        btn:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            GameTooltip:SetText(name, 1, 1, 1)
+            GameTooltip:AddLine(i == 1 and "Background color for all buttons" or "Button color when hovering with mouse", 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+            GameTooltip:Show()
+        end)
+        btn:SetScript("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        btn:SetScript("OnMouseDown", function()
+            local r, g, b, a = GetCurrentColor(colorKey)
+            ColorPickerFrame:SetupColorPickerAndShow({
+                r = r, g = g, b = b,
+                opacity = a,
+                hasOpacity = true,
+                swatchFunc = function()
+                    local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                    local na = ColorPickerFrame:GetColorAlpha()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors[colorKey] = {r = nr, g = ng, b = nb, a = na}
+                    UpdateFrameColors()
+                end,
+                cancelFunc = function()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors[colorKey] = {r = r, g = g, b = b, a = a}
+                    UpdateFrameColors()
+                end,
+            })
+        end)
+        
+        table.insert(buttons, btn)
+    end
+    frame.mockButtons = buttons
     
     -- Reset button at bottom
     local resetBtn = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -2724,12 +2964,19 @@ function MidnightUI:OpenColorEditorFrame()
     resetTxt:SetText("Reset to Theme Defaults")
     resetTxt:SetPoint("CENTER")
     resetTxt:SetTextColor(GetCurrentColor("text-primary"))
+    resetBtn:SetScript("OnEnter", function(self)
+        self:SetBackdropColor(GetCurrentColor("button-hover"))
+    end)
+    resetBtn:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(GetCurrentColor("button-bg"))
+    end)
     resetBtn:SetScript("OnClick", function()
         MidnightUI.tempThemeColors = nil
         UpdateFrameColors()
         MidnightUI:Print("Colors reset to theme defaults.")
     end)
     
+    UpdateFrameColors()
     self.colorEditorFrame = frame
     frame:Show()
 end
