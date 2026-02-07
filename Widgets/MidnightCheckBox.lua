@@ -40,6 +40,10 @@ local methods = {
         end
     end,
     
+    ["OnHeightSet"] = function(self, height)
+        -- CheckBox height is fixed
+    end,
+    
     ["SetDisabled"] = function(self, disabled)
         self.disabled = disabled
         if disabled then

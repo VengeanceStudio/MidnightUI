@@ -36,6 +36,14 @@ local methods = {
         self:ClearFocus()
     end,
     
+    ["OnWidthSet"] = function(self, width)
+        -- Width is set by the frame
+    end,
+    
+    ["OnHeightSet"] = function(self, height)
+        -- Height is set by the frame
+    end,
+    
     ["SetDisabled"] = function(self, disabled)
         self.disabled = disabled
         if disabled then
