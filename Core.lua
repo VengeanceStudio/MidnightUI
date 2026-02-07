@@ -2472,67 +2472,266 @@ function MidnightUI:GetThemeOptions()
         },
         colorsDesc = {
             type = "description",
-            name = "Adjust individual colors for the theme. These settings are temporary until you save them as a custom theme.",
+            name = "Click 'Open Color Editor' to open an interactive preview where you can click on any element to change its color.",
             order = 10,
         },
-    }
-    
-    -- Define core color keys with descriptions
-    local colorGroups = {
-        {
-            name = "Core Colors",
-            order = 20,
-            colors = {
-                {key = "panel-bg", name = "Panel Background", desc = "Main background color for settings windows and panels"},
-                {key = "panel-border", name = "Panel Border", desc = "Border color for all panels, frames, and the minimap"},
-                {key = "accent-primary", name = "Accent Color", desc = "Signature teal/cyan color used for borders, highlights, and active states"},
-                {key = "button-bg", name = "Button Background", desc = "Background color for all buttons"},
-                {key = "button-hover", name = "Button Hover", desc = "Button color when hovering with mouse"},
-                {key = "text-primary", name = "Primary Text", desc = "Main text color for labels, headers, and body text"},
-                {key = "text-secondary", name = "Secondary Text", desc = "Text color for descriptions, hints, and supporting information"},
-                {key = "tab-active", name = "Active Tab", desc = "Background color for the currently selected tab"},
-            }
+        openColorEditor = {
+            type = "execute",
+            name = "Open Color Editor",
+            desc = "Opens a visual mockup window where you can click on elements to edit their colors",
+            order = 11,
+            func = function()
+                self:OpenColorEditorFrame()
+            end,
         },
     }
     
-    -- Add color pickers for each group
-    for _, group in ipairs(colorGroups) do
-        -- Add group header
-        options["group_header_" .. group.order] = {
-            type = "header",
-            name = group.name,
-            order = group.order,
-        }
+    return options
+end
+
+function MidnightUI:OpenColorEditorFrame()
+    -- Create or show the color editor frame
+    if self.colorEditorFrame then
+        self.colorEditorFrame:Show()
+        return
+    end
+    
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    if not ColorPalette or not FontKit then
+        self:Print("Framework not initialized.")
+        return
+    end
+    
+    -- Create main frame
+    local frame = CreateFrame("Frame", "MidnightUI_ColorEditorFrame", UIParent, "BackdropTemplate")
+    frame:SetSize(700, 550)
+    frame:SetPoint("CENTER")
+    frame:SetFrameStrata("DIALOG")
+    frame:EnableMouse(true)
+    frame:SetMovable(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", function(f) f:StartMoving() end)
+    frame:SetScript("OnDragStop", function(f) f:StopMovingOrSizing() end)
+    
+    -- Function to get current color
+    local function GetCurrentColor(key)
+        local color = self.tempThemeColors and self.tempThemeColors[key]
+        if color then
+            return color.r, color.g, color.b, color.a
+        end
+        return ColorPalette:GetColor(key)
+    end
+    
+    -- Function to update frame colors
+    local function UpdateFrameColors()
+        -- Update main frame
+        frame:SetBackdropColor(GetCurrentColor("panel-bg"))
+        frame:SetBackdropBorderColor(GetCurrentColor("panel-border"))
         
-        -- Add color pickers for this group
-        for i, colorDef in ipairs(group.colors) do
-            options["color_" .. colorDef.key] = {
-                type = "color",
-                name = colorDef.name,
-                desc = colorDef.desc,
-                order = group.order + (i * 0.1),
-                hasAlpha = true,
-                get = function()
-                    -- Get color from temporary storage or current theme
-                    local color = self.tempThemeColors and self.tempThemeColors[colorDef.key]
-                    if not color then
-                        local r, g, b, a = ColorPalette:GetColor(colorDef.key)
-                        return r, g, b, a
-                    end
-                    return color.r, color.g, color.b, color.a
-                end,
-                set = function(_, r, g, b, a)
-                    -- Store in temporary storage
-                    if not self.tempThemeColors then
-                        self.tempThemeColors = {}
-                    end
-                    self.tempThemeColors[colorDef.key] = {r = r, g = g, b = b, a = a}
-                end,
-            }
+        -- Update all labeled sections
+        if frame.mockPanel then
+            frame.mockPanel:SetBackdropColor(GetCurrentColor("panel-bg"))
+            frame.mockPanel:SetBackdropBorderColor(GetCurrentColor("panel-border"))
+        end
+        if frame.mockButton then
+            frame.mockButton:SetBackdropColor(GetCurrentColor("button-bg"))
+            frame.mockButton:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
+        end
+        if frame.mockTab then
+            frame.mockTab:SetBackdropColor(GetCurrentColor("tab-active"))
+            frame.mockTab:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
+        end
+        if frame.primaryText then
+            frame.primaryText:SetTextColor(GetCurrentColor("text-primary"))
+        end
+        if frame.secondaryText then
+            frame.secondaryText:SetTextColor(GetCurrentColor("text-secondary"))
+        end
+        if frame.buttonText then
+            frame.buttonText:SetTextColor(GetCurrentColor("text-primary"))
+        end
+        if frame.tabText then
+            frame.tabText:SetTextColor(GetCurrentColor("text-primary"))
         end
     end
     
-    return options
+    -- Apply backdrop
+    frame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 2,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    UpdateFrameColors()
+    
+    -- Title
+    local title = FontKit:CreateFontString(frame, "heading", "large")
+    title:SetPoint("TOP", 0, -15)
+    title:SetText("Click Elements to Edit Colors")
+    title:SetTextColor(GetCurrentColor("text-primary"))
+    frame.primaryText = title
+    
+    -- Instructions
+    local instructions = FontKit:CreateFontString(frame, "body", "small")
+    instructions:SetPoint("TOP", title, "BOTTOM", 0, -5)
+    instructions:SetText("Click on any colored area below to change its color")
+    instructions:SetTextColor(GetCurrentColor("text-secondary"))
+    frame.secondaryText = instructions
+    
+    -- Close button
+    local closeBtn = CreateFrame("Button", nil, frame, "BackdropTemplate")
+    closeBtn:SetSize(24, 24)
+    closeBtn:SetPoint("TOPRIGHT", -8, -8)
+    closeBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    closeBtn:SetBackdropColor(GetCurrentColor("button-bg"))
+    closeBtn:SetBackdropBorderColor(GetCurrentColor("panel-border"))
+    local closeTxt = closeBtn:CreateFontString(nil, "OVERLAY")
+    closeTxt:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+    closeTxt:SetText("×")
+    closeTxt:SetPoint("CENTER", 0, 0)
+    closeTxt:SetTextColor(GetCurrentColor("text-primary"))
+    closeBtn:SetScript("OnClick", function() frame:Hide() end)
+    
+    -- Helper function to create clickable color area
+    local function CreateColorArea(parent, width, height, colorKey, labelText, desc)
+        local area = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+        area:SetSize(width, height)
+        area:EnableMouse(true)
+        
+        area:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 2,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        })
+        
+        -- Label
+        local label = FontKit:CreateFontString(area, "body", "small")
+        label:SetPoint("CENTER")
+        label:SetText(labelText)
+        area.label = label
+        
+        -- Hover highlight
+        area:SetScript("OnEnter", function(self)
+            self:SetBackdropBorderColor(1, 1, 1, 1)
+            GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            GameTooltip:SetText(labelText, 1, 1, 1)
+            GameTooltip:AddLine(desc, 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+            GameTooltip:Show()
+        end)
+        
+        area:SetScript("OnLeave", function(self)
+            UpdateFrameColors()
+            GameTooltip:Hide()
+        end)
+        
+        -- Click to open color picker
+        area:SetScript("OnMouseDown", function(self)
+            local r, g, b, a = GetCurrentColor(colorKey)
+            ColorPickerFrame:SetupColorPickerAndShow({
+                r = r, g = g, b = b,
+                opacity = a,
+                hasOpacity = true,
+                swatchFunc = function()
+                    local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                    local na = ColorPickerFrame:GetColorAlpha()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors[colorKey] = {r = nr, g = ng, b = nb, a = na}
+                    UpdateFrameColors()
+                end,
+                cancelFunc = function()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors[colorKey] = {r = r, g = g, b = b, a = a}
+                    UpdateFrameColors()
+                end,
+            })
+        end)
+        
+        return area
+    end
+    
+    -- Layout mockup elements
+    local yOffset = -80
+    
+    -- Panel Background (large area)
+    local panelBg = CreateColorArea(frame, 300, 200, "panel-bg", "Panel Background", "Main background color for windows and panels")
+    panelBg:SetPoint("TOPLEFT", 20, yOffset)
+    frame.mockPanel = panelBg
+    
+    -- Panel Border (shown on the panel background)
+    local panelBorder = CreateColorArea(frame, 280, 30, "panel-border", "Panel Border", "Border color for all panels and frames")
+    panelBorder:SetPoint("TOP", panelBg, "BOTTOM", 0, 15)
+    
+    -- Right column
+    local rightX = 340
+    
+    -- Accent color
+    local accent = CreateColorArea(frame, 340, 60, "accent-primary", "Accent Color (Borders & Highlights)", "Signature color used for borders, highlights, and active states")
+    accent:SetPoint("TOPLEFT", rightX, yOffset)
+    
+    -- Button background
+    local buttonBg = CreateColorArea(frame, 160, 50, "button-bg", "Button Background", "Background color for all buttons")
+    buttonBg:SetPoint("TOPLEFT", rightX, yOffset - 70)
+    frame.mockButton = buttonBg
+    frame.buttonText = buttonBg.label
+    
+    -- Button hover
+    local buttonHover = CreateColorArea(frame, 160, 50, "button-hover", "Button Hover", "Button color when hovering with mouse")
+    buttonHover:SetPoint("LEFT", buttonBg, "RIGHT", 20, 0)
+    
+    -- Text colors
+    local textPrimary = CreateColorArea(frame, 160, 50, "text-primary", "Primary Text", "Main text color for labels and headers")
+    textPrimary:SetPoint("TOPLEFT", rightX, yOffset - 130)
+    
+    local textSecondary = CreateColorArea(frame, 160, 50, "text-secondary", "Secondary Text", "Text color for descriptions and hints")
+    textSecondary:SetPoint("LEFT", textPrimary, "RIGHT", 20, 0)
+    
+    -- Tab active
+    local tabActive = CreateColorArea(frame, 340, 50, "tab-active", "Active Tab", "Background color for the currently selected tab")
+    tabActive:SetPoint("TOPLEFT", rightX, yOffset - 190)
+    frame.mockTab = tabActive
+    frame.tabText = tabActive.label
+    
+    -- Reset button at bottom
+    local resetBtn = CreateFrame("Button", nil, frame, "BackdropTemplate")
+    resetBtn:SetSize(200, 36)
+    resetBtn:SetPoint("BOTTOM", 0, 15)
+    resetBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    resetBtn:SetBackdropColor(GetCurrentColor("button-bg"))
+    resetBtn:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
+    local resetTxt = resetBtn:CreateFontString(nil, "OVERLAY")
+    resetTxt:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+    resetTxt:SetText("Reset to Theme Defaults")
+    resetTxt:SetPoint("CENTER")
+    resetTxt:SetTextColor(GetCurrentColor("text-primary"))
+    resetBtn:SetScript("OnClick", function()
+        MidnightUI.tempThemeColors = nil
+        UpdateFrameColors()
+        MidnightUI:Print("Colors reset to theme defaults.")
+    end)
+    
+    self.colorEditorFrame = frame
+    frame:Show()
 end
 
 function MidnightUI:SaveCustomTheme()
@@ -2553,17 +2752,34 @@ function MidnightUI:SaveCustomTheme()
         return
     end
     
+    -- Get full theme palette from current theme as base
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local fullTheme = {}
+    
+    -- Copy all colors from current active theme
+    local currentTheme = self.db.profile.theme.active
+    local palette = ColorPalette.palettes[currentTheme]
+    if palette then
+        for key, color in pairs(palette) do
+            fullTheme[key] = {r = color.r, g = color.g, b = color.b, a = color.a}
+        end
+    end
+    
+    -- Override with custom changes
+    for key, color in pairs(self.tempThemeColors) do
+        fullTheme[key] = color
+    end
+    
     -- Save theme to database
     if not self.db.profile.theme.customThemes then
         self.db.profile.theme.customThemes = {}
     end
     
-    self.db.profile.theme.customThemes[themeName] = self.tempThemeColors
+    self.db.profile.theme.customThemes[themeName] = fullTheme
     
     -- Register the theme with ColorPalette
-    local ColorPalette = _G.MidnightUI_ColorPalette
     if ColorPalette then
-        ColorPalette:RegisterPalette(themeName, self.tempThemeColors)
+        ColorPalette:RegisterPalette(themeName, fullTheme)
     end
     
     self:Print("|cff00ff00Success:|r Custom theme '" .. themeName .. "' saved!")
