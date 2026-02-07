@@ -128,11 +128,19 @@ function MidnightUI:OnEnable()
                 
                 -- Style scrollbar in MultiLineEditBox
                 if widget and type == "MidnightMultiLineEditBox" and widget.scrollBar then
+                    -- Get the scroll buttons from the scrollbar (UIPanelScrollFrameTemplate creates these as global children)
+                    local scrollBar = widget.scrollBar
+                    local scrollBarName = scrollBar:GetName()
+                    local upButton = _G[scrollBarName .. "ScrollUpButton"]
+                    local downButton = _G[scrollBarName .. "ScrollDownButton"]
+                    
+                    -- Attach buttons as properties so StyleScrollFrame can find them
+                    scrollBar.ScrollUpButton = upButton
+                    scrollBar.ScrollDownButton = downButton
+                    
                     -- Create a ScrollFrame-like object for our styling function
                     local scrollFrameWidget = {
-                        scrollbar = widget.scrollBar,
-                        ScrollUpButton = widget.scrollBar.ScrollUpButton or _G[widget.scrollBar:GetName() .. "ScrollUpButton"],
-                        ScrollDownButton = widget.scrollBar.ScrollDownButton or _G[widget.scrollBar:GetName() .. "ScrollDownButton"]
+                        scrollbar = scrollBar
                     }
                     MidnightUI:StyleScrollFrame(scrollFrameWidget)
                 end
