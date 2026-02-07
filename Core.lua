@@ -82,12 +82,8 @@ function MidnightUI:OnEnable()
         if AceGUI and not AceGUI.MidnightCreateHooked then
             local originalCreate = AceGUI.Create
             AceGUI.Create = function(self, type, ...)
-                -- Replace standard widgets with Midnight versions (except TabGroup for now)
-                if type == "Dropdown" then
-                    type = "MidnightDropdown"
-                elseif type == "Button" then
-                    type = "MidnightButton"
-                elseif type == "Slider" then
+                -- Use custom Slider only (Dropdown and Button need full widget interface implementation)
+                if type == "Slider" then
                     type = "MidnightSlider"
                 end
                 return originalCreate(self, type, ...)
@@ -1121,7 +1117,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     insets = { left = 1, right = 1, top = 1, bottom = 1 }
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                 
                 -- Protect dropdown backdrop texture regions from being hidden
                 if not widget.dropdown.backdropProtected then
@@ -1259,7 +1255,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             insets = { left = 1, right = 1, top = 1, bottom = 1 }
                         })
                         widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                        widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                        widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                     end
                     
                     -- Ensure button and arrow are visible
@@ -1439,6 +1435,53 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     end
                 end
             end
+        end
+        
+    elseif widgetType == "Button" then
+        if widget.frame then
+            -- Ensure button has BackdropTemplate
+            if not widget.frame.SetBackdrop and BackdropTemplateMixin then
+                Mixin(widget.frame, BackdropTemplateMixin)
+                if widget.frame.OnBackdropLoaded then
+                    widget.frame:OnBackdropLoaded()
+                end
+            end
+            
+            -- Hide all button textures
+            for _, region in ipairs({widget.frame:GetRegions()}) do
+                if region:GetObjectType() == "Texture" and region ~= widget.text then
+                    region:Hide()
+                end
+            end
+            
+            -- Apply themed backdrop with visible border
+            if widget.frame.SetBackdrop then
+                widget.frame:SetBackdrop({
+                    bgFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    tile = false, edgeSize = 1,
+                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                })
+                widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                
+                -- Add hover effect
+                if not widget.customHoverHook then
+                    widget.frame:HookScript("OnEnter", function()
+                        local r, g, b, a = ColorPalette:GetColor('button-bg')
+                        widget.frame:SetBackdropColor(math.min(r * 2 + 0.15, 1), math.min(g * 2 + 0.15, 1), math.min(b * 2 + 0.15, 1), a)
+                    end)
+                    widget.frame:HookScript("OnLeave", function()
+                        widget.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                    end)
+                    widget.customHoverHook = true
+                end
+            end
+        end
+        
+        if widget.text and FontKit then
+            FontKit:SetFont(widget.text, 'button', 'normal')
+            widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
         end
         
     elseif widgetType == "Heading" or widgetType == "Label" then
