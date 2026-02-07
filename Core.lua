@@ -161,6 +161,12 @@ function MidnightUI:StyleLSMWidget(widget)
     if not widget or not widget.frame then return end
     
     print("StyleLSMWidget: Starting for", widget.type)
+    print("  Widget methods:")
+    for k, v in pairs(widget) do
+        if type(v) == "function" and type(k) == "string" then
+            print("    ", k)
+        end
+    end
     
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
