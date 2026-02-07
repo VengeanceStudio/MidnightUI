@@ -177,23 +177,31 @@ function MidnightUI:StyleLSMWidget(widget)
     widget.isLSMWidget = true
     frame.isLSMWidget = true
     
-    print("  Checking frame properties:")
-    print("    button:", widget.button ~= nil)
-    print("    label:", widget.label ~= nil)
-    print("    text:", widget.text ~= nil)
+    -- Debug: check what properties exist
+    print("  Widget properties:")
+    for k, v in pairs(widget) do
+        if type(v) ~= "function" and type(v) ~= "table" then
+            print("    ", k, "=", v)
+        elseif k ~= "frame" and k ~= "userdata" and k ~= "events" and k ~= "base" then
+            print("    ", k, "=", type(v))
+        end
+    end
     
-    -- Style the main dropdown button frame
-    if frame.SetBackdrop then
-        frame:SetBackdrop({
-            bgFile = "Interface\\Buttons\\WHITE8X8",
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            tile = false,
-            edgeSize = 1,
-            insets = { left = 1, right = 1, top = 1, bottom = 1 }
-        })
-        frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-        frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
-        print("  Set frame backdrop")
+    print("  Frame properties:")
+    for k, v in pairs(frame) do
+        if type(v) ~= "function" and k ~= "0" then
+            print("    ", k, "=", type(v))
+        end
+    end
+    
+    print("  Frame children:")
+    for i, child in ipairs({frame:GetChildren()}) do
+        print("    child", i, child:GetObjectType(), child:GetName())
+    end
+    
+    print("  Frame regions:")
+    for i, region in ipairs({frame:GetRegions()}) do
+        print("    region", i, region:GetObjectType(), region:GetName())
     end
     
     -- Hide all Blizzard textures on main frame
