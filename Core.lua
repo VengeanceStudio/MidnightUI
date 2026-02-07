@@ -254,7 +254,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 local function HideTabTextures(t)
                     for _, region in ipairs({t:GetRegions()}) do
                         if region:GetObjectType() == "Texture" and region ~= t.text then
-                            region:Hide()
+                            -- Don't hide backdrop textures (borders and background)
+                            if region ~= t.Center and region ~= t.TopEdge and region ~= t.BottomEdge and 
+                               region ~= t.LeftEdge and region ~= t.RightEdge and 
+                               region ~= t.TopLeftCorner and region ~= t.TopRightCorner and 
+                               region ~= t.BottomLeftCorner and region ~= t.BottomRightCorner then
+                                region:Hide()
+                            end
                         end
                     end
                 end
