@@ -336,7 +336,13 @@ local function Constructor()
     local originalAddChild = container.AddChild
     container.AddChild = function(self, child, ...)
         print("MidnightTabGroup AddChild called, child type:", child.type)
-        return originalAddChild(self, child, ...)
+        print("  content frame visible:", self.content:IsShown())
+        print("  content size:", self.content:GetWidth(), "x", self.content:GetHeight())
+        print("  content.width/height:", self.content.width, self.content.height)
+        local result = originalAddChild(self, child, ...)
+        -- Trigger layout after adding child
+        self:DoLayout()
+        return result
     end
     
     local originalReleaseChildren = container.ReleaseChildren
