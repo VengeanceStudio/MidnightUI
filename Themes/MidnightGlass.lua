@@ -43,6 +43,10 @@ ColorPalette:RegisterPalette("MidnightGlass", {
     
     ["tab-inactive"] = {r = 0.1, g = 0.1, b = 0.15, a = 0.8},
     ["tab-active"] = {r = 0.15, g = 0.3, b = 0.4, a = 0.95},
+    ["tab-selected-bg"] = {r = 0.25, g = 0.4, b = 0.5, a = 0.95},  -- Brighter blue for selected tab
+    
+    -- Accent colors
+    ["accent-primary"] = {r = 0.1608, g = 0.5216, b = 0.5804, a = 1.0},  -- Teal accent
     
     ["scrollbar-track"] = {r = 0.05, g = 0.05, b = 0.1, a = 0.7},
     ["scrollbar-thumb"] = {r = 0.2, g = 0.4, b = 0.6, a = 0.9},

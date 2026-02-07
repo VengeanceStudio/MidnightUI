@@ -305,8 +305,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         tab.SetBackdropColor = function(self, r, g, b, a)
                             local selected = (widget.selected == self.value) or (self.selected == true)
                             if selected then
-                                -- Force white background for selected tabs
-                                originalSetBackdropColor(self, 1, 1, 1, 1)
+                                -- Use theme color for selected tabs
+                                originalSetBackdropColor(self, ColorPalette:GetColor('tab-selected-bg'))
                             else
                                 -- Allow normal color for unselected tabs
                                 originalSetBackdropColor(self, r, g, b, a)
@@ -354,9 +354,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     -- Check if this tab is selected
                     local isSelected = (widget.selected == tab.value)
                     if isSelected then
-                        -- Selected tab: white background, accent border
-                        tab:SetBackdropColor(1, 1, 1, 1)
-                        tab:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1) -- Teal accent
+                        -- Selected tab: use theme colors
+                        tab:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                        tab:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                     else
                         -- Unselected tab: normal colors
                         tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
@@ -369,7 +369,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     -- Set text color based on selection
                     local isSelected = (widget.selected == tab.value)
                     if isSelected then
-                        tab.text:SetTextColor(0.1608, 0.5216, 0.5804, 1) -- Teal accent for selected
+                        tab.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
                     else
                         tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                     end
@@ -413,10 +413,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 
                                 -- Trigger SetBackdropColor which will be intercepted by our hook
                                 if selected then
-                                    t:SetBackdropColor(1, 1, 1, 1)  -- Will be enforced by hook
-                                    t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                    t:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                                    t:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                                     if t.text then
-                                        t.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
+                                        t.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
                                     end
                                 else
                                     t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
@@ -445,10 +445,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         for _, t in pairs(widget.tabs) do
                             local selected = (widget.selected == t.value) or (t.selected == true)
                             if selected then
-                                t:SetBackdropColor(1, 1, 1, 1)
-                                t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                t:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                                t:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                                 if t.text then
-                                    t.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
+                                    t.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
                                 end
                             end
                         end
