@@ -3064,7 +3064,7 @@ function MidnightUI:GetOptions()
             themes = {
                 name = "Themes",
                 type = "group",
-                order = 2,
+                order = 40,
                 args = self:GetThemeOptions(),
             },  -- closes themes group
             export = {
