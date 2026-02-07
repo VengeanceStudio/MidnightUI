@@ -152,8 +152,6 @@ local methods = {
         local tabs = self.tablist
         if not tabs then return end
         
-        local width = self.frame:GetWidth() or 800
-        local tabWidth = 120
         local spacing = 2
         
         for i, v in ipairs(tabs) do
@@ -174,14 +172,11 @@ local methods = {
             tab.value = v.value
             tab.text:SetText(v.text)
             
-            -- Auto-size based on text width
+            -- Auto-size each tab based on its own text width
             local textWidth = tab.text:GetStringWidth()
-            local calculatedWidth = textWidth + 32
-            if calculatedWidth > tabWidth then
-                tabWidth = calculatedWidth
-            end
+            local calculatedWidth = textWidth + 32  -- 16px padding on each side
             
-            tab:SetWidth(tabWidth)
+            tab:SetWidth(calculatedWidth)
             tab:SetHeight(24)
             
             -- Position tab
