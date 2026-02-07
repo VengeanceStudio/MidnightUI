@@ -87,6 +87,7 @@ function MidnightUI:OnEnable()
         if AceConfigDialog.SelectGroup and not AceConfigDialog.MidnightSelectGroupHooked then
             local originalSelectGroup = AceConfigDialog.SelectGroup
             AceConfigDialog.SelectGroup = function(appName, ...)
+                print("DEBUG: SelectGroup called for:", appName)
                 -- Call the original function first
                 originalSelectGroup(appName, ...)
                 
@@ -125,6 +126,52 @@ function MidnightUI:OnEnable()
                 end
             end
             AceConfigDialog.MidnightSelectGroupHooked = true
+        end
+        
+        -- Hook into AceConfigDialog Open to find and hook tree buttons
+        if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
+            local originalOpen = AceConfigDialog.Open
+            AceConfigDialog.Open = function(appName, ...)
+                local result = originalOpen(appName, ...)
+                
+                if appName == "MidnightUI" then
+                    C_Timer.After(0.3, function()
+                        local status = AceConfigDialog.OpenFrames["MidnightUI"]
+                        if status and status.frame and status.frame.obj then
+                            local container = status.frame.obj
+                            if container.treeframe then
+                                print("DEBUG: Found tree frame, hooking buttons")
+                                -- Hook all tree buttons
+                                for _, button in pairs(container.buttons or {}) do
+                                    if button and button:GetScript("OnClick") and not button.MidnightClickHooked then
+                                        button:HookScript("OnClick", function()
+                                            print("DEBUG: Tree button clicked")
+                                            C_Timer.After(0.05, function()
+                                                if self.colorSwatchContainer then
+                                                    local currentPage = status.status and status.status.groups and status.status.groups.selected
+                                                    print("DEBUG: Current page after click:", currentPage)
+                                                    if currentPage ~= "themes" then
+                                                        print("DEBUG: Not on themes, hiding swatches")
+                                                        self.colorSwatchContainer:Hide()
+                                                        self.colorSwatchContainer:ClearAllPoints()
+                                                        self.colorSwatchContainer:SetParent(nil)
+                                                        self.colorSwatchContainer = nil
+                                                        self.themeColorSwatches = nil
+                                                    end
+                                                end
+                                            end)
+                                        end)
+                                        button.MidnightClickHooked = true
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                end
+                
+                return result
+            end
+            AceConfigDialog.MidnightOpenHooked = true
         end
         
         -- Hook AceGUI:Create to use our custom widgets
