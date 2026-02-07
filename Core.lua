@@ -509,6 +509,17 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                         insets = { left = 2, right = 2, top = 2, bottom = 2 }
                                     })
                                     
+                                    -- Force show all backdrop textures
+                                    if t.Center then t.Center:Show() end
+                                    if t.TopEdge then t.TopEdge:Show() end
+                                    if t.BottomEdge then t.BottomEdge:Show() end
+                                    if t.LeftEdge then t.LeftEdge:Show() end
+                                    if t.RightEdge then t.RightEdge:Show() end
+                                    if t.TopLeftCorner then t.TopLeftCorner:Show() end
+                                    if t.TopRightCorner then t.TopRightCorner:Show() end
+                                    if t.BottomLeftCorner then t.BottomLeftCorner:Show() end
+                                    if t.BottomRightCorner then t.BottomRightCorner:Show() end
+                                    
                                     -- Reapply colors
                                     local selected = (widget.selected == t.value) or (t.selected == true)
                                     if selected then
