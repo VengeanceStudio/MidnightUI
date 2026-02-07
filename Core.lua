@@ -2415,6 +2415,11 @@ function MidnightUI:GetOptions()
                             return "This will scale all UI element positions from " .. MidnightUI.REFERENCE_WIDTH .. "x" .. MidnightUI.REFERENCE_HEIGHT .. " to " .. screenWidth .. "x" .. screenHeight .. " and reload your UI. Continue?"
                         end,
                     },
+                    fontHeaderSpacer = {
+                        type = "description",
+                        name = " ",
+                        order = 1.095,
+                    },
                     fontHeader = {
                         type = "header",
                         name = "Global Font",
