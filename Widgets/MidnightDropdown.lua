@@ -187,9 +187,11 @@ local methods = {
     end,
     
     ["RefreshColors"] = function(self)
+        print("MidnightDropdown: RefreshColors called!")
         local r, g, b = ColorPalette:GetColor('button-bg')
         self.dropdown:SetBackdropColor(r, g, b, 1)
         r, g, b = ColorPalette:GetColor('accent-primary')
+        print(string.format("MidnightDropdown RefreshColors: Setting border to %.2f,%.2f,%.2f", r or 0, g or 0, b or 0))
         self.dropdown:SetBackdropBorderColor(r, g, b, 1)
         self.arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
         if self.disabled then
