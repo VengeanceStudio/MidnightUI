@@ -11,6 +11,22 @@ local Type = "MidnightEditBox"
 local Version = 1
 
 -- ============================================================================
+-- HELPER FUNCTIONS
+-- ============================================================================
+
+local function ShowButton(self)
+    if not self.disablebutton then
+        self.button:Show()
+        self.editbox:SetTextInsets(4, 44, 2, 2)  -- Make room for button
+    end
+end
+
+local function HideButton(self)
+    self.button:Hide()
+    self.editbox:SetTextInsets(4, 4, 2, 2)
+end
+
+-- ============================================================================
 -- METHODS
 -- ============================================================================
 
@@ -20,6 +36,7 @@ local methods = {
         self:SetDisabled(false)
         self:SetLabel()
         self:SetText()
+        self:DisableButton(false)
         self:SetMaxLetters(0)
     end,
     
@@ -53,6 +70,7 @@ local methods = {
         self.lasttext = text or ""
         self.editbox:SetText(text or "")
         self.editbox:SetCursorPosition(0)
+        HideButton(self)
     end,
     
     ["GetText"] = function(self)
@@ -77,6 +95,13 @@ local methods = {
     
     ["SetMaxLetters"] = function(self, num)
         self.editbox:SetMaxLetters(num or 0)
+    end,
+    
+    ["DisableButton"] = function(self, disabled)
+        self.disablebutton = disabled
+        if disabled then
+            HideButton(self)
+        end
     end,
     
     ["ClearFocus"] = function(self)
@@ -160,6 +185,7 @@ local function Constructor()
         local cancel = self:Fire("OnEnterPressed", value)
         if not cancel then
             PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+            HideButton(self)
         end
     end)
     
@@ -177,6 +203,7 @@ local function Constructor()
         if tostring(value) ~= tostring(self.lasttext) then
             self:Fire("OnTextChanged", value)
             self.lasttext = value
+            ShowButton(self)
         end
     end)
     
@@ -184,10 +211,49 @@ local function Constructor()
         AceGUI:SetFocus(frame.obj)
     end)
     
+    -- Create OK button
+    local button = CreateFrame("Button", nil, editbox, nil)
+    button:SetSize(40, 20)
+    button:SetPoint("RIGHT", -2, 0)
+    button:SetText(OKAY)
+    
+    -- Style the button with MidnightUI theme
+    button:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+    button:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+    
+    local buttonText = button:CreateFontString(nil, "OVERLAY")
+    FontKit:SetFont(buttonText, 'button', 'normal')
+    buttonText:SetTextColor(ColorPalette:GetColor('text-primary'))
+    buttonText:SetPoint("CENTER")
+    buttonText:SetText(OKAY)
+    button.text = buttonText
+    
+    button:SetScript("OnClick", function(btn)
+        local editbox = btn:GetParent()
+        editbox:ClearFocus()
+        local self = editbox.obj
+        local value = editbox:GetText()
+        local cancel = self:Fire("OnEnterPressed", value)
+        if not cancel then
+            PlaySound(856)
+            HideButton(self)
+        end
+    end)
+    
+    button:Hide()
+    
     local widget = {
         frame = frame,
         editbox = editbox,
         label = label,
+        button = button,
         type = Type
     }
     
