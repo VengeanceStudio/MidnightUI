@@ -2,7 +2,7 @@
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
 ## Author: Vengeance
-## Version: 12.0.0.306
+## Version: 12.0.0.307
 ## IconTexture: Interface\AddOns\MidnightUI\icon.png
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
@@ -59,6 +59,7 @@ Widgets\MidnightCheckBox.lua
 Widgets\MidnightEditBox.lua
 Widgets\MidnightMultiLineEditBox.lua
 Widgets\MidnightColorPicker.lua
+Widgets\MidnightInlineGroup.lua
 Widgets\MidnightHeading.lua
 
 # ------------------------------------------------------------------------------
