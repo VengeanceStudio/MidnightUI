@@ -94,6 +94,8 @@ function MidnightUI:OnEnable()
                     type = "MidnightCheckBox"
                 elseif type == "EditBox" then
                     type = "MidnightEditBox"
+                elseif type == "MultiLineEditBox" then
+                    type = "MidnightMultiLineEditBox"
                 elseif type == "Button" then
                     type = "MidnightButton"
                 elseif type == "Dropdown" then
@@ -108,7 +110,7 @@ function MidnightUI:OnEnable()
                 end
                 local widget = originalCreate(self, type, ...)
                 -- Ensure type is preserved
-                if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox" or type == "MidnightButton" or type == "MidnightDropdown" or type == "MidnightDropdown-Pullout" or type == "MidnightHeading" or type == "MidnightTabGroup") then
+                if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox" or type == "MidnightMultiLineEditBox" or type == "MidnightButton" or type == "MidnightDropdown" or type == "MidnightDropdown-Pullout" or type == "MidnightHeading" or type == "MidnightTabGroup") then
                     widget.type = type
                 end
                 
@@ -122,6 +124,17 @@ function MidnightUI:OnEnable()
                 if widget and type == "ScrollFrame" then
                     print("Styling ScrollFrame")
                     MidnightUI:StyleScrollFrame(widget)
+                end
+                
+                -- Style scrollbar in MultiLineEditBox
+                if widget and type == "MidnightMultiLineEditBox" and widget.scrollBar then
+                    -- Create a ScrollFrame-like object for our styling function
+                    local scrollFrameWidget = {
+                        scrollbar = widget.scrollBar,
+                        ScrollUpButton = widget.scrollBar.ScrollUpButton or _G[widget.scrollBar:GetName() .. "ScrollUpButton"],
+                        ScrollDownButton = widget.scrollBar.ScrollDownButton or _G[widget.scrollBar:GetName() .. "ScrollDownButton"]
+                    }
+                    MidnightUI:StyleScrollFrame(scrollFrameWidget)
                 end
                 
                 return widget
