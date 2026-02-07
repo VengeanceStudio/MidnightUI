@@ -167,9 +167,9 @@ function MidnightUI:OnEnable()
                         else
                             print("DEBUG: Could not hook SelectByValue - either doesn't exist or already hooked")
                         end
-                        else
-                            print("DEBUG: Could not find treeGroup to hook")
-                        end
+                    else
+                        print("DEBUG: Could not find treeGroup to hook")
+                    end
                     end)
                 end
                 
