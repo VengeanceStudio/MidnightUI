@@ -83,87 +83,47 @@ function MidnightUI:OnEnable()
             AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
-        -- Hook SelectGroup to handle page changes for color swatches
-        if AceConfigDialog.SelectGroup and not AceConfigDialog.MidnightSelectGroupHooked then
-            local originalSelectGroup = AceConfigDialog.SelectGroup
-            AceConfigDialog.SelectGroup = function(appName, ...)
-                print("DEBUG: SelectGroup called for:", appName)
-                -- Call the original function first
-                originalSelectGroup(appName, ...)
-                
-                -- Always destroy swatches when changing pages in MidnightUI
-                if appName == "MidnightUI" then
-                    C_Timer.After(0.01, function()
-                        print("DEBUG: SelectGroup triggered for MidnightUI")
-                        if self.colorSwatchContainer then
-                            print("DEBUG: Swatch container exists, attempting to destroy")
-                            print("DEBUG: Container is showing:", self.colorSwatchContainer:IsShown())
-                            print("DEBUG: Container parent:", self.colorSwatchContainer:GetParent())
-                            self.colorSwatchContainer:Hide()
-                            self.colorSwatchContainer:ClearAllPoints()
-                            self.colorSwatchContainer:SetParent(nil)
-                            self.colorSwatchContainer = nil
-                            print("DEBUG: Container destroyed")
-                        else
-                            print("DEBUG: No swatch container to destroy")
-                        end
-                        self.themeColorSwatches = nil
-                        
-                        -- Recreate only if we're on the themes page
-                        local status = AceConfigDialog.OpenFrames["MidnightUI"]
-                        if status and status.status and status.status.groups then
-                            print("DEBUG: Selected page:", status.status.groups.selected)
-                            if status.status.groups.selected == "themes" then
-                                print("DEBUG: On themes page, will create swatches")
-                                C_Timer.After(0.15, function()
-                                    self:CreateColorPaletteSwatches()
-                                end)
-                            else
-                                print("DEBUG: Not on themes page, swatches should not appear")
-                            end
-                        end
-                    end)
-                end
-            end
-            AceConfigDialog.MidnightSelectGroupHooked = true
-        end
-        
-        -- Hook into AceConfigDialog Open to find and hook tree buttons
+        -- Hook into AceConfigDialog Open to hook the TreeGroup selection
         if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
             local originalOpen = AceConfigDialog.Open
             AceConfigDialog.Open = function(appName, ...)
                 local result = originalOpen(appName, ...)
                 
                 if appName == "MidnightUI" then
-                    C_Timer.After(0.3, function()
-                        local status = AceConfigDialog.OpenFrames["MidnightUI"]
-                        if status and status.frame and status.frame.obj then
-                            local container = status.frame.obj
-                            if container.treeframe then
-                                print("DEBUG: Found tree frame, hooking buttons")
-                                -- Hook all tree buttons
-                                for _, button in pairs(container.buttons or {}) do
-                                    if button and button:GetScript("OnClick") and not button.MidnightClickHooked then
-                                        button:HookScript("OnClick", function()
-                                            print("DEBUG: Tree button clicked")
-                                            C_Timer.After(0.05, function()
-                                                if self.colorSwatchContainer then
-                                                    local currentPage = status.status and status.status.groups and status.status.groups.selected
-                                                    print("DEBUG: Current page after click:", currentPage)
-                                                    if currentPage ~= "themes" then
-                                                        print("DEBUG: Not on themes, hiding swatches")
-                                                        self.colorSwatchContainer:Hide()
-                                                        self.colorSwatchContainer:ClearAllPoints()
-                                                        self.colorSwatchContainer:SetParent(nil)
-                                                        self.colorSwatchContainer = nil
-                                                        self.themeColorSwatches = nil
-                                                    end
-                                                end
-                                            end)
+                    C_Timer.After(0.1, function()
+                        local openFrame = AceConfigDialog.OpenFrames["MidnightUI"]
+                        if openFrame and openFrame.frame and openFrame.frame.obj then
+                            local treeGroup = openFrame.frame.obj
+                            
+                            -- Hook the TreeGroup's SelectByValue method
+                            if treeGroup.SelectByValue and not treeGroup.MidnightSelectHooked then
+                                local originalSelect = treeGroup.SelectByValue
+                                treeGroup.SelectByValue = function(widget, uniquevalue, ...)
+                                    print("DEBUG: TreeGroup SelectByValue called with:", uniquevalue)
+                                    
+                                    -- Clean up swatches before selecting new page
+                                    if self.colorSwatchContainer then
+                                        print("DEBUG: Destroying swatches before page change")
+                                        self.colorSwatchContainer:Hide()
+                                        self.colorSwatchContainer:ClearAllPoints()
+                                        self.colorSwatchContainer:SetParent(nil)
+                                        self.colorSwatchContainer = nil
+                                        self.themeColorSwatches = nil
+                                    end
+                                    
+                                    -- Call original selection
+                                    originalSelect(widget, uniquevalue, ...)
+                                    
+                                    -- Recreate swatches if we're on themes page
+                                    if uniquevalue == "themes" then
+                                        print("DEBUG: Selected themes page, will create swatches")
+                                        C_Timer.After(0.15, function()
+                                            self:CreateColorPaletteSwatches()
                                         end)
-                                        button.MidnightClickHooked = true
                                     end
                                 end
+                                treeGroup.MidnightSelectHooked = true
+                                print("DEBUG: TreeGroup SelectByValue hooked successfully")
                             end
                         end
                     end)
@@ -172,27 +132,6 @@ function MidnightUI:OnEnable()
                 return result
             end
             AceConfigDialog.MidnightOpenHooked = true
-        end
-        
-        -- Create a simple repeating check to clean up swatches when not on themes page
-        if not self.swatchCleanupTimer then
-            print("DEBUG: Setting up repeating cleanup check")
-            self.swatchCleanupTimer = C_Timer.NewTicker(0.5, function()
-                if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() then
-                    local status = AceConfigDialog.OpenFrames and AceConfigDialog.OpenFrames["MidnightUI"]
-                    if status and status.status and status.status.groups then
-                        local currentPage = status.status.groups.selected
-                        if currentPage ~= "themes" then
-                            print("DEBUG: Cleanup timer detected swatches on non-themes page:", currentPage)
-                            self.colorSwatchContainer:Hide()
-                            self.colorSwatchContainer:ClearAllPoints()
-                            self.colorSwatchContainer:SetParent(nil)
-                            self.colorSwatchContainer = nil
-                            self.themeColorSwatches = nil
-                        end
-                    end
-                end
-            end)
         end
         
         -- Hook AceGUI:Create to use our custom widgets
