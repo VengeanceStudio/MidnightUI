@@ -87,26 +87,27 @@ function MidnightUI:OnEnable()
         if AceConfigDialog.SelectGroup and not AceConfigDialog.MidnightSelectGroupHooked then
             local originalSelectGroup = AceConfigDialog.SelectGroup
             AceConfigDialog.SelectGroup = function(appName, ...)
-                -- Always clean up swatches when changing pages in MidnightUI
-                if appName == "MidnightUI" then
-                    if self.colorSwatchContainer then
-                        self.colorSwatchContainer:Hide()
-                        self.colorSwatchContainer:SetParent(nil)
-                        self.colorSwatchContainer = nil
-                    end
-                    self.themeColorSwatches = nil
-                end
-                
-                -- Call the original function
+                -- Call the original function first
                 originalSelectGroup(appName, ...)
                 
-                -- Recreate swatches only if we're on the themes page
+                -- Always destroy swatches when changing pages in MidnightUI
                 if appName == "MidnightUI" then
-                    C_Timer.After(0.15, function()
+                    C_Timer.After(0.01, function()
+                        if self.colorSwatchContainer then
+                            self.colorSwatchContainer:Hide()
+                            self.colorSwatchContainer:ClearAllPoints()
+                            self.colorSwatchContainer:SetParent(nil)
+                            self.colorSwatchContainer = nil
+                        end
+                        self.themeColorSwatches = nil
+                        
+                        -- Recreate only if we're on the themes page
                         local status = AceConfigDialog.OpenFrames["MidnightUI"]
                         if status and status.status and status.status.groups then
                             if status.status.groups.selected == "themes" then
-                                self:CreateColorPaletteSwatches()
+                                C_Timer.After(0.15, function()
+                                    self:CreateColorPaletteSwatches()
+                                end)
                             end
                         end
                     end)
