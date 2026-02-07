@@ -247,6 +247,24 @@ local function Constructor()
     r, g, b = ColorPalette:GetColor('accent-primary')
     dropdown:SetBackdropBorderColor(r, g, b, 1)
     
+    -- Debug: Monitor backdrop changes
+    local originalSetBackdrop = dropdown.SetBackdrop
+    dropdown.SetBackdrop = function(self, backdrop)
+        print("MidnightDropdown: SetBackdrop called internally!")
+        if backdrop then
+            print("  edgeSize =", backdrop.edgeSize)
+        else
+            print("  backdrop = nil")
+        end
+        return originalSetBackdrop(self, backdrop)
+    end
+    
+    local originalSetBackdropBorderColor = dropdown.SetBackdropBorderColor
+    dropdown.SetBackdropBorderColor = function(self, r, g, b, a)
+        print(string.format("MidnightDropdown: SetBackdropBorderColor(%.2f, %.2f, %.2f, %.2f)", r or 0, g or 0, b or 0, a or 1))
+        return originalSetBackdropBorderColor(self, r, g, b, a)
+    end
+    
     dropdown:Show()
     
     local button = CreateFrame("Button", nil, dropdown)
