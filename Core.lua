@@ -1259,6 +1259,42 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
                 widget.customButtonSkinned = true
             end
+            
+            -- Special handling for color swatch buttons (keys start with "color_")
+            if widget.frame and widget.user then
+                local optionKey = tostring(widget.user or "")
+                if optionKey:match("^color_") then
+                    local colorKey = optionKey:gsub("^color_", "")
+                    
+                    -- Create color swatch texture if it doesn't exist
+                    if not widget.colorSwatch then
+                        widget.colorSwatch = widget.frame:CreateTexture(nil, "ARTWORK")
+                        widget.colorSwatch:SetSize(60, 40)
+                        widget.colorSwatch:SetPoint("LEFT", widget.frame, "LEFT", 8, 0)
+                        
+                        -- Shift button text to the right
+                        if widget.text then
+                            widget.text:ClearAllPoints()
+                            widget.text:SetPoint("LEFT", widget.colorSwatch, "RIGHT", 10, 0)
+                            widget.text:SetJustifyH("LEFT")
+                        end
+                    end
+                    
+                    -- Update color swatch to current theme color
+                    if widget.colorSwatch and ColorPalette then
+                        widget.colorSwatch:SetColorTexture(ColorPalette:GetColor(colorKey))
+                    end
+                    
+                    -- Store for updates
+                    if not MidnightUI.themeColorSwatches then
+                        MidnightUI.themeColorSwatches = {}
+                    end
+                    MidnightUI.themeColorSwatches[colorKey] = {
+                        colorTexture = widget.colorSwatch,
+                        frame = widget.frame
+                    }
+                end
+            end
         end
         
         if widget.text and FontKit then
@@ -2472,58 +2508,42 @@ function MidnightUI:GetThemeOptions()
         },
         colorsDesc = {
             type = "description",
-            name = "Click any color below to edit it directly, or use the Theme Editor for a visual preview.",
+            name = "Click any color rectangle below to change its color.",
             order = 10,
+        },
+        createColorSwatches = {
+            type = "execute",
+            name = "",
+            desc = "",
+            order = 10.5,
+            width = "full",
+            hidden = true,  -- Hidden button that triggers swatch creation
+            func = function() end,
+            dialogControl = "MidnightColorPalette",  -- Custom widget type
         },
     }
     
-    -- Add color picker swatches for the 8 core colors
+    -- Add individual color execute buttons that will be styled as color swatches
     local coreColors = {
-        {key = "panel-bg", name = "Panel Background", order = 11},
-        {key = "panel-border", name = "Panel Border", order = 12},
-        {key = "accent-primary", name = "Accent", order = 13},
-        {key = "button-bg", name = "Button Background", order = 14},
-        {key = "button-hover", name = "Button Hover", order = 15},
-        {key = "text-primary", name = "Primary Text", order = 16},
-        {key = "text-secondary", name = "Secondary Text", order = 17},
-        {key = "tab-active", name = "Active Tab", order = 18},
+        {key = "panel-bg", name = "Panel Background", desc = "Main background color for windows and panels"},
+        {key = "panel-border", name = "Panel Border", desc = "Border color for all panels and frames"},
+        {key = "accent-primary", name = "Accent", desc = "Highlighted border and accent color"},
+        {key = "button-bg", name = "Button", desc = "Background color for all buttons"},
+        {key = "button-hover", name = "Button Hover", desc = "Button color when hovering"},
+        {key = "text-primary", name = "Primary Text", desc = "Main text color for labels and headers"},
+        {key = "text-secondary", name = "Secondary Text", desc = "Text color for descriptions"},
+        {key = "tab-active", name = "Active Tab", desc = "Background color for the active tab"},
     }
     
-    for _, colorInfo in ipairs(coreColors) do
-        options[colorInfo.key] = {
-            type = "color",
+    for i, colorInfo in ipairs(coreColors) do
+        options["color_" .. colorInfo.key] = {
+            type = "execute",
             name = colorInfo.name,
-            desc = "Click to change the " .. colorInfo.name:lower() .. " color",
-            order = colorInfo.order,
-            hasAlpha = true,
-            width = "half",
-            get = function()
-                local r, g, b, a = ColorPalette:GetColor(colorInfo.key)
-                return r, g, b, a
-            end,
-            set = function(_, r, g, b, a)
-                -- Store in temp colors for this session
-                if not self.tempThemeColors then
-                    self.tempThemeColors = {}
-                end
-                self.tempThemeColors[colorInfo.key] = {r = r, g = g, b = b, a = a}
-                
-                -- Apply the color immediately to preview
-                if ColorPalette then
-                    local activeTheme = self.db.profile.theme.active
-                    -- Get the full palette
-                    local fullPalette = ColorPalette:GetPalette(activeTheme)
-                    if fullPalette then
-                        -- Update with temp colors
-                        for tempKey, tempColor in pairs(self.tempThemeColors) do
-                            fullPalette[tempKey] = tempColor
-                        end
-                        -- Re-register the theme with updated colors
-                        ColorPalette:RegisterPalette(activeTheme, fullPalette)
-                    end
-                end
-                
-                self:Print("Color updated. Use 'Save Custom Theme' to preserve these changes.")
+            desc = colorInfo.desc .. "\n\nClick to change this color.",
+            order = 11 + (i - 1) * 0.1,
+            width = 0.7,
+            func = function()
+                self:OpenColorPickerForThemeColor(colorInfo.key, colorInfo.name)
             end,
         }
     end
@@ -2545,6 +2565,79 @@ function MidnightUI:GetThemeOptions()
     }
     
     return options
+end
+
+function MidnightUI:OpenColorPickerForThemeColor(colorKey, colorName)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then
+        self:Print("Color system not initialized.")
+        return
+    end
+    
+    local r, g, b, a = ColorPalette:GetColor(colorKey)
+    ColorPickerFrame:SetupColorPickerAndShow({
+        r = r, g = g, b = b,
+        opacity = a,
+        hasOpacity = true,
+        swatchFunc = function()
+            local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+            local na = ColorPickerFrame:GetColorAlpha()
+            
+            -- Store in temp colors
+            if not self.tempThemeColors then
+                self.tempThemeColors = {}
+            end
+            self.tempThemeColors[colorKey] = {r = nr, g = ng, b = nb, a = na}
+            
+            -- Apply the color immediately to preview
+            local activeTheme = self.db.profile.theme.active
+            local fullPalette = ColorPalette:GetPalette(activeTheme)
+            if fullPalette then
+                -- Create a copy and update with temp colors
+                local updatedPalette = {}
+                for k, v in pairs(fullPalette) do
+                    updatedPalette[k] = v
+                end
+                for tempKey, tempColor in pairs(self.tempThemeColors) do
+                    updatedPalette[tempKey] = tempColor
+                end
+                -- Re-register the theme with updated colors
+                ColorPalette:RegisterPalette(activeTheme, updatedPalette)
+            end
+            
+            -- Update color swatch frames if they exist
+            self:UpdateThemeColorSwatches()
+        end,
+        cancelFunc = function()
+            -- Restore original color
+            if not self.tempThemeColors then
+                self.tempThemeColors = {}
+            end
+            self.tempThemeColors[colorKey] = {r = r, g = g, b = b, a = a}
+            
+            local activeTheme = self.db.profile.theme.active
+            local fullPalette = ColorPalette:GetPalette(activeTheme)
+            if fullPalette then
+                ColorPalette:RegisterPalette(activeTheme, fullPalette)
+            end
+            
+            self:UpdateThemeColorSwatches()
+        end,
+    })
+end
+
+function MidnightUI:UpdateThemeColorSwatches()
+    -- This will update the color swatch frames when they're created
+    if self.themeColorSwatches then
+        local ColorPalette = _G.MidnightUI_ColorPalette
+        if not ColorPalette then return end
+        
+        for colorKey, swatchFrame in pairs(self.themeColorSwatches) do
+            if swatchFrame and swatchFrame.colorTexture then
+                swatchFrame.colorTexture:SetColorTexture(ColorPalette:GetColor(colorKey))
+            end
+        end
+    end
 end
 
 function MidnightUI:OpenColorEditorFrame()
