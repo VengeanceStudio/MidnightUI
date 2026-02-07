@@ -2504,7 +2504,7 @@ function MidnightUI:GetThemeOptions()
             type = "description",
             name = function()
                 -- This will trigger the creation of custom color swatch frames
-                C_Timer.After(0.1, function()
+                C_Timer.After(0.15, function()
                     self:CreateColorPaletteSwatches()
                 end)
                 return " "
@@ -2519,9 +2519,13 @@ function MidnightUI:GetThemeOptions()
             width = "full",
             hidden = false,
             dialogHidden = function()
-                -- This gets called when the description is about to be drawn
-                -- If we're on themes page, return false (show), otherwise return true (hide)
-                -- But we need to hide the color swatches when not on this page
+                -- Clean up swatches when this element is hidden (page change)
+                if self.colorSwatchContainer then
+                    self.colorSwatchContainer:Hide()
+                    self.colorSwatchContainer:SetParent(nil)
+                    self.colorSwatchContainer = nil
+                    self.themeColorSwatches = nil
+                end
                 return false
             end,
         },
@@ -2622,6 +2626,14 @@ function MidnightUI:CreateColorPaletteSwatches()
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette or not FontKit then return end
     
+    -- Clean up old container if it exists
+    if self.colorSwatchContainer then
+        self.colorSwatchContainer:Hide()
+        self.colorSwatchContainer:SetParent(nil)
+        self.colorSwatchContainer = nil
+        self.themeColorSwatches = nil
+    end
+    
     -- Find the AceGUI container for the Themes tab
     local AceGUI = LibStub("AceGUI-3.0")
     local AceConfigDialog = LibStub("AceConfigDialog-3.0")
@@ -2645,30 +2657,28 @@ function MidnightUI:CreateColorPaletteSwatches()
     local container = appName.frame.obj
     if not container or not container.content then return end
     
-    -- If container exists and is already showing, don't recreate
-    if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() and self.colorSwatchContainer:GetParent() == container.content then
-        self:UpdateThemeColorSwatches()
-        return
+    -- Find the ScrollFrame within the content
+    local scrollFrame = nil
+    for _, child in ipairs({container.content:GetChildren()}) do
+        if child:GetObjectType() == "ScrollFrame" then
+            scrollFrame = child
+            break
+        end
     end
     
-    -- Clean up old container if it exists
-    if self.colorSwatchContainer then
-        self.colorSwatchContainer:Hide()
-        self.colorSwatchContainer:SetParent(nil)
-        self.colorSwatchContainer = nil
-        self.themeColorSwatches = nil
+    if not scrollFrame then
+        scrollFrame = container.content
     end
     
-    -- Find a parent frame to attach to - use the scrolling content frame
-    local parentFrame = container.content
-    if not parentFrame then return end
-    
-    -- Create container for swatches
-    local swatchContainer = CreateFrame("Frame", nil, parentFrame)
+    -- Create container for swatches - attach to UIParent with proper positioning
+    local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", UIParent)
     swatchContainer:SetSize(800, 100)
-    swatchContainer:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -280)  -- Position below the header
-    swatchContainer:SetFrameStrata("DIALOG")
-    swatchContainer:SetFrameLevel(parentFrame:GetFrameLevel() + 10)
+    swatchContainer:SetFrameStrata("FULLSCREEN_DIALOG")
+    swatchContainer:SetFrameLevel(1000)
+    
+    -- Position relative to the AceGUI content frame
+    swatchContainer:SetPoint("TOPLEFT", scrollFrame, "TOPLEFT", 10, -280)
+    
     self.colorSwatchContainer = swatchContainer
     
     -- Define the 8 core colors
@@ -2740,6 +2750,8 @@ function MidnightUI:CreateColorPaletteSwatches()
         
         xOffset = xOffset + 90
     end
+    
+    swatchContainer:Show()
 end
 
 function MidnightUI:OpenColorEditorFrame()
