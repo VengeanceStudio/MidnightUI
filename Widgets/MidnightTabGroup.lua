@@ -136,8 +136,8 @@ local methods = {
     
     ["DoLayout"] = function(self)
         local content = self.content
-        local contentwidth = content:GetWidth() or 0
-        local contentheight = content:GetHeight() or 0
+        local contentwidth = content.width or content:GetWidth() or 0
+        local contentheight = content.height or content:GetHeight() or 0
         local tabs = self.tablist
         
         if not tabs then return end
@@ -158,9 +158,6 @@ local methods = {
                 end
             end
         end
-        
-        -- Layout child widgets
-        self:LayoutChildren(contentwidth, contentheight)
     end,
     
     ["LayoutFinished"] = function(self, width, height)
