@@ -162,9 +162,16 @@ function MidnightUI:StyleLSMWidget(widget)
     
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
-    -- Style the dropdown button frame
+    -- Give frame a Midnight name so backdrop hooks skip it
+    if not frame:GetName() or not frame:GetName():match("^Midnight") then
+        local frameName = "MidnightLSMWidget" .. (widget.type or "") .. math.random(1000, 9999)
+        frame:SetName(frameName)
+    end
+    
+    -- Style the main dropdown button frame
     if frame.SetBackdrop then
         frame:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -177,16 +184,96 @@ function MidnightUI:StyleLSMWidget(widget)
         frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
     end
     
-    -- Hide Blizzard textures
+    -- Hide all Blizzard textures
     for _, region in ipairs({frame:GetRegions()}) do
         if region:GetObjectType() == "Texture" and region ~= widget.text then
-            region:SetTexture(nil)
+            region:Hide()
         end
     end
     
-    -- Style text if present
+    -- Style text
     if widget.text then
+        if FontKit then
+            FontKit:SetFont(widget.text, 'button', 'normal')
+        end
         widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+    end
+    
+    -- Style the dropdown button
+    if widget.button then
+        local btn = widget.button
+        
+        -- Hide Blizzard textures on button
+        for _, region in ipairs({btn:GetRegions()}) do
+            if region:GetObjectType() == "Texture" then
+                region:Hide()
+            end
+        end
+        
+        -- Create custom arrow if not exists
+        if not btn.customArrow then
+            btn.customArrow = btn:CreateTexture(nil, "OVERLAY")
+            btn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Down-Up")
+            btn.customArrow:SetSize(12, 12)
+            btn.customArrow:SetPoint("CENTER")
+            btn.customArrow:SetVertexColor(ColorPalette:GetColor('accent-primary'))
+        end
+    end
+    
+    -- Hook pullout creation to use our styled version
+    if widget.SetList and not widget.lsmPulloutHooked then
+        local originalSetList = widget.SetList
+        widget.SetList = function(self, list)
+            originalSetList(self, list)
+            
+            -- Style the pullout frame
+            if self.pullout and self.pullout.frame then
+                local pullout = self.pullout.frame
+                
+                -- Give pullout a Midnight name
+                if not pullout:GetName() or not pullout:GetName():match("^Midnight") then
+                    pullout:SetName("MidnightLSMPullout" .. math.random(1000, 9999))
+                end
+                
+                -- Style pullout backdrop
+                if pullout.SetBackdrop then
+                    pullout:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false,
+                        edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    pullout:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                    pullout:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                end
+                
+                -- Style scrollbar if present
+                if self.pullout.scrollBar then
+                    local scrollBar = self.pullout.scrollBar
+                    if scrollBar.SetBackdrop then
+                        scrollBar:SetBackdrop({
+                            bgFile = "Interface\\Buttons\\WHITE8X8",
+                            edgeFile = "Interface\\Buttons\\WHITE8X8",
+                            tile = false,
+                            edgeSize = 1,
+                            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                        })
+                        scrollBar:SetBackdropColor(ColorPalette:GetColor('panel-bg', 0.5))
+                        scrollBar:SetBackdropBorderColor(ColorPalette:GetColor('panel-border', 0.3))
+                    end
+                    
+                    -- Style scrollbar thumb
+                    local thumb = scrollBar:GetThumbTexture()
+                    if thumb then
+                        thumb:SetTexture("Interface\\Buttons\\WHITE8X8")
+                        thumb:SetVertexColor(ColorPalette:GetColor('accent-primary'))
+                        thumb:SetSize(8, 16)
+                    end
+                end
+            end
+        end
+        widget.lsmPulloutHooked = true
     end
 end
 
