@@ -187,12 +187,13 @@ function MidnightUI:StyleLSMWidget(widget)
     if frame.DMiddle then frame.DMiddle:Hide() end
     if frame.DRight then frame.DRight:Hide() end
     
-    -- Style label (the dropdown name)
+    -- Style label (the dropdown name) - FORCE color change
     if frame.label then
         if FontKit then
             FontKit:SetFont(frame.label, 'body', 'normal')
         end
-        frame.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        local r, g, b, a = ColorPalette:GetColor('text-primary')
+        frame.label:SetTextColor(r, g, b, a or 1)
     end
     
     -- Style the selected value text
@@ -200,56 +201,101 @@ function MidnightUI:StyleLSMWidget(widget)
         if FontKit then
             FontKit:SetFont(frame.text, 'button', 'normal')
         end
-        frame.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        local r, g, b, a = ColorPalette:GetColor('text-primary')
+        frame.text:SetTextColor(r, g, b, a or 1)
     end
     
-    -- Style the dropdown button
+    -- Style the dropdown button and create custom arrow
     if frame.dropButton then
         local btn = frame.dropButton
+        btn.isLSMWidget = true
+        
+        -- Remove backdrop on button
+        if btn.SetBackdrop then
+            btn:SetBackdrop(nil)
+        end
         
         -- Hide all textures on button
-        local normalTex = btn:GetNormalTexture()
-        if normalTex then normalTex:Hide() end
-        local pushedTex = btn:GetPushedTexture()
-        if pushedTex then pushedTex:Hide() end
-        local highlightTex = btn:GetHighlightTexture()
-        if highlightTex then highlightTex:Hide() end
-        local disabledTex = btn:GetDisabledTexture()
-        if disabledTex then disabledTex:Hide() end
+        for _, region in ipairs({btn:GetRegions()}) do
+            if region:GetObjectType() == "Texture" then
+                region:Hide()
+            end
+        end
         
-        -- Create custom arrow
+        local normalTex = btn:GetNormalTexture()
+        if normalTex then normalTex:SetTexture(nil) end
+        local pushedTex = btn:GetPushedTexture()
+        if pushedTex then pushedTex:SetTexture(nil) end
+        local highlightTex = btn:GetHighlightTexture()
+        if highlightTex then highlightTex:SetTexture(nil) end
+        local disabledTex = btn:GetDisabledTexture()
+        if disabledTex then disabledTex:SetTexture(nil) end
+        
+        -- Create custom teal arrow
         if not btn.customArrow then
             btn.customArrow = btn:CreateTexture(nil, "OVERLAY")
             btn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Down-Up")
-            btn.customArrow:SetTexCoord(0, 1, 0, 0.5)  -- Top half = down arrow
+            btn.customArrow:SetTexCoord(0, 1, 0, 0.5)  -- Down arrow
             btn.customArrow:SetSize(16, 16)
             btn.customArrow:SetPoint("CENTER", 0, 0)
-            btn.customArrow:SetVertexColor(ColorPalette:GetColor('accent-primary'))
         end
+        local r, g, b = ColorPalette:GetColor('accent-primary')
+        btn.customArrow:SetVertexColor(r, g, b, 1)
         btn.customArrow:Show()
     end
     
-    -- Hook the dropdown toggle to style pullout
+    -- Hook ToggleDrop to style the pullout menu
     if widget.ToggleDrop and not widget.lsmToggleHooked then
         local originalToggleDrop = widget.ToggleDrop
         widget.ToggleDrop = function(self, ...)
-            originalToggleDrop(self, ...)
+            local result = originalToggleDrop(self, ...)
             
-            -- Style the pullout if it exists
-            C_Timer.After(0.01, function()
-                if widget.dropdown and widget.dropdown.SetBackdrop then
-                    widget.dropdown.isLSMWidget = true
-                    widget.dropdown:SetBackdrop({
+            -- Style the dropdown after it's created
+            if widget.dropdown then
+                local dd = widget.dropdown
+                dd.isLSMWidget = true
+                
+                -- Apply themed backdrop
+                if dd.SetBackdrop then
+                    dd:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
                         edgeFile = "Interface\\Buttons\\WHITE8X8",
                         tile = false,
                         edgeSize = 1,
                         insets = { left = 1, right = 1, top = 1, bottom = 1 }
                     })
-                    widget.dropdown:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-                    widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                    dd:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                    dd:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                 end
-            end)
+                
+                -- Hide Blizzard textures
+                for _, region in ipairs({dd:GetRegions()}) do
+                    if region:GetObjectType() == "Texture" then
+                        region:Hide()
+                    end
+                end
+                
+                -- Style all item buttons in dropdown
+                for _, child in ipairs({dd:GetChildren()}) do
+                    if child:GetObjectType() == "Button" then
+                        -- Style item text
+                        local text = child:GetFontString()
+                        if text and FontKit then
+                            FontKit:SetFont(text, 'body', 'normal')
+                            text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                        end
+                        
+                        -- Hide highlight texture, we'll use the default
+                        local highlight = child:GetHighlightTexture()
+                        if highlight then
+                            highlight:SetTexture("Interface\\Buttons\\WHITE8X8")
+                            highlight:SetVertexColor(ColorPalette:GetColor('accent-primary', 0.15))
+                        end
+                    end
+                end
+            end
+            
+            return result
         end
         widget.lsmToggleHooked = true
     end
