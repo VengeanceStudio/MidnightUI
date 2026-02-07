@@ -109,6 +109,28 @@ local methods = {
                 end
             end
         end
+        
+        -- Layout child widgets
+        self:LayoutChildren(contentwidth, contentheight)
+    end,
+    
+    ["LayoutChildren"] = function(self, width, height)
+        local obj = self.obj
+        if obj and obj.LayoutFinished then
+            obj:LayoutFinished(width, height)
+        end
+    end,
+    
+    ["OnWidthSet"] = function(self, width)
+        local content = self.content
+        content:SetWidth(width - 20)
+        self:DoLayout()
+    end,
+    
+    ["OnHeightSet"] = function(self, height)
+        local content = self.content
+        content:SetHeight(height - 42)
+        self:DoLayout()
     end,
     
     ["BuildTabs"] = function(self)
@@ -230,7 +252,13 @@ local function Constructor()
         widget[method] = func
     end
     
-    return AceGUI:RegisterAsContainer(widget)
+    local container = AceGUI:RegisterAsContainer(widget)
+    
+    -- Set up bi-directional reference for layout system
+    widget.obj = container
+    content.obj = container
+    
+    return container
 end
 
 AceGUI:RegisterWidgetType(Type, Constructor, Version)
