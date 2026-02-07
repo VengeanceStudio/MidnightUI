@@ -1855,12 +1855,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             FontKit:SetFont(widget.text, 'body', 'normal')
             widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
             
-            -- Reposition dropdown text to reduce left padding
+            -- Reposition dropdown text to reduce left padding (only for standard Dropdown, not MidnightDropdown)
             if widgetType == "Dropdown" and widget.dropdown and widget.button then
-                widget.text:ClearAllPoints()
-                widget.text:SetPoint("LEFT", widget.dropdown, "LEFT", 4, 0)
-                widget.text:SetPoint("RIGHT", widget.button, "LEFT", -2, 0)
-                widget.text:SetJustifyH("LEFT")
+                local dropdownName = widget.dropdown:GetName() or ""
+                if not dropdownName:match("^Midnight") then
+                    widget.text:ClearAllPoints()
+                    widget.text:SetPoint("LEFT", widget.dropdown, "LEFT", 4, 0)
+                    widget.text:SetPoint("RIGHT", widget.button, "LEFT", -2, 0)
+                    widget.text:SetJustifyH("LEFT")
+                end
             end
         end
         
