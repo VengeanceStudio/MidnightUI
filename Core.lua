@@ -160,14 +160,6 @@ end
 function MidnightUI:StyleLSMWidget(widget)
     if not widget or not widget.frame then return end
     
-    print("StyleLSMWidget: Starting for", widget.type)
-    print("  Widget methods:")
-    for k, v in pairs(widget) do
-        if type(v) == "function" and type(k) == "string" then
-            print("    ", k)
-        end
-    end
-    
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
@@ -192,13 +184,12 @@ function MidnightUI:StyleLSMWidget(widget)
     end
     
     -- Hide Blizzard textures (DLeft, DMiddle, DRight)
-    if frame.DLeft then frame.DLeft:Hide() print("  Hid DLeft") end
-    if frame.DMiddle then frame.DMiddle:Hide() print("  Hid DMiddle") end
-    if frame.DRight then frame.DRight:Hide() print("  Hid DRight") end
+    if frame.DLeft then frame.DLeft:Hide() end
+    if frame.DMiddle then frame.DMiddle:Hide() end
+    if frame.DRight then frame.DRight:Hide() end
     
     -- Style label (the dropdown name) - FORCE white color and prevent yellow
     if frame.label then
-        print("  Found label, applying style...")
         if FontKit then
             FontKit:SetFont(frame.label, 'body', 'normal')
         end
@@ -209,7 +200,6 @@ function MidnightUI:StyleLSMWidget(widget)
             frame.label.SetTextColor = function(self, r, g, b, a)
                 -- If it's trying to set yellow (normal font color ~1, 0.82, 0), override to white
                 if r and r > 0.9 and g and g > 0.7 and g < 0.9 and b and b < 0.1 then
-                    print("  Blocked yellow label color, forcing white")
                     local wr, wg, wb, wa = ColorPalette:GetColor('text-primary')
                     return originalSetTextColor(self, wr, wg, wb, wa or 1)
                 end
@@ -221,7 +211,6 @@ function MidnightUI:StyleLSMWidget(widget)
         -- Set initial color
         local r, g, b, a = ColorPalette:GetColor('text-primary')
         frame.label:SetTextColor(r, g, b, a or 1)
-        print("  Label color set to:", r, g, b, a)
     end
     
     -- Hook SetLabel to force color
@@ -232,7 +221,6 @@ function MidnightUI:StyleLSMWidget(widget)
             if self.frame and self.frame.label then
                 local r, g, b, a = ColorPalette:GetColor('text-primary')
                 self.frame.label:SetTextColor(r, g, b, a or 1)
-                print("SetLabel hook: color applied")
             end
         end
         widget.setLabelHooked = true
@@ -247,7 +235,6 @@ function MidnightUI:StyleLSMWidget(widget)
                 if self.frame and self.frame.label then
                     local r, g, b, a = ColorPalette:GetColor('text-primary')
                     self.frame.label:SetTextColor(r, g, b, a or 1)
-                    print("OnAcquire hook: color reapplied")
                 end
             end)
         end
@@ -259,7 +246,6 @@ function MidnightUI:StyleLSMWidget(widget)
         if frame.label then
             local r, g, b, a = ColorPalette:GetColor('text-primary')
             frame.label:SetTextColor(r, g, b, a or 1)
-            print("Delayed color reapply completed")
         end
     end)
     
@@ -313,11 +299,9 @@ function MidnightUI:StyleLSMWidget(widget)
         -- Hook the button click to style pullout after it opens
         if not btn.lsmClickHooked then
             btn:HookScript("OnClick", function()
-                print("Button clicked, looking for pullout...")
                 C_Timer.After(0.05, function()
                     local pullout = widget.pullout or widget.dropdown
                     if pullout then
-                        print("  Found pullout, styling...")
                         pullout.isLSMWidget = true
                         
                         -- Apply themed backdrop
@@ -331,7 +315,6 @@ function MidnightUI:StyleLSMWidget(widget)
                             })
                             pullout:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                             pullout:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
-                            print("  Applied pullout backdrop")
                         end
                         
                         -- Style the scrollframe if it exists
@@ -346,20 +329,14 @@ function MidnightUI:StyleLSMWidget(widget)
                             end
                         end
                         
-                        -- Style all item buttons in pullout
-                        local buttonCount = 0
-                        print("  Pullout children:", pullout:GetNumChildren())
+                        -- Style all item buttons in pullout (they're in a scrollframe)
                         for _, child in ipairs({pullout:GetChildren()}) do
-                            print("    Child type:", child:GetObjectType(), "name:", child:GetName())
-                            
                             -- Check if it's a scrollframe with buttons inside
                             if child:GetObjectType() == "ScrollFrame" or child.scrollframe then
                                 local scrollChild = child.scrollframe or child:GetScrollChild()
                                 if scrollChild then
-                                    print("      Found scrollframe, checking its children...")
                                     for _, btn in ipairs({scrollChild:GetChildren()}) do
                                         if btn:GetObjectType() == "Button" or btn:GetObjectType() == "CheckButton" then
-                                            buttonCount = buttonCount + 1
                                             btn.isLSMWidget = true
                                             
                                             -- Style item text
@@ -387,11 +364,10 @@ function MidnightUI:StyleLSMWidget(widget)
                                 end
                             end
                             
+                            -- Also check direct children in case they're not in a scrollframe
                             if child:GetObjectType() == "Button" or child:GetObjectType() == "CheckButton" then
-                                buttonCount = buttonCount + 1
                                 child.isLSMWidget = true
                                 
-                                -- Style item text
                                 local text = child:GetFontString()
                                 if text and FontKit then
                                     FontKit:SetFont(text, 'body', 'normal')
@@ -399,12 +375,10 @@ function MidnightUI:StyleLSMWidget(widget)
                                     text:SetTextColor(r, g, b, a or 1)
                                 end
                                 
-                                -- Remove Blizzard backdrop
                                 if child.SetBackdrop then
                                     child:SetBackdrop(nil)
                                 end
                                 
-                                -- Style highlight
                                 local highlight = child:GetHighlightTexture()
                                 if highlight then
                                     highlight:SetTexture("Interface\\Buttons\\WHITE8X8")
@@ -413,95 +387,11 @@ function MidnightUI:StyleLSMWidget(widget)
                                 end
                             end
                         end
-                        print("  Styled", buttonCount, "item buttons in pullout")
-                    else
-                        print("  No pullout found!")
                     end
                 end)
             end)
             btn.lsmClickHooked = true
         end
-    end
-    
-    -- Hook ToggleDrop to style the pullout menu
-    if widget.ToggleDrop and not widget.lsmToggleHooked then
-        print("  Setting up ToggleDrop hook...")
-        local originalToggleDrop = widget.ToggleDrop
-        widget.ToggleDrop = function(self, ...)
-            print("ToggleDrop HOOKED CALLED!")
-            local result = originalToggleDrop(self, ...)
-            
-            print("ToggleDrop called, dropdown:", widget.dropdown, "pullout:", widget.pullout)
-            
-            -- Style the pullout (LSM widgets use .pullout not .dropdown)
-            local pullout = widget.pullout or widget.dropdown
-            if pullout then
-                print("  Found pullout, styling...")
-                pullout.isLSMWidget = true
-                
-                -- Apply themed backdrop
-                if pullout.SetBackdrop then
-                    pullout:SetBackdrop({
-                        bgFile = "Interface\\Buttons\\WHITE8X8",
-                        edgeFile = "Interface\\Buttons\\WHITE8X8",
-                        tile = false,
-                        edgeSize = 1,
-                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                    })
-                    pullout:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-                    pullout:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
-                    print("  Applied pullout backdrop")
-                end
-                
-                -- Style the scrollframe if it exists
-                if pullout.frame then
-                    pullout.frame.isLSMWidget = true
-                end
-                
-                -- Hide Blizzard textures
-                for _, region in ipairs({pullout:GetRegions()}) do
-                    if region:GetObjectType() == "Texture" then
-                        region:Hide()
-                    end
-                end
-                
-                -- Style all item buttons in pullout
-                local buttonCount = 0
-                for _, child in ipairs({pullout:GetChildren()}) do
-                    if child:GetObjectType() == "Button" or child:GetObjectType() == "CheckButton" then
-                        buttonCount = buttonCount + 1
-                        child.isLSMWidget = true
-                        
-                        -- Style item text
-                        local text = child:GetFontString()
-                        if text and FontKit then
-                            FontKit:SetFont(text, 'body', 'normal')
-                            local r, g, b, a = ColorPalette:GetColor('text-primary')
-                            text:SetTextColor(r, g, b, a or 1)
-                        end
-                        
-                        -- Remove Blizzard backdrop
-                        if child.SetBackdrop then
-                            child:SetBackdrop(nil)
-                        end
-                        
-                        -- Style highlight
-                        local highlight = child:GetHighlightTexture()
-                        if highlight then
-                            highlight:SetTexture("Interface\\Buttons\\WHITE8X8")
-                            local r, g, b = ColorPalette:GetColor('accent-primary')
-                            highlight:SetVertexColor(r, g, b, 0.15)
-                        end
-                    end
-                end
-                print("  Styled", buttonCount, "item buttons in pullout")
-            else
-                print("  No pullout found!")
-            end
-            
-            return result
-        end
-        widget.lsmToggleHooked = true
     end
 end
 
