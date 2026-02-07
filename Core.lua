@@ -1259,42 +1259,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 
                 widget.customButtonSkinned = true
             end
-            
-            -- Special handling for color swatch buttons (keys start with "color_")
-            if widget.frame and widget.user then
-                local optionKey = tostring(widget.user or "")
-                if optionKey:match("^color_") then
-                    local colorKey = optionKey:gsub("^color_", "")
-                    
-                    -- Create color swatch texture if it doesn't exist
-                    if not widget.colorSwatch then
-                        widget.colorSwatch = widget.frame:CreateTexture(nil, "ARTWORK")
-                        widget.colorSwatch:SetSize(60, 40)
-                        widget.colorSwatch:SetPoint("LEFT", widget.frame, "LEFT", 8, 0)
-                        
-                        -- Shift button text to the right
-                        if widget.text then
-                            widget.text:ClearAllPoints()
-                            widget.text:SetPoint("LEFT", widget.colorSwatch, "RIGHT", 10, 0)
-                            widget.text:SetJustifyH("LEFT")
-                        end
-                    end
-                    
-                    -- Update color swatch to current theme color
-                    if widget.colorSwatch and ColorPalette then
-                        widget.colorSwatch:SetColorTexture(ColorPalette:GetColor(colorKey))
-                    end
-                    
-                    -- Store for updates
-                    if not MidnightUI.themeColorSwatches then
-                        MidnightUI.themeColorSwatches = {}
-                    end
-                    MidnightUI.themeColorSwatches[colorKey] = {
-                        colorTexture = widget.colorSwatch,
-                        frame = widget.frame
-                    }
-                end
-            end
         end
         
         if widget.text and FontKit then
@@ -2511,57 +2475,32 @@ function MidnightUI:GetThemeOptions()
             name = "Click any color rectangle below to change its color.",
             order = 10,
         },
-        createColorSwatches = {
-            type = "execute",
-            name = "",
-            desc = "",
-            order = 10.5,
-            width = "full",
-            hidden = true,  -- Hidden button that triggers swatch creation
-            func = function() end,
-            dialogControl = "MidnightColorPalette",  -- Custom widget type
-        },
-    }
-    
-    -- Add individual color execute buttons that will be styled as color swatches
-    local coreColors = {
-        {key = "panel-bg", name = "Panel Background", desc = "Main background color for windows and panels"},
-        {key = "panel-border", name = "Panel Border", desc = "Border color for all panels and frames"},
-        {key = "accent-primary", name = "Accent", desc = "Highlighted border and accent color"},
-        {key = "button-bg", name = "Button", desc = "Background color for all buttons"},
-        {key = "button-hover", name = "Button Hover", desc = "Button color when hovering"},
-        {key = "text-primary", name = "Primary Text", desc = "Main text color for labels and headers"},
-        {key = "text-secondary", name = "Secondary Text", desc = "Text color for descriptions"},
-        {key = "tab-active", name = "Active Tab", desc = "Background color for the active tab"},
-    }
-    
-    for i, colorInfo in ipairs(coreColors) do
-        options["color_" .. colorInfo.key] = {
-            type = "execute",
-            name = colorInfo.name,
-            desc = colorInfo.desc .. "\n\nClick to change this color.",
-            order = 11 + (i - 1) * 0.1,
-            width = 0.7,
-            func = function()
-                self:OpenColorPickerForThemeColor(colorInfo.key, colorInfo.name)
+        colorPaletteDisplay = {
+            type = "description",
+            name = function()
+                -- This will trigger the creation of custom color swatch frames
+                C_Timer.After(0.1, function()
+                    self:CreateColorPaletteSwatches()
+                end)
+                return " "
             end,
-        }
-    end
-    
-    options.spacer2 = {
-        type = "description",
-        name = " ",
-        order = 19,
-    }
-    
-    options.openColorEditor = {
-        type = "execute",
-        name = "Open Theme Editor",
-        desc = "Opens a visual mockup window where you can click on elements to edit their colors",
-        order = 20,
-        func = function()
-            self:OpenColorEditorFrame()
-        end,
+            order = 11,
+            width = "full",
+        },
+        spacer2 = {
+            type = "description",
+            name = " ",
+            order = 19,
+        },
+        openColorEditor = {
+            type = "execute",
+            name = "Open Theme Editor",
+            desc = "Opens a visual mockup window where you can click on elements to edit their colors",
+            order = 20,
+            func = function()
+                self:OpenColorEditorFrame()
+            end,
+        },
     }
     
     return options
@@ -2632,11 +2571,116 @@ function MidnightUI:UpdateThemeColorSwatches()
         local ColorPalette = _G.MidnightUI_ColorPalette
         if not ColorPalette then return end
         
-        for colorKey, swatchFrame in pairs(self.themeColorSwatches) do
-            if swatchFrame and swatchFrame.colorTexture then
-                swatchFrame.colorTexture:SetColorTexture(ColorPalette:GetColor(colorKey))
+        for colorKey, swatchData in pairs(self.themeColorSwatches) do
+            if swatchData and swatchData.texture then
+                swatchData.texture:SetColorTexture(ColorPalette:GetColor(colorKey))
             end
         end
+    end
+end
+
+function MidnightUI:CreateColorPaletteSwatches()
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    if not ColorPalette or not FontKit then return end
+    
+    -- Find the AceGUI container for the Themes tab
+    local AceGUI = LibStub("AceGUI-3.0")
+    local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+    if not AceGUI or not AceConfigDialog then return end
+    
+    -- Get the options frame
+    local appName = AceConfigDialog.OpenFrames["MidnightUI"]
+    if not appName or not appName.frame then return end
+    
+    local container = appName.frame.obj
+    if not container or not container.content then return end
+    
+    -- Create container frame for color swatches if it doesn't exist
+    if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() then
+        -- Already created, just update colors
+        self:UpdateThemeColorSwatches()
+        return
+    end
+    
+    -- Find a parent frame to attach to
+    local parentFrame = container.content or container.frame
+    if not parentFrame then return end
+    
+    -- Create container for swatches
+    local swatchContainer = CreateFrame("Frame", nil, parentFrame)
+    swatchContainer:SetSize(800, 100)
+    swatchContainer:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -280)  -- Position below the header
+    self.colorSwatchContainer = swatchContainer
+    
+    -- Define the 8 core colors
+    local coreColors = {
+        {key = "panel-bg", name = "Panel\nBackground"},
+        {key = "panel-border", name = "Panel\nBorder"},
+        {key = "accent-primary", name = "Accent"},
+        {key = "button-bg", name = "Button"},
+        {key = "button-hover", name = "Button\nHover"},
+        {key = "text-primary", name = "Primary\nText"},
+        {key = "text-secondary", name = "Secondary\nText"},
+        {key = "tab-active", name = "Active\nTab"},
+    }
+    
+    self.themeColorSwatches = {}
+    local xOffset = 0
+    
+    for i, colorData in ipairs(coreColors) do
+        -- Create clickable frame for the swatch
+        local swatchFrame = CreateFrame("Button", nil, swatchContainer)
+        swatchFrame:SetSize(80, 50)
+        swatchFrame:SetPoint("TOPLEFT", xOffset, 0)
+        
+        -- Create color texture
+        local colorTexture = swatchFrame:CreateTexture(nil, "ARTWORK")
+        colorTexture:SetAllPoints()
+        colorTexture:SetColorTexture(ColorPalette:GetColor(colorData.key))
+        
+        -- Create border
+        local border = swatchFrame:CreateTexture(nil, "BORDER")
+        border:SetPoint("TOPLEFT", -1, 1)
+        border:SetPoint("BOTTOMRIGHT", 1, -1)
+        border:SetColorTexture(ColorPalette:GetColor("panel-border"))
+        border:SetDrawLayer("BORDER", -1)
+        
+        -- Label below
+        local label = FontKit:CreateFontString(swatchFrame, "body", "tiny")
+        label:SetPoint("TOP", swatchFrame, "BOTTOM", 0, -4)
+        label:SetText(colorData.name)
+        label:SetTextColor(ColorPalette:GetColor("text-secondary"))
+        label:SetJustifyH("CENTER")
+        label:SetWordWrap(false)
+        
+        -- Click handler
+        swatchFrame:SetScript("OnClick", function()
+            self:OpenColorPickerForThemeColor(colorData.key, colorData.name:gsub("\n", " "))
+        end)
+        
+        -- Hover effect
+        swatchFrame:SetScript("OnEnter", function()
+            border:SetColorTexture(ColorPalette:GetColor("accent-primary"))
+            GameTooltip:SetOwner(swatchFrame, "ANCHOR_TOP")
+            GameTooltip:SetText(colorData.name:gsub("\n", " "), 1, 1, 1)
+            GameTooltip:AddLine("Click to change this color", 0.7, 0.7, 0.7)
+            GameTooltip:Show()
+        end)
+        
+        swatchFrame:SetScript("OnLeave", function()
+            border:SetColorTexture(ColorPalette:GetColor("panel-border"))
+            GameTooltip:Hide()
+        end)
+        
+        -- Store for updates
+        self.themeColorSwatches[colorData.key] = {
+            texture = colorTexture,
+            border = border,
+            frame = swatchFrame
+        }
+        
+        xOffset = xOffset + 90
     end
 end
 
