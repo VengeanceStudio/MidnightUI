@@ -80,6 +80,11 @@ local methods = {
         return self.checked
     end,
     
+    ["ToggleChecked"] = function(self)
+        local value = not self.checked
+        self:SetValue(value, true)  -- silent = true to avoid double-firing
+    end,
+    
     ["SetTriState"] = function(self, enabled)
         self.tristate = enabled
         self:SetValue(self:GetValue())

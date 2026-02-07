@@ -99,6 +99,9 @@ function MidnightUI:OnEnable()
                     type = "MidnightHeading"
                 elseif type == "TabGroup" then
                     type = "MidnightTabGroup"
+                elseif type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound" then
+                    -- Redirect LibSharedMedia widgets to our custom dropdown
+                    type = "MidnightDropdown"
                 end
                 local widget = originalCreate(self, type, ...)
                 -- Ensure type is preserved
