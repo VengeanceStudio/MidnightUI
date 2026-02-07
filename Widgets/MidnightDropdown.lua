@@ -60,7 +60,6 @@ local methods = {
     end,
     
     ["SetDisabled"] = function(self, disabled)
-        print("MidnightDropdown: SetDisabled called with", disabled)
         self.disabled = disabled
         if disabled then
             self.button:Disable()
@@ -69,7 +68,6 @@ local methods = {
             -- Update border color for disabled state
             local r, g, b = ColorPalette:GetColor('panel-border')
             self.dropdown:SetBackdropBorderColor(r, g, b, 1)
-            print("MidnightDropdown: Set border to disabled color")
         else
             self.button:Enable()
             self.text:SetTextColor(ColorPalette:GetColor('text-primary'))
@@ -77,7 +75,6 @@ local methods = {
             -- Restore border color
             local r, g, b = ColorPalette:GetColor('accent-primary')
             self.dropdown:SetBackdropBorderColor(r, g, b, 1)
-            print("MidnightDropdown: Set border to accent-primary color")
         end
     end,
     
@@ -196,11 +193,9 @@ local methods = {
     end,
     
     ["RefreshColors"] = function(self)
-        print("MidnightDropdown: RefreshColors called!")
         local r, g, b = ColorPalette:GetColor('button-bg')
         self.dropdown:SetBackdropColor(r, g, b, 1)
         r, g, b = ColorPalette:GetColor('accent-primary')
-        print(string.format("MidnightDropdown RefreshColors: Setting border to %.2f,%.2f,%.2f", r or 0, g or 0, b or 0))
         self.dropdown:SetBackdropBorderColor(r, g, b, 1)
         self.arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
         if self.disabled then
@@ -242,55 +237,16 @@ local function Constructor()
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
         tileSize = 16,
-        edgeSize = 3,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     
     local r, g, b = ColorPalette:GetColor('button-bg')
     dropdown:SetBackdropColor(r, g, b, 1)
-    
-    -- TEST: Bright red thick border to see if it's visible at all
-    dropdown:SetBackdropBorderColor(1, 0, 0, 1)
-    print("MidnightDropdown: TEST - Set THICK RED border (edgeSize=3)")
-    
-    -- Debug: Check actual dimensions after frame update
-    C_Timer.After(0.1, function()
-        local width = dropdown:GetWidth()
-        local height = dropdown:GetHeight()
-        print(string.format("MidnightDropdown: Frame size = %.1f x %.1f", width or 0, height or 0))
-        
-        -- Check if background is visible
-        local bgR, bgG, bgB, bgA = dropdown:GetBackdropColor()
-        local edgeR, edgeG, edgeB, edgeA = dropdown:GetBackdropBorderColor()
-        print(string.format("MidnightDropdown: BG color = %.2f,%.2f,%.2f,%.2f | Border = %.2f,%.2f,%.2f,%.2f", 
-            bgR or 0, bgG or 0, bgB or 0, bgA or 0,
-            edgeR or 0, edgeG or 0, edgeB or 0, edgeA or 0))
-        
-        -- Check frame visibility
-        print("MidnightDropdown: IsShown =", dropdown:IsShown(), "Alpha =", dropdown:GetAlpha())
-        print("MidnightDropdown: Backdrop exists =", dropdown:GetBackdrop() ~= nil)
-        
-        -- Check if backdrop textures exist
-        local regions = {dropdown:GetRegions()}
-        print("MidnightDropdown: Has", #regions, "regions")
-        for i, region in ipairs(regions) do
-            if region.GetTexture then
-                print("  Region", i, "is texture:", region:GetTexture(), "Alpha:", region:GetAlpha())
-            end
-        end
-    end)
+    r, g, b = ColorPalette:GetColor('accent-primary')
+    dropdown:SetBackdropBorderColor(r, g, b, 1)
     
     dropdown:Show()
-    
-    -- Hook SetBackdrop to detect if something is clearing it
-    local originalSetBackdrop = dropdown.SetBackdrop
-    dropdown.SetBackdrop = function(self, backdrop)
-        print("MidnightDropdown: SetBackdrop called! backdrop =", backdrop)
-        if backdrop then
-            print("  edgeFile =", backdrop.edgeFile, "edgeSize =", backdrop.edgeSize)
-        end
-        return originalSetBackdrop(self, backdrop)
-    end
     
     local button = CreateFrame("Button", nil, dropdown)
     button:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", -2, -2)
