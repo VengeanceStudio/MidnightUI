@@ -223,6 +223,12 @@ local function Constructor()
     dropdown:SetHeight(26)
     dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -18)
     dropdown:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -18)
+    
+    -- Debug: Check if SetBackdrop exists
+    if not dropdown.SetBackdrop then
+        print("MidnightDropdown ERROR: SetBackdrop not available on dropdown frame!")
+    end
+    
     dropdown:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -231,10 +237,23 @@ local function Constructor()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
+    
+    -- Debug: Check backdrop was set
+    local backdropInfo = dropdown:GetBackdrop()
+    if backdropInfo then
+        print("MidnightDropdown: Backdrop set successfully, edgeSize=" .. tostring(backdropInfo.edgeSize))
+    else
+        print("MidnightDropdown ERROR: Backdrop is nil after SetBackdrop!")
+    end
+    
     local r, g, b = ColorPalette:GetColor('button-bg')
     dropdown:SetBackdropColor(r, g, b, 1)
+    print("MidnightDropdown: Set backdrop color to", r, g, b)
+    
     r, g, b = ColorPalette:GetColor('accent-primary')
     dropdown:SetBackdropBorderColor(r, g, b, 1)
+    print("MidnightDropdown: Set border color to", r, g, b)
+    
     dropdown:Show()
     
     local button = CreateFrame("Button", nil, dropdown)
