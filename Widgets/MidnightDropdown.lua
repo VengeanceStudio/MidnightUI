@@ -94,13 +94,13 @@ local methods = {
             self.label:Show()
             self.dropdown:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -18)
             self:SetHeight(44)
-            self.alignoffset = 30
+            self.alignoffset = 0
         else
             self.label:SetText("")
             self.label:Hide()
             self.dropdown:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, 0)
             self:SetHeight(26)
-            self.alignoffset = 12
+            self.alignoffset = 0
         end
     end,
     
