@@ -455,19 +455,45 @@ function MidnightUI:StyleScrollFrame(widget)
         scrollbar:SetBackdropBorderColor(br, bg, bb, 0.5)
     end
     
-    -- Hide default textures
+    -- Hide default textures on scroll buttons
     if scrollbar.ScrollUpButton then
-        scrollbar.ScrollUpButton:SetNormalTexture(nil)
-        scrollbar.ScrollUpButton:SetPushedTexture(nil)
-        scrollbar.ScrollUpButton:SetDisabledTexture(nil)
-        scrollbar.ScrollUpButton:SetHighlightTexture(nil)
+        local upBtn = scrollbar.ScrollUpButton
+        if upBtn.GetNormalTexture then
+            local tex = upBtn:GetNormalTexture()
+            if tex then tex:SetTexture(nil) end
+        end
+        if upBtn.GetPushedTexture then
+            local tex = upBtn:GetPushedTexture()
+            if tex then tex:SetTexture(nil) end
+        end
+        if upBtn.GetDisabledTexture then
+            local tex = upBtn:GetDisabledTexture()
+            if tex then tex:SetTexture(nil) end
+        end
+        if upBtn.GetHighlightTexture then
+            local tex = upBtn:GetHighlightTexture()
+            if tex then tex:SetTexture(nil) end
+        end
     end
     
     if scrollbar.ScrollDownButton then
-        scrollbar.ScrollDownButton:SetNormalTexture(nil)
-        scrollbar.ScrollDownButton:SetPushedTexture(nil)
-        scrollbar.ScrollDownButton:SetDisabledTexture(nil)
-        scrollbar.ScrollDownButton:SetHighlightTexture(nil)
+        local downBtn = scrollbar.ScrollDownButton
+        if downBtn.GetNormalTexture then
+            local tex = downBtn:GetNormalTexture()
+            if tex then tex:SetTexture(nil) end
+        end
+        if downBtn.GetPushedTexture then
+            local tex = downBtn:GetPushedTexture()
+            if tex then tex:SetTexture(nil) end
+        end
+        if downBtn.GetDisabledTexture then
+            local tex = downBtn:GetDisabledTexture()
+            if tex then tex:SetTexture(nil) end
+        end
+        if downBtn.GetHighlightTexture then
+            local tex = downBtn:GetHighlightTexture()
+            if tex then tex:SetTexture(nil) end
+        end
     end
 end
 
