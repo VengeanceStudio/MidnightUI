@@ -98,6 +98,7 @@ function Maps:PLAYER_ENTERING_WORLD()
         Minimap.Layout = function() end
     end
     
+    self:SetupMinimapBorder()
     self:SetupMinimapPosition()
     self:SetupMinimapDragging()
     self:SetupNudgeControls()
@@ -110,6 +111,39 @@ end
 -- -----------------------------------------------------------------------------
 -- MINIMAP POSITIONING
 -- -----------------------------------------------------------------------------
+function Maps:SetupMinimapBorder()
+    -- Only create the border once
+    if self.minimapBorderInitialized then
+        return
+    end
+    
+    -- Create a frame to hold the border
+    if not self.minimapBorder then
+        self.minimapBorder = CreateFrame("Frame", "MidnightUI_MinimapBorder", Minimap, "BackdropTemplate")
+        self.minimapBorder:SetAllPoints(Minimap)
+        self.minimapBorder:SetFrameLevel(Minimap:GetFrameLevel() + 1)
+        
+        -- Apply border with theme color
+        self.minimapBorder:SetBackdrop({
+            bgFile = nil,
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 1,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        })
+        
+        -- Use accent color from ColorPalette
+        if ColorPalette then
+            self.minimapBorder:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        else
+            -- Fallback to teal
+            self.minimapBorder:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+        end
+    end
+    
+    self.minimapBorderInitialized = true
+end
+
 function Maps:SetupMinimapPosition()
     -- Only override SetPoint once - prevent function wrapping on zone changes
     if self.minimapPositionInitialized then
