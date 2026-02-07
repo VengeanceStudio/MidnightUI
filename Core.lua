@@ -2630,6 +2630,7 @@ function MidnightUI:OpenColorEditorFrame()
     })
     closeBtn:SetBackdropColor(GetCurrentColor("button-bg"))
     closeBtn:SetBackdropBorderColor(GetCurrentColor("panel-border"))
+    closeBtn:SetFrameLevel(frame:GetFrameLevel() + 10)
     local closeTxt = closeBtn:CreateFontString(nil, "OVERLAY")
     closeTxt:SetFont("Fonts\\FRIZQT__.TTF", 26, "OUTLINE")
     closeTxt:SetText("×")
@@ -2670,7 +2671,111 @@ function MidnightUI:OpenColorEditorFrame()
         end
     end)
     
-    -- Create inner panel to demonstrate panel border
+    -- Background click area (behind everything else) for panel-bg and panel-border colors
+    local bgClickArea = CreateFrame("Frame", nil, frame)
+    bgClickArea:SetAllPoints(frame)
+    bgClickArea:SetFrameLevel(frame:GetFrameLevel() + 1)
+    bgClickArea:EnableMouse(true)
+    bgClickArea:SetScript("OnMouseDown", function(self, button)
+        if button ~= "LeftButton" then return end
+        
+        -- Get mouse position relative to frame
+        local scale = frame:GetEffectiveScale()
+        local frameLeft = frame:GetLeft() * scale
+        local frameRight = frame:GetRight() * scale
+        local frameTop = frame:GetTop() * scale
+        local frameBottom = frame:GetBottom() * scale
+        local mouseX, mouseY = GetCursorPosition()
+        
+        -- Check if click is within 20px of any edge
+        local edgeThreshold = 20 * scale
+        local nearLeftEdge = (mouseX - frameLeft) < edgeThreshold
+        local nearRightEdge = (frameRight - mouseX) < edgeThreshold
+        local nearTopEdge = (frameTop - mouseY) < edgeThreshold
+        local nearBottomEdge = (mouseY - frameBottom) < edgeThreshold
+        
+        if nearLeftEdge or nearRightEdge or nearTopEdge or nearBottomEdge then
+            -- Click near border - change panel-border color
+            local r, g, b, a = GetCurrentColor("panel-border")
+            ColorPickerFrame:SetupColorPickerAndShow({
+                r = r, g = g, b = b,
+                opacity = a,
+                hasOpacity = true,
+                swatchFunc = function()
+                    local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                    local na = ColorPickerFrame:GetColorAlpha()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors["panel-border"] = {r = nr, g = ng, b = nb, a = na}
+                    UpdateFrameColors()
+                end,
+                cancelFunc = function()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors["panel-border"] = {r = r, g = g, b = b, a = a}
+                    UpdateFrameColors()
+                end,
+            })
+        else
+            -- Click in center - change panel-bg color
+            local r, g, b, a = GetCurrentColor("panel-bg")
+            ColorPickerFrame:SetupColorPickerAndShow({
+                r = r, g = g, b = b,
+                opacity = a,
+                hasOpacity = true,
+                swatchFunc = function()
+                    local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                    local na = ColorPickerFrame:GetColorAlpha()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors["panel-bg"] = {r = nr, g = ng, b = nb, a = na}
+                    UpdateFrameColors()
+                end,
+                cancelFunc = function()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors["panel-bg"] = {r = r, g = g, b = b, a = a}
+                    UpdateFrameColors()
+                end,
+            })
+        end
+    end)
+    bgClickArea:SetScript("OnEnter", function()
+        -- Show tooltip based on mouse position
+        local scale = frame:GetEffectiveScale()
+        local frameLeft = frame:GetLeft() * scale
+        local frameRight = frame:GetRight() * scale
+        local frameTop = frame:GetTop() * scale
+        local frameBottom = frame:GetBottom() * scale
+        local mouseX, mouseY = GetCursorPosition()
+        
+        local edgeThreshold = 20 * scale
+        local nearLeftEdge = (mouseX - frameLeft) < edgeThreshold
+        local nearRightEdge = (frameRight - mouseX) < edgeThreshold
+        local nearTopEdge = (frameTop - mouseY) < edgeThreshold
+        local nearBottomEdge = (mouseY - frameBottom) < edgeThreshold
+        
+        GameTooltip:SetOwner(bgClickArea, "ANCHOR_CURSOR")
+        if nearLeftEdge or nearRightEdge or nearTopEdge or nearBottomEdge then
+            GameTooltip:SetText("Panel Border", 1, 1, 1)
+            GameTooltip:AddLine("Border color for all panels and frames", 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine("Click near edge to change color", 0.0, 1.0, 0.5)
+        else
+            GameTooltip:SetText("Panel Background", 1, 1, 1)
+            GameTooltip:AddLine("Main background color for windows and panels", 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine("Click center area to change color", 0.0, 1.0, 0.5)
+        end
+        GameTooltip:Show()
+    end)
+    bgClickArea:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    
+    -- Create inner panel to demonstrate panel border (accent-primary)
     local innerPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     innerPanel:SetSize(760, 450)
     innerPanel:SetPoint("TOP", 0, -75)
@@ -2681,6 +2786,7 @@ function MidnightUI:OpenColorEditorFrame()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
+    innerPanel:SetFrameLevel(frame:GetFrameLevel() + 2)
     innerPanel:EnableMouse(true)
     innerPanel:SetScript("OnEnter", function()
         GameTooltip:SetOwner(innerPanel, "ANCHOR_TOP")
@@ -2742,6 +2848,7 @@ function MidnightUI:OpenColorEditorFrame()
             edgeSize = 1,
             insets = { left = 1, right = 1, top = 1, bottom = 1 }
         })
+        tab:SetFrameLevel(innerPanel:GetFrameLevel() + 5)
         tab.text = tab:CreateFontString(nil, "OVERLAY")
         tab.text:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
         tab.text:SetText(name)
@@ -2797,6 +2904,7 @@ function MidnightUI:OpenColorEditorFrame()
     
     local textClick1 = CreateFrame("Frame", nil, innerPanel)
     textClick1:SetAllPoints(textLabel1)
+    textClick1:SetFrameLevel(innerPanel:GetFrameLevel() + 5)
     textClick1:EnableMouse(true)
     textClick1:SetScript("OnEnter", function()
         GameTooltip:SetOwner(textClick1, "ANCHOR_TOP")
@@ -2840,6 +2948,7 @@ function MidnightUI:OpenColorEditorFrame()
     
     local textClick2 = CreateFrame("Frame", nil, innerPanel)
     textClick2:SetAllPoints(textLabel2)
+    textClick2:SetFrameLevel(innerPanel:GetFrameLevel() + 5)
     textClick2:EnableMouse(true)
     textClick2:SetScript("OnEnter", function()
         GameTooltip:SetOwner(textClick2, "ANCHOR_TOP")
@@ -2895,6 +3004,7 @@ function MidnightUI:OpenColorEditorFrame()
             edgeSize = 1,
             insets = { left = 1, right = 1, top = 1, bottom = 1 }
         })
+        btn:SetFrameLevel(innerPanel:GetFrameLevel() + 5)
         btn.text = btn:CreateFontString(nil, "OVERLAY")
         btn.text:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
         btn.text:SetText(name)
@@ -2952,6 +3062,7 @@ function MidnightUI:OpenColorEditorFrame()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
+    saveBtn:SetFrameLevel(frame:GetFrameLevel() + 10)
     saveBtn:SetBackdropColor(GetCurrentColor("button-bg"))
     saveBtn:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
     local saveTxt = saveBtn:CreateFontString(nil, "OVERLAY")
@@ -3012,6 +3123,7 @@ function MidnightUI:OpenColorEditorFrame()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
+    resetBtn:SetFrameLevel(frame:GetFrameLevel() + 10)
     resetBtn:SetBackdropColor(GetCurrentColor("button-bg"))
     resetBtn:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
     local resetTxt = resetBtn:CreateFontString(nil, "OVERLAY")
