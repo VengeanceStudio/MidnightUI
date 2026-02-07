@@ -463,7 +463,7 @@ function UIButtons:GetOptions()
             },
             fontSpacer = {
                 type = "description",
-                name = "|cffff0000SPACER|r",
+                name = "",
                 order = 6.5,
                 width = "full",
             },
