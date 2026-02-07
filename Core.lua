@@ -348,7 +348,45 @@ function MidnightUI:StyleLSMWidget(widget)
                         
                         -- Style all item buttons in pullout
                         local buttonCount = 0
+                        print("  Pullout children:", pullout:GetNumChildren())
                         for _, child in ipairs({pullout:GetChildren()}) do
+                            print("    Child type:", child:GetObjectType(), "name:", child:GetName())
+                            
+                            -- Check if it's a scrollframe with buttons inside
+                            if child:GetObjectType() == "ScrollFrame" or child.scrollframe then
+                                local scrollChild = child.scrollframe or child:GetScrollChild()
+                                if scrollChild then
+                                    print("      Found scrollframe, checking its children...")
+                                    for _, btn in ipairs({scrollChild:GetChildren()}) do
+                                        if btn:GetObjectType() == "Button" or btn:GetObjectType() == "CheckButton" then
+                                            buttonCount = buttonCount + 1
+                                            btn.isLSMWidget = true
+                                            
+                                            -- Style item text
+                                            local text = btn:GetFontString()
+                                            if text and FontKit then
+                                                FontKit:SetFont(text, 'body', 'normal')
+                                                local r, g, b, a = ColorPalette:GetColor('text-primary')
+                                                text:SetTextColor(r, g, b, a or 1)
+                                            end
+                                            
+                                            -- Remove Blizzard backdrop
+                                            if btn.SetBackdrop then
+                                                btn:SetBackdrop(nil)
+                                            end
+                                            
+                                            -- Style highlight
+                                            local highlight = btn:GetHighlightTexture()
+                                            if highlight then
+                                                highlight:SetTexture("Interface\\Buttons\\WHITE8X8")
+                                                local r, g, b = ColorPalette:GetColor('accent-primary')
+                                                highlight:SetVertexColor(r, g, b, 0.15)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                            
                             if child:GetObjectType() == "Button" or child:GetObjectType() == "CheckButton" then
                                 buttonCount = buttonCount + 1
                                 child.isLSMWidget = true
