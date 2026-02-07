@@ -167,6 +167,7 @@ function MidnightUI:StyleLSMWidget(widget)
     
     -- Style the main dropdown button frame BEFORE marking as LSM widget
     if frame.SetBackdrop then
+        print("Setting dropdown box backdrop...")
         frame:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
             edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -176,8 +177,11 @@ function MidnightUI:StyleLSMWidget(widget)
         })
         local r, g, b, a = ColorPalette:GetColor('button-bg')
         frame:SetBackdropColor(r, g, b, a or 1)
+        print("  BG color:", r, g, b, a)
         local br, bg, bb, ba = ColorPalette:GetColor('accent-primary')
         frame:SetBackdropBorderColor(br, bg, bb, ba or 1)
+        print("  Border color:", br, bg, bb, ba)
+        print("Backdrop applied to dropdown box")
     end
     
     -- NOW mark this widget so backdrop hooks can identify it
@@ -303,8 +307,10 @@ function MidnightUI:StyleLSMWidget(widget)
                 C_Timer.After(0.05, function()
                     local pullout = widget.pullout or widget.dropdown
                     if pullout then
+                        print("Styling pullout...")
                         -- Apply themed backdrop BEFORE marking as LSM widget
                         if pullout.SetBackdrop then
+                            print("  Setting pullout backdrop...")
                             pullout:SetBackdrop({
                                 bgFile = "Interface\\Buttons\\WHITE8X8",
                                 edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -314,8 +320,11 @@ function MidnightUI:StyleLSMWidget(widget)
                             })
                             local r, g, b = ColorPalette:GetColor('panel-bg')
                             pullout:SetBackdropColor(r, g, b, 1)  -- Full opacity
+                            print("    BG color:", r, g, b)
                             local br, bg, bb = ColorPalette:GetColor('accent-primary')
                             pullout:SetBackdropBorderColor(br, bg, bb, 1)
+                            print("    Border color:", br, bg, bb)
+                            print("  Pullout backdrop applied")
                         end
                         
                         -- NOW mark it so backdrop hooks skip it
