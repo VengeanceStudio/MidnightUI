@@ -2477,91 +2477,20 @@ function MidnightUI:GetThemeOptions()
         },
     }
     
-    -- Define all color keys with descriptions
+    -- Define core color keys with descriptions
     local colorGroups = {
         {
-            name = "Primary Colors",
+            name = "Core Colors",
             order = 20,
             colors = {
-                {key = "primary", name = "Primary", desc = "Main accent color used throughout the UI"},
-                {key = "secondary", name = "Secondary", desc = "Secondary accent color"},
-                {key = "accent", name = "Accent", desc = "Accent color for highlights and emphasis"},
-                {key = "accent-primary", name = "Accent Primary", desc = "Primary accent color for borders and highlights"},
-            }
-        },
-        {
-            name = "Background Colors",
-            order = 30,
-            colors = {
-                {key = "bg-primary", name = "Background Primary", desc = "Main background color"},
-                {key = "bg-secondary", name = "Background Secondary", desc = "Secondary background color"},
-                {key = "bg-tertiary", name = "Background Tertiary", desc = "Tertiary background color"},
-                {key = "panel-bg", name = "Panel Background", desc = "Background color for panels"},
-                {key = "panel-border", name = "Panel Border", desc = "Border color for panels"},
-            }
-        },
-        {
-            name = "Glass Effects",
-            order = 40,
-            colors = {
-                {key = "glass-dark", name = "Glass Dark", desc = "Dark glass effect"},
-                {key = "glass-medium", name = "Glass Medium", desc = "Medium glass effect"},
-                {key = "glass-light", name = "Glass Light", desc = "Light glass effect"},
-            }
-        },
-        {
-            name = "Text Colors",
-            order = 50,
-            colors = {
-                {key = "text-primary", name = "Text Primary", desc = "Primary text color"},
-                {key = "text-secondary", name = "Text Secondary", desc = "Secondary text color"},
-                {key = "text-muted", name = "Text Muted", desc = "Muted/disabled text color"},
-                {key = "text-disabled", name = "Text Disabled", desc = "Disabled text color"},
-            }
-        },
-        {
-            name = "Button Colors",
-            order = 60,
-            colors = {
-                {key = "button-bg", name = "Button Background", desc = "Button background color"},
-                {key = "button-hover", name = "Button Hover", desc = "Button hover state color"},
-                {key = "button-pressed", name = "Button Pressed", desc = "Button pressed state color"},
-                {key = "button-disabled", name = "Button Disabled", desc = "Button disabled state color"},
-            }
-        },
-        {
-            name = "Tab Colors",
-            order = 70,
-            colors = {
-                {key = "tab-inactive", name = "Tab Inactive", desc = "Inactive tab color"},
-                {key = "tab-active", name = "Tab Active", desc = "Active tab color"},
-                {key = "tab-selected-bg", name = "Tab Selected Background", desc = "Selected tab background color"},
-            }
-        },
-        {
-            name = "Scrollbar Colors",
-            order = 80,
-            colors = {
-                {key = "scrollbar-track", name = "Scrollbar Track", desc = "Scrollbar track background"},
-                {key = "scrollbar-thumb", name = "Scrollbar Thumb", desc = "Scrollbar thumb/handle"},
-            }
-        },
-        {
-            name = "Tooltip Colors",
-            order = 90,
-            colors = {
-                {key = "tooltip-bg", name = "Tooltip Background", desc = "Tooltip background color"},
-                {key = "tooltip-border", name = "Tooltip Border", desc = "Tooltip border color"},
-            }
-        },
-        {
-            name = "Status Colors",
-            order = 100,
-            colors = {
-                {key = "success", name = "Success", desc = "Success/positive state color"},
-                {key = "warning", name = "Warning", desc = "Warning state color"},
-                {key = "error", name = "Error", desc = "Error/danger state color"},
-                {key = "info", name = "Info", desc = "Informational state color"},
+                {key = "panel-bg", name = "Panel Background", desc = "Main background color for settings windows and panels"},
+                {key = "panel-border", name = "Panel Border", desc = "Border color for all panels, frames, and the minimap"},
+                {key = "accent-primary", name = "Accent Color", desc = "Signature teal/cyan color used for borders, highlights, and active states"},
+                {key = "button-bg", name = "Button Background", desc = "Background color for all buttons"},
+                {key = "button-hover", name = "Button Hover", desc = "Button color when hovering with mouse"},
+                {key = "text-primary", name = "Primary Text", desc = "Main text color for labels, headers, and body text"},
+                {key = "text-secondary", name = "Secondary Text", desc = "Text color for descriptions, hints, and supporting information"},
+                {key = "tab-active", name = "Active Tab", desc = "Background color for the currently selected tab"},
             }
         },
     }
