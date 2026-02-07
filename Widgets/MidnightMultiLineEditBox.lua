@@ -187,6 +187,26 @@ local methods = {
 		self:DisableButton(false)
 		self.entered = nil
 		self:SetMaxLetters(0)
+		
+		-- Re-style scrollbar on acquire (in case widget was recycled)
+		if self.scrollBar and MidnightUI and MidnightUI.StyleScrollFrame then
+			local scrollBar = self.scrollBar
+			local scrollBarName = scrollBar:GetName()
+			if scrollBarName then
+				local upButton = _G[scrollBarName .. "ScrollUpButton"]
+				local downButton = _G[scrollBarName .. "ScrollDownButton"]
+				
+				-- Attach buttons as properties
+				scrollBar.ScrollUpButton = upButton
+				scrollBar.ScrollDownButton = downButton
+				
+				-- Style the scrollbar
+				local scrollFrameWidget = {
+					scrollbar = scrollBar
+				}
+				MidnightUI:StyleScrollFrame(scrollFrameWidget)
+			end
+		end
 	end,
 
 	["OnRelease"] = function(self)
