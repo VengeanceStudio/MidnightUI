@@ -2776,6 +2776,7 @@ function MidnightUI:OpenColorEditorFrame()
     end)
     
     -- Create inner panel to demonstrate panel border (accent-primary)
+    -- This panel is non-interactive so clicks pass through to bgClickArea for proper edge detection
     local innerPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     innerPanel:SetSize(760, 450)
     innerPanel:SetPoint("TOP", 0, -75)
@@ -2787,41 +2788,7 @@ function MidnightUI:OpenColorEditorFrame()
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     innerPanel:SetFrameLevel(frame:GetFrameLevel() + 2)
-    innerPanel:EnableMouse(true)
-    innerPanel:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(innerPanel, "ANCHOR_TOP")
-        GameTooltip:SetText("Panel Border", 1, 1, 1)
-        GameTooltip:AddLine("Border color for panels, frames, and minimap", 0.7, 0.7, 0.7, true)
-        GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
-        GameTooltip:Show()
-    end)
-    innerPanel:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-    innerPanel:SetScript("OnMouseDown", function()
-        local r, g, b, a = GetCurrentColor("accent-primary")
-        ColorPickerFrame:SetupColorPickerAndShow({
-            r = r, g = g, b = b,
-            opacity = a,
-            hasOpacity = true,
-            swatchFunc = function()
-                local nr, ng, nb = ColorPickerFrame:GetColorRGB()
-                local na = ColorPickerFrame:GetColorAlpha()
-                if not MidnightUI.tempThemeColors then
-                    MidnightUI.tempThemeColors = {}
-                end
-                MidnightUI.tempThemeColors["accent-primary"] = {r = nr, g = ng, b = nb, a = na}
-                UpdateFrameColors()
-            end,
-            cancelFunc = function()
-                if not MidnightUI.tempThemeColors then
-                    MidnightUI.tempThemeColors = {}
-                end
-                MidnightUI.tempThemeColors["accent-primary"] = {r = r, g = g, b = b, a = a}
-                UpdateFrameColors()
-            end,
-        })
-    end)
+    innerPanel:EnableMouse(false)  -- Don't intercept clicks - let them pass through to bgClickArea
     frame.innerPanel = innerPanel
     
     -- Header text in panel
