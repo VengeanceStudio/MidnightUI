@@ -219,11 +219,10 @@ local function Constructor()
     label:SetJustifyH("LEFT")
     label:SetHeight(14)
     
-    local dropdown = CreateFrame("Button", nil, frame, BackdropTemplateMixin and "BackdropTemplate")
+    local dropdown = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     dropdown:SetHeight(26)
     dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -18)
     dropdown:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -18)
-    dropdown:Show()
     dropdown:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -236,6 +235,7 @@ local function Constructor()
     dropdown:SetBackdropColor(r, g, b, 1)
     r, g, b = ColorPalette:GetColor('accent-primary')
     dropdown:SetBackdropBorderColor(r, g, b, 1)
+    dropdown:Show()
     
     local button = CreateFrame("Button", nil, dropdown)
     button:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", -2, -2)
