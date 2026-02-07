@@ -358,6 +358,10 @@ local function Constructor()
         print("  content size:", self.content:GetWidth(), "x", self.content:GetHeight())
         print("  content.width/height:", self.content.width, self.content.height)
         local result = originalAddChild(self, child, ...)
+        print("  child frame parent:", child.frame:GetParent():GetName() or "unnamed")
+        print("  child frame visible:", child.frame:IsShown())
+        print("  child frame size:", child.frame:GetWidth(), "x", child.frame:GetHeight())
+        print("  num children:", #self.children)
         -- Trigger layout after adding child
         self:DoLayout()
         return result
