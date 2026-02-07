@@ -15,8 +15,11 @@ local Version = 1
 -- TAB BUTTON CREATION
 -- ============================================================================
 
+local tabCount = 0
+
 local function CreateTab(parent)
-    local tab = CreateFrame("Button", nil, parent, BackdropTemplateMixin and "BackdropTemplate")
+    tabCount = tabCount + 1
+    local tab = CreateFrame("Button", "MidnightTabButton" .. tabCount, parent, BackdropTemplateMixin and "BackdropTemplate")
     
     -- Set up backdrop from the start
     tab:SetBackdrop({
