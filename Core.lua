@@ -425,6 +425,16 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     if t.text then
                                         t.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
                                     end
+                                    
+                                    -- Verify the color stuck
+                                    C_Timer.After(0.01, function()
+                                        local r, g, b, a = t:GetBackdropColor()
+                                        print("  Verified tab", t.value, "color after 0.01s:", r, g, b, a)
+                                    end)
+                                    C_Timer.After(0.1, function()
+                                        local r, g, b, a = t:GetBackdropColor()
+                                        print("  Verified tab", t.value, "color after 0.1s:", r, g, b, a)
+                                    end)
                                 else
                                     t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                                     t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
