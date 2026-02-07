@@ -60,18 +60,14 @@ Scripts
 local function Control_OnEnter(frame)
 	frame.obj:Fire("OnEnter")
 	-- Highlight border on hover
-	if frame.border then
-		frame.border:SetVertexColor(1, 1, 1, 1)
-	end
+	frame:SetBackdropBorderColor(1, 1, 1, 1)
 end
 
 local function Control_OnLeave(frame)
 	frame.obj:Fire("OnLeave")
 	-- Reset border color
-	if frame.border then
-		local r, g, b = ColorPalette:GetColor('accent-primary')
-		frame.border:SetVertexColor(r, g, b, 1)
-	end
+	local r, g, b = ColorPalette:GetColor('accent-primary')
+	frame:SetBackdropBorderColor(r, g, b, 1)
 end
 
 local function ColorSwatch_OnClick(frame)
@@ -212,9 +208,6 @@ local function Constructor()
 	frame:SetBackdropColor(r, g, b, 1)
 	local br, bg, bb = ColorPalette:GetColor('accent-primary')
 	frame:SetBackdropBorderColor(br, bg, bb, 1)
-	
-	-- Store border reference for hover effect
-	frame.border = frame
 
 	local colorSwatch = frame:CreateTexture(nil, "OVERLAY")
 	colorSwatch:SetWidth(19)
