@@ -219,7 +219,7 @@ local function Constructor()
     label:SetJustifyH("LEFT")
     label:SetHeight(14)
     
-    local dropdown = CreateFrame("Frame", nil, frame, BackdropTemplateMixin and "BackdropTemplate")
+    local dropdown = CreateFrame("Button", nil, frame, BackdropTemplateMixin and "BackdropTemplate")
     dropdown:SetHeight(26)
     dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -18)
     dropdown:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -18)
