@@ -135,9 +135,12 @@ local methods = {
     end,
     
     ["DoLayout"] = function(self)
+        print("MidnightTabGroup DoLayout called")
         local content = self.content
         local contentwidth = content.width or content:GetWidth() or 0
         local contentheight = content.height or content:GetHeight() or 0
+        print("  DoLayout content size:", contentwidth, "x", contentheight)
+        print("  DoLayout has", #(self.children or {}), "children")
         local tabs = self.tablist
         
         if not tabs then return end
@@ -157,6 +160,12 @@ local methods = {
                     tab.selected = false
                 end
             end
+        end
+        
+        -- Call the container's PerformLayout to actually lay out children
+        print("  Calling PerformLayout")
+        if self.PerformLayout then
+            self:PerformLayout()
         end
     end,
     
@@ -328,6 +337,7 @@ local function Constructor()
     local content = CreateFrame("Frame", nil, border)
     content:SetPoint("TOPLEFT", border, "TOPLEFT", 10, -32)
     content:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", -10, 10)
+    content:SetClipsChildren(true)  -- Ensure children are clipped to content area
     
     local widget = {
         frame = frame,
