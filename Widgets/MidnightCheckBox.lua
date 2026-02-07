@@ -24,14 +24,15 @@ local methods = {
     end,
     
     ["OnRelease"] = function(self)
-        self:SetDisabled(false)
-        self:SetLabel()
-        self:SetDescription()
-        self:SetValue(false)
-        self:SetType()
-        self:SetTriState(nil)
+        self.disabled = false
         self.checked = false
         self.tristate = nil
+        self.check:Hide()
+        self.text:SetText("")
+        if self.desc then
+            self.desc:Hide()
+            self.desc:SetText("")
+        end
     end,
     
     ["OnWidthSet"] = function(self, width)
@@ -55,7 +56,7 @@ local methods = {
         end
     end,
     
-    ["SetValue"] = function(self, value)
+    ["SetValue"] = function(self, value, silent)
         local check = self.check
         self.checked = value
         if value then
@@ -69,7 +70,10 @@ local methods = {
                 check:Hide()
             end
         end
-        self:Fire("OnValueChanged", value)
+        self:SetDisabled(self.disabled)
+        if not silent then
+            self:Fire("OnValueChanged", value)
+        end
     end,
     
     ["GetValue"] = function(self)
