@@ -113,11 +113,16 @@ function MidnightUI:OnEnable()
                             local obj = openFrame.frame.obj
                             if obj then
                                 print("DEBUG: obj type:", obj.type)
-                                print("DEBUG: Listing all methods on obj:")
+                                print("DEBUG: Listing ALL methods on obj:")
+                                local methods = {}
                                 for k, v in pairs(obj) do
-                                    if type(v) == "function" and type(k) == "string" and k:find("Select") then
-                                        print("DEBUG:   - ", k, "=", type(v))
+                                    if type(v) == "function" and type(k) == "string" then
+                                        table.insert(methods, k)
                                     end
+                                end
+                                table.sort(methods)
+                                for _, method in ipairs(methods) do
+                                    print("DEBUG:   - ", method)
                                 end
                             end
                         end
