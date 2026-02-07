@@ -167,6 +167,13 @@ function MidnightUI:StyleLSMWidget(widget)
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
+    -- Add backdrop support if missing (modern WoW)
+    if not frame.SetBackdrop and frame.SetBackdropColor then
+        -- Frame has backdrop methods but not SetBackdrop, might need mixin
+        Mixin(frame, BackdropTemplateMixin)
+        print("Added BackdropTemplateMixin to frame")
+    end
+    
     -- Style the main dropdown button frame BEFORE marking as LSM widget
     if frame.SetBackdrop then
         print("Setting dropdown box backdrop...")
@@ -185,7 +192,8 @@ function MidnightUI:StyleLSMWidget(widget)
         print("  Border color:", br, bg, bb, ba)
         print("Backdrop applied to dropdown box")
     else
-        print("frame.SetBackdrop is nil!")
+        print("frame.SetBackdrop still nil after mixin attempt")
+        print("  frame type:", frame:GetObjectType())
     end
     
     -- NOW mark this widget so backdrop hooks can identify it
