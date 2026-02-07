@@ -309,6 +309,80 @@ function MidnightUI:StyleLSMWidget(widget)
         local r, g, b = ColorPalette:GetColor('accent-primary')
         btn.customArrow:SetVertexColor(r, g, b, 1)
         btn.customArrow:Show()
+        
+        -- Hook the button click to style pullout after it opens
+        if not btn.lsmClickHooked then
+            btn:HookScript("OnClick", function()
+                print("Button clicked, looking for pullout...")
+                C_Timer.After(0.05, function()
+                    local pullout = widget.pullout or widget.dropdown
+                    if pullout then
+                        print("  Found pullout, styling...")
+                        pullout.isLSMWidget = true
+                        
+                        -- Apply themed backdrop
+                        if pullout.SetBackdrop then
+                            pullout:SetBackdrop({
+                                bgFile = "Interface\\Buttons\\WHITE8X8",
+                                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                tile = false,
+                                edgeSize = 1,
+                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                            })
+                            pullout:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                            pullout:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                            print("  Applied pullout backdrop")
+                        end
+                        
+                        -- Style the scrollframe if it exists
+                        if pullout.frame then
+                            pullout.frame.isLSMWidget = true
+                        end
+                        
+                        -- Hide Blizzard textures
+                        for _, region in ipairs({pullout:GetRegions()}) do
+                            if region:GetObjectType() == "Texture" then
+                                region:Hide()
+                            end
+                        end
+                        
+                        -- Style all item buttons in pullout
+                        local buttonCount = 0
+                        for _, child in ipairs({pullout:GetChildren()}) do
+                            if child:GetObjectType() == "Button" or child:GetObjectType() == "CheckButton" then
+                                buttonCount = buttonCount + 1
+                                child.isLSMWidget = true
+                                
+                                -- Style item text
+                                local text = child:GetFontString()
+                                if text and FontKit then
+                                    FontKit:SetFont(text, 'body', 'normal')
+                                    local r, g, b, a = ColorPalette:GetColor('text-primary')
+                                    text:SetTextColor(r, g, b, a or 1)
+                                end
+                                
+                                -- Remove Blizzard backdrop
+                                if child.SetBackdrop then
+                                    child:SetBackdrop(nil)
+                                end
+                                
+                                -- Style highlight
+                                local highlight = child:GetHighlightTexture()
+                                if highlight then
+                                    highlight:SetTexture("Interface\\Buttons\\WHITE8X8")
+                                    local r, g, b = ColorPalette:GetColor('accent-primary')
+                                    highlight:SetVertexColor(r, g, b, 0.15)
+                                end
+                            end
+                        end
+                        print("  Styled", buttonCount, "item buttons in pullout")
+                    else
+                        print("  No pullout found!")
+                    end
+                end)
+            end)
+            btn.lsmClickHooked = true
+        end
     end
     
     -- Hook ToggleDrop to style the pullout menu
