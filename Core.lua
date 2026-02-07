@@ -434,30 +434,27 @@ function MidnightUI:StyleScrollFrame(widget)
     local ColorPalette = _G.MidnightUI_ColorPalette
     if not ColorPalette then return end
     
-    -- Style the scrollbar thumb
-    if scrollbar.thumb then
+    -- Get the actual thumb texture
+    local thumbTexture = scrollbar:GetThumbTexture()
+    if thumbTexture then
         local r, g, b = ColorPalette:GetColor('accent-primary')
-        scrollbar.thumb:SetColorTexture(r, g, b, 0.8)
+        thumbTexture:SetColorTexture(r, g, b, 1)
+        thumbTexture:SetSize(12, 24)
     end
     
-    -- Style the scrollbar background
-    if scrollbar.SetBackdrop then
-        scrollbar:SetBackdrop({
-            bgFile = "Interface\\Buttons\\WHITE8X8",
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            tile = false,
-            edgeSize = 1,
-            insets = { left = 1, right = 1, top = 1, bottom = 1 }
-        })
+    -- Style the scrollbar track background
+    if not scrollbar.midnightBg then
+        scrollbar.midnightBg = scrollbar:CreateTexture(nil, "BACKGROUND")
+        scrollbar.midnightBg:SetAllPoints(scrollbar)
         local r, g, b = ColorPalette:GetColor('button-bg')
-        scrollbar:SetBackdropColor(r, g, b, 0.5)
-        local br, bg, bb = ColorPalette:GetColor('panel-border')
-        scrollbar:SetBackdropBorderColor(br, bg, bb, 0.5)
+        scrollbar.midnightBg:SetColorTexture(r, g, b, 0.3)
     end
     
-    -- Hide default textures on scroll buttons
+    -- Hide and restyle scroll up button
     if scrollbar.ScrollUpButton then
         local upBtn = scrollbar.ScrollUpButton
+        
+        -- Hide default textures
         if upBtn.GetNormalTexture then
             local tex = upBtn:GetNormalTexture()
             if tex then tex:SetTexture(nil) end
@@ -474,10 +471,23 @@ function MidnightUI:StyleScrollFrame(widget)
             local tex = upBtn:GetHighlightTexture()
             if tex then tex:SetTexture(nil) end
         end
+        
+        -- Create custom up arrow
+        if not upBtn.customArrow then
+            upBtn.customArrow = upBtn:CreateTexture(nil, "ARTWORK")
+            upBtn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Up-Up")
+            upBtn.customArrow:SetSize(12, 12)
+            upBtn.customArrow:SetPoint("CENTER")
+            local r, g, b = ColorPalette:GetColor('accent-primary')
+            upBtn.customArrow:SetVertexColor(r, g, b, 1)
+        end
     end
     
+    -- Hide and restyle scroll down button
     if scrollbar.ScrollDownButton then
         local downBtn = scrollbar.ScrollDownButton
+        
+        -- Hide default textures
         if downBtn.GetNormalTexture then
             local tex = downBtn:GetNormalTexture()
             if tex then tex:SetTexture(nil) end
@@ -493,6 +503,16 @@ function MidnightUI:StyleScrollFrame(widget)
         if downBtn.GetHighlightTexture then
             local tex = downBtn:GetHighlightTexture()
             if tex then tex:SetTexture(nil) end
+        end
+        
+        -- Create custom down arrow
+        if not downBtn.customArrow then
+            downBtn.customArrow = downBtn:CreateTexture(nil, "ARTWORK")
+            downBtn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Down-Up")
+            downBtn.customArrow:SetSize(12, 12)
+            downBtn.customArrow:SetPoint("CENTER")
+            local r, g, b = ColorPalette:GetColor('accent-primary')
+            downBtn.customArrow:SetVertexColor(r, g, b, 1)
         end
     end
 end
