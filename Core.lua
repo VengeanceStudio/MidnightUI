@@ -2673,7 +2673,32 @@ function MidnightUI:OpenColorEditorFrame()
         self:SetBackdropColor(GetCurrentColor("button-bg"))
         self:SetBackdropBorderColor(GetCurrentColor("panel-border"))
     end)
-    closeBtn:SetScript("OnClick", function() frame:Hide() end)
+    closeBtn:SetScript("OnClick", function()
+        -- Check if there are any color changes
+        if MidnightUI.tempThemeColors and next(MidnightUI.tempThemeColors) ~= nil then
+            StaticPopupDialogs["MIDNIGHTUI_THEME_CLOSE_CONFIRM"] = {
+                text = "You have unsaved color changes that will be lost. Close anyway?",
+                button1 = "Close",
+                button2 = "Cancel",
+                OnAccept = function()
+                    -- Discard changes and close
+                    MidnightUI.tempThemeColors = nil
+                    frame:Hide()
+                end,
+                OnCancel = function()
+                    -- Cancel - keep window open
+                end,
+                timeout = 0,
+                whileDead = true,
+                hideOnEscape = true,
+                preferredIndex = 3,
+            }
+            StaticPopup_Show("MIDNIGHTUI_THEME_CLOSE_CONFIRM")
+        else
+            -- No changes, just close
+            frame:Hide()
+        end
+    end)
     
     -- Create inner panel to demonstrate panel border
     local innerPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
@@ -2946,10 +2971,70 @@ function MidnightUI:OpenColorEditorFrame()
     end
     frame.mockButtons = buttons
     
+    -- Bottom buttons
+    local saveBtn = CreateFrame("Button", nil, frame, "BackdropTemplate")
+    saveBtn:SetSize(200, 36)
+    saveBtn:SetPoint("BOTTOMLEFT", 20, 15)
+    saveBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    saveBtn:SetBackdropColor(GetCurrentColor("button-bg"))
+    saveBtn:SetBackdropBorderColor(GetCurrentColor("accent-primary"))
+    local saveTxt = saveBtn:CreateFontString(nil, "OVERLAY")
+    saveTxt:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+    saveTxt:SetText("Save & Apply")
+    saveTxt:SetPoint("CENTER")
+    saveTxt:SetTextColor(GetCurrentColor("text-primary"))
+    saveBtn:SetScript("OnEnter", function(self)
+        self:SetBackdropColor(GetCurrentColor("button-hover"))
+    end)
+    saveBtn:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(GetCurrentColor("button-bg"))
+    end)
+    saveBtn:SetScript("OnClick", function()
+        -- Check if there are any color changes
+        if not MidnightUI.tempThemeColors or next(MidnightUI.tempThemeColors) == nil then
+            MidnightUI:Print("|cffff8800Warning:|r No color changes detected. Please modify at least one color first.")
+            return
+        end
+        
+        -- Show save dialog
+        StaticPopupDialogs["MIDNIGHTUI_THEME_SAVE_CONFIRM"] = {
+            text = "Ready to save your custom theme. The editor will close and the Themes settings page will open where you can enter a name and save.",
+            button1 = "Continue",
+            button2 = "Cancel",
+            OnAccept = function()
+                -- Open settings to Themes page so user can enter a name and save
+                frame:Hide()
+                local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+                if AceConfigDialog then
+                    AceConfigDialog:Open("MidnightUI")
+                    -- Try to select the Themes category
+                    C_Timer.After(0.1, function()
+                        AceConfigDialog:SelectGroup("MidnightUI", "themes")
+                    end)
+                end
+                MidnightUI:Print("Enter a theme name and click 'Save Custom Theme' to save your changes.")
+            end,
+            OnCancel = function()
+                -- Cancel - keep window open
+            end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+            preferredIndex = 3,
+        }
+        StaticPopup_Show("MIDNIGHTUI_THEME_SAVE_CONFIRM")
+    end)
+    
     -- Reset button at bottom
     local resetBtn = CreateFrame("Button", nil, frame, "BackdropTemplate")
     resetBtn:SetSize(200, 36)
-    resetBtn:SetPoint("BOTTOM", 0, 15)
+    resetBtn:SetPoint("BOTTOMRIGHT", -20, 15)
     resetBtn:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
