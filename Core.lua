@@ -1261,6 +1261,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "CheckBox" then
+        -- Increase the overall frame height to add spacing and prevent label overlap
+        if widget.frame and not widget.customFrameHeight then
+            local currentHeight = widget.frame:GetHeight()
+            if currentHeight then
+                widget.frame:SetHeight(currentHeight + 10)
+            end
+            widget.customFrameHeight = true
+        end
+        
         if widget.frame then
             -- Hide original checkbox elements
             if widget.checkbg then widget.checkbg:Hide() end
@@ -1277,6 +1286,9 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             if widget.text then
                 widget.text:ClearAllPoints()
                 widget.text:SetPoint("LEFT", widget.frame, "LEFT", 50, 0)
+                widget.text:SetPoint("RIGHT", widget.frame, "RIGHT", -10, 0)
+                widget.text:SetWordWrap(true)
+                widget.text:SetJustifyH("LEFT")
             end
             
             -- Create toggle slider background
