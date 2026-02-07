@@ -199,9 +199,7 @@ local methods = {
                 
                 tab:SetScript("OnClick", function()
                     if not (self.status and self.status.selected == v.value) then
-                        self.status.selected = v.value
-                        self:Fire("OnGroupSelected", v.value)
-                        self:DoLayout()
+                        self:SelectTab(v.value)
                     end
                 end)
             end
