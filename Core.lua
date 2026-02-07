@@ -2439,12 +2439,6 @@ function MidnightUI:GetOptions()
                         get = function() return self.db.profile.theme.font or "Friz Quadrata TT" end,
                         set = function(_, v) self.db.profile.theme.font = v end,
                     },
-                    fontSpacer = {
-                        type = "description",
-                        name = "",
-                        order = 1.115,
-                        width = "full",
-                    },
                     applyGlobalFont = {
                         type = "execute",
                         name = "Apply to All",
