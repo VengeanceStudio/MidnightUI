@@ -2510,6 +2510,19 @@ function MidnightUI:GetThemeOptions()
         colorPaletteDisplay = {
             type = "description",
             name = function()
+                -- Always check and clean up swatches that shouldn't be showing
+                if self.colorSwatchContainer then
+                    local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+                    local status = AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"]
+                    if status and status.status and status.status.groups and status.status.groups.selected ~= "themes" then
+                        -- We're not on themes page but swatches exist - destroy them
+                        self.colorSwatchContainer:Hide()
+                        self.colorSwatchContainer:SetParent(nil)
+                        self.colorSwatchContainer = nil
+                        self.themeColorSwatches = nil
+                    end
+                end
+                
                 -- This will trigger the creation of custom color swatch frames
                 C_Timer.After(0.15, function()
                     self:CreateColorPaletteSwatches()
@@ -3575,6 +3588,20 @@ function MidnightUI:LoadCustomThemes()
 end
 
 function MidnightUI:GetOptions()
+    -- Cleanup check every time options are fetched
+    if self.colorSwatchContainer then
+        local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+        if AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"] then
+            local status = AceConfigDialog.OpenFrames["MidnightUI"].status
+            if status and status.groups and status.groups.selected ~= "themes" then
+                self.colorSwatchContainer:Hide()
+                self.colorSwatchContainer:SetParent(nil)
+                self.colorSwatchContainer = nil
+                self.themeColorSwatches = nil
+            end
+        end
+    end
+    
     local options = {
         name = "Midnight UI",
         type = "group",
