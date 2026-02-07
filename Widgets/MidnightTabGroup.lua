@@ -98,20 +98,14 @@ local methods = {
     end,
     
     ["SelectTab"] = function(self, value)
-        print("MidnightTabGroup SelectTab called with value:", value)
         local status = self.status or self.localstatus
         local found = false
-        
-        print("  status table:", status)
-        print("  tablist:", self.tablist and #self.tablist or "nil")
         
         -- Update all tabs to show selection state
         for i, v in ipairs(self.tablist or {}) do
             local tab = self.tabs[v.value]
-            print("  Checking tab", i, "value:", v.value, "tab exists:", tab ~= nil)
             if tab then
                 if v.value == value then
-                    print("    -> Setting tab selected")
                     tab:SetSelected(true)
                     found = true
                 else
@@ -122,7 +116,6 @@ local methods = {
         
         status.selected = value
         
-        print("  found:", found, "firing OnGroupSelected")
         -- Fire the event if tab was found
         if found then
             self:Fire("OnGroupSelected", value)
@@ -135,12 +128,9 @@ local methods = {
     end,
     
     ["DoLayout"] = function(self)
-        print("MidnightTabGroup DoLayout called")
         local content = self.content
         local contentwidth = content.width or content:GetWidth() or 0
         local contentheight = content.height or content:GetHeight() or 0
-        print("  DoLayout content size:", contentwidth, "x", contentheight)
-        print("  DoLayout has", #(self.children or {}), "children")
         local tabs = self.tablist
         
         if not tabs then return end
@@ -163,7 +153,6 @@ local methods = {
         end
         
         -- Call the container's PerformLayout to actually lay out children
-        print("  Calling PerformLayout")
         if self.PerformLayout then
             self:PerformLayout()
         end
@@ -294,10 +283,10 @@ local methods = {
     end,
     
     ["LayoutFinished"] = function(self, width, height)
-        if self.content:GetWidth() ~= width then
+        if width and width > 0 and self.content:GetWidth() ~= width then
             self.content:SetWidth(width)
         end
-        if self.content:GetHeight() ~= height then
+        if height and height > 0 and self.content:GetHeight() ~= height then
             self.content:SetHeight(height)
         end
     end
@@ -360,28 +349,7 @@ local function Constructor()
     
     local container = AceGUI:RegisterAsContainer(widget)
     
-    -- Debug: Monitor when children are added
-    local originalAddChild = container.AddChild
-    container.AddChild = function(self, child, ...)
-        print("MidnightTabGroup AddChild called, child type:", child.type)
-        print("  content frame visible:", self.content:IsShown())
-        print("  content size:", self.content:GetWidth(), "x", self.content:GetHeight())
-        print("  content.width/height:", self.content.width, self.content.height)
-        local result = originalAddChild(self, child, ...)
-        print("  child frame parent:", child.frame:GetParent():GetName() or "unnamed")
-        print("  child frame visible:", child.frame:IsShown())
-        print("  child frame size:", child.frame:GetWidth(), "x", child.frame:GetHeight())
-        print("  num children:", #self.children)
-        -- Trigger layout after adding child
-        self:DoLayout()
-        return result
-    end
-    
-    local originalReleaseChildren = container.ReleaseChildren
-    container.ReleaseChildren = function(self, ...)
-        print("MidnightTabGroup ReleaseChildren called")
-        return originalReleaseChildren(self, ...)
-    end
+
     
     -- Set up bi-directional reference for layout system
     widget.obj = container
