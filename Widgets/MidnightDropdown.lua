@@ -213,6 +213,7 @@ local methods = {
 -- ============================================================================
 
 local function Constructor()
+    local count = AceGUI:GetNextWidgetNum(Type)
     local frame = CreateFrame("Frame", nil, UIParent)
     frame:SetHeight(44)
     frame:SetWidth(200)
@@ -225,7 +226,7 @@ local function Constructor()
     label:SetJustifyH("LEFT")
     label:SetHeight(14)
     
-    local dropdown = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    local dropdown = CreateFrame("Frame", "MidnightDropdownFrame" .. count, frame, "BackdropTemplate")
     dropdown:SetHeight(26)
     dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -18)
     dropdown:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -18)
