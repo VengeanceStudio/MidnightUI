@@ -465,6 +465,7 @@ function UIButtons:GetOptions()
                 type = "description",
                 name = "|cffff0000SPACER|r",
                 order = 6.5,
+                width = "half",
             },
             font = {
                 name = "Font",
