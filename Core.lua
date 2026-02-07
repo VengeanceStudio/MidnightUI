@@ -182,14 +182,22 @@ function MidnightUI:StyleLSMWidget(widget)
         frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
     end
     
-    -- Hide all Blizzard textures
+    -- Hide all Blizzard textures on main frame
     for _, region in ipairs({frame:GetRegions()}) do
-        if region:GetObjectType() == "Texture" and region ~= widget.text then
+        if region:GetObjectType() == "Texture" then
             region:Hide()
         end
     end
     
-    -- Style text
+    -- Style label (the dropdown name)
+    if widget.label then
+        if FontKit then
+            FontKit:SetFont(widget.label, 'body', 'normal')
+        end
+        widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+    end
+    
+    -- Style the selected value text
     if widget.text then
         if FontKit then
             FontKit:SetFont(widget.text, 'button', 'normal')
@@ -197,28 +205,38 @@ function MidnightUI:StyleLSMWidget(widget)
         widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
     end
     
-    -- Style the dropdown button
+    -- Style the dropdown button and arrow
     if widget.button then
         local btn = widget.button
         
-        -- Hide Blizzard textures on button
+        -- Hide ALL textures on button
         for _, region in ipairs({btn:GetRegions()}) do
             if region:GetObjectType() == "Texture" then
                 region:Hide()
             end
         end
         
-        -- Create custom arrow if not exists
+        -- Also check normal/pushed/highlight textures
+        local normalTex = btn:GetNormalTexture()
+        if normalTex then normalTex:Hide() end
+        local pushedTex = btn:GetPushedTexture()
+        if pushedTex then pushedTex:Hide() end
+        local highlightTex = btn:GetHighlightTexture()
+        if highlightTex then highlightTex:Hide() end
+        
+        -- Create custom arrow
         if not btn.customArrow then
             btn.customArrow = btn:CreateTexture(nil, "OVERLAY")
             btn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Down-Up")
-            btn.customArrow:SetSize(12, 12)
-            btn.customArrow:SetPoint("CENTER")
+            btn.customArrow:SetTexCoord(0, 1, 0, 0.5)  -- Top half = down arrow
+            btn.customArrow:SetSize(16, 16)
+            btn.customArrow:SetPoint("CENTER", 0, 0)
             btn.customArrow:SetVertexColor(ColorPalette:GetColor('accent-primary'))
         end
+        btn.customArrow:Show()
     end
     
-    -- Hook pullout creation to use our styled version
+    -- Hook pullout creation to style it
     if widget.SetList and not widget.lsmPulloutHooked then
         local originalSetList = widget.SetList
         widget.SetList = function(self, list)
