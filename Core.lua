@@ -2472,12 +2472,12 @@ function MidnightUI:GetThemeOptions()
         },
         colorsDesc = {
             type = "description",
-            name = "Click 'Open Color Editor' to open an interactive preview where you can click on any element to change its color.",
+            name = "Click 'Open Theme Editor' to open an interactive preview where you can click on any element to change its color.",
             order = 10,
         },
         openColorEditor = {
             type = "execute",
-            name = "Open Color Editor",
+            name = "Open Theme Editor",
             desc = "Opens a visual mockup window where you can click on elements to edit their colors",
             order = 11,
             func = function()
