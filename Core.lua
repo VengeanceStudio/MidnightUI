@@ -82,11 +82,6 @@ function MidnightUI:OnEnable()
         if AceGUI and not AceGUI.MidnightCreateHooked then
             local originalCreate = AceGUI.Create
             AceGUI.Create = function(self, type, ...)
-                -- Debug: log what's being created
-                if type == "Dropdown" or type:match("LSM30") or type == "Dropdown-Pullout" or type == "ScrollFrame" then
-                    print("AceGUI.Create called with type:", type)
-                end
-                
                 -- Replace standard widgets with Midnight versions
                 if type == "Slider" then
                     type = "MidnightSlider"
@@ -103,7 +98,6 @@ function MidnightUI:OnEnable()
                 elseif type == "Button" then
                     type = "MidnightButton"
                 elseif type == "Dropdown" then
-                    print("  Replacing with MidnightDropdown")
                     type = "MidnightDropdown"
                 elseif type == "Dropdown-Pullout" then
                     type = "MidnightDropdown-Pullout"
@@ -120,13 +114,11 @@ function MidnightUI:OnEnable()
                 
                 -- Style LSM widgets after creation
                 if widget and type and (type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound") then
-                    print("Styling LSM widget:", type)
                     MidnightUI:StyleLSMWidget(widget)
                 end
                 
                 -- Style ScrollFrame widgets
                 if widget and type == "ScrollFrame" then
-                    print("Styling ScrollFrame")
                     MidnightUI:StyleScrollFrame(widget)
                 end
                 

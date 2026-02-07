@@ -24,7 +24,7 @@ function Demo:OnInitialize()
 end
 
 function Demo:OnEnable()
-    MidnightUI:Print("Framework Demo loaded. Type |cff00ccff/midemo|r to open.")
+    -- Framework Demo loaded
 end
 
 -- ============================================================================

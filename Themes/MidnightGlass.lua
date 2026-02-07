@@ -75,4 +75,4 @@ FontKit:RegisterThemeFonts("MidnightGlass", {
     ["number"] = "Friz Quadrata TT",       -- Numeric displays
 })
 
-print("|cff00ccffMidnightUI:|r Midnight Dark Glass theme loaded")
+-- Theme loaded

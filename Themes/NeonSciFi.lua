@@ -77,4 +77,4 @@ FontKit:RegisterThemeFonts("NeonSciFi", {
     ["number"] = "Friz Quadrata TT",       -- Numeric displays
 })
 
-print("|cff00ffffMidnightUI:|r Neon Sci-Fi theme loaded")
+-- Theme loaded
