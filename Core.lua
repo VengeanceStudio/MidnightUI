@@ -77,6 +77,12 @@ function MidnightUI:OnEnable()
             AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
+        -- Use custom MidnightTabGroup widget instead of default TabGroup
+        local AceGUI = LibStub("AceGUI-3.0")
+        if AceGUI then
+            AceConfigDialog:SetUserWidgetType("tab", "MidnightTabGroup")
+        end
+        
         -- Hook AceConfigDialog to apply themed backdrop
         self:HookConfigDialogFrames()
     end)

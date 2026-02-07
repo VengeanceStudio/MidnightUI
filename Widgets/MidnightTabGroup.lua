@@ -1,0 +1,213 @@
+-- MidnightUI Custom TabGroup Widget
+-- Replaces AceGUI TabGroup with theme-aware styling
+
+local AceGUI = LibStub("AceGUI-3.0")
+local ColorPalette = _G.MidnightUI_ColorPalette
+local FontKit = _G.MidnightUI_FontKit
+
+if not ColorPalette or not FontKit then return end
+
+-- Widget version
+local Type = "MidnightTabGroup"
+local Version = 1
+
+-- ============================================================================
+-- TAB BUTTON CREATION
+-- ============================================================================
+
+local function CreateTab(parent)
+    local tab = CreateFrame("Button", nil, parent, BackdropTemplateMixin and "BackdropTemplate")
+    
+    -- Set up backdrop from the start
+    tab:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 2,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    
+    -- Default unselected colors
+    tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+    tab:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Create text
+    tab.text = tab:CreateFontString(nil, "OVERLAY")
+    FontKit:SetFont(tab.text, 'button', 'normal')
+    tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+    tab.text:SetPoint("CENTER", tab, "CENTER", 0, 0)
+    tab.text:SetJustifyH("CENTER")
+    tab.text:SetJustifyV("MIDDLE")
+    
+    return tab
+end
+
+-- ============================================================================
+-- WIDGET CONSTRUCTOR
+-- ============================================================================
+
+local methods = {
+    ["OnAcquire"] = function(self)
+        self:SetTitle()
+    end,
+    
+    ["OnRelease"] = function(self)
+        self.status = nil
+        for _, tab in pairs(self.tabs) do
+            tab:Hide()
+        end
+    end,
+    
+    ["SetTitle"] = function(self, title)
+        self.titletext:SetText(title or "")
+        if title and title ~= "" then
+            self.alignoffset = 25
+        else
+            self.alignoffset = 18
+        end
+    end,
+    
+    ["SetTabs"] = function(self, tabs)
+        self.tablist = tabs
+        self:BuildTabs()
+    end,
+    
+    ["SelectTab"] = function(self, value)
+        local tab = self.tabs[value]
+        if not tab then return end
+        
+        -- Update all tabs
+        for k, t in pairs(self.tabs) do
+            if k == value then
+                t:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                t:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                t.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
+                t.selected = true
+            else
+                t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                t.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                t.selected = false
+            end
+        end
+        
+        self.selected = value
+    end,
+    
+    ["BuildTabs"] = function(self)
+        local tabs = self.tablist
+        if not tabs then return end
+        
+        local width = self.frame:GetWidth() or 800
+        local tabWidth = 120
+        local spacing = 2
+        
+        for i, v in ipairs(tabs) do
+            local tab = self.tabs[v.value]
+            if not tab then
+                tab = CreateTab(self.border)
+                self.tabs[v.value] = tab
+                
+                tab:SetScript("OnClick", function()
+                    if not (self.selected == v.value) then
+                        self:SelectTab(v.value)
+                        self:Fire("OnGroupSelected", v.value)
+                    end
+                end)
+            end
+            
+            tab.value = v.value
+            tab.text:SetText(v.text)
+            
+            -- Auto-size based on text width
+            local textWidth = tab.text:GetStringWidth()
+            local calculatedWidth = textWidth + 32
+            if calculatedWidth > tabWidth then
+                tabWidth = calculatedWidth
+            end
+            
+            tab:SetWidth(tabWidth)
+            tab:SetHeight(24)
+            
+            -- Position tab
+            if i == 1 then
+                tab:SetPoint("TOPLEFT", self.border, "TOPLEFT", 10, -6)
+            else
+                local prevTab = self.tabs[tabs[i-1].value]
+                tab:SetPoint("LEFT", prevTab, "RIGHT", spacing, 0)
+            end
+            
+            tab:Show()
+        end
+        
+        -- Select first tab by default if nothing selected
+        if not self.selected and tabs[1] then
+            self:SelectTab(tabs[1].value)
+        end
+    end,
+    
+    ["LayoutFinished"] = function(self, width, height)
+        if self.content:GetWidth() ~= width then
+            self.content:SetWidth(width)
+        end
+        if self.content:GetHeight() ~= height then
+            self.content:SetHeight(height)
+        end
+    end
+}
+
+-- ============================================================================
+-- CONSTRUCTOR
+-- ============================================================================
+
+local function Constructor()
+    local frame = CreateFrame("Frame", nil, UIParent)
+    frame:SetHeight(100)
+    frame:SetWidth(100)
+    frame:SetFrameStrata("FULLSCREEN_DIALOG")
+    
+    local border = CreateFrame("Frame", nil, frame, BackdropTemplateMixin and "BackdropTemplate")
+    border:SetPoint("TOPLEFT", 0, 0)
+    border:SetPoint("BOTTOMRIGHT", 0, 0)
+    border:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 2,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    border:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+    border:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    local titletext = border:CreateFontString(nil, "OVERLAY")
+    FontKit:SetFont(titletext, 'heading', 'normal')
+    titletext:SetTextColor(ColorPalette:GetColor('text-primary'))
+    titletext:SetPoint("TOPLEFT", border, "TOPLEFT", 14, -4)
+    titletext:SetPoint("TOPRIGHT", border, "TOPRIGHT", -14, -4)
+    titletext:SetJustifyH("LEFT")
+    titletext:SetHeight(18)
+    
+    local content = CreateFrame("Frame", nil, border)
+    content:SetPoint("TOPLEFT", border, "TOPLEFT", 10, -32)
+    content:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", -10, 10)
+    
+    local widget = {
+        frame = frame,
+        border = border,
+        content = content,
+        titletext = titletext,
+        tabs = {},
+        tablist = {},
+        selected = nil,
+        alignoffset = 18,
+        type = Type
+    }
+    
+    for method, func in pairs(methods) do
+        widget[method] = func
+    end
+    
+    return AceGUI:RegisterAsContainer(widget)
+end
+
+AceGUI:RegisterWidgetType(Type, Constructor, Version)
