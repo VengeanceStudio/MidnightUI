@@ -83,6 +83,31 @@ function MidnightUI:OnEnable()
             AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
+        -- Hook SelectGroup to handle page changes for color swatches
+        if AceConfigDialog.SelectGroup and not AceConfigDialog.MidnightSelectGroupHooked then
+            local originalSelectGroup = AceConfigDialog.SelectGroup
+            AceConfigDialog.SelectGroup = function(appName, ...)
+                originalSelectGroup(appName, ...)
+                
+                -- Check if color swatches need to be shown/hidden
+                if appName == "MidnightUI" and self.colorSwatchContainer then
+                    C_Timer.After(0.05, function()
+                        local status = AceConfigDialog.OpenFrames["MidnightUI"]
+                        if status and status.status and status.status.groups then
+                            if status.status.groups.selected == "themes" then
+                                self:CreateColorPaletteSwatches()
+                            else
+                                if self.colorSwatchContainer then
+                                    self.colorSwatchContainer:Hide()
+                                end
+                            end
+                        end
+                    end)
+                end
+            end
+            AceConfigDialog.MidnightSelectGroupHooked = true
+        end
+        
         -- Hook AceGUI:Create to use our custom widgets
         local AceGUI = LibStub("AceGUI-3.0")
         if AceGUI and not AceGUI.MidnightCreateHooked then
