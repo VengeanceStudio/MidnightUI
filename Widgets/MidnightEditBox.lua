@@ -212,7 +212,7 @@ local function Constructor()
     end)
     
     -- Create OK button
-    local button = CreateFrame("Button", nil, editbox, nil)
+    local button = CreateFrame("Button", nil, editbox, BackdropTemplateMixin and "BackdropTemplate")
     button:SetSize(40, 20)
     button:SetPoint("RIGHT", -2, 0)
     button:SetText(OKAY)
