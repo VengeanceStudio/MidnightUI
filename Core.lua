@@ -436,10 +436,22 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     C_Timer.After(0.01, function()
                                         local r, g, b, a = t:GetBackdropColor()
                                         print("  Verified tab", t.value, "color after 0.01s:", r, g, b, a)
+                                        if t.Center then
+                                            local shown = t.Center:IsShown()
+                                            local alpha = t.Center:GetAlpha()
+                                            local vr, vg, vb, va = t.Center:GetVertexColor()
+                                            print("    Center texture - Shown:", shown, "Alpha:", alpha, "VertexColor:", vr, vg, vb, va)
+                                        end
                                     end)
                                     C_Timer.After(0.1, function()
                                         local r, g, b, a = t:GetBackdropColor()
                                         print("  Verified tab", t.value, "color after 0.1s:", r, g, b, a)
+                                        if t.Center then
+                                            local shown = t.Center:IsShown()
+                                            local alpha = t.Center:GetAlpha()
+                                            local vr, vg, vb, va = t.Center:GetVertexColor()
+                                            print("    Center texture - Shown:", shown, "Alpha:", alpha, "VertexColor:", vr, vg, vb, va)
+                                        end
                                     end)
                                 else
                                     t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
