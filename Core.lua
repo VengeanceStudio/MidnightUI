@@ -83,7 +83,7 @@ function MidnightUI:OnEnable()
             local originalCreate = AceGUI.Create
             AceGUI.Create = function(self, type, ...)
                 -- Debug: log what's being created
-                if type == "Dropdown" or type:match("LSM30") or type == "Dropdown-Pullout" then
+                if type == "Dropdown" or type:match("LSM30") or type == "Dropdown-Pullout" or type == "ScrollFrame" then
                     print("AceGUI.Create called with type:", type)
                 end
                 
@@ -116,6 +116,12 @@ function MidnightUI:OnEnable()
                 if widget and type and (type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound") then
                     print("Styling LSM widget:", type)
                     MidnightUI:StyleLSMWidget(widget)
+                end
+                
+                -- Style ScrollFrame widgets
+                if widget and type == "ScrollFrame" then
+                    print("Styling ScrollFrame")
+                    MidnightUI:StyleScrollFrame(widget)
                 end
                 
                 return widget
@@ -417,6 +423,51 @@ function MidnightUI:StyleLSMWidget(widget)
             end)
             btn.lsmClickHooked = true
         end
+    end
+end
+
+-- Style ScrollFrame widgets
+function MidnightUI:StyleScrollFrame(widget)
+    if not widget or not widget.scrollbar then return end
+    
+    local scrollbar = widget.scrollbar
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then return end
+    
+    -- Style the scrollbar thumb
+    if scrollbar.thumb then
+        local r, g, b = ColorPalette:GetColor('accent-primary')
+        scrollbar.thumb:SetColorTexture(r, g, b, 0.8)
+    end
+    
+    -- Style the scrollbar background
+    if scrollbar.SetBackdrop then
+        scrollbar:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        local r, g, b = ColorPalette:GetColor('button-bg')
+        scrollbar:SetBackdropColor(r, g, b, 0.5)
+        local br, bg, bb = ColorPalette:GetColor('panel-border')
+        scrollbar:SetBackdropBorderColor(br, bg, bb, 0.5)
+    end
+    
+    -- Hide default textures
+    if scrollbar.ScrollUpButton then
+        scrollbar.ScrollUpButton:SetNormalTexture(nil)
+        scrollbar.ScrollUpButton:SetPushedTexture(nil)
+        scrollbar.ScrollUpButton:SetDisabledTexture(nil)
+        scrollbar.ScrollUpButton:SetHighlightTexture(nil)
+    end
+    
+    if scrollbar.ScrollDownButton then
+        scrollbar.ScrollDownButton:SetNormalTexture(nil)
+        scrollbar.ScrollDownButton:SetPushedTexture(nil)
+        scrollbar.ScrollDownButton:SetDisabledTexture(nil)
+        scrollbar.ScrollDownButton:SetHighlightTexture(nil)
     end
 end
 
