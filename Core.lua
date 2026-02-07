@@ -82,9 +82,13 @@ function MidnightUI:OnEnable()
         if AceGUI and not AceGUI.MidnightCreateHooked then
             local originalCreate = AceGUI.Create
             AceGUI.Create = function(self, type, ...)
-                -- Use custom Slider only (Dropdown and Button need full widget interface implementation)
+                -- Replace standard widgets with Midnight versions
                 if type == "Slider" then
                     type = "MidnightSlider"
+                elseif type == "CheckBox" then
+                    type = "MidnightCheckBox"
+                elseif type == "EditBox" then
+                    type = "MidnightEditBox"
                 end
                 return originalCreate(self, type, ...)
             end
