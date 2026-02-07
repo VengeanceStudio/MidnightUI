@@ -84,22 +84,38 @@ function MidnightUI:OnEnable()
         end
         
         -- Hook into AceConfigDialog Open to hook the TreeGroup selection
+        print("DEBUG: Starting Open hook setup")
         if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
+            print("DEBUG: AceConfigDialog.Open exists and not yet hooked")
             local originalOpen = AceConfigDialog.Open
             AceConfigDialog.Open = function(appName, ...)
+                print("DEBUG: AceConfigDialog.Open called for:", appName)
                 local result = originalOpen(appName, ...)
                 
                 if appName == "MidnightUI" then
+                    print("DEBUG: Open called for MidnightUI, will try to hook TreeGroup")
                     C_Timer.After(0.1, function()
                         local openFrame = AceConfigDialog.OpenFrames["MidnightUI"]
+                        print("DEBUG: Looking for openFrame:", openFrame)
+                        if openFrame then
+                            print("DEBUG: openFrame.frame:", openFrame.frame)
+                            if openFrame.frame then
+                                print("DEBUG: openFrame.frame.obj:", openFrame.frame.obj)
+                            end
+                        end
+                        
                         if openFrame and openFrame.frame and openFrame.frame.obj then
                             local treeGroup = openFrame.frame.obj
+                            print("DEBUG: Found treeGroup, type:", type(treeGroup))
+                            print("DEBUG: treeGroup.SelectByValue exists:", treeGroup.SelectByValue ~= nil)
+                            print("DEBUG: Already hooked:", treeGroup.MidnightSelectHooked)
                             
                             -- Hook the TreeGroup's SelectByValue method
                             if treeGroup.SelectByValue and not treeGroup.MidnightSelectHooked then
+                                print("DEBUG: About to hook SelectByValue")
                                 local originalSelect = treeGroup.SelectByValue
                                 treeGroup.SelectByValue = function(widget, uniquevalue, ...)
-                                    print("DEBUG: TreeGroup SelectByValue called with:", uniquevalue)
+                                    print("DEBUG: ===== TreeGroup SelectByValue called with:", uniquevalue, "=====")
                                     
                                     -- Clean up swatches before selecting new page
                                     if self.colorSwatchContainer then
@@ -109,9 +125,12 @@ function MidnightUI:OnEnable()
                                         self.colorSwatchContainer:SetParent(nil)
                                         self.colorSwatchContainer = nil
                                         self.themeColorSwatches = nil
+                                    else
+                                        print("DEBUG: No swatches to destroy")
                                     end
                                     
                                     -- Call original selection
+                                    print("DEBUG: Calling original SelectByValue")
                                     originalSelect(widget, uniquevalue, ...)
                                     
                                     -- Recreate swatches if we're on themes page
@@ -120,11 +139,17 @@ function MidnightUI:OnEnable()
                                         C_Timer.After(0.15, function()
                                             self:CreateColorPaletteSwatches()
                                         end)
+                                    else
+                                        print("DEBUG: Selected non-themes page:", uniquevalue)
                                     end
                                 end
                                 treeGroup.MidnightSelectHooked = true
-                                print("DEBUG: TreeGroup SelectByValue hooked successfully")
+                                print("DEBUG: TreeGroup SelectByValue hooked successfully!")
+                            else
+                                print("DEBUG: Could not hook SelectByValue - either doesn't exist or already hooked")
                             end
+                        else
+                            print("DEBUG: Could not find treeGroup to hook")
                         end
                     end)
                 end
@@ -132,6 +157,9 @@ function MidnightUI:OnEnable()
                 return result
             end
             AceConfigDialog.MidnightOpenHooked = true
+            print("DEBUG: Open hook installed")
+        else
+            print("DEBUG: Open hook not installed - either doesn't exist or already hooked")
         end
         
         -- Hook AceGUI:Create to use our custom widgets
