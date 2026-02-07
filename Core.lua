@@ -2647,26 +2647,38 @@ function MidnightUI:CreateColorPaletteSwatches()
     local container = appName.frame.obj
     if not container or not container.content then return end
     
-    -- Find the ScrollFrame within the content
-    local scrollFrame = nil
+    -- Find the actual content area (NOT the tree frame)
+    -- Look for the ScrollFrame that contains the options
+    local contentFrame = nil
     for _, child in ipairs({container.content:GetChildren()}) do
-        if child:GetObjectType() == "ScrollFrame" then
-            scrollFrame = child
-            break
+        local childType = child:GetObjectType()
+        -- Skip the tree frame, find the ScrollFrame that's for content
+        if childType == "ScrollFrame" then
+            -- Make sure this isn't the tree's scrollframe by checking its position
+            local point = child:GetPoint()
+            if point and point ~= "TOPLEFT" then  -- Tree is at TOPLEFT, content is elsewhere
+                contentFrame = child
+                break
+            end
         end
     end
     
-    local parentFrame = scrollFrame or container.content
+    -- If we didn't find a separate scroll frame, look for the content container directly
+    if not contentFrame then
+        -- The content is likely directly in container.content, but positioned to the right of tree
+        contentFrame = container.content
+    end
     
-    -- Create container for swatches - attach to the parent frame directly
-    local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", parentFrame)
+    -- Create container for swatches - attach to the content frame
+    local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", contentFrame)
     swatchContainer:SetSize(800, 100)
-    swatchContainer:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -280)
+    -- Position relative to the content frame with a left offset to account for tree width
+    swatchContainer:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 200, -280)
     
     -- Set frame strata and level to ensure it's on top
-    local parentStrata = parentFrame:GetFrameStrata()
+    local parentStrata = contentFrame:GetFrameStrata()
     swatchContainer:SetFrameStrata(parentStrata)
-    swatchContainer:SetFrameLevel(parentFrame:GetFrameLevel() + 100)
+    swatchContainer:SetFrameLevel(contentFrame:GetFrameLevel() + 100)
     
     self.colorSwatchContainer = swatchContainer
     
