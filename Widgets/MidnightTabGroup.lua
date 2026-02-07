@@ -42,6 +42,20 @@ local function CreateTab(parent)
     tab.text:SetJustifyH("CENTER")
     tab.text:SetJustifyV("MIDDLE")
     
+    -- Add SetSelected method for tab selection logic
+    tab.SetSelected = function(self, selected)
+        self.selected = selected
+        if selected then
+            self:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+            self:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+            self.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
+        else
+            self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+            self:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            self.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+    end
+    
     return tab
 end
 
@@ -84,8 +98,28 @@ local methods = {
     end,
     
     ["SelectTab"] = function(self, value)
-        self.status.selected = value
-        self:DoLayout()
+        local status = self.status or self.localstatus
+        local found = false
+        
+        -- Update all tabs to show selection state
+        for i, v in ipairs(self.tablist or {}) do
+            local tab = self.tabs[v.value]
+            if tab then
+                if v.value == value then
+                    tab:SetSelected(true)
+                    found = true
+                else
+                    tab:SetSelected(false)
+                end
+            end
+        end
+        
+        status.selected = value
+        
+        -- Fire the event if tab was found
+        if found then
+            self:Fire("OnGroupSelected", value)
+        end
     end,
     
     ["SetTabs"] = function(self, tabs)
