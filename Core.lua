@@ -2510,9 +2510,6 @@ function MidnightUI:OpenColorEditorFrame()
     frame:SetFrameStrata("DIALOG")
     frame:EnableMouse(true)
     frame:SetMovable(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", function(f) f:StartMoving() end)
-    frame:SetScript("OnDragStop", function(f) f:StopMovingOrSizing() end)
     
     -- Function to get current color
     local function GetCurrentColor(key)
@@ -2587,52 +2584,25 @@ function MidnightUI:OpenColorEditorFrame()
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     
-    -- Title bar background (clickable for panel-bg)
+    -- Title bar background (used for dragging, not clickable for color)
     local titleBg = frame:CreateTexture(nil, "ARTWORK")
     titleBg:SetPoint("TOPLEFT", 0, 0)
     titleBg:SetPoint("TOPRIGHT", 0, 0)
     titleBg:SetHeight(60)
     frame.titleBg = titleBg
     
-    -- Make title bar clickable for panel-bg color
-    local titleClickArea = CreateFrame("Frame", nil, frame)
-    titleClickArea:SetPoint("TOPLEFT", 0, 0)
-    titleClickArea:SetPoint("TOPRIGHT", 0, 0)
-    titleClickArea:SetHeight(60)
-    titleClickArea:EnableMouse(true)
-    titleClickArea:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(titleClickArea, "ANCHOR_TOP")
-        GameTooltip:SetText("Panel Background", 1, 1, 1)
-        GameTooltip:AddLine("Main background color for windows and panels", 0.7, 0.7, 0.7, true)
-        GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
-        GameTooltip:Show()
+    -- Make title bar draggable (not clickable for color picker)
+    local titleBar = CreateFrame("Frame", nil, frame)
+    titleBar:SetPoint("TOPLEFT", 0, 0)
+    titleBar:SetPoint("TOPRIGHT", 0, 0)
+    titleBar:SetHeight(60)
+    titleBar:EnableMouse(true)
+    titleBar:RegisterForDrag("LeftButton")
+    titleBar:SetScript("OnDragStart", function()
+        frame:StartMoving()
     end)
-    titleClickArea:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-    titleClickArea:SetScript("OnMouseDown", function()
-        local r, g, b, a = GetCurrentColor("panel-bg")
-        ColorPickerFrame:SetupColorPickerAndShow({
-            r = r, g = g, b = b,
-            opacity = a,
-            hasOpacity = true,
-            swatchFunc = function()
-                local nr, ng, nb = ColorPickerFrame:GetColorRGB()
-                local na = ColorPickerFrame:GetColorAlpha()
-                if not MidnightUI.tempThemeColors then
-                    MidnightUI.tempThemeColors = {}
-                end
-                MidnightUI.tempThemeColors["panel-bg"] = {r = nr, g = ng, b = nb, a = na}
-                UpdateFrameColors()
-            end,
-            cancelFunc = function()
-                if not MidnightUI.tempThemeColors then
-                    MidnightUI.tempThemeColors = {}
-                end
-                MidnightUI.tempThemeColors["panel-bg"] = {r = r, g = g, b = b, a = a}
-                UpdateFrameColors()
-            end,
-        })
+    titleBar:SetScript("OnDragStop", function()
+        frame:StopMovingOrSizing()
     end)
     
     -- Title text
@@ -2644,7 +2614,7 @@ function MidnightUI:OpenColorEditorFrame()
     -- Instructions in title area
     local instructions = FontKit:CreateFontString(frame, "body", "small")
     instructions:SetPoint("TOPLEFT", 20, -38)
-    instructions:SetText("Click on any element below to change its color")
+    instructions:SetText("Click on any element below to change its color • Drag title bar to move")
     frame.descText = instructions
     
     -- Close button
