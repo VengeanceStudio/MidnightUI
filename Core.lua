@@ -304,11 +304,15 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local originalSetBackdropColor = tab.SetBackdropColor
                         tab.SetBackdropColor = function(self, r, g, b, a)
                             local selected = (widget.selected == self.value) or (self.selected == true)
+                            print("SetBackdropColor hook - Tab:", self.value, "widget.selected:", widget.selected, "selected:", selected, "Color:", r, g, b, a)
                             if selected then
                                 -- Use theme color for selected tabs
-                                originalSetBackdropColor(self, ColorPalette:GetColor('tab-selected-bg'))
+                                local sr, sg, sb, sa = ColorPalette:GetColor('tab-selected-bg')
+                                print("  Applying selected color:", sr, sg, sb, sa)
+                                originalSetBackdropColor(self, sr, sg, sb, sa)
                             else
                                 -- Allow normal color for unselected tabs
+                                print("  Applying provided color:", r, g, b, a)
                                 originalSetBackdropColor(self, r, g, b, a)
                             end
                         end
@@ -405,14 +409,17 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         
                         -- Wait for widget.selected to update, then trigger color update
                         C_Timer.After(0.05, function()
+                            print("OnClick timer fired - widget.selected:", widget.selected)
                             for _, t in pairs(widget.tabs) do
                                 HideTabTextures(t)
                                 
                                 -- Check both widget.selected and the tab's own selected property
                                 local selected = (widget.selected == t.value) or (t.selected == true)
+                                print("  Tab:", t.value, "selected:", selected, "t.selected:", t.selected)
                                 
                                 -- Trigger SetBackdropColor which will be intercepted by our hook
                                 if selected then
+                                    print("  Setting selected colors for tab:", t.value)
                                     t:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
                                     t:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                                     if t.text then
