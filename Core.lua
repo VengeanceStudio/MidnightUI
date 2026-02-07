@@ -89,65 +89,84 @@ function MidnightUI:OnEnable()
             print("DEBUG: AceConfigDialog.Open exists and not yet hooked")
             local originalOpen = AceConfigDialog.Open
             AceConfigDialog.Open = function(appName, ...)
-                print("DEBUG: AceConfigDialog.Open called for:", appName)
+                print("DEBUG: AceConfigDialog.Open called")
+                print("DEBUG: appName type:", type(appName), "value:", appName)
+                print("DEBUG: All args:", appName, ...)
+                
                 local result = originalOpen(appName, ...)
                 
-                if appName == "MidnightUI" then
-                    print("DEBUG: Open called for MidnightUI, will try to hook TreeGroup")
-                    C_Timer.After(0.1, function()
-                        local openFrame = AceConfigDialog.OpenFrames["MidnightUI"]
-                        print("DEBUG: Looking for openFrame:", openFrame)
-                        if openFrame then
-                            print("DEBUG: openFrame.frame:", openFrame.frame)
-                            if openFrame.frame then
-                                print("DEBUG: openFrame.frame.obj:", openFrame.frame.obj)
-                            end
+                -- Try to find our frame after opening
+                C_Timer.After(0.1, function()
+                    print("DEBUG: Checking OpenFrames table:")
+                    if AceConfigDialog.OpenFrames then
+                        for name, frame in pairs(AceConfigDialog.OpenFrames) do
+                            print("DEBUG: OpenFrame key:", name, "type:", type(name))
                         end
-                        
-                        if openFrame and openFrame.frame and openFrame.frame.obj then
-                            local treeGroup = openFrame.frame.obj
-                            print("DEBUG: Found treeGroup, type:", type(treeGroup))
-                            print("DEBUG: treeGroup.SelectByValue exists:", treeGroup.SelectByValue ~= nil)
-                            print("DEBUG: Already hooked:", treeGroup.MidnightSelectHooked)
-                            
-                            -- Hook the TreeGroup's SelectByValue method
-                            if treeGroup.SelectByValue and not treeGroup.MidnightSelectHooked then
-                                print("DEBUG: About to hook SelectByValue")
-                                local originalSelect = treeGroup.SelectByValue
-                                treeGroup.SelectByValue = function(widget, uniquevalue, ...)
-                                    print("DEBUG: ===== TreeGroup SelectByValue called with:", uniquevalue, "=====")
-                                    
-                                    -- Clean up swatches before selecting new page
-                                    if self.colorSwatchContainer then
-                                        print("DEBUG: Destroying swatches before page change")
-                                        self.colorSwatchContainer:Hide()
-                                        self.colorSwatchContainer:ClearAllPoints()
-                                        self.colorSwatchContainer:SetParent(nil)
-                                        self.colorSwatchContainer = nil
-                                        self.themeColorSwatches = nil
-                                    else
-                                        print("DEBUG: No swatches to destroy")
-                                    end
-                                    
-                                    -- Call original selection
-                                    print("DEBUG: Calling original SelectByValue")
-                                    originalSelect(widget, uniquevalue, ...)
-                                    
-                                    -- Recreate swatches if we're on themes page
-                                    if uniquevalue == "themes" then
-                                        print("DEBUG: Selected themes page, will create swatches")
-                                        C_Timer.After(0.15, function()
-                                            self:CreateColorPaletteSwatches()
-                                        end)
-                                    else
-                                        print("DEBUG: Selected non-themes page:", uniquevalue)
+                    end
+                    
+                    local openFrame = AceConfigDialog.OpenFrames["MidnightUI"]
+                    print("DEBUG: Looking for openFrame:", openFrame)
+                    if openFrame then
+                        print("DEBUG: openFrame.frame:", openFrame.frame)
+                        if openFrame.frame then
+                            print("DEBUG: openFrame.frame.obj:", openFrame.frame.obj)
+                            local obj = openFrame.frame.obj
+                            if obj then
+                                print("DEBUG: obj type:", obj.type)
+                                print("DEBUG: Listing all methods on obj:")
+                                for k, v in pairs(obj) do
+                                    if type(v) == "function" and type(k) == "string" and k:find("Select") then
+                                        print("DEBUG:   - ", k, "=", type(v))
                                     end
                                 end
-                                treeGroup.MidnightSelectHooked = true
-                                print("DEBUG: TreeGroup SelectByValue hooked successfully!")
-                            else
-                                print("DEBUG: Could not hook SelectByValue - either doesn't exist or already hooked")
                             end
+                        end
+                    end
+                    
+                    if openFrame and openFrame.frame and openFrame.frame.obj then
+                        local treeGroup = openFrame.frame.obj
+                        print("DEBUG: Found treeGroup, type:", type(treeGroup))
+                        print("DEBUG: treeGroup.SelectByValue exists:", treeGroup.SelectByValue ~= nil)
+                        print("DEBUG: Already hooked:", treeGroup.MidnightSelectHooked)
+                        
+                        -- Hook the TreeGroup's SelectByValue method
+                        if treeGroup.SelectByValue and not treeGroup.MidnightSelectHooked then
+                            print("DEBUG: About to hook SelectByValue")
+                            local originalSelect = treeGroup.SelectByValue
+                            treeGroup.SelectByValue = function(widget, uniquevalue, ...)
+                                print("DEBUG: ===== TreeGroup SelectByValue called with:", uniquevalue, "=====")
+                                
+                                -- Clean up swatches before selecting new page
+                                if self.colorSwatchContainer then
+                                    print("DEBUG: Destroying swatches before page change")
+                                    self.colorSwatchContainer:Hide()
+                                    self.colorSwatchContainer:ClearAllPoints()
+                                    self.colorSwatchContainer:SetParent(nil)
+                                    self.colorSwatchContainer = nil
+                                    self.themeColorSwatches = nil
+                                else
+                                    print("DEBUG: No swatches to destroy")
+                                end
+                                
+                                -- Call original selection
+                                print("DEBUG: Calling original SelectByValue")
+                                originalSelect(widget, uniquevalue, ...)
+                                
+                                -- Recreate swatches if we're on themes page
+                                if uniquevalue == "themes" then
+                                    print("DEBUG: Selected themes page, will create swatches")
+                                    C_Timer.After(0.15, function()
+                                        self:CreateColorPaletteSwatches()
+                                    end)
+                                else
+                                    print("DEBUG: Selected non-themes page:", uniquevalue)
+                                end
+                            end
+                            treeGroup.MidnightSelectHooked = true
+                            print("DEBUG: TreeGroup SelectByValue hooked successfully!")
+                        else
+                            print("DEBUG: Could not hook SelectByValue - either doesn't exist or already hooked")
+                        end
                         else
                             print("DEBUG: Could not find treeGroup to hook")
                         end
