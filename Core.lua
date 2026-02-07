@@ -158,51 +158,102 @@ end
 
 -- Style LibSharedMedia widgets (LSM30_Font, LSM30_Statusbar, etc.)
 function MidnightUI:StyleLSMWidget(widget)
-    if not widget or not widget.frame then 
-        print("StyleLSMWidget: no widget or frame")
-        return 
-    end
-    
-    print("StyleLSMWidget called for", widget.type)
+    if not widget or not widget.frame then return end
     
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
-    if not ColorPalette then 
-        print("StyleLSMWidget: no ColorPalette")
-        return 
-    end
+    if not ColorPalette then return end
     
     -- Mark this widget so backdrop hooks can identify it
     widget.isLSMWidget = true
     frame.isLSMWidget = true
     
-    -- Debug: check what properties exist
-    print("  Widget properties:")
-    for k, v in pairs(widget) do
-        if type(v) ~= "function" and type(v) ~= "table" then
-            print("    ", k, "=", v)
-        elseif k ~= "frame" and k ~= "userdata" and k ~= "events" and k ~= "base" then
-            print("    ", k, "=", type(v))
+    -- Style the main dropdown button frame
+    if frame.SetBackdrop then
+        frame:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+        frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+    end
+    
+    -- Hide Blizzard textures (DLeft, DMiddle, DRight)
+    if frame.DLeft then frame.DLeft:Hide() end
+    if frame.DMiddle then frame.DMiddle:Hide() end
+    if frame.DRight then frame.DRight:Hide() end
+    
+    -- Style label (the dropdown name)
+    if frame.label then
+        if FontKit then
+            FontKit:SetFont(frame.label, 'body', 'normal')
         end
+        frame.label:SetTextColor(ColorPalette:GetColor('text-primary'))
     end
     
-    print("  Frame properties:")
-    for k, v in pairs(frame) do
-        if type(v) ~= "function" and k ~= "0" then
-            print("    ", k, "=", type(v))
+    -- Style the selected value text
+    if frame.text then
+        if FontKit then
+            FontKit:SetFont(frame.text, 'button', 'normal')
         end
+        frame.text:SetTextColor(ColorPalette:GetColor('text-primary'))
     end
     
-    print("  Frame children:")
-    for i, child in ipairs({frame:GetChildren()}) do
-        print("    child", i, child:GetObjectType(), child:GetName())
+    -- Style the dropdown button
+    if frame.dropButton then
+        local btn = frame.dropButton
+        
+        -- Hide all textures on button
+        local normalTex = btn:GetNormalTexture()
+        if normalTex then normalTex:Hide() end
+        local pushedTex = btn:GetPushedTexture()
+        if pushedTex then pushedTex:Hide() end
+        local highlightTex = btn:GetHighlightTexture()
+        if highlightTex then highlightTex:Hide() end
+        local disabledTex = btn:GetDisabledTexture()
+        if disabledTex then disabledTex:Hide() end
+        
+        -- Create custom arrow
+        if not btn.customArrow then
+            btn.customArrow = btn:CreateTexture(nil, "OVERLAY")
+            btn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Down-Up")
+            btn.customArrow:SetTexCoord(0, 1, 0, 0.5)  -- Top half = down arrow
+            btn.customArrow:SetSize(16, 16)
+            btn.customArrow:SetPoint("CENTER", 0, 0)
+            btn.customArrow:SetVertexColor(ColorPalette:GetColor('accent-primary'))
+        end
+        btn.customArrow:Show()
     end
     
-    print("  Frame regions:")
-    for i, region in ipairs({frame:GetRegions()}) do
-        print("    region", i, region:GetObjectType(), region:GetName())
+    -- Hook the dropdown toggle to style pullout
+    if widget.ToggleDrop and not widget.lsmToggleHooked then
+        local originalToggleDrop = widget.ToggleDrop
+        widget.ToggleDrop = function(self, ...)
+            originalToggleDrop(self, ...)
+            
+            -- Style the pullout if it exists
+            C_Timer.After(0.01, function()
+                if widget.dropdown and widget.dropdown.SetBackdrop then
+                    widget.dropdown.isLSMWidget = true
+                    widget.dropdown:SetBackdrop({
+                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                        tile = false,
+                        edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    })
+                    widget.dropdown:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+                    widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                end
+            end)
+        end
+        widget.lsmToggleHooked = true
     end
+end
     
     -- Hide all Blizzard textures on main frame
     for _, region in ipairs({frame:GetRegions()}) do
