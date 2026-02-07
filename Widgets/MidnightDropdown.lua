@@ -17,8 +17,23 @@ local Version = 1
 local methods = {
     ["OnAcquire"] = function(self)
         local pullout = AceGUI:Create("Dropdown-Pullout")
-        self.pullout = pullout
-        pullout.userdata.obj = self
+        self.pullout = pullout        
+        -- Apply our custom styling to the pullout
+        if pullout.frame and pullout.frame.SetBackdrop then
+            pullout.frame:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false,
+                tileSize = 16,
+                edgeSize = 1,
+                insets = { left = 1, right = 1, top = 1, bottom = 1 }
+            })
+            local r, g, b = ColorPalette:GetColor('panel-bg')
+            pullout.frame:SetBackdropColor(r, g, b, 1)
+            r, g, b = ColorPalette:GetColor('accent-primary')
+            pullout.frame:SetBackdropBorderColor(r, g, b, 1)
+        end
+                pullout.userdata.obj = self
         pullout:SetCallback("OnClose", function(widget)
             self.open = nil
             self:Fire("OnClosed")
@@ -223,6 +238,7 @@ local function Constructor()
     dropdown:SetHeight(26)
     dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -18)
     dropdown:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -18)
+    dropdown:Show()
     dropdown:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
