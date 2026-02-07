@@ -93,10 +93,12 @@ function MidnightUI:OnEnable()
                     type = "MidnightButton"
                 elseif type == "Dropdown" then
                     type = "MidnightDropdown"
+                elseif type == "Dropdown-Pullout" then
+                    type = "MidnightDropdown-Pullout"
                 end
                 local widget = originalCreate(self, type, ...)
                 -- Ensure type is preserved
-                if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox" or type == "MidnightButton" or type == "MidnightDropdown") then
+                if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox" or type == "MidnightButton" or type == "MidnightDropdown" or type == "MidnightDropdown-Pullout") then
                     widget.type = type
                 end
                 return widget
