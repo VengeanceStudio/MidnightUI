@@ -278,10 +278,8 @@ local function Constructor()
     slider:SetFrameStrata("FULLSCREEN_DIALOG")
     slider:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", -16, 0)
     slider:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", -16, 0)
-    slider:SetScript("OnValueChanged", OnScrollValueChanged)
     slider:SetMinMaxValues(0, 1000)
     slider:SetValueStep(1)
-    slider:SetValue(0)
     
     scrollFrame:Show()
     itemFrame:Show()
@@ -307,6 +305,10 @@ local function Constructor()
     scrollFrame.obj = widget
     itemFrame.obj = widget
     slider.obj = widget
+    
+    -- Set scripts after obj is assigned
+    slider:SetScript("OnValueChanged", OnScrollValueChanged)
+    slider:SetValue(0)
     
     widget:FixScroll()
     
