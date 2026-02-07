@@ -2509,6 +2509,11 @@ function MidnightUI:GetOptions()
                             -- Add update calls for other modules as needed
                         end,
                     },
+                    modulesHeaderSpacer = {
+                        type = "description",
+                        name = " ",
+                        order = 1.995,
+                    },
                     modulesHeader = { type = "header", order = 2.0, name = "Modules" },
                     modulesDesc = { type = "description", order = 2.01, name = "Toggle modules. Requires Reload." },
                     bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full",
