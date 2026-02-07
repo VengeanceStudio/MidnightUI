@@ -99,15 +99,18 @@ function MidnightUI:OnEnable()
                     type = "MidnightHeading"
                 elseif type == "TabGroup" then
                     type = "MidnightTabGroup"
-                elseif type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound" then
-                    -- Redirect LibSharedMedia widgets to our custom dropdown
-                    type = "MidnightDropdown"
                 end
                 local widget = originalCreate(self, type, ...)
                 -- Ensure type is preserved
                 if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox" or type == "MidnightButton" or type == "MidnightDropdown" or type == "MidnightDropdown-Pullout" or type == "MidnightHeading" or type == "MidnightTabGroup") then
                     widget.type = type
                 end
+                
+                -- Style LSM widgets after creation
+                if widget and type and (type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound") then
+                    self:StyleLSMWidget(widget)
+                end
+                
                 return widget
             end
             AceGUI.MidnightCreateHooked = true
@@ -150,6 +153,40 @@ function MidnightUI:OnEnable()
     -- Load Focus Frame if present
     if UnitFrames and UnitFrames.CreateFocusFrame then
         UnitFrames:CreateFocusFrame()
+    end
+end
+
+-- Style LibSharedMedia widgets (LSM30_Font, LSM30_Statusbar, etc.)
+function MidnightUI:StyleLSMWidget(widget)
+    if not widget or not widget.frame then return end
+    
+    local frame = widget.frame
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then return end
+    
+    -- Style the dropdown button frame
+    if frame.SetBackdrop then
+        frame:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+        frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+    end
+    
+    -- Hide Blizzard textures
+    for _, region in ipairs({frame:GetRegions()}) do
+        if region:GetObjectType() == "Texture" and region ~= widget.text then
+            region:SetTexture(nil)
+        end
+    end
+    
+    -- Style text if present
+    if widget.text then
+        widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
     end
 end
 
