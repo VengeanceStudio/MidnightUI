@@ -67,31 +67,48 @@ local methods = {
         end
     end,
     
+    ["SetStatusTable"] = function(self, status)
+        assert(type(status) == "table")
+        self.status = status
+        if not status.groups then
+            status.groups = {}
+        end
+    end,
+    
+    ["SelectTab"] = function(self, value)
+        self.status.selected = value
+        self:DoLayout()
+    end,
+    
     ["SetTabs"] = function(self, tabs)
         self.tablist = tabs
         self:BuildTabs()
     end,
     
-    ["SelectTab"] = function(self, value)
-        local tab = self.tabs[value]
-        if not tab then return end
+    ["DoLayout"] = function(self)
+        local content = self.content
+        local contentwidth = content:GetWidth() or 0
+        local contentheight = content:GetHeight() or 0
+        local tabs = self.tablist
         
-        -- Update all tabs
-        for k, t in pairs(self.tabs) do
-            if k == value then
-                t:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
-                t:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
-                t.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
-                t.selected = true
-            else
-                t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                t.text:SetTextColor(ColorPalette:GetColor('text-primary'))
-                t.selected = false
+        if not tabs then return end
+        
+        for i, v in ipairs(tabs) do
+            local tab = self.tabs[v.value]
+            if tab then
+                if self.status and self.status.selected == v.value then
+                    tab:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                    tab:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                    tab.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
+                    tab.selected = true
+                else
+                    tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                    tab:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                    tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                    tab.selected = false
+                end
             end
         end
-        
-        self.selected = value
     end,
     
     ["BuildTabs"] = function(self)
@@ -109,9 +126,10 @@ local methods = {
                 self.tabs[v.value] = tab
                 
                 tab:SetScript("OnClick", function()
-                    if not (self.selected == v.value) then
-                        self:SelectTab(v.value)
+                    if not (self.status and self.status.selected == v.value) then
+                        self.status.selected = v.value
                         self:Fire("OnGroupSelected", v.value)
+                        self:DoLayout()
                     end
                 end)
             end
@@ -141,9 +159,11 @@ local methods = {
         end
         
         -- Select first tab by default if nothing selected
-        if not self.selected and tabs[1] then
-            self:SelectTab(tabs[1].value)
+        if self.status and not self.status.selected and tabs[1] then
+            self.status.selected = tabs[1].value
         end
+        
+        self:DoLayout()
     end,
     
     ["LayoutFinished"] = function(self, width, height)
@@ -198,7 +218,10 @@ local function Constructor()
         titletext = titletext,
         tabs = {},
         tablist = {},
-        selected = nil,
+        status = {
+            groups = {},
+            selected = nil
+        },
         alignoffset = 18,
         type = Type
     }
