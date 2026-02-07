@@ -224,11 +224,6 @@ local function Constructor()
     dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -18)
     dropdown:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -18)
     
-    -- Debug: Check if SetBackdrop exists
-    if not dropdown.SetBackdrop then
-        print("MidnightDropdown ERROR: SetBackdrop not available on dropdown frame!")
-    end
-    
     dropdown:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -238,21 +233,20 @@ local function Constructor()
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     
-    -- Debug: Check backdrop was set
-    local backdropInfo = dropdown:GetBackdrop()
-    if backdropInfo then
-        print("MidnightDropdown: Backdrop set successfully, edgeSize=" .. tostring(backdropInfo.edgeSize))
-    else
-        print("MidnightDropdown ERROR: Backdrop is nil after SetBackdrop!")
-    end
-    
     local r, g, b = ColorPalette:GetColor('button-bg')
     dropdown:SetBackdropColor(r, g, b, 1)
-    print("MidnightDropdown: Set backdrop color to", r, g, b)
-    
     r, g, b = ColorPalette:GetColor('accent-primary')
     dropdown:SetBackdropBorderColor(r, g, b, 1)
-    print("MidnightDropdown: Set border color to", r, g, b)
+    
+    -- Debug: Check actual dimensions after frame update
+    C_Timer.After(0.1, function()
+        local width = dropdown:GetWidth()
+        local height = dropdown:GetHeight()
+        print(string.format("MidnightDropdown: Frame size = %.1f x %.1f", width or 0, height or 0))
+        
+        -- Try to force a redraw
+        dropdown:SetBackdropBorderColor(r, g, b, 1)
+    end)
     
     dropdown:Show()
     
@@ -268,7 +262,7 @@ local function Constructor()
     arrow:SetRotation(-1.57)
     arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
     
-    local text = dropdown:CreateFontString(nil, "OVERLAY")
+    local text = dropdown:CreateFontString(nil, "ARTWORK")
     FontKit:SetFont(text, 'body', 'normal')
     text:SetTextColor(ColorPalette:GetColor('text-primary'))
     text:SetPoint("LEFT", dropdown, "LEFT", 4, 0)
