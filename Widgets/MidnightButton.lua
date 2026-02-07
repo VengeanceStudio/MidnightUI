@@ -16,18 +16,29 @@ local Version = 1
 
 local methods = {
     ["OnAcquire"] = function(self)
+        self:SetHeight(24)
         self:SetWidth(200)
-        self:SetText()
         self:SetDisabled(false)
+        self:SetAutoWidth(false)
+        self:SetText()
     end,
     
     ["OnRelease"] = function(self)
-        self:SetText()
-        self:SetDisabled(false)
+        -- Reset to defaults
     end,
     
     ["SetText"] = function(self, text)
         self.text:SetText(text or "")
+        if self.autoWidth then
+            self:SetWidth(self.text:GetStringWidth() + 30)
+        end
+    end,
+    
+    ["SetAutoWidth"] = function(self, autoWidth)
+        self.autoWidth = autoWidth
+        if self.autoWidth then
+            self:SetWidth(self.text:GetStringWidth() + 30)
+        end
     end,
     
     ["SetDisabled"] = function(self, disabled)
@@ -42,13 +53,22 @@ local methods = {
     end,
     
     ["OnWidthSet"] = function(self, width)
-        -- Reduce width by 25px
-        self.frame:SetWidth(width - 25)
+        -- Width is set by frame
     end,
     
     ["OnHeightSet"] = function(self, height)
-        self.frame:SetHeight(height)
-    end
+        -- Height is set by frame
+    end,
+    
+    ["RefreshColors"] = function(self)
+        self.frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+        self.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        if self.disabled then
+            self.text:SetTextColor(ColorPalette:GetColor('text-disabled'))
+        else
+            self.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+    end,
 }
 
 -- ============================================================================
@@ -75,15 +95,21 @@ local function Constructor()
     text:SetTextColor(ColorPalette:GetColor('text-primary'))
     text:SetPoint("CENTER")
     
+    button:SetScript("OnClick", function(self, ...)
+        AceGUI:ClearFocus()
+        PlaySound(852) -- SOUNDKIT.IG_MAINMENU_OPTION
+        self.obj:Fire("OnClick", ...)
+    end)
+    
     button:SetScript("OnEnter", function(self)
+        self.obj:Fire("OnEnter")
         local r, g, b, a = ColorPalette:GetColor('button-bg')
-        button:SetBackdropColor(math.min(r * 2 + 0.15, 1), math.min(g * 2 + 0.15, 1), math.min(b * 2 + 0.15, 1), a)
-        button:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        self:SetBackdropColor(math.min(r * 2 + 0.15, 1), math.min(g * 2 + 0.15, 1), math.min(b * 2 + 0.15, 1), a)
     end)
     
     button:SetScript("OnLeave", function(self)
-        button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-        button:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        self.obj:Fire("OnLeave")
+        self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
     end)
     
     local widget = {
@@ -96,7 +122,23 @@ local function Constructor()
         widget[method] = func
     end
     
-    return AceGUI:RegisterAsWidget(widget)
+    button.obj = widget
+    
+    local registeredWidget = AceGUI:RegisterAsWidget(widget)
+    
+    -- Protect the type field from being set to nil
+    local widgetType = Type
+    local mt = getmetatable(registeredWidget) or {}
+    mt.__newindex = function(t, k, v)
+        if k == "type" and v == nil then
+            rawset(t, k, widgetType)
+        else
+            rawset(t, k, v)
+        end
+    end
+    setmetatable(registeredWidget, mt)
+    
+    return registeredWidget
 end
 
 AceGUI:RegisterWidgetType(Type, Constructor, Version)
