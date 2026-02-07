@@ -461,6 +461,11 @@ function UIButtons:GetOptions()
                     self:UpdateLayout()
                 end
             },
+            fontSpacer = {
+                type = "description",
+                name = " ",
+                order = 6.5,
+            },
             font = {
                 name = "Font",
                 type = "select",
