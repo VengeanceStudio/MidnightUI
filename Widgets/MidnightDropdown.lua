@@ -228,7 +228,7 @@ local function Constructor()
     
     local dropdown = CreateFrame("Frame", "MidnightDropdownFrame" .. count, frame, "BackdropTemplate")
     dropdown:SetHeight(26)
-    dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -18)
+    dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -18)
     dropdown:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -18)
     dropdown:SetFrameStrata("MEDIUM")
     dropdown:SetFrameLevel(frame:GetFrameLevel() + 1)
