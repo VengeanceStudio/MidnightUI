@@ -1,5 +1,6 @@
 local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local UIButtons = MidnightUI:NewModule("UIButtons", "AceEvent-3.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 local uiButtons = {}
 local container
