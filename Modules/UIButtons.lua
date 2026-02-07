@@ -417,6 +417,7 @@ function UIButtons:GetOptions()
                 name = "Lock Position",
                 type = "toggle",
                 order = 3,
+                width = "full",
                 get = function() return self.db.profile.locked end,
                 set = function(_, v) self.db.profile.locked = v end
             },
