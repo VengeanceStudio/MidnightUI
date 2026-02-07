@@ -16,16 +16,47 @@ local Version = 1
 
 local methods = {
     ["OnAcquire"] = function(self)
+        local pullout = AceGUI:Create("Dropdown-Pullout")
+        self.pullout = pullout
+        pullout.userdata.obj = self
+        pullout:SetCallback("OnClose", function(widget)
+            self.open = nil
+            self:Fire("OnClosed")
+        end)
+        pullout:SetCallback("OnOpen", function(widget)
+            local value = self.value
+            if not self.multiselect then
+                for i, item in widget:IterateItems() do
+                    item:SetValue(item.userdata.value == value)
+                end
+            end
+            self.open = true
+            self:Fire("OnOpened")
+        end)
+        self.pullout.frame:SetFrameLevel(self.frame:GetFrameLevel() + 1)
+        
+        self:SetHeight(44)
         self:SetWidth(200)
         self:SetLabel()
+        self:SetPulloutWidth(nil)
+        self.list = {}
     end,
     
     ["OnRelease"] = function(self)
+        if self.open then
+            self.pullout:Close()
+        end
+        AceGUI:Release(self.pullout)
+        self.pullout = nil
+        
         self:SetText("")
-        self:SetLabel()
         self:SetDisabled(false)
+        self:SetMultiselect(false)
+        
         self.value = nil
         self.list = nil
+        self.open = nil
+        self.hasClose = nil
     end,
     
     ["SetDisabled"] = function(self, disabled)
@@ -33,9 +64,17 @@ local methods = {
         if disabled then
             self.button:Disable()
             self.text:SetTextColor(ColorPalette:GetColor('text-disabled'))
+            self.label:SetTextColor(ColorPalette:GetColor('text-disabled'))
         else
             self.button:Enable()
             self.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+            self.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+    end,
+    
+    ["ClearFocus"] = function(self)
+        if self.open then
+            self.pullout:Close()
         end
     end,
     
@@ -48,33 +87,117 @@ local methods = {
             self.label:SetText(text)
             self.label:Show()
             self.dropdown:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -18)
+            self:SetHeight(44)
+            self.alignoffset = 30
         else
             self.label:SetText("")
             self.label:Hide()
             self.dropdown:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, 0)
+            self:SetHeight(26)
+            self.alignoffset = 12
         end
     end,
     
     ["SetValue"] = function(self, value)
+        self:SetText(self.list[value] or "")
         self.value = value
-        if self.list and self.list[value] then
-            self:SetText(self.list[value])
+    end,
+    
+    ["GetValue"] = function(self)
+        return self.value
+    end,
+    
+    ["SetList"] = function(self, list, order, itemType)
+        self.list = list or {}
+        self.pullout:Clear()
+        if not list then return end
+        
+        local items = {}
+        if order then
+            for i, key in ipairs(order) do
+                local text = list[key]
+                if text then
+                    items[i] = {text = text, value = key}
+                end
+            end
+        else
+            for key, text in pairs(list) do
+                items[#items + 1] = {text = text, value = key}
+            end
+        end
+        
+        for i, item in ipairs(items) do
+            local widgetType = itemType or "Dropdown-Item-Toggle"
+            local widget = AceGUI:Create(widgetType)
+            widget:SetText(item.text)
+            widget.userdata.obj = self
+            widget.userdata.value = item.value
+            widget:SetCallback("OnValueChanged", function(widget, event, checked)
+                if self.multiselect then
+                    self:Fire("OnValueChanged", item.value, checked)
+                else
+                    if checked then
+                        self:SetValue(item.value)
+                        self:Fire("OnValueChanged", item.value)
+                    else
+                        widget:SetValue(true)
+                    end
+                    if self.open then
+                        self.pullout:Close()
+                    end
+                end
+            end)
+            self.pullout:AddItem(widget)
         end
     end,
     
-    ["SetList"] = function(self, list)
-        self.list = list
+    ["SetPulloutWidth"] = function(self, width)
+        self.pulloutWidth = width
+    end,
+    
+    ["SetMultiselect"] = function(self, multi)
+        self.multiselect = multi
+    end,
+    
+    ["SetItemValue"] = function(self, item, value)
+        if not self.multiselect then return end
+        for i, widget in self.pullout:IterateItems() do
+            if widget.userdata.value == item then
+                if widget.SetValue then
+                    widget:SetValue(value)
+                end
+            end
+        end
+    end,
+    
+    ["SetItemDisabled"] = function(self, item, disabled)
+        for i, widget in self.pullout:IterateItems() do
+            if widget.userdata.value == item then
+                widget:SetDisabled(disabled)
+            end
+        end
     end,
     
     ["OnWidthSet"] = function(self, width)
-        -- Reduce width by 30px
-        local adjustedWidth = width - 30
-        self.dropdown:SetWidth(adjustedWidth)
+        -- Width handled by frame
     end,
     
     ["OnHeightSet"] = function(self, height)
-        self.dropdown:SetHeight(height)
-    end
+        -- Height controlled by SetLabel
+    end,
+    
+    ["RefreshColors"] = function(self)
+        self.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+        self.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        self.arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
+        if self.disabled then
+            self.text:SetTextColor(ColorPalette:GetColor('text-disabled'))
+            self.label:SetTextColor(ColorPalette:GetColor('text-disabled'))
+        else
+            self.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+            self.label:SetTextColor(ColorPalette:GetColor('text-primary'))
+        end
+    end,
 }
 
 -- ============================================================================
@@ -106,16 +229,59 @@ local function Constructor()
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-    dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
     
     local button = CreateFrame("Button", nil, dropdown)
     button:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", -2, -2)
     button:SetPoint("BOTTOMRIGHT", dropdown, "BOTTOMRIGHT", -2, 2)
     button:SetWidth(18)
     
-    local arrow = button:CreateTexture(nil, "OVERLAY")
-    arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
-    arrow:SetSize(10, 10)
+    button:SetScript("OnClick", function(self)
+        local widget = self.obj
+        if widget.open then
+            widget.open = nil
+            widget.pullout:Close()
+            AceGUI:ClearFocus()
+        else
+            widget.open = true
+            widget.pullout:SetWidth(widget.pulloutWidth or widget.frame:GetWidth())
+            widget.pullout:Open("TOPLEFT", widget.frame, "BOTTOMLEFT", 0, widget.label:IsShown() and -2 or 0)
+            AceGUI:SetFocus(widget)
+        end
+    end)
+    
+    local widget = {
+        frame = frame,
+        dropdown = dropdown,
+        button = button,
+        text = text,
+        label = label,
+        arrow = arrow,
+        type = Type
+    }
+    
+    for method, func in pairs(methods) do
+        widget[method] = func
+    end
+    
+    frame.obj = widget
+    button.obj = widget
+    
+    local registeredWidget = AceGUI:RegisterAsWidget(widget)
+    
+    -- Protect the type field from being set to nil
+    local widgetType = Type
+    local mt = getmetatable(registeredWidget) or {}
+    mt.__newindex = function(t, k, v)
+        if k == "type" and v == nil then
+            rawset(t, k, widgetType)
+        else
+            rawset(t, k, v)
+        end
+    end
+    setmetatable(registeredWidget, mt)
+    
+    return registeredWidget
     arrow:SetPoint("CENTER")
     arrow:SetRotation(-1.57)
     arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
