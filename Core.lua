@@ -2024,7 +2024,6 @@ function MidnightUI:GetOptions()
                             
                             local resInfo = "UI Resolution (effective): |cffffaa00" .. screenWidth .. "x" .. screenHeight .. "|r\n"
                             if physicalWidth ~= screenWidth or physicalHeight ~= screenHeight then
-                                resInfo = resInfo .. "Physical Resolution: |cffcccccc" .. physicalWidth .. "x" .. physicalHeight .. "|r\n"
                                 resInfo = resInfo .. "UI Scale: |cffcccccc" .. string.format("%.1f%%", uiScale * 100) .. "|r\n\n"
                             end
                             
