@@ -98,14 +98,20 @@ local methods = {
     end,
     
     ["SelectTab"] = function(self, value)
+        print("MidnightTabGroup SelectTab called with value:", value)
         local status = self.status or self.localstatus
         local found = false
+        
+        print("  status table:", status)
+        print("  tablist:", self.tablist and #self.tablist or "nil")
         
         -- Update all tabs to show selection state
         for i, v in ipairs(self.tablist or {}) do
             local tab = self.tabs[v.value]
+            print("  Checking tab", i, "value:", v.value, "tab exists:", tab ~= nil)
             if tab then
                 if v.value == value then
+                    print("    -> Setting tab selected")
                     tab:SetSelected(true)
                     found = true
                 else
@@ -116,6 +122,7 @@ local methods = {
         
         status.selected = value
         
+        print("  found:", found, "firing OnGroupSelected")
         -- Fire the event if tab was found
         if found then
             self:Fire("OnGroupSelected", value)
