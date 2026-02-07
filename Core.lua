@@ -310,15 +310,11 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         local originalSetBackdropColor = tab.SetBackdropColor
                         tab.SetBackdropColor = function(self, r, g, b, a)
                             local selected = (widget.selected == self.value) or (self.selected == true)
-                            print("SetBackdropColor hook - Tab:", self.value, "widget.selected:", widget.selected, "selected:", selected, "Color:", r, g, b, a)
                             if selected then
                                 -- Use theme color for selected tabs
-                                local sr, sg, sb, sa = ColorPalette:GetColor('tab-selected-bg')
-                                print("  Applying selected color:", sr, sg, sb, sa)
-                                originalSetBackdropColor(self, sr, sg, sb, sa)
+                                originalSetBackdropColor(self, ColorPalette:GetColor('tab-selected-bg'))
                             else
                                 -- Allow normal color for unselected tabs
-                                print("  Applying provided color:", r, g, b, a)
                                 originalSetBackdropColor(self, r, g, b, a)
                             end
                         end
@@ -361,8 +357,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         -- Protect background texture regions (the colored part!)
                         protectTexture(tab.Center)
                         protectTexture(tab.Bg)
-                        
-                        print("Tab", tab.value, "backdrop textures - Center:", tab.Center and "exists" or "nil", "Bg:", tab.Bg and "exists" or "nil")
                         
                         tab.backdropProtected = true
                     end
@@ -421,44 +415,19 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         
                         -- Wait for widget.selected to update, then trigger color update
                         C_Timer.After(0.05, function()
-                            print("OnClick timer fired - widget.selected:", widget.selected)
                             for _, t in pairs(widget.tabs) do
                                 HideTabTextures(t)
                                 
                                 -- Check both widget.selected and the tab's own selected property
                                 local selected = (widget.selected == t.value) or (t.selected == true)
-                                print("  Tab:", t.value, "selected:", selected, "t.selected:", t.selected)
                                 
                                 -- Trigger SetBackdropColor which will be intercepted by our hook
                                 if selected then
-                                    print("  Setting selected colors for tab:", t.value)
                                     t:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
                                     t:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                                     if t.text then
                                         t.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
                                     end
-                                    
-                                    -- Verify the color stuck
-                                    C_Timer.After(0.01, function()
-                                        local r, g, b, a = t:GetBackdropColor()
-                                        print("  Verified tab", t.value, "color after 0.01s:", r, g, b, a)
-                                        if t.Center then
-                                            local shown = t.Center:IsShown()
-                                            local alpha = t.Center:GetAlpha()
-                                            local vr, vg, vb, va = t.Center:GetVertexColor()
-                                            print("    Center texture - Shown:", shown, "Alpha:", alpha, "VertexColor:", vr, vg, vb, va)
-                                        end
-                                    end)
-                                    C_Timer.After(0.1, function()
-                                        local r, g, b, a = t:GetBackdropColor()
-                                        print("  Verified tab", t.value, "color after 0.1s:", r, g, b, a)
-                                        if t.Center then
-                                            local shown = t.Center:IsShown()
-                                            local alpha = t.Center:GetAlpha()
-                                            local vr, vg, vb, va = t.Center:GetVertexColor()
-                                            print("    Center texture - Shown:", shown, "Alpha:", alpha, "VertexColor:", vr, vg, vb, va)
-                                        end
-                                    end)
                                 else
                                     t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                                     t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -470,9 +439,35 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         end)
                     end)
                     
-                    -- Also hook OnShow to prevent textures from reappearing
+                    -- Also hook OnShow to prevent textures from reappearing and reapply styling
                     tab:HookScript("OnShow", function()
                         HideTabTextures(tab)
+                        
+                        -- Reapply backdrop and colors when tab is shown
+                        if not tab.backdropReapplied then
+                            tab:SetBackdrop({
+                                bgFile = "Interface\\Buttons\\WHITE8X8",
+                                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                tile = false, edgeSize = 2,
+                                insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                            })
+                            
+                            -- Reapply colors based on selection state
+                            local selected = (widget.selected == tab.value) or (tab.selected == true)
+                            if selected then
+                                tab:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                                tab:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                            else
+                                tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                tab:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                            end
+                            
+                            tab.backdropReapplied = true
+                            -- Reset flag after a moment to allow future reapplications
+                            C_Timer.After(0.5, function()
+                                tab.backdropReapplied = false
+                            end)
+                        end
                     end)
                     
                     tab.customTabHooked = true
