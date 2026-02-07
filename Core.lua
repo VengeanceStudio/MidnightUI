@@ -2791,6 +2791,80 @@ function MidnightUI:OpenColorEditorFrame()
     innerPanel:EnableMouse(false)  -- Don't intercept clicks - let them pass through to bgClickArea
     frame.innerPanel = innerPanel
     
+    -- Create clickable border areas for accent-primary color editing
+    local borderThickness = 8  -- Make borders easier to click
+    
+    -- Top border
+    local topBorder = CreateFrame("Frame", nil, innerPanel)
+    topBorder:SetPoint("TOPLEFT", innerPanel, "TOPLEFT", 0, 0)
+    topBorder:SetPoint("TOPRIGHT", innerPanel, "TOPRIGHT", 0, 0)
+    topBorder:SetHeight(borderThickness)
+    topBorder:SetFrameLevel(innerPanel:GetFrameLevel() + 1)
+    topBorder:EnableMouse(true)
+    
+    -- Bottom border
+    local bottomBorder = CreateFrame("Frame", nil, innerPanel)
+    bottomBorder:SetPoint("BOTTOMLEFT", innerPanel, "BOTTOMLEFT", 0, 0)
+    bottomBorder:SetPoint("BOTTOMRIGHT", innerPanel, "BOTTOMRIGHT", 0, 0)
+    bottomBorder:SetHeight(borderThickness)
+    bottomBorder:SetFrameLevel(innerPanel:GetFrameLevel() + 1)
+    bottomBorder:EnableMouse(true)
+    
+    -- Left border
+    local leftBorder = CreateFrame("Frame", nil, innerPanel)
+    leftBorder:SetPoint("TOPLEFT", innerPanel, "TOPLEFT", 0, -borderThickness)
+    leftBorder:SetPoint("BOTTOMLEFT", innerPanel, "BOTTOMLEFT", 0, borderThickness)
+    leftBorder:SetWidth(borderThickness)
+    leftBorder:SetFrameLevel(innerPanel:GetFrameLevel() + 1)
+    leftBorder:EnableMouse(true)
+    
+    -- Right border
+    local rightBorder = CreateFrame("Frame", nil, innerPanel)
+    rightBorder:SetPoint("TOPRIGHT", innerPanel, "TOPRIGHT", 0, -borderThickness)
+    rightBorder:SetPoint("BOTTOMRIGHT", innerPanel, "BOTTOMRIGHT", 0, borderThickness)
+    rightBorder:SetWidth(borderThickness)
+    rightBorder:SetFrameLevel(innerPanel:GetFrameLevel() + 1)
+    rightBorder:EnableMouse(true)
+    
+    -- Add scripts to all border frames
+    local borderFrames = {topBorder, bottomBorder, leftBorder, rightBorder}
+    for _, border in ipairs(borderFrames) do
+        border:SetScript("OnEnter", function()
+            GameTooltip:SetOwner(border, "ANCHOR_CURSOR")
+            GameTooltip:SetText("Panel Border (Accent)", 1, 1, 1)
+            GameTooltip:AddLine("Highlighted border color for panels and minimap", 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine("Click to change color", 0.0, 1.0, 0.5)
+            GameTooltip:Show()
+        end)
+        border:SetScript("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        border:SetScript("OnMouseDown", function()
+            local r, g, b, a = GetCurrentColor("accent-primary")
+            ColorPickerFrame:SetupColorPickerAndShow({
+                r = r, g = g, b = b,
+                opacity = a,
+                hasOpacity = true,
+                swatchFunc = function()
+                    local nr, ng, nb = ColorPickerFrame:GetColorRGB()
+                    local na = ColorPickerFrame:GetColorAlpha()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors["accent-primary"] = {r = nr, g = ng, b = nb, a = na}
+                    UpdateFrameColors()
+                end,
+                cancelFunc = function()
+                    if not MidnightUI.tempThemeColors then
+                        MidnightUI.tempThemeColors = {}
+                    end
+                    MidnightUI.tempThemeColors["accent-primary"] = {r = r, g = g, b = b, a = a}
+                    UpdateFrameColors()
+                end,
+            })
+        end)
+    end
+    
     -- Header text in panel
     local headerText = FontKit:CreateFontString(innerPanel, "heading", "medium")
     headerText:SetPoint("TOPLEFT", 20, -20)
