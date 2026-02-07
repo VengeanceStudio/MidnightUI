@@ -87,19 +87,23 @@ function MidnightUI:OnEnable()
         if AceConfigDialog.SelectGroup and not AceConfigDialog.MidnightSelectGroupHooked then
             local originalSelectGroup = AceConfigDialog.SelectGroup
             AceConfigDialog.SelectGroup = function(appName, ...)
+                -- Clean up swatches immediately when changing pages
+                if appName == "MidnightUI" and self.colorSwatchContainer then
+                    self.colorSwatchContainer:Hide()
+                    self.colorSwatchContainer:SetParent(nil)
+                    self.colorSwatchContainer = nil
+                    self.themeColorSwatches = nil
+                end
+                
                 originalSelectGroup(appName, ...)
                 
-                -- Check if color swatches need to be shown/hidden
-                if appName == "MidnightUI" and self.colorSwatchContainer then
-                    C_Timer.After(0.05, function()
+                -- Recreate swatches if we're on the themes page
+                if appName == "MidnightUI" then
+                    C_Timer.After(0.1, function()
                         local status = AceConfigDialog.OpenFrames["MidnightUI"]
                         if status and status.status and status.status.groups then
                             if status.status.groups.selected == "themes" then
                                 self:CreateColorPaletteSwatches()
-                            else
-                                if self.colorSwatchContainer then
-                                    self.colorSwatchContainer:Hide()
-                                end
                             end
                         end
                     end)
@@ -2666,18 +2670,17 @@ function MidnightUI:CreateColorPaletteSwatches()
         end
     end
     
-    if not scrollFrame then
-        scrollFrame = container.content
-    end
+    local parentFrame = scrollFrame or container.content
     
-    -- Create container for swatches - attach to UIParent with proper positioning
-    local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", UIParent)
+    -- Create container for swatches - attach to the parent frame directly
+    local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", parentFrame)
     swatchContainer:SetSize(800, 100)
-    swatchContainer:SetFrameStrata("FULLSCREEN_DIALOG")
-    swatchContainer:SetFrameLevel(1000)
+    swatchContainer:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -280)
     
-    -- Position relative to the AceGUI content frame
-    swatchContainer:SetPoint("TOPLEFT", scrollFrame, "TOPLEFT", 10, -280)
+    -- Set frame strata and level to ensure it's on top
+    local parentStrata = parentFrame:GetFrameStrata()
+    swatchContainer:SetFrameStrata(parentStrata)
+    swatchContainer:SetFrameLevel(parentFrame:GetFrameLevel() + 100)
     
     self.colorSwatchContainer = swatchContainer
     
