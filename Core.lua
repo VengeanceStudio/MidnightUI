@@ -2512,6 +2512,19 @@ function MidnightUI:GetThemeOptions()
             order = 11,
             width = "full",
         },
+        paletteHider = {
+            type = "description",
+            name = "",
+            order = 11.1,
+            width = "full",
+            hidden = false,
+            dialogHidden = function()
+                -- This gets called when the description is about to be drawn
+                -- If we're on themes page, return false (show), otherwise return true (hide)
+                -- But we need to hide the color swatches when not on this page
+                return false
+            end,
+        },
         spacer2 = {
             type = "description",
             name = " ",
@@ -2621,38 +2634,41 @@ function MidnightUI:CreateColorPaletteSwatches()
     -- Check if we're on the Themes tab
     local status = appName.status
     if not status or not status.groups or not status.groups.selected then
-        if self.colorSwatchContainer then
-            self.colorSwatchContainer:Hide()
-        end
         return
     end
     
     -- Only show on Themes tab
     if status.groups.selected ~= "themes" then
-        if self.colorSwatchContainer then
-            self.colorSwatchContainer:Hide()
-        end
         return
     end
     
     local container = appName.frame.obj
     if not container or not container.content then return end
     
-    -- If container exists, just show it and update colors
-    if self.colorSwatchContainer then
-        self.colorSwatchContainer:Show()
+    -- If container exists and is already showing, don't recreate
+    if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() and self.colorSwatchContainer:GetParent() == container.content then
         self:UpdateThemeColorSwatches()
         return
     end
     
-    -- Find a parent frame to attach to
-    local parentFrame = container.content or container.frame
+    -- Clean up old container if it exists
+    if self.colorSwatchContainer then
+        self.colorSwatchContainer:Hide()
+        self.colorSwatchContainer:SetParent(nil)
+        self.colorSwatchContainer = nil
+        self.themeColorSwatches = nil
+    end
+    
+    -- Find a parent frame to attach to - use the scrolling content frame
+    local parentFrame = container.content
     if not parentFrame then return end
     
     -- Create container for swatches
     local swatchContainer = CreateFrame("Frame", nil, parentFrame)
     swatchContainer:SetSize(800, 100)
     swatchContainer:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 10, -280)  -- Position below the header
+    swatchContainer:SetFrameStrata("DIALOG")
+    swatchContainer:SetFrameLevel(parentFrame:GetFrameLevel() + 10)
     self.colorSwatchContainer = swatchContainer
     
     -- Define the 8 core colors
