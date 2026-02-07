@@ -332,6 +332,19 @@ local function Constructor()
     
     local container = AceGUI:RegisterAsContainer(widget)
     
+    -- Debug: Monitor when children are added
+    local originalAddChild = container.AddChild
+    container.AddChild = function(self, child, ...)
+        print("MidnightTabGroup AddChild called, child type:", child.type)
+        return originalAddChild(self, child, ...)
+    end
+    
+    local originalReleaseChildren = container.ReleaseChildren
+    container.ReleaseChildren = function(self, ...)
+        print("MidnightTabGroup ReleaseChildren called")
+        return originalReleaseChildren(self, ...)
+    end
+    
     -- Set up bi-directional reference for layout system
     widget.obj = container
     content.obj = container
