@@ -340,8 +340,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 backdrop = {
                                     bgFile = "Interface\\Buttons\\WHITE8X8",
                                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                    tile = false, edgeSize = 2,
-                                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                    tile = false, edgeSize = 1,
+                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
                                 }
                             else
                                 -- Force edgeSize to 1 for pixel-perfect borders
@@ -1128,15 +1128,20 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             backdrop = {
                                 bgFile = "Interface\\Buttons\\WHITE8X8",
                                 edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                tile = false, edgeSize = 2,
-                                insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                tile = false, edgeSize = 1,
+                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
                             }
                         else
-                            -- Force edgeSize to 2 if backdrop exists
-                            if backdrop.edgeFile and backdrop.edgeSize ~= 2 then
-                                backdrop.edgeSize = 2
-                                if not backdrop.insets then
-                                    backdrop.insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                            -- Force edgeSize to 1 for pixel-perfect borders
+                            -- BUT: Skip if this is a MidnightUI custom widget (they handle their own borders)
+                            if backdrop.edgeFile and backdrop.edgeSize ~= 1 then
+                                -- Check if this is one of our custom widgets by checking the frame name
+                                local frameName = self:GetName() or ""
+                                if not frameName:match("^Midnight") then
+                                    backdrop.edgeSize = 1
+                                    if not backdrop.insets then
+                                        backdrop.insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                                    end
                                 end
                             end
                         end
