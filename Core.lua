@@ -172,9 +172,18 @@ function MidnightUI:StyleLSMWidget(widget)
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
-    -- NOW mark this widget so backdrop hooks can identify it
+    -- Mark this widget so backdrop hooks can identify it
     widget.isLSMWidget = true
     frame.isLSMWidget = true
+    
+    -- Create background and border manually since frame doesn't support backdrop
+    if not frame.midnightBg then
+        -- Add semi-transparent dark background
+        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+        frame.midnightBg:SetAllPoints(frame)
+        local r, g, b = ColorPalette:GetColor('button-bg')
+        frame.midnightBg:SetColorTexture(r, g, b, 0.3)
+    end
     
     -- Hide Blizzard textures (DLeft, DMiddle, DRight)
     if frame.DLeft then frame.DLeft:Hide() end
@@ -294,20 +303,40 @@ function MidnightUI:StyleLSMWidget(widget)
             btn:HookScript("OnClick", function()
                 C_Timer.After(0.05, function()
                     local pullout = widget.pullout or widget.dropdown
-                    if pullout then
-                        -- Apply themed backdrop BEFORE marking as LSM widget
-                        if pullout.SetBackdrop then
-                            pullout:SetBackdrop({
-                                bgFile = "Interface\\Buttons\\WHITE8X8",
-                                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                tile = false,
-                                edgeSize = 1,
-                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                            })
+                    if pullout and pullout.SetBackdrop then
+                        -- Create persistent background using manual texture since backdrop gets cleared
+                        if not pullout.midnightBg then
+                            pullout.midnightBg = pullout:CreateTexture(nil, "BACKGROUND", nil, -8)
+                            pullout.midnightBg:SetAllPoints(pullout)
                             local r, g, b = ColorPalette:GetColor('panel-bg')
-                            pullout:SetBackdropColor(r, g, b, 1)  -- Full opacity
+                            pullout.midnightBg:SetColorTexture(r, g, b, 1)
+                            
+                            -- Create border textures
                             local br, bg, bb = ColorPalette:GetColor('accent-primary')
-                            pullout:SetBackdropBorderColor(br, bg, bb, 1)
+                            
+                            pullout.midnightBorderTop = pullout:CreateTexture(nil, "BORDER")
+                            pullout.midnightBorderTop:SetHeight(1)
+                            pullout.midnightBorderTop:SetPoint("TOPLEFT")
+                            pullout.midnightBorderTop:SetPoint("TOPRIGHT")
+                            pullout.midnightBorderTop:SetColorTexture(br, bg, bb, 1)
+                            
+                            pullout.midnightBorderBottom = pullout:CreateTexture(nil, "BORDER")
+                            pullout.midnightBorderBottom:SetHeight(1)
+                            pullout.midnightBorderBottom:SetPoint("BOTTOMLEFT")
+                            pullout.midnightBorderBottom:SetPoint("BOTTOMRIGHT")
+                            pullout.midnightBorderBottom:SetColorTexture(br, bg, bb, 1)
+                            
+                            pullout.midnightBorderLeft = pullout:CreateTexture(nil, "BORDER")
+                            pullout.midnightBorderLeft:SetWidth(1)
+                            pullout.midnightBorderLeft:SetPoint("TOPLEFT")
+                            pullout.midnightBorderLeft:SetPoint("BOTTOMLEFT")
+                            pullout.midnightBorderLeft:SetColorTexture(br, bg, bb, 1)
+                            
+                            pullout.midnightBorderRight = pullout:CreateTexture(nil, "BORDER")
+                            pullout.midnightBorderRight:SetWidth(1)
+                            pullout.midnightBorderRight:SetPoint("TOPRIGHT")
+                            pullout.midnightBorderRight:SetPoint("BOTTOMRIGHT")
+                            pullout.midnightBorderRight:SetColorTexture(br, bg, bb, 1)
                         end
                         
                         -- NOW mark it so backdrop hooks skip it
