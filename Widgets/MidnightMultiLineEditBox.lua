@@ -119,10 +119,9 @@ local function OnLeave(self)                                                    
 end
 
 local function OnMouseUp(self)                                                   -- ScrollFrame
-	self = self.obj
-	if self.scrolling then
-		self.scrolling = nil
-	end
+	self = self.obj.editBox
+	self:SetFocus()
+	self:SetCursorPosition(self:GetNumLetters())
 end
 
 local function OnReceiveDrag(self)                                               -- EditBox / ScrollFrame
