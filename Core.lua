@@ -2593,12 +2593,29 @@ function MidnightUI:CreateColorPaletteSwatches()
     local appName = AceConfigDialog.OpenFrames["MidnightUI"]
     if not appName or not appName.frame then return end
     
+    -- Check if we're on the Themes tab
+    local status = appName.status
+    if not status or not status.groups or not status.groups.selected then
+        if self.colorSwatchContainer then
+            self.colorSwatchContainer:Hide()
+        end
+        return
+    end
+    
+    -- Only show on Themes tab
+    if status.groups.selected ~= "themes" then
+        if self.colorSwatchContainer then
+            self.colorSwatchContainer:Hide()
+        end
+        return
+    end
+    
     local container = appName.frame.obj
     if not container or not container.content then return end
     
-    -- Create container frame for color swatches if it doesn't exist
-    if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() then
-        -- Already created, just update colors
+    -- If container exists, just show it and update colors
+    if self.colorSwatchContainer then
+        self.colorSwatchContainer:Show()
         self:UpdateThemeColorSwatches()
         return
     end
