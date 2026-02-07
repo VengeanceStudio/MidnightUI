@@ -3252,6 +3252,10 @@ function MidnightUI:GetOptions()
                 options.args.unitframes = module:GetOptions()
                 options.args.unitframes.name = "Unit Frames"
                 options.args.unitframes.order = 8
+            elseif name == "Setup" then
+                options.args[name] = module:GetOptions()
+                options.args[name].name = displayName
+                options.args[name].order = 45
             else
                 options.args[name] = module:GetOptions()
                 options.args[name].name = displayName
