@@ -344,8 +344,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tab:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
                         edgeFile = "Interface\\Buttons\\WHITE8X8",
-                        tile = false, edgeSize = 2,
-                        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                        tile = false, edgeSize = 1,
+                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
                     })
                     
                     -- Protect backdrop texture regions from being hidden
@@ -467,8 +467,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             tab:SetBackdrop({
                                 bgFile = "Interface\\Buttons\\WHITE8X8",
                                 edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                tile = false, edgeSize = 2,
-                                insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                tile = false, edgeSize = 1,
+                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
                             })
                             
                             -- Reapply colors based on selection state
@@ -523,8 +523,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     t:SetBackdrop({
                                         bgFile = "Interface\\Buttons\\WHITE8X8",
                                         edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                        tile = false, edgeSize = 2,
-                                        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                        tile = false, edgeSize = 1,
+                                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
                                     })
                                     
                                     -- Force show all backdrop textures
@@ -1117,8 +1117,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.dropdown:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    tile = false, edgeSize = 2,
-                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                    tile = false, edgeSize = 1,
+                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
                 })
                 widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -1255,8 +1255,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         widget.dropdown:SetBackdrop({
                             bgFile = "Interface\\Buttons\\WHITE8X8",
                             edgeFile = "Interface\\Buttons\\WHITE8X8",
-                            tile = false, edgeSize = 2,
-                            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                            tile = false, edgeSize = 1,
+                            insets = { left = 1, right = 1, top = 1, bottom = 1 }
                         })
                         widget.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                         widget.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -1303,8 +1303,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 scrollFrame:SetBackdrop({
                                     bgFile = "Interface\\Buttons\\WHITE8X8",
                                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                    tile = false, edgeSize = 2,
-                                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                                    tile = false, edgeSize = 1,
+                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
                                 })
                                 scrollFrame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                                 scrollFrame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -1348,8 +1348,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 frame:SetBackdrop({
                                     bgFile = "Interface\\Buttons\\WHITE8X8",
                                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                    tile = false, edgeSize = 2,
-                                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                                    tile = false, edgeSize = 1,
+                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
                                 })
                                 frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                                 frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -1481,8 +1481,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.frame:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
                     edgeFile = "Interface\\Buttons\\WHITE8X8",
-                    tile = false, edgeSize = 2,
-                    insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                    tile = false, edgeSize = 1,
+                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
                 })
                 widget.frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                 widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
@@ -1610,8 +1610,8 @@ function MidnightUI:SkinConfigFrame(frame)
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
         tileSize = 16,
-        edgeSize = 2,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     
     frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
@@ -1822,8 +1822,8 @@ function MidnightUI:ApplyThemedBackdrop(frame)
     frame.muiBackdrop:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false, tileSize = 0, edgeSize = 2,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     
     -- Use framework colors if available

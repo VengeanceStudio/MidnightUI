@@ -23,8 +23,8 @@ local function CreateTab(parent)
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
-        edgeSize = 2,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     
     -- Default unselected colors
@@ -230,8 +230,8 @@ local function Constructor()
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
-        edgeSize = 2,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     border:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
     border:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
