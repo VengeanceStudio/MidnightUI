@@ -475,11 +475,13 @@ function MidnightUI:StyleScrollFrame(widget)
         -- Create custom up arrow
         if not upBtn.customArrow then
             upBtn.customArrow = upBtn:CreateTexture(nil, "ARTWORK")
-            upBtn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Up-Up")
+            upBtn.customArrow:SetTexture("Interface\\Buttons\\Arrow-Down-Up")
+            upBtn.customArrow:SetTexCoord(0, 1, 1, 0)  -- Flip it upside down for up arrow
             upBtn.customArrow:SetSize(12, 12)
             upBtn.customArrow:SetPoint("CENTER")
             local r, g, b = ColorPalette:GetColor('accent-primary')
             upBtn.customArrow:SetVertexColor(r, g, b, 1)
+            upBtn.customArrow:SetDesaturated(true)  -- Remove baked-in color
         end
     end
     
@@ -513,6 +515,7 @@ function MidnightUI:StyleScrollFrame(widget)
             downBtn.customArrow:SetPoint("CENTER")
             local r, g, b = ColorPalette:GetColor('accent-primary')
             downBtn.customArrow:SetVertexColor(r, g, b, 1)
+            downBtn.customArrow:SetDesaturated(true)  -- Remove baked-in color
         end
     end
 end
