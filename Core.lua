@@ -160,6 +160,8 @@ end
 function MidnightUI:StyleLSMWidget(widget)
     if not widget or not widget.frame then return end
     
+    print("StyleLSMWidget: Starting for", widget.type)
+    
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
@@ -180,20 +182,48 @@ function MidnightUI:StyleLSMWidget(widget)
         })
         frame:SetBackdropColor(ColorPalette:GetColor('button-bg'))
         frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        print("  Applied frame backdrop")
     end
     
     -- Hide Blizzard textures (DLeft, DMiddle, DRight)
-    if frame.DLeft then frame.DLeft:Hide() end
-    if frame.DMiddle then frame.DMiddle:Hide() end
-    if frame.DRight then frame.DRight:Hide() end
+    if frame.DLeft then frame.DLeft:Hide() print("  Hid DLeft") end
+    if frame.DMiddle then frame.DMiddle:Hide() print("  Hid DMiddle") end
+    if frame.DRight then frame.DRight:Hide() print("  Hid DRight") end
     
-    -- Style label (the dropdown name) - FORCE color change
+    -- Style label (the dropdown name) - try multiple approaches
     if frame.label then
+        print("  Found label, applying style...")
         if FontKit then
             FontKit:SetFont(frame.label, 'body', 'normal')
         end
         local r, g, b, a = ColorPalette:GetColor('text-primary')
         frame.label:SetTextColor(r, g, b, a or 1)
+        print("  Label color set to:", r, g, b, a)
+        
+        -- Also hook SetText on label to reapply color
+        if not frame.label.colorHooked then
+            local originalSetText = frame.label.SetText
+            frame.label.SetText = function(self, text)
+                originalSetText(self, text)
+                local r, g, b, a = ColorPalette:GetColor('text-primary')
+                self:SetTextColor(r, g, b, a or 1)
+            end
+            frame.label.colorHooked = true
+        end
+    end
+    
+    -- Hook SetLabel to force color
+    if widget.SetLabel and not widget.setLabelHooked then
+        local originalSetLabel = widget.SetLabel
+        widget.SetLabel = function(self, text)
+            originalSetLabel(self, text)
+            if self.frame and self.frame.label then
+                local r, g, b, a = ColorPalette:GetColor('text-primary')
+                self.frame.label:SetTextColor(r, g, b, a or 1)
+                print("SetLabel hook: color applied")
+            end
+        end
+        widget.setLabelHooked = true
     end
     
     -- Style the selected value text
