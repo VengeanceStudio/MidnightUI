@@ -2641,7 +2641,7 @@ function MidnightUI:OpenColorPickerForThemeColor(colorKey, colorName)
             
             -- Apply the color immediately to preview
             local activeTheme = self.db.profile.theme.active
-            local fullPalette = ColorPalette:GetPalette(activeTheme)
+            local fullPalette = ColorPalette.palettes[activeTheme]
             if fullPalette then
                 -- Create a copy and update with temp colors
                 local updatedPalette = {}
@@ -2666,7 +2666,7 @@ function MidnightUI:OpenColorPickerForThemeColor(colorKey, colorName)
             self.tempThemeColors[colorKey] = {r = r, g = g, b = b, a = a}
             
             local activeTheme = self.db.profile.theme.active
-            local fullPalette = ColorPalette:GetPalette(activeTheme)
+            local fullPalette = ColorPalette.palettes[activeTheme]
             if fullPalette then
                 ColorPalette:RegisterPalette(activeTheme, fullPalette)
             end
