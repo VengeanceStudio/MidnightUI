@@ -188,6 +188,19 @@ local methods = {
                 insets = { left = 1, right = 1, top = 1, bottom = 1 }
             })
             
+            -- Apply colors immediately based on selection state
+            if self.status and self.status.selected == v.value then
+                tab:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                tab:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                tab.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
+                tab.selected = true
+            else
+                tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                tab:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                tab.selected = false
+            end
+            
             -- Position tab
             if i == 1 then
                 tab:SetPoint("TOPLEFT", self.border, "TOPLEFT", 10, -6)
