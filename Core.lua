@@ -492,6 +492,46 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 end)
                 widget.customInitialSelectionApplied = true
             end
+            
+            -- Hook TabGroup frame OnShow to restore all tab backdrops
+            if widget.frame and not widget.customTabGroupOnShow then
+                widget.frame:HookScript("OnShow", function()
+                    C_Timer.After(0, function()
+                        if widget.tabs then
+                            for _, t in pairs(widget.tabs) do
+                                -- Force backdrop reapplication
+                                if t.SetBackdrop then
+                                    t:SetBackdrop({
+                                        bgFile = "Interface\\Buttons\\WHITE8X8",
+                                        edgeFile = "Interface\\Buttons\\WHITE8X8",
+                                        tile = false, edgeSize = 2,
+                                        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+                                    })
+                                    
+                                    -- Reapply colors
+                                    local selected = (widget.selected == t.value) or (t.selected == true)
+                                    if selected then
+                                        t:SetBackdropColor(ColorPalette:GetColor('tab-selected-bg'))
+                                        t:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+                                        if t.text then
+                                            t.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
+                                        end
+                                    else
+                                        t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+                                        t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                                        if t.text then
+                                            t.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+                                        end
+                                    end
+                                    
+                                    HideTabTextures(t)
+                                end
+                            end
+                        end
+                    end)
+                end)
+                widget.customTabGroupOnShow = true
+            end
         end
         
     elseif widgetType == "InlineGroup" or widgetType == "SimpleGroup" or widgetType == "TreeGroup" then
