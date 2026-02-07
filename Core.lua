@@ -165,11 +165,7 @@ function MidnightUI:StyleLSMWidget(widget)
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
     
-    -- Mark this widget so backdrop hooks can identify it
-    widget.isLSMWidget = true
-    frame.isLSMWidget = true
-    
-    -- Style the main dropdown button frame
+    -- Style the main dropdown button frame BEFORE marking as LSM widget
     if frame.SetBackdrop then
         frame:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -183,6 +179,10 @@ function MidnightUI:StyleLSMWidget(widget)
         local br, bg, bb, ba = ColorPalette:GetColor('accent-primary')
         frame:SetBackdropBorderColor(br, bg, bb, ba or 1)
     end
+    
+    -- NOW mark this widget so backdrop hooks can identify it
+    widget.isLSMWidget = true
+    frame.isLSMWidget = true
     
     -- Hide Blizzard textures (DLeft, DMiddle, DRight)
     if frame.DLeft then frame.DLeft:Hide() end
@@ -303,9 +303,7 @@ function MidnightUI:StyleLSMWidget(widget)
                 C_Timer.After(0.05, function()
                     local pullout = widget.pullout or widget.dropdown
                     if pullout then
-                        pullout.isLSMWidget = true
-                        
-                        -- Apply themed backdrop
+                        -- Apply themed backdrop BEFORE marking as LSM widget
                         if pullout.SetBackdrop then
                             pullout:SetBackdrop({
                                 bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -319,6 +317,9 @@ function MidnightUI:StyleLSMWidget(widget)
                             local br, bg, bb = ColorPalette:GetColor('accent-primary')
                             pullout:SetBackdropBorderColor(br, bg, bb, 1)
                         end
+                        
+                        -- NOW mark it so backdrop hooks skip it
+                        pullout.isLSMWidget = true
                         
                         -- Style the scrollframe if it exists
                         if pullout.frame then
