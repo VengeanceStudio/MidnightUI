@@ -334,6 +334,7 @@ local function Constructor()
 	scrollBG:SetBackdrop(backdrop)
 	scrollBG:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
 	scrollBG:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+	scrollBG:EnableMouse(false)  -- Don't intercept mouse clicks - let them pass through to editBox
 
 	local scrollFrame = CreateFrame("ScrollFrame", ("%s%dScrollFrame"):format(Type, widgetNum), frame, "UIPanelScrollFrameTemplate")
 
