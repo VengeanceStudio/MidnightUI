@@ -298,17 +298,21 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                 end
                             end
                             originalSetBackdrop(self, backdrop)
-                            
-                            -- Reapply colors immediately after backdrop change
-                            local selected = (widget.selected == self.value)
+                        end
+                        
+                        -- Hook SetBackdropColor to enforce our selection colors
+                        local originalSetBackdropColor = tab.SetBackdropColor
+                        tab.SetBackdropColor = function(self, r, g, b, a)
+                            local selected = (widget.selected == self.value) or (self.selected == true)
                             if selected then
-                                self:SetBackdropColor(1, 1, 1, 1)
-                                self:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                                -- Force white background for selected tabs
+                                originalSetBackdropColor(self, 1, 1, 1, 1)
                             else
-                                self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-                                self:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                                -- Allow normal color for unselected tabs
+                                originalSetBackdropColor(self, r, g, b, a)
                             end
                         end
+                        
                         tab.backdropHooked = true
                     end
                     
@@ -399,52 +403,29 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                             HideTabTextures(t)
                         end
                         
-                        -- Wait longer for widget.selected to update
+                        -- Wait for widget.selected to update, then trigger color update
                         C_Timer.After(0.05, function()
                             for _, t in pairs(widget.tabs) do
                                 HideTabTextures(t)
                                 
                                 -- Check both widget.selected and the tab's own selected property
                                 local selected = (widget.selected == t.value) or (t.selected == true)
+                                
+                                -- Trigger SetBackdropColor which will be intercepted by our hook
                                 if selected then
-                                    -- White background for selected tab
-                                    t:SetBackdropColor(1, 1, 1, 1)
+                                    t:SetBackdropColor(1, 1, 1, 1)  -- Will be enforced by hook
                                     t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                    -- Set text color to teal accent for selected tab
                                     if t.text then
                                         t.text:SetTextColor(0.1608, 0.5216, 0.5804, 1)
                                     end
                                 else
                                     t:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                                     t:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-                                    -- Reset text color to normal for unselected tabs
                                     if t.text then
                                         t.text:SetTextColor(ColorPalette:GetColor('text-primary'))
                                     end
                                 end
                             end
-                            
-                            -- Force another update slightly later to override any backdrop resets
-                            C_Timer.After(0.02, function()
-                                for _, t in pairs(widget.tabs) do
-                                    local selected = (widget.selected == t.value) or (t.selected == true)
-                                    if selected then
-                                        t:SetBackdropColor(1, 1, 1, 1)
-                                        t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                    end
-                                end
-                            end)
-                            
-                            -- And one more final check to ensure it sticks
-                            C_Timer.After(0.1, function()
-                                for _, t in pairs(widget.tabs) do
-                                    local selected = (widget.selected == t.value) or (t.selected == true)
-                                    if selected then
-                                        t:SetBackdropColor(1, 1, 1, 1)
-                                        t:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
-                                    end
-                                end
-                            end)
                         end)
                     end)
                     
