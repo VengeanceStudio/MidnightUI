@@ -187,8 +187,10 @@ local methods = {
     end,
     
     ["RefreshColors"] = function(self)
-        self.dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-        self.dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        local r, g, b = ColorPalette:GetColor('button-bg')
+        self.dropdown:SetBackdropColor(r, g, b, 1)
+        r, g, b = ColorPalette:GetColor('accent-primary')
+        self.dropdown:SetBackdropBorderColor(r, g, b, 1)
         self.arrow:SetVertexColor(ColorPalette:GetColor('text-secondary'))
         if self.disabled then
             self.text:SetTextColor(ColorPalette:GetColor('text-disabled'))
@@ -228,8 +230,10 @@ local function Constructor()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-    dropdown:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+    local r, g, b = ColorPalette:GetColor('button-bg')
+    dropdown:SetBackdropColor(r, g, b, 1)
+    r, g, b = ColorPalette:GetColor('accent-primary')
+    dropdown:SetBackdropBorderColor(r, g, b, 1)
     
     local button = CreateFrame("Button", nil, dropdown)
     button:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", -2, -2)
