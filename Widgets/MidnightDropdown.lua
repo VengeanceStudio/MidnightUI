@@ -265,6 +265,19 @@ local function Constructor()
         print(string.format("MidnightDropdown: BG color = %.2f,%.2f,%.2f,%.2f | Border = %.2f,%.2f,%.2f,%.2f", 
             bgR or 0, bgG or 0, bgB or 0, bgA or 0,
             edgeR or 0, edgeG or 0, edgeB or 0, edgeA or 0))
+        
+        -- Check frame visibility
+        print("MidnightDropdown: IsShown =", dropdown:IsShown(), "Alpha =", dropdown:GetAlpha())
+        print("MidnightDropdown: Backdrop exists =", dropdown:GetBackdrop() ~= nil)
+        
+        -- Check if backdrop textures exist
+        local regions = {dropdown:GetRegions()}
+        print("MidnightDropdown: Has", #regions, "regions")
+        for i, region in ipairs(regions) do
+            if region.GetTexture then
+                print("  Region", i, "is texture:", region:GetTexture(), "Alpha:", region:GetAlpha())
+            end
+        end
     end)
     
     dropdown:Show()
