@@ -1,5 +1,7 @@
 local AceGUI = LibStub("AceGUI-3.0")
-local ColorPalette = MidnightUI.ColorPalette
+local ColorPalette = _G.MidnightUI_ColorPalette
+
+if not ColorPalette then return end
 
 -- Lua APIs
 local min, max, floor = math.min, math.max, math.floor
