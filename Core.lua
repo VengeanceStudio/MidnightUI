@@ -160,15 +160,10 @@ end
 function MidnightUI:StyleLSMWidget(widget)
     if not widget or not widget.frame then return end
     
-    print("StyleLSMWidget called for", widget.type)
-    
     local frame = widget.frame
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette then return end
-    
-    -- Style the main dropdown button frame - don't add border here, it includes the label
-    -- The border should be on the button/text area only
     
     -- NOW mark this widget so backdrop hooks can identify it
     widget.isLSMWidget = true
@@ -240,47 +235,13 @@ function MidnightUI:StyleLSMWidget(widget)
         end
     end)
     
-    -- Style the selected value text and add border around it
+    -- Style the selected value text
     if frame.text then
         if FontKit then
             FontKit:SetFont(frame.text, 'button', 'normal')
         end
         local r, g, b, a = ColorPalette:GetColor('text-primary')
         frame.text:SetTextColor(r, g, b, a or 1)
-        
-        -- Create border around the text/button container
-        local textParent = frame.text:GetParent()
-        if textParent and not textParent.midnightBorder then
-            print("Creating border around text container...")
-            local borderColor = {ColorPalette:GetColor('accent-primary')}
-            
-            textParent.midnightBorderTop = textParent:CreateTexture(nil, "OVERLAY")
-            textParent.midnightBorderTop:SetHeight(1)
-            textParent.midnightBorderTop:SetPoint("TOPLEFT", textParent, "TOPLEFT", 0, 0)
-            textParent.midnightBorderTop:SetPoint("TOPRIGHT", textParent, "TOPRIGHT", 0, 0)
-            textParent.midnightBorderTop:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
-            
-            textParent.midnightBorderBottom = textParent:CreateTexture(nil, "OVERLAY")
-            textParent.midnightBorderBottom:SetHeight(1)
-            textParent.midnightBorderBottom:SetPoint("BOTTOMLEFT", textParent, "BOTTOMLEFT", 0, 0)
-            textParent.midnightBorderBottom:SetPoint("BOTTOMRIGHT", textParent, "BOTTOMRIGHT", 0, 0)
-            textParent.midnightBorderBottom:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
-            
-            textParent.midnightBorderLeft = textParent:CreateTexture(nil, "OVERLAY")
-            textParent.midnightBorderLeft:SetWidth(1)
-            textParent.midnightBorderLeft:SetPoint("TOPLEFT", textParent, "TOPLEFT", 0, 0)
-            textParent.midnightBorderLeft:SetPoint("BOTTOMLEFT", textParent, "BOTTOMLEFT", 0, 0)
-            textParent.midnightBorderLeft:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
-            
-            textParent.midnightBorderRight = textParent:CreateTexture(nil, "OVERLAY")
-            textParent.midnightBorderRight:SetWidth(1)
-            textParent.midnightBorderRight:SetPoint("TOPRIGHT", textParent, "TOPRIGHT", 0, 0)
-            textParent.midnightBorderRight:SetPoint("BOTTOMRIGHT", textParent, "BOTTOMRIGHT", 0, 0)
-            textParent.midnightBorderRight:SetColorTexture(borderColor[1], borderColor[2], borderColor[3], 1)
-            
-            textParent.midnightBorder = true
-            print("Border created around text container")
-        end
     end
     
     -- Style the dropdown button and create custom arrow
@@ -327,13 +288,8 @@ function MidnightUI:StyleLSMWidget(widget)
                 C_Timer.After(0.05, function()
                     local pullout = widget.pullout or widget.dropdown
                     if pullout then
-                        print("Styling pullout...")
-                        print("  Pullout type:", pullout:GetObjectType())
-                        print("  Has SetBackdrop:", pullout.SetBackdrop ~= nil)
-                        
                         -- Apply themed backdrop BEFORE marking as LSM widget
                         if pullout.SetBackdrop then
-                            print("  Setting pullout backdrop...")
                             pullout:SetBackdrop({
                                 bgFile = "Interface\\Buttons\\WHITE8X8",
                                 edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -343,31 +299,8 @@ function MidnightUI:StyleLSMWidget(widget)
                             })
                             local r, g, b = ColorPalette:GetColor('panel-bg')
                             pullout:SetBackdropColor(r, g, b, 1)  -- Full opacity
-                            print("    BG color:", r, g, b)
                             local br, bg, bb = ColorPalette:GetColor('accent-primary')
                             pullout:SetBackdropBorderColor(br, bg, bb, 1)
-                            print("    Border color:", br, bg, bb)
-                            print("  Pullout backdrop applied")
-                            
-                            -- Check if backdrop is still there after a moment
-                            C_Timer.After(0.1, function()
-                                local bd = pullout:GetBackdrop()
-                                print("  Backdrop after 0.1s:", bd ~= nil)
-                                if not bd then
-                                    print("  Backdrop was cleared! Reapplying...")
-                                    pullout:SetBackdrop({
-                                        bgFile = "Interface\\Buttons\\WHITE8X8",
-                                        edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                        tile = false,
-                                        edgeSize = 1,
-                                        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                                    })
-                                    pullout:SetBackdropColor(r, g, b, 1)
-                                    pullout:SetBackdropBorderColor(br, bg, bb, 1)
-                                end
-                            end)
-                        else
-                            print("  pullout.SetBackdrop is nil")
                         end
                         
                         -- NOW mark it so backdrop hooks skip it
