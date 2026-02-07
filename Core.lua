@@ -77,14 +77,20 @@ function MidnightUI:OnEnable()
             AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
-        -- Hook AceGUI:Create to use our custom MidnightTabGroup instead of TabGroup
+        -- Hook AceGUI:Create to use our custom widgets
         local AceGUI = LibStub("AceGUI-3.0")
         if AceGUI and not AceGUI.MidnightCreateHooked then
             local originalCreate = AceGUI.Create
             AceGUI.Create = function(self, type, ...)
-                -- Replace TabGroup with MidnightTabGroup
+                -- Replace standard widgets with Midnight versions
                 if type == "TabGroup" then
                     type = "MidnightTabGroup"
+                elseif type == "Dropdown" then
+                    type = "MidnightDropdown"
+                elseif type == "Button" then
+                    type = "MidnightButton"
+                elseif type == "Slider" then
+                    type = "MidnightSlider"
                 end
                 return originalCreate(self, type, ...)
             end
