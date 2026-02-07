@@ -477,7 +477,7 @@ function MidnightUI:StyleScrollFrame(widget)
         
         -- Hide all texture regions
         for _, region in pairs({upBtn:GetRegions()}) do
-            if region:GetObjectType() == "Texture" then
+            if region:GetObjectType() == "Texture" and region ~= upBtn.customArrow then
                 region:SetTexture(nil)
                 region:Hide()
             end
@@ -494,6 +494,8 @@ function MidnightUI:StyleScrollFrame(widget)
             upBtn.customArrow:SetVertexColor(r, g, b, 1)
             upBtn.customArrow:SetDesaturated(true)  -- Remove baked-in color
         end
+        -- Always ensure the custom arrow is visible
+        upBtn.customArrow:Show()
     end
     
     -- Hide and restyle scroll down button
@@ -502,7 +504,7 @@ function MidnightUI:StyleScrollFrame(widget)
         
         -- Hide all texture regions
         for _, region in pairs({downBtn:GetRegions()}) do
-            if region:GetObjectType() == "Texture" then
+            if region:GetObjectType() == "Texture" and region ~= downBtn.customArrow then
                 region:SetTexture(nil)
                 region:Hide()
             end
@@ -518,6 +520,8 @@ function MidnightUI:StyleScrollFrame(widget)
             downBtn.customArrow:SetVertexColor(r, g, b, 1)
             downBtn.customArrow:SetDesaturated(true)  -- Remove baked-in color
         end
+        -- Always ensure the custom arrow is visible
+        downBtn.customArrow:Show()
     end
 end
 
