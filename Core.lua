@@ -2669,6 +2669,19 @@ function MidnightUI:CreateColorPaletteSwatches()
         contentFrame = container.content
     end
     
+    -- Hook the content frame's OnUpdate to detect when it's being reused for another page
+    if not contentFrame.MidnightSwatchCleanupHooked then
+        contentFrame:HookScript("OnHide", function()
+            if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() then
+                self.colorSwatchContainer:Hide()
+                self.colorSwatchContainer:SetParent(nil)
+                self.colorSwatchContainer = nil
+                self.themeColorSwatches = nil
+            end
+        end)
+        contentFrame.MidnightSwatchCleanupHooked = true
+    end
+    
     -- Create container for swatches - attach to the content frame
     local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", contentFrame)
     swatchContainer:SetSize(800, 100)
