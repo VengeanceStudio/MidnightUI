@@ -1867,19 +1867,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         if widget.label and FontKit then
             FontKit:SetFont(widget.label, 'body', 'normal')
             widget.label:SetTextColor(ColorPalette:GetColor('text-primary'))
-            
-            -- Adjust label position for Active Theme and Global Font dropdowns
-            local labelText = widget.label:GetText()
-            if labelText and (labelText:find("Active Theme") or labelText:find("Global Font")) then
-                if not widget.customLabelMoved then
-                    local point, relativeTo, relativePoint, xOfs, yOfs = widget.label:GetPoint()
-                    if point and xOfs and yOfs then
-                        widget.label:ClearAllPoints()
-                        widget.label:SetPoint(point, relativeTo, relativePoint, xOfs - 15, yOfs + 3)
-                        widget.customLabelMoved = true
-                    end
-                end
-            end
         end
         
     elseif widgetType == "Button" then
