@@ -34,6 +34,7 @@ local defaults = {
             fontSize = 12,
             bgColor = {0.1, 0.1, 0.1, 0.8},
             borderColor = {0, 0, 0, 1},
+            customThemes = {},  -- User-created themes
         },
         modules = {
             skins = true,
@@ -63,6 +64,11 @@ function MidnightUI:OnInitialize()
 end
 
 function MidnightUI:OnEnable()
+    -- Load custom themes on startup
+    C_Timer.After(0.05, function()
+        self:LoadCustomThemes()
+    end)
+    
     -- Send the message after all modules have registered
     C_Timer.After(0.1, function()
         self:SendMessage("MIDNIGHTUI_DB_READY")
@@ -2335,6 +2341,360 @@ end
 -- ============================================================================
 -- 4. OPTIONS TABLE
 -- ============================================================================
+function MidnightUI:GetThemeOptions()
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then
+        return {
+            header = {
+                type = "header",
+                name = "Theme System Not Loaded",
+                order = 1,
+            },
+            desc = {
+                type = "description",
+                name = "The theme system is not yet initialized. Please /reload and try again.",
+                order = 2,
+            },
+        }
+    end
+    
+    -- Get available themes
+    local availableThemes = {"MidnightGlass", "NeonSciFi"}
+    local customThemes = self.db.profile.theme.customThemes or {}
+    for themeName, _ in pairs(customThemes) do
+        table.insert(availableThemes, themeName)
+    end
+    
+    -- Build theme selection dropdown values
+    local themeValues = {}
+    for _, name in ipairs(availableThemes) do
+        themeValues[name] = name
+    end
+    
+    local options = {
+        header = {
+            type = "header",
+            name = "Theme Management",
+            order = 1,
+        },
+        description = {
+            type = "description",
+            name = "Select an existing theme or create your own custom theme by adjusting the colors below.",
+            order = 2,
+            fontSize = "medium",
+        },
+        activeTheme = {
+            type = "select",
+            name = "Active Theme",
+            desc = "Select which theme to use for the MidnightUI framework.",
+            order = 3,
+            values = themeValues,
+            get = function() return self.db.profile.theme.active end,
+            set = function(_, value)
+                self.db.profile.theme.active = value
+                if self.FrameFactory then
+                    self.FrameFactory:SetTheme(value)
+                end
+                if ColorPalette then
+                    ColorPalette:SetActiveTheme(value)
+                end
+                if self.FontKit then
+                    self.FontKit:SetActiveTheme(value)
+                end
+                self:Print("Theme changed to " .. value .. ". Some changes may require a /reload to take full effect.")
+                
+                -- Refresh options to show current theme colors
+                local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+                if AceConfigRegistry then
+                    AceConfigRegistry:NotifyChange("MidnightUI")
+                end
+            end,
+        },
+        spacer1 = {
+            type = "description",
+            name = " ",
+            order = 3.5,
+        },
+        customThemeHeader = {
+            type = "header",
+            name = "Custom Theme Editor",
+            order = 4,
+        },
+        customThemeDesc = {
+            type = "description",
+            name = "Create a custom theme by adjusting the colors below. These colors are shown from the currently selected theme. To create a custom theme, adjust the colors and then save with a new name.",
+            order = 5,
+            fontSize = "medium",
+        },
+        customThemeName = {
+            type = "input",
+            name = "New Theme Name",
+            desc = "Enter a name for your custom theme before saving.",
+            order = 6,
+            width = "full",
+            get = function() return self.customThemeName or "" end,
+            set = function(_, v) self.customThemeName = v end,
+        },
+        saveCustomTheme = {
+            type = "execute",
+            name = "Save Custom Theme",
+            desc = "Save current color settings as a new custom theme.",
+            order = 7,
+            func = function()
+                self:SaveCustomTheme()
+            end,
+        },
+        deleteCustomTheme = {
+            type = "execute",
+            name = "Delete Custom Theme",
+            desc = "Delete the currently selected custom theme (built-in themes cannot be deleted).",
+            order = 8,
+            disabled = function()
+                local active = self.db.profile.theme.active
+                return active == "MidnightGlass" or active == "NeonSciFi"
+            end,
+            func = function()
+                self:DeleteCustomTheme()
+            end,
+            confirm = function()
+                return "Are you sure you want to delete the theme '" .. self.db.profile.theme.active .. "'?"
+            end,
+        },
+        spacer2 = {
+            type = "description",
+            name = " ",
+            order = 8.5,
+        },
+        colorsHeader = {
+            type = "header",
+            name = "Theme Colors",
+            order = 9,
+        },
+        colorsDesc = {
+            type = "description",
+            name = "Adjust individual colors for the theme. These settings are temporary until you save them as a custom theme.",
+            order = 10,
+        },
+    }
+    
+    -- Define all color keys with descriptions
+    local colorGroups = {
+        {
+            name = "Primary Colors",
+            order = 20,
+            colors = {
+                {key = "primary", name = "Primary", desc = "Main accent color used throughout the UI"},
+                {key = "secondary", name = "Secondary", desc = "Secondary accent color"},
+                {key = "accent", name = "Accent", desc = "Accent color for highlights and emphasis"},
+                {key = "accent-primary", name = "Accent Primary", desc = "Primary accent color for borders and highlights"},
+            }
+        },
+        {
+            name = "Background Colors",
+            order = 30,
+            colors = {
+                {key = "bg-primary", name = "Background Primary", desc = "Main background color"},
+                {key = "bg-secondary", name = "Background Secondary", desc = "Secondary background color"},
+                {key = "bg-tertiary", name = "Background Tertiary", desc = "Tertiary background color"},
+                {key = "panel-bg", name = "Panel Background", desc = "Background color for panels"},
+                {key = "panel-border", name = "Panel Border", desc = "Border color for panels"},
+            }
+        },
+        {
+            name = "Glass Effects",
+            order = 40,
+            colors = {
+                {key = "glass-dark", name = "Glass Dark", desc = "Dark glass effect"},
+                {key = "glass-medium", name = "Glass Medium", desc = "Medium glass effect"},
+                {key = "glass-light", name = "Glass Light", desc = "Light glass effect"},
+            }
+        },
+        {
+            name = "Text Colors",
+            order = 50,
+            colors = {
+                {key = "text-primary", name = "Text Primary", desc = "Primary text color"},
+                {key = "text-secondary", name = "Text Secondary", desc = "Secondary text color"},
+                {key = "text-muted", name = "Text Muted", desc = "Muted/disabled text color"},
+                {key = "text-disabled", name = "Text Disabled", desc = "Disabled text color"},
+            }
+        },
+        {
+            name = "Button Colors",
+            order = 60,
+            colors = {
+                {key = "button-bg", name = "Button Background", desc = "Button background color"},
+                {key = "button-hover", name = "Button Hover", desc = "Button hover state color"},
+                {key = "button-pressed", name = "Button Pressed", desc = "Button pressed state color"},
+                {key = "button-disabled", name = "Button Disabled", desc = "Button disabled state color"},
+            }
+        },
+        {
+            name = "Tab Colors",
+            order = 70,
+            colors = {
+                {key = "tab-inactive", name = "Tab Inactive", desc = "Inactive tab color"},
+                {key = "tab-active", name = "Tab Active", desc = "Active tab color"},
+                {key = "tab-selected-bg", name = "Tab Selected Background", desc = "Selected tab background color"},
+            }
+        },
+        {
+            name = "Scrollbar Colors",
+            order = 80,
+            colors = {
+                {key = "scrollbar-track", name = "Scrollbar Track", desc = "Scrollbar track background"},
+                {key = "scrollbar-thumb", name = "Scrollbar Thumb", desc = "Scrollbar thumb/handle"},
+            }
+        },
+        {
+            name = "Tooltip Colors",
+            order = 90,
+            colors = {
+                {key = "tooltip-bg", name = "Tooltip Background", desc = "Tooltip background color"},
+                {key = "tooltip-border", name = "Tooltip Border", desc = "Tooltip border color"},
+            }
+        },
+        {
+            name = "Status Colors",
+            order = 100,
+            colors = {
+                {key = "success", name = "Success", desc = "Success/positive state color"},
+                {key = "warning", name = "Warning", desc = "Warning state color"},
+                {key = "error", name = "Error", desc = "Error/danger state color"},
+                {key = "info", name = "Info", desc = "Informational state color"},
+            }
+        },
+    }
+    
+    -- Add color pickers for each group
+    for _, group in ipairs(colorGroups) do
+        -- Add group header
+        options["group_header_" .. group.order] = {
+            type = "header",
+            name = group.name,
+            order = group.order,
+        }
+        
+        -- Add color pickers for this group
+        for i, colorDef in ipairs(group.colors) do
+            options["color_" .. colorDef.key] = {
+                type = "color",
+                name = colorDef.name,
+                desc = colorDef.desc,
+                order = group.order + (i * 0.1),
+                hasAlpha = true,
+                get = function()
+                    -- Get color from temporary storage or current theme
+                    local color = self.tempThemeColors and self.tempThemeColors[colorDef.key]
+                    if not color then
+                        local r, g, b, a = ColorPalette:GetColor(colorDef.key)
+                        return r, g, b, a
+                    end
+                    return color.r, color.g, color.b, color.a
+                end,
+                set = function(_, r, g, b, a)
+                    -- Store in temporary storage
+                    if not self.tempThemeColors then
+                        self.tempThemeColors = {}
+                    end
+                    self.tempThemeColors[colorDef.key] = {r = r, g = g, b = b, a = a}
+                end,
+            }
+        end
+    end
+    
+    return options
+end
+
+function MidnightUI:SaveCustomTheme()
+    local themeName = self.customThemeName
+    if not themeName or themeName == "" then
+        self:Print("|cffff0000Error:|r Please enter a name for your custom theme.")
+        return
+    end
+    
+    -- Don't allow overwriting built-in themes
+    if themeName == "MidnightGlass" or themeName == "NeonSciFi" then
+        self:Print("|cffff0000Error:|r Cannot overwrite built-in themes.")
+        return
+    end
+    
+    if not self.tempThemeColors or next(self.tempThemeColors) == nil then
+        self:Print("|cffff0000Error:|r No color changes detected. Please modify at least one color before saving.")
+        return
+    end
+    
+    -- Save theme to database
+    if not self.db.profile.theme.customThemes then
+        self.db.profile.theme.customThemes = {}
+    end
+    
+    self.db.profile.theme.customThemes[themeName] = self.tempThemeColors
+    
+    -- Register the theme with ColorPalette
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if ColorPalette then
+        ColorPalette:RegisterPalette(themeName, self.tempThemeColors)
+    end
+    
+    self:Print("|cff00ff00Success:|r Custom theme '" .. themeName .. "' saved!")
+    
+    -- Clear temporary storage and name
+    self.tempThemeColors = nil
+    self.customThemeName = ""
+    
+    -- Refresh options
+    local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+    if AceConfigRegistry then
+        AceConfigRegistry:NotifyChange("MidnightUI")
+    end
+end
+
+function MidnightUI:DeleteCustomTheme()
+    local themeName = self.db.profile.theme.active
+    
+    if not self.db.profile.theme.customThemes or not self.db.profile.theme.customThemes[themeName] then
+        self:Print("|cffff0000Error:|r Theme not found or is not a custom theme.")
+        return
+    end
+    
+    -- Remove from database
+    self.db.profile.theme.customThemes[themeName] = nil
+    
+    -- Switch to default theme
+    self.db.profile.theme.active = "MidnightGlass"
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if ColorPalette then
+        ColorPalette:SetActiveTheme("MidnightGlass")
+    end
+    if self.FrameFactory then
+        self.FrameFactory:SetTheme("MidnightGlass")
+    end
+    if self.FontKit then
+        self.FontKit:SetActiveTheme("MidnightGlass")
+    end
+    
+    self:Print("|cff00ff00Success:|r Theme '" .. themeName .. "' deleted. Switched to MidnightGlass.")
+    
+    -- Refresh options
+    local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+    if AceConfigRegistry then
+        AceConfigRegistry:NotifyChange("MidnightUI")
+    end
+end
+
+function MidnightUI:LoadCustomThemes()
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then return end
+    
+    local customThemes = self.db.profile.theme.customThemes
+    if not customThemes then return end
+    
+    for themeName, themeColors in pairs(customThemes) do
+        ColorPalette:RegisterPalette(themeName, themeColors)
+    end
+end
+
 function MidnightUI:GetOptions()
     local options = {
         name = "Midnight UI",
@@ -2556,6 +2916,12 @@ function MidnightUI:GetOptions()
                         set = function(_, v) self.db.profile.modules.tweaks = v; C_UI.Reload() end }
                 }  -- closes args table for general
             },  -- closes general group
+            themes = {
+                name = "Themes",
+                type = "group",
+                order = 2,
+                args = self:GetThemeOptions(),
+            },  -- closes themes group
             export = {
                 name = "Export",
                 type = "group",
