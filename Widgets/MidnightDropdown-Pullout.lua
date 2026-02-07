@@ -245,7 +245,7 @@ local function Constructor()
     frame:SetHeight(600)
     
     local scrollFrame = CreateFrame("ScrollFrame", nil, frame)
-    scrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", -15, -3)
+    scrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", -25, -3)
     scrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -3, 3)
     scrollFrame:EnableMouseWheel(true)
     scrollFrame:SetScript("OnMouseWheel", OnMouseWheel)
