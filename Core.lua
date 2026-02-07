@@ -352,6 +352,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         protectTexture(tab.BottomLeftCorner)
                         protectTexture(tab.BottomRightCorner)
                         
+                        -- Protect background texture regions (the colored part!)
+                        protectTexture(tab.Center)
+                        protectTexture(tab.Bg)
+                        
+                        print("Tab", tab.value, "backdrop textures - Center:", tab.Center and "exists" or "nil", "Bg:", tab.Bg and "exists" or "nil")
+                        
                         tab.backdropProtected = true
                     end
                     
