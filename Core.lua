@@ -2607,8 +2607,8 @@ function MidnightUI:OpenColorEditorFrame()
     
     -- Title text
     local title = FontKit:CreateFontString(frame, "title", "large")
-    title:SetPoint("LEFT", 20, 20)
-    title:SetText("Theme Color Editor")
+    title:SetPoint("TOPLEFT", 20, -12)
+    title:SetText("Theme Editor")
     frame.titleText = title
     
     -- Instructions in title area
