@@ -184,6 +184,10 @@ local methods = {
         content:SetWidth(contentwidth)
         content.width = contentwidth
         self:BuildTabs()
+        -- If we have children and this is the first real sizing, re-layout them
+        if self.children and #self.children > 0 and width > 100 then
+            self:DoLayout()
+        end
     end,
     
     ["OnHeightSet"] = function(self, height)
