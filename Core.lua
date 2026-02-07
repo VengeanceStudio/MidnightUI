@@ -335,6 +335,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     if not tab.backdropHooked then
                         local originalSetBackdrop = tab.SetBackdrop
                         tab.SetBackdrop = function(self, backdrop)
+                            -- Check if this is one of our custom widgets by checking the frame name
+                            local frameName = self:GetName() or ""
+                            if frameName:match("^Midnight") then
+                                -- This is a Midnight widget, don't interfere
+                                return originalSetBackdrop(self, backdrop)
+                            end
+                            
                             -- If trying to clear backdrop, apply our styled one instead
                             if not backdrop or backdrop == {} then
                                 backdrop = {
@@ -1123,6 +1130,13 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 if not widget.dropdown.backdropHooked then
                     local originalSetBackdrop = widget.dropdown.SetBackdrop
                     widget.dropdown.SetBackdrop = function(self, backdrop)
+                        -- Check if this is one of our custom widgets by checking the frame name
+                        local frameName = self:GetName() or ""
+                        if frameName:match("^Midnight") then
+                            -- This is a Midnight widget, don't interfere
+                            return originalSetBackdrop(self, backdrop)
+                        end
+                        
                         -- If trying to clear backdrop, apply our styled one instead
                         if not backdrop or backdrop == {} then
                             backdrop = {
