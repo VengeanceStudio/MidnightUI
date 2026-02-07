@@ -90,7 +90,12 @@ function MidnightUI:OnEnable()
                 elseif type == "EditBox" then
                     type = "MidnightEditBox"
                 end
-                return originalCreate(self, type, ...)
+                local widget = originalCreate(self, type, ...)
+                -- Ensure type is preserved
+                if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox") then
+                    widget.type = type
+                end
+                return widget
             end
             AceGUI.MidnightCreateHooked = true
         end
@@ -98,24 +103,16 @@ function MidnightUI:OnEnable()
         -- Register theme change callback to refresh widget colors
         if ColorPalette and not ColorPalette.MidnightCallbackRegistered then
             ColorPalette:RegisterCallback(function(themeName)
-                -- Refresh all active AceGUI widgets
-                if AceGUI then
-                    for widgetType in pairs(AceGUI.WidgetRegistry or {}) do
-                        for i = 1, AceGUI:GetWidgetCount(widgetType) do
-                            local widget = AceGUI:GetWidgetByNum(widgetType, i)
-                            if widget and widget.RefreshColors then
-                                widget:RefreshColors()
-                            end
-                        end
-                    end
-                end
-                
-                -- Trigger a config frame refresh if it exists
+                -- Close and reopen config dialog to apply new theme
                 if AceConfigDialog then
                     local frame = AceConfigDialog.OpenFrames["MidnightUI"]
                     if frame then
-                        AceConfigDialog:Close("MidnightUI")
-                        AceConfigDialog:Open("MidnightUI")
+                        C_Timer.After(0.1, function()
+                            AceConfigDialog:Close("MidnightUI")
+                            C_Timer.After(0.1, function()
+                                AceConfigDialog:Open("MidnightUI")
+                            end)
+                        end)
                     end
                 end
             end)
