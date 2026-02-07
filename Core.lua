@@ -226,6 +226,31 @@ function MidnightUI:StyleLSMWidget(widget)
         widget.setLabelHooked = true
     end
     
+    -- Hook OnAcquire to reapply colors when widget is recycled
+    if widget.OnAcquire and not widget.onAcquireHooked then
+        local originalOnAcquire = widget.OnAcquire
+        widget.OnAcquire = function(self)
+            originalOnAcquire(self)
+            C_Timer.After(0.05, function()
+                if self.frame and self.frame.label then
+                    local r, g, b, a = ColorPalette:GetColor('text-primary')
+                    self.frame.label:SetTextColor(r, g, b, a or 1)
+                    print("OnAcquire hook: color reapplied")
+                end
+            end)
+        end
+        widget.onAcquireHooked = true
+    end
+    
+    -- Delayed reapply to catch any late color setting
+    C_Timer.After(0.1, function()
+        if frame.label then
+            local r, g, b, a = ColorPalette:GetColor('text-primary')
+            frame.label:SetTextColor(r, g, b, a or 1)
+            print("Delayed color reapply completed")
+        end
+    end)
+    
     -- Style the selected value text
     if frame.text then
         if FontKit then
