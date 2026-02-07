@@ -277,7 +277,7 @@ local function Constructor()
         else
             widget.open = true
             widget.pullout:SetWidth(widget.pulloutWidth or widget.frame:GetWidth())
-            widget.pullout:Open("TOPLEFT", widget.frame, "BOTTOMLEFT", 0, widget.label:IsShown() and -2 or 0)
+            widget.pullout:Open("TOPLEFT", widget.dropdown, "BOTTOMLEFT", 0, -2)
             AceGUI:SetFocus(widget)
         end
     end)
