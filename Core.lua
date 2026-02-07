@@ -269,6 +269,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
     elseif widgetType == "TabGroup" then
+        -- Check if this is our custom MidnightTabGroup (it handles its own styling)
+        if widget.type == "MidnightTabGroup" then
+            -- Don't apply any styling to MidnightTabGroup - it handles everything itself
+            return
+        end
+        
         if widget.border then
             widget.border:SetBackdrop({
                 bgFile = "Interface\\Buttons\\WHITE8X8",
