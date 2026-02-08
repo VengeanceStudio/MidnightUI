@@ -2505,6 +2505,31 @@ function MidnightUI:GetThemeOptions()
             order = 11,
             width = "full",
         },
+        spacer3 = {
+            type = "description",
+            name = " ",
+            order = 12,
+        },
+        spacer4 = {
+            type = "description",
+            name = " ",
+            order = 13,
+        },
+        spacer5 = {
+            type = "description",
+            name = " ",
+            order = 14,
+        },
+        spacer6 = {
+            type = "description",
+            name = " ",
+            order = 15,
+        },
+        spacer7 = {
+            type = "description",
+            name = " ",
+            order = 16,
+        },
         spacer2 = {
             type = "description",
             name = " ",
