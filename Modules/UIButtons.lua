@@ -326,6 +326,12 @@ function UIButtons:CreateButtons()
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 GameTooltip:SetText(data.tooltip)
                 GameTooltip:Show()
+                
+                -- Trigger MidnightUI tooltip styling if available
+                local Tooltips = MidnightUI:GetModule("Tooltips", true)
+                if Tooltips and Tooltips.StyleTooltip then
+                    Tooltips:StyleTooltip(GameTooltip)
+                end
             end)
             btn:SetScript("OnLeave", function(self)
                 GameTooltip:Hide()
