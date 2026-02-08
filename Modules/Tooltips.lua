@@ -267,18 +267,18 @@ function Tooltips:StyleTooltip(tooltip, itemQuality, classColor)
             tooltip.NineSlice.RightEdge:SetWidth(borderSize)
         end
         
-        -- Set corner colors
+        -- Set corner colors to background color for cleaner look
         if tooltip.NineSlice.TopLeftCorner then
-            tooltip.NineSlice.TopLeftCorner:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.TopLeftCorner:SetColorTexture(bgr, bgg, bgb, bga)
         end
         if tooltip.NineSlice.TopRightCorner then
-            tooltip.NineSlice.TopRightCorner:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.TopRightCorner:SetColorTexture(bgr, bgg, bgb, bga)
         end
         if tooltip.NineSlice.BottomLeftCorner then
-            tooltip.NineSlice.BottomLeftCorner:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.BottomLeftCorner:SetColorTexture(bgr, bgg, bgb, bga)
         end
         if tooltip.NineSlice.BottomRightCorner then
-            tooltip.NineSlice.BottomRightCorner:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.BottomRightCorner:SetColorTexture(bgr, bgg, bgb, bga)
         end
         
         -- Create or update background texture
