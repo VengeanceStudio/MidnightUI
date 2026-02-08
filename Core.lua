@@ -3615,15 +3615,16 @@ function MidnightUI:SaveCustomTheme()
         end
     end
     
-    if not self.tempThemeColors or next(self.tempThemeColors) == nil then
-        self:Print("|cffff0000Error:|r No color changes detected. Please modify at least one color before saving.")
-        return
-    end
-    
     -- Check if theme already exists
     local isOverwrite = false
     if self.db.profile.theme.customThemes and self.db.profile.theme.customThemes[themeName] then
         isOverwrite = true
+    end
+    
+    -- Only require color changes for NEW themes, allow overwrites without changes
+    if not isOverwrite and (not self.tempThemeColors or next(self.tempThemeColors) == nil) then
+        self:Print("|cffff0000Error:|r No color changes detected. Please modify at least one color before saving a new theme.")
+        return
     end
     
     -- Get full theme palette from current theme as base
@@ -3639,9 +3640,11 @@ function MidnightUI:SaveCustomTheme()
         end
     end
     
-    -- Override with custom changes
-    for key, color in pairs(self.tempThemeColors) do
-        fullTheme[key] = color
+    -- Override with custom changes (if any)
+    if self.tempThemeColors then
+        for key, color in pairs(self.tempThemeColors) do
+            fullTheme[key] = color
+        end
     end
     
     -- Save theme to database
