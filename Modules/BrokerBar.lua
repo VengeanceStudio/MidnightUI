@@ -1018,6 +1018,11 @@ function BrokerBar:OnDBReady()
     -- Keep namespace as "Bar" for backwards compatibility with saved settings
     self.db = MidnightUI.db:RegisterNamespace("Bar", defaults)
     
+    -- Ensure MainBar has useThemeColor flag set (migration for existing profiles)
+    if self.db.profile.bars["MainBar"] and self.db.profile.bars["MainBar"].useThemeColor == nil then
+        self.db.profile.bars["MainBar"].useThemeColor = true
+    end
+    
     if Masque then 
         masqueGroup = Masque:Group("Midnight Bar") 
     end
