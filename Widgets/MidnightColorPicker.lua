@@ -174,7 +174,7 @@ local methods = {
 		self.disabled = disabled
 		if self.disabled then
 			self.frame:Disable()
-			self.text:SetTextColor(0.5, 0.5, 0.5)
+			self.text:SetTextColor(ColorPalette:GetColor('text-disabled'))
 		else
 			self.frame:Enable()
 			local r, g, b = ColorPalette:GetColor('text-primary')

@@ -1254,7 +1254,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                         widget.frame:SetBackdropColor(r, g, b, a)
                     end
                     if widget.frame.SetBackdropBorderColor then
-                        widget.frame:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                        widget.frame:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
                     end
                 end)
                 widget.frame:HookScript("OnLeave", function(self)
@@ -1435,8 +1435,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tile = false, edgeSize = 1,
                     insets = { left = 2, right = 2, top = 2, bottom = 2 }
                 })
-                -- Use a darker background color
-                widget.editbox:SetBackdropColor(0.15, 0.15, 0.15, 1)
+                -- Use theme background color
+                widget.editbox:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.editbox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
             end
             
@@ -1472,7 +1472,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tile = false, edgeSize = 1,
                     insets = { left = 2, right = 2, top = 2, bottom = 2 }
                 })
-                widget.editbox:SetBackdropColor(0.15, 0.15, 0.15, 1)
+                widget.editbox:SetBackdropColor(ColorPalette:GetColor('button-bg'))
                 widget.editbox:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
             end
             
@@ -2255,7 +2255,7 @@ function MidnightUI:SkinConfigFrame(frame)
         -- Hover effects - highlight full background like Setup window
         frame.customCloseBtn:SetScript("OnEnter", function(self)
             self:SetBackdropColor(ColorPalette:GetColor('button-hover'))
-            self:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+            self:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
         end)
         frame.customCloseBtn:SetScript("OnLeave", function(self)
             self:SetBackdropColor(ColorPalette:GetColor('button-bg'))

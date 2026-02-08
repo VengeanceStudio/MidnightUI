@@ -166,7 +166,7 @@ local function Constructor()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    editbox:SetBackdropColor(0.15, 0.15, 0.15, 1)
+    editbox:SetBackdropColor(ColorPalette:GetColor('button-bg'))
     editbox:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
     
     editbox:SetFont("Fonts\\FRIZQT__.TTF", 10, "")

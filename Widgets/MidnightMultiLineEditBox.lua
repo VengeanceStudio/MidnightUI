@@ -218,8 +218,8 @@ local methods = {
 		if disabled then
 			editBox:ClearFocus()
 			editBox:EnableMouse(false)
-			editBox:SetTextColor(0.5, 0.5, 0.5)
-			self.label:SetTextColor(0.5, 0.5, 0.5)
+			editBox:SetTextColor(ColorPalette:GetColor('text-disabled'))
+			self.label:SetTextColor(ColorPalette:GetColor('text-disabled'))
 			self.button:Disable()
 			self.scrollFrame:EnableMouse(false)
 		else
