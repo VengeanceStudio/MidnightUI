@@ -138,35 +138,37 @@ function Tooltips:Initialize()
     -- Create tooltip anchor frame
     self:CreateTooltipAnchor()
     
-    -- Hook all tooltips that show after this point (catches addon tooltips)
-    self:HookAllTooltips()
+    -- Hook all tooltips including addon tooltips (safe delayed scan)
+    C_Timer.After(2, function()
+        self:HookAllTooltips()
+    end)
 end
 
 function Tooltips:HookAllTooltips()
-    -- Hook the global tooltip creation function to catch all tooltips
-    local orig_CreateFrame = CreateFrame
-    CreateFrame = function(frameType, name, parent, template, ...)
-        local frame = orig_CreateFrame(frameType, name, parent, template, ...)
-        
-        -- If it's a GameTooltip type frame, hook it
-        if frameType == "GameTooltip" or (template and template:find("Tooltip")) then
-            if frame and frame.GetObjectType and not self:IsHooked(frame, "OnShow") then
-                self:HookScript(frame, "OnShow", function(tooltip)
-                    self:StyleTooltip(tooltip)
-                end)
-            end
-        end
-        
-        return frame
+    -- Don't scan during combat to avoid taint
+    if InCombatLockdown() then
+        C_Timer.After(2, function()
+            self:HookAllTooltips()
+        end)
+        return
     end
     
-    -- Also scan for existing tooltips that might not be in our hardcoded list
-    for _, frame in pairs({EnumerateFrames()}) do
-        if frame and frame.GetObjectType then
-            local objType = frame:GetObjectType()
-            if objType == "GameTooltip" and not self:IsHooked(frame, "OnShow") then
-                self:HookScript(frame, "OnShow", function(tooltip)
-                    self:StyleTooltip(tooltip)
+    -- Only hook specific known tooltip frames to avoid taint
+    local tooltipNames = {
+        "GameTooltip",
+        "ItemRefTooltip",
+        "ShoppingTooltip1",
+        "ShoppingTooltip2",
+        "BaganatorTooltip",
+        "BaganatorItemViewTooltip",
+    }
+    
+    for _, name in ipairs(tooltipNames) do
+        local tooltip = _G[name]
+        if tooltip and tooltip.GetObjectType and tooltip:GetObjectType() == "GameTooltip" then
+            if not self:IsHooked(tooltip, "OnShow") then
+                self:HookScript(tooltip, "OnShow", function(tip)
+                    self:StyleTooltip(tip)
                 end)
             end
         end
