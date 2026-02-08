@@ -932,10 +932,6 @@ function BrokerBar:ApplyBarSettings(barID)
     local r, g, b, alpha
     if db.useThemeColor and ColorPalette then
         r, g, b, alpha = ColorPalette:GetColor("panel-bg")
-        -- Debug output
-        if barID == "MainBar" then
-            print("MainBar useThemeColor: panel-bg =", r, g, b, alpha)
-        end
         -- Fallback if ColorPalette returns nil (shouldn't happen but safety check)
         if not r then
             r, g, b = db.color.r, db.color.g, db.color.b
@@ -944,10 +940,6 @@ function BrokerBar:ApplyBarSettings(barID)
     else
         r, g, b = db.color.r, db.color.g, db.color.b
         alpha = db.alpha or 0.6
-        -- Debug output
-        if barID == "MainBar" then
-            print("MainBar saved color =", r, g, b, alpha)
-        end
     end
     f.bg:SetVertexColor(r, g, b, alpha)
     
