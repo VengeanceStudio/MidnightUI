@@ -2826,6 +2826,11 @@ function MidnightUI:CreateColorPaletteSwatches()
         swatchFrame:SetSize(80, 50)
         swatchFrame:SetPoint("TOPLEFT", xOffset, 0)
         
+        -- Create solid white background (so transparency is visible)
+        local background = swatchFrame:CreateTexture(nil, "BACKGROUND")
+        background:SetAllPoints()
+        background:SetColorTexture(1, 1, 1, 1)  -- Solid white
+        
         -- Create color texture
         local colorTexture = swatchFrame:CreateTexture(nil, "ARTWORK")
         colorTexture:SetAllPoints()
@@ -2840,7 +2845,7 @@ function MidnightUI:CreateColorPaletteSwatches()
         end
         colorTexture:SetColorTexture(r, g, b, a)
         
-        -- Create border
+        -- Create border (just edge, not background)
         local border = swatchFrame:CreateTexture(nil, "BORDER")
         border:SetPoint("TOPLEFT", -1, 1)
         border:SetPoint("BOTTOMRIGHT", 1, -1)
