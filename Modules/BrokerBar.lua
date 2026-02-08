@@ -919,17 +919,19 @@ function BrokerBar:ApplyBarSettings(barID)
     
     f:SetHeight(db.height or 24)
     f.bg:SetTexture(LSM:Fetch("statusbar", db.texture or "Flat"))
-    f.bg:SetVertexColor(db.color.r, db.color.g, db.color.b, db.alpha or 0.5)
-    f:SetBackdrop(skin.backdrop)
     
     -- Use theme colors if available
     if ColorPalette then
+        local r, g, b, a = ColorPalette:GetColor("panel-bg")
+        f.bg:SetVertexColor(r, g, b, db.alpha or a)
         f:SetBackdropColor(ColorPalette:GetColor("bg-primary"))
         f:SetBackdropBorderColor(ColorPalette:GetColor("panel-border"))
     else
+        f.bg:SetVertexColor(db.color.r, db.color.g, db.color.b, db.alpha or 0.5)
         f:SetBackdropColor(0, 0, 0, 0)
         f:SetBackdropBorderColor(1, 1, 1, skin.borderAlpha)
     end
+    f:SetBackdrop(skin.backdrop)
     
     if db.enabled then 
         f:Show()

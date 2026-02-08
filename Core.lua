@@ -64,6 +64,20 @@ function MidnightUI:OnInitialize()
 end
 
 function MidnightUI:OnEnable()
+    -- Validate and migrate theme setting
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if ColorPalette and self.db.profile.theme.active then
+        local currentTheme = self.db.profile.theme.active
+        -- Check if the current theme exists in the palette
+        if not ColorPalette.palettes[currentTheme] then
+            -- Theme doesn't exist, fall back to MidnightUIDefault
+            self.db.profile.theme.active = "MidnightUIDefault"
+            self:Print("Previous theme not found. Switched to MidnightUI Default theme.")
+        end
+        -- Set the active theme in ColorPalette
+        ColorPalette:SetActiveTheme(self.db.profile.theme.active)
+    end
+    
     -- Load custom themes on startup
     C_Timer.After(0.05, function()
         self:LoadCustomThemes()
@@ -3539,7 +3553,7 @@ function MidnightUI:SaveCustomTheme()
     end
     
     -- Don't allow overwriting built-in themes
-    if themeName == "MidnightGlass" or themeName == "NeonSciFi" then
+    if themeName == "MidnightGlass" or themeName == "NeonSciFi" or themeName == "MidnightUIDefault" then
         self:Print("|cffff0000Error:|r Cannot overwrite built-in themes.")
         return
     end
@@ -3547,6 +3561,12 @@ function MidnightUI:SaveCustomTheme()
     if not self.tempThemeColors or next(self.tempThemeColors) == nil then
         self:Print("|cffff0000Error:|r No color changes detected. Please modify at least one color before saving.")
         return
+    end
+    
+    -- Check if theme already exists
+    local isOverwrite = false
+    if self.db.profile.theme.customThemes and self.db.profile.theme.customThemes[themeName] then
+        isOverwrite = true
     end
     
     -- Get full theme palette from current theme as base
@@ -3577,13 +3597,31 @@ function MidnightUI:SaveCustomTheme()
     -- Register the theme with ColorPalette
     if ColorPalette then
         ColorPalette:RegisterPalette(themeName, fullTheme)
+        -- Switch to the newly saved custom theme
+        ColorPalette:SetActiveTheme(themeName)
     end
     
-    self:Print("|cff00ff00Success:|r Custom theme '" .. themeName .. "' saved!")
+    -- Switch the active theme to the newly created theme
+    self.db.profile.theme.active = themeName
+    if self.FrameFactory then
+        self.FrameFactory:SetTheme(themeName)
+    end
+    if self.FontKit then
+        self.FontKit:SetActiveTheme(themeName)
+    end
+    
+    if isOverwrite then
+        self:Print("|cff00ff00Success:|r Custom theme '" .. themeName .. "' updated and activated!")
+    else
+        self:Print("|cff00ff00Success:|r Custom theme '" .. themeName .. "' created and activated!")
+    end
     
     -- Clear temporary storage and name
     self.tempThemeColors = nil
     self.customThemeName = ""
+    
+    -- Update the color swatches to show the new theme colors
+    self:UpdateThemeColorSwatches()
     
     -- Refresh options
     local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
