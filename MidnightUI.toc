@@ -2,7 +2,7 @@
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
 ## Author: Vengeance
-## Version: 12.0.0.57
+## Version: 12.0.0.58
 ## IconTexture: Interface\AddOns\MidnightUI\icon.png
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
@@ -44,6 +44,7 @@ Framework\ColorPalette.lua
 Framework\FontKit.lua
 Framework\LayoutHelper.lua
 Framework\FrameFactory.lua
+Themes\MidnightUIDefault.lua
 Themes\MidnightGlass.lua
 Themes\NeonSciFi.lua
 
