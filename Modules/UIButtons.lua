@@ -94,17 +94,17 @@ function UIButtons:CreateContainer()
     container:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false, edgeSize = 1,
+        tile = false, edgeSize = 0, -- Temporarily hidden (was 1)
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     
     -- Use ColorPalette if available, fallback to database
     if ColorPalette then
         container:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-        container:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+        -- container:SetBackdropBorderColor(ColorPalette:GetColor('panel-border')) -- Border temporarily hidden
     else
         container:SetBackdropColor(unpack(self.db.profile.backgroundColor))
-        container:SetBackdropBorderColor(0, 0, 0, 1)
+        -- container:SetBackdropBorderColor(0, 0, 0, 1) -- Border temporarily hidden
     end
     
     -- Use Movable for drag functionality
