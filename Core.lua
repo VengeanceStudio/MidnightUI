@@ -2496,7 +2496,21 @@ function MidnightUI:GetThemeOptions()
             order = 8,
             disabled = function()
                 local active = self.db.profile.theme.active
-                return active == "MidnightGlass" or active == "NeonSciFi"
+                local builtInThemes = {
+                    "MidnightUIDefault", "MidnightGlass", "MidnightGreen",
+                    "MidnightTransparent", "MidnightTransparentGold",
+                    "MidnightDeathKnight", "MidnightDemonHunter", "MidnightDruid",
+                    "MidnightEvoker", "MidnightHunter", "MidnightMage",
+                    "MidnightMonk", "MidnightPaladin", "MidnightPriest",
+                    "MidnightRogue", "MidnightShaman", "MidnightWarlock",
+                    "MidnightWarrior", "NeonSciFi"
+                }
+                for _, themeName in ipairs(builtInThemes) do
+                    if active == themeName then
+                        return true
+                    end
+                end
+                return false
             end,
             func = function()
                 self:DeleteCustomTheme()
