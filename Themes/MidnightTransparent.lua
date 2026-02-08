@@ -13,7 +13,7 @@ if not ColorPalette or not FontKit then return end
 ColorPalette:RegisterPalette("MidnightTransparent", {
     -- Core UI Colors (8 main colors for theme editor)
     ["panel-bg"] = {r = 0.05, g = 0.05, b = 0.05, a = 0.65},       -- Very transparent black
-    ["panel-border"] = {r = 0.35, g = 0.35, b = 0.40, a = 0.70},   -- Cool grey
+    ["panel-border"] = {r = 0.50, g = 0.55, b = 0.60, a = 0.90},   -- Brighter cool grey for visibility
     ["accent-primary"] = {r = 0.55, g = 0.60, b = 0.70, a = 0.85}, -- Steel blue-grey
     ["button-bg"] = {r = 0.08, g = 0.08, b = 0.10, a = 0.60},      -- Transparent dark charcoal
     ["button-hover"] = {r = 0.40, g = 0.42, b = 0.48, a = 0.75},   -- Medium grey-blue

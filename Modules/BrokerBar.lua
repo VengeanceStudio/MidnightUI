@@ -1404,7 +1404,6 @@ function BrokerBar:GetOptions()
             bars = { 
                 name = "Bars", 
                 type = "group",
-                inline = true,
                 childGroups = "tree",
                 order = 8, 
                 args = { 
