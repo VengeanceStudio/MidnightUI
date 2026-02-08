@@ -2535,6 +2535,27 @@ function MidnightUI:GetThemeOptions()
             name = " ",
             order = 19,
         },
+        resetThemeColors = {
+            type = "execute",
+            name = "Reset to Theme Defaults",
+            desc = "Reset all color changes back to the original theme defaults",
+            order = 19.5,
+            func = function()
+                -- Clear temp colors
+                self.tempThemeColors = nil
+                
+                -- Reload the original palette for the active theme
+                local ColorPalette = _G.MidnightUI_ColorPalette
+                if ColorPalette then
+                    local activeTheme = self.db.profile.theme.active
+                    -- Force re-registration from the theme file
+                    self:LoadTheme(activeTheme)
+                    self:UpdateThemeColorSwatches()
+                end
+                
+                self:Print("Theme colors reset to defaults")
+            end,
+        },
         openColorEditor = {
             type = "execute",
             name = "Open Theme Editor",
