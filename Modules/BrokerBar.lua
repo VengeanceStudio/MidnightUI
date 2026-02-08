@@ -1522,7 +1522,8 @@ function BrokerBar:GetOptions()
                 skin = { 
                     name = "Skin", 
                     type = "select", 
-                    order = 5, 
+                    order = 5,
+                    hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     values = GetSkinList, 
                     get = function() return self.db.profile.bars[id].skin or "Global" end, 
                     set = function(_, v) self.db.profile.bars[id].skin = v; self:ApplyBarSettings(id) end 
@@ -1530,7 +1531,8 @@ function BrokerBar:GetOptions()
                 texture = { 
                     name = "Texture", 
                     type = "select", 
-                    order = 6, 
+                    order = 6,
+                    hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     dialogControl = "Dropdown", 
                     values = function()
                         local textures = LSM:List("statusbar")
@@ -1546,7 +1548,15 @@ function BrokerBar:GetOptions()
                     type = "toggle",
                     order = 6.5,
                     get = function() return self.db.profile.bars[id].useThemeColor end,
-                    set = function(_, v) self.db.profile.bars[id].useThemeColor = v; self:ApplyBarSettings(id) end
+                    set = function(_, v)
+                        self.db.profile.bars[id].useThemeColor = v
+                        if v then
+                            -- Set to Transparent skin and Solid texture when using theme color
+                            self.db.profile.bars[id].skin = "Transparent"
+                            self.db.profile.bars[id].texture = "Solid"
+                        end
+                        self:ApplyBarSettings(id)
+                    end
                 },
                 color = { 
                     name = "Color", 
