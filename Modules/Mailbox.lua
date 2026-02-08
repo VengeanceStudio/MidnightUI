@@ -911,11 +911,22 @@ function Mailbox:GetOptions()
                 end,
                 disabled = function() return not self:IsEnabled() end,
             },
+            quickAttachEnabled = {
+                type = "toggle",
+                name = "Enable QuickAttach",
+                desc = "Show Ore, Herb, Leather, Cloth, Gems buttons on send mail screen",
+                order = 44,
+                get = function() return self.db.profile.quickAttachEnabled end,
+                set = function(_, value)
+                    self.db.profile.quickAttachEnabled = value
+                end,
+                disabled = function() return not self:IsEnabled() end,
+            },
             tradeBlockEnabled = {
                 type = "toggle",
                 name = "Enable TradeBlock",
                 desc = "Block trades while at mailbox",
-                order = 44,
+                order = 45,
                 get = function() return self.db.profile.tradeBlockEnabled end,
                 set = function(_, value)
                     self.db.profile.tradeBlockEnabled = value
