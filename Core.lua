@@ -1148,8 +1148,8 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                                 for _, btn in pairs(treeWidget.buttons) do
                                                     if btn and btn.text then
                                                         if btn.selected then
-                                                            -- Bright teal text for selected item
-                                                            btn.text:SetTextColor(0.2, 0.7, 0.8, 1)
+                                                            -- Use theme accent color for selected item
+                                                            btn.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
                                                         else
                                                             -- Normal white/gray text for non-selected items
                                                             btn.text:SetTextColor(ColorPalette:GetColor('text-primary'))
@@ -1162,7 +1162,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                                     
                                     -- Apply color immediately if already selected
                                     if button.selected and button.text then
-                                        button.text:SetTextColor(0.2, 0.7, 0.8, 1)
+                                        button.text:SetTextColor(ColorPalette:GetColor('accent-primary'))
                                     end
                                     
                                     button.customStyled = true

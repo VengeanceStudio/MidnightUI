@@ -100,6 +100,7 @@ local methods = {
             size = 16
             checkbg:SetTexture("Interface\\Buttons\\UI-RadioButton")
             checkbg:SetTexCoord(0, 0.25, 0, 1)
+            checkbg:SetVertexColor(ColorPalette:GetColor("button-bg"))
             check:SetTexture("Interface\\Buttons\\UI-RadioButton")
             check:SetTexCoord(0.25, 0.5, 0, 1)
             check:SetBlendMode("ADD")
@@ -112,6 +113,7 @@ local methods = {
             size = 24
             checkbg:SetTexture("Interface\\Buttons\\UI-CheckBox-Up")
             checkbg:SetTexCoord(0, 1, 0, 1)
+            checkbg:SetVertexColor(ColorPalette:GetColor("button-bg"))
             check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
             check:SetTexCoord(0, 1, 0, 1)
             check:SetBlendMode("BLEND")
@@ -184,6 +186,8 @@ local function Constructor()
     checkbg:SetHeight(24)
     checkbg:SetPoint("TOPLEFT")
     checkbg:SetTexture("Interface\\Buttons\\UI-CheckBox-Up")
+    -- Tint the checkbox background to match theme
+    checkbg:SetVertexColor(ColorPalette:GetColor("button-bg"))
     
     local check = frame:CreateTexture(nil, "OVERLAY")
     check:SetAllPoints(checkbg)
