@@ -122,9 +122,6 @@ function Tooltips:Initialize()
     -- Listen for inspect data
     self:RegisterEvent("INSPECT_READY")
     
-    -- Position shopping tooltips intelligently
-    self:SecureHookScript(GameTooltip, "OnShow", "PositionShoppingTooltips")
-    
     -- Listen for theme changes
     self:RegisterMessage("MIDNIGHTUI_THEME_CHANGED", "OnThemeChanged")
 end
@@ -237,6 +234,11 @@ function Tooltips:OnTooltipShow(tooltip)
         if rightText then
             rightText:SetFont(font, fontSize, "")
         end
+    end
+    
+    -- Position shopping tooltips if this is GameTooltip
+    if tooltip == GameTooltip then
+        self:PositionShoppingTooltips()
     end
 end
 
