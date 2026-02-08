@@ -152,9 +152,9 @@ function Tooltips:StyleTooltip(tooltip, itemQuality, classColor)
         br, bg, bb = classColor.r, classColor.g, classColor.b
     -- Override border color with item quality color if enabled
     elseif itemQuality and self.db.profile.qualityBorderColors then
-        local qualityColor = C_Item.GetItemQualityColor(itemQuality)
-        if qualityColor then
-            br, bg, bb = qualityColor:GetRGB()
+        local r, g, b, hex = C_Item.GetItemQualityColor(itemQuality)
+        if r then
+            br, bg, bb = r, g, b
         end
     end
     
