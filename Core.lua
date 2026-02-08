@@ -29,7 +29,7 @@ StaticPopupDialogs["MIDNIGHTUI_RELOAD_CONFIRM"] = {
 local defaults = {
     profile = {
         theme = {
-            active = "MidnightUIDefault",  -- Active framework theme
+            active = "MidnightTransparent",  -- Active framework theme
             font = "Friz Quadrata TT",
             fontSize = 12,
             bgColor = {0.1, 0.1, 0.1, 0.8},
@@ -3725,19 +3725,19 @@ function MidnightUI:DeleteCustomTheme()
     self.db.profile.theme.customThemes[themeName] = nil
     
     -- Switch to default theme
-    self.db.profile.theme.active = "MidnightGlass"
+    self.db.profile.theme.active = "MidnightTransparent"
     local ColorPalette = _G.MidnightUI_ColorPalette
     if ColorPalette then
-        ColorPalette:SetActiveTheme("MidnightGlass")
+        ColorPalette:SetActiveTheme("MidnightTransparent")
     end
     if self.FrameFactory then
-        self.FrameFactory:SetTheme("MidnightGlass")
+        self.FrameFactory:SetTheme("MidnightTransparent")
     end
     if self.FontKit then
-        self.FontKit:SetActiveTheme("MidnightGlass")
+        self.FontKit:SetActiveTheme("MidnightTransparent")
     end
     
-    self:Print("|cff00ff00Success:|r Theme '" .. themeName .. "' deleted. Switched to MidnightGlass.")
+    self:Print("|cff00ff00Success:|r Theme '" .. themeName .. "' deleted. Switched to Midnight Transparent.")
     
     -- Refresh options
     local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
