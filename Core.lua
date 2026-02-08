@@ -2826,12 +2826,20 @@ function MidnightUI:CreateColorPaletteSwatches()
         swatchFrame:SetSize(80, 50)
         swatchFrame:SetPoint("TOPLEFT", xOffset, 0)
         
-        -- Create solid white background (so transparency is visible)
+        -- Create border first (lowest layer, extends 1px beyond frame)
+        local border = swatchFrame:CreateTexture(nil, "BACKGROUND")
+        border:SetPoint("TOPLEFT", -1, 1)
+        border:SetPoint("BOTTOMRIGHT", 1, -1)
+        border:SetColorTexture(ColorPalette:GetColor("panel-border"))
+        border:SetDrawLayer("BACKGROUND", -1)
+        
+        -- Create solid white background on top of border (so transparency is visible)
         local background = swatchFrame:CreateTexture(nil, "BACKGROUND")
         background:SetAllPoints()
         background:SetColorTexture(1, 1, 1, 1)  -- Solid white
+        background:SetDrawLayer("BACKGROUND", 0)
         
-        -- Create color texture
+        -- Create color texture on top
         local colorTexture = swatchFrame:CreateTexture(nil, "ARTWORK")
         colorTexture:SetAllPoints()
         
@@ -2844,13 +2852,6 @@ function MidnightUI:CreateColorPaletteSwatches()
             r, g, b, a = ColorPalette:GetColor(colorData.key)
         end
         colorTexture:SetColorTexture(r, g, b, a)
-        
-        -- Create border (just edge, not background)
-        local border = swatchFrame:CreateTexture(nil, "BORDER")
-        border:SetPoint("TOPLEFT", -1, 1)
-        border:SetPoint("BOTTOMRIGHT", 1, -1)
-        border:SetColorTexture(ColorPalette:GetColor("panel-border"))
-        border:SetDrawLayer("BORDER", -1)
         
         -- Label below
         local label = FontKit:CreateFontString(swatchFrame, "body", "tiny")
