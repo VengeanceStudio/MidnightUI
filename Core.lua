@@ -2378,11 +2378,21 @@ function MidnightUI:GetThemeOptions()
     end
     
     -- Get available themes
-    local availableThemes = {"MidnightGlass", "NeonSciFi"}
-    local customThemes = self.db.profile.theme.customThemes or {}
-    for themeName, _ in pairs(customThemes) do
+    local availableThemes = {}
+    -- Get all registered themes from ColorPalette
+    for themeName, _ in pairs(ColorPalette.palettes) do
         table.insert(availableThemes, themeName)
     end
+    -- Add custom themes
+    local customThemes = self.db.profile.theme.customThemes or {}
+    for themeName, _ in pairs(customThemes) do
+        if not ColorPalette.palettes[themeName] then
+            table.insert(availableThemes, themeName)
+        end
+    end
+    
+    -- Sort alphabetically
+    table.sort(availableThemes)
     
     -- Build theme selection dropdown values
     local themeValues = {}
