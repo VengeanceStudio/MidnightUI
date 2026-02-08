@@ -22,6 +22,7 @@ function Tooltips:OnInitialize()
             
             -- Player Information
             classColor = true,
+            classColoredBorders = false,
             showGuild = true,
             yourGuildColor = {r = 0.25, g = 1.0, b = 0.25},
             otherGuildColor = {r = 0.67, g = 0.83, b = 0.45},
@@ -140,14 +141,17 @@ function Tooltips:StyleTooltips()
     end
 end
 
-function Tooltips:StyleTooltip(tooltip, itemQuality)
+function Tooltips:StyleTooltip(tooltip, itemQuality, classColor)
     if not tooltip or not self.ColorPalette then return end
     
     local br, bg, bb, ba = self.ColorPalette:GetColor("panel-border")
     local bgr, bgg, bgb, bga = self.ColorPalette:GetColor("tooltip-bg")
     
+    -- Override border color with class color if provided and enabled
+    if classColor and self.db.profile.classColoredBorders then
+        br, bg, bb = classColor.r, classColor.g, classColor.b
     -- Override border color with item quality color if enabled
-    if itemQuality and self.db.profile.qualityBorderColors then
+    elseif itemQuality and self.db.profile.qualityBorderColors then
         local qualityColor = C_Item.GetItemQualityColor(itemQuality)
         if qualityColor then
             br, bg, bb = qualityColor:GetRGB()
@@ -396,16 +400,22 @@ function Tooltips:OnTooltipSetUnit(tooltip)
     
     if not name or not guid then return end
     
-    -- Class coloring for player names
-    if self.db.profile.classColor then
-        local _, class = UnitClass(unit)
-        if class then
-            local color = RAID_CLASS_COLORS[class]
-            if color then
-                tooltip:ClearLines()
-                tooltip:AddLine(name, color.r, color.g, color.b)
-            end
+    -- Get class color for border (if enabled)
+    local classColor = nil
+    local _, class = UnitClass(unit)
+    if class then
+        classColor = RAID_CLASS_COLORS[class]
+        
+        -- Class coloring for player names
+        if self.db.profile.classColor and classColor then
+            tooltip:ClearLines()
+            tooltip:AddLine(name, classColor.r, classColor.g, classColor.b)
         end
+    end
+    
+    -- Apply class-colored border if enabled
+    if self.db.profile.classColoredBorders and classColor then
+        self:StyleTooltip(tooltip, nil, classColor)
     end
     
     -- Guild information
@@ -886,6 +896,18 @@ function Tooltips:GetOptions()
                 get = function() return self.db.profile.classColor end,
                 set = function(_, value)
                     self.db.profile.classColor = value
+                end,
+                disabled = function() return not self:IsEnabled() end,
+            },
+            classColoredBorders = {
+                type = "toggle",
+                name = "Class-Colored Borders",
+                desc = "Color tooltip borders based on player class (overrides theme border color)",
+                order = 31.5,
+                get = function() return self.db.profile.classColoredBorders end,
+                set = function(_, value)
+                    self.db.profile.classColoredBorders = value
+                    self:UpdateSettings()
                 end,
                 disabled = function() return not self:IsEnabled() end,
             },
