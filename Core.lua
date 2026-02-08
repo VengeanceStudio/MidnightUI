@@ -3563,9 +3563,18 @@ function MidnightUI:SaveCustomTheme()
     end
     
     -- Don't allow overwriting built-in themes
-    if themeName == "MidnightGlass" or themeName == "NeonSciFi" or themeName == "MidnightUIDefault" then
-        self:Print("|cffff0000Error:|r Cannot overwrite built-in themes.")
-        return
+    local builtInThemes = {
+        "MidnightUIDefault",
+        "MidnightGlass",
+        "MidnightGreen",
+        "MidnightTransparent",
+        "NeonSciFi"
+    }
+    for _, builtInName in ipairs(builtInThemes) do
+        if themeName == builtInName then
+            self:Print("|cffff0000Error:|r Cannot overwrite built-in themes.")
+            return
+        end
     end
     
     if not self.tempThemeColors or next(self.tempThemeColors) == nil then
