@@ -2560,7 +2560,8 @@ function MidnightUI:GetThemeOptions()
             type = "description",
             name = " ",
             order = 19.75,
-        },        openColorEditor = {
+        },        
+        openColorEditor = {
             type = "execute",
             name = "Open Theme Editor",
             desc = "Opens a visual mockup window where you can click on elements to edit their colors",
