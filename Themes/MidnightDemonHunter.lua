@@ -12,7 +12,7 @@ if not ColorPalette or not FontKit then return end
 
 ColorPalette:RegisterPalette("MidnightDemonHunter", {
     -- Core UI Colors (8 main colors for theme editor)
-    ["panel-bg"] = {r = 0.05, g = 0.05, b = 0.05, a = 0.65},       -- Very transparent black
+    ["panel-bg"] = {r = 0.239, g = 0.106, b = 0.333, a = 0.65},    -- Dark purple (#3D1B55)
     ["panel-border"] = {r = 0.639, g = 0.207, b = 0.933, a = 0.90}, -- DH purple
     ["accent-primary"] = {r = 0.639, g = 0.207, b = 0.933, a = 0.85}, -- DH purple
     ["button-bg"] = {r = 0.08, g = 0.08, b = 0.10, a = 0.60},      -- Transparent dark charcoal
