@@ -201,11 +201,10 @@ function UIButtons:CreateButtons()
                     insets = { left = 0, right = 0, top = 0, bottom = 0 }
                 })
                 if ColorPalette then
-                    -- Use panel-bg darkened by 20% towards black
-                    local r, g, b, a = ColorPalette:GetColor("panel-bg")
-                    btn:SetBackdropColor(r * 0.8, g * 0.8, b * 0.8, a)
+                    -- Use same panel-bg color as container
+                    btn:SetBackdropColor(ColorPalette:GetColor("panel-bg"))
                 else
-                    btn:SetBackdropColor(0.08, 0.08, 0.08, 0.9)
+                    btn:SetBackdropColor(0.1, 0.1, 0.1, 0.9)
                 end
                 
                 btn.text = btn:CreateFontString(nil, "OVERLAY")
@@ -236,11 +235,10 @@ function UIButtons:CreateButtons()
                         })
                         
                         if ColorPalette then
-                            -- Use panel-bg darkened by 20% towards black
-                            local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                            btn:SetBackdropColor(r * 0.8, g * 0.8, b * 0.8, a)
+                            -- Use same panel-bg color as container
+                            btn:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                         else
-                            btn:SetBackdropColor(0.08, 0.08, 0.08, 0.8)
+                            btn:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
                         end
                     end
                 else
@@ -255,11 +253,10 @@ function UIButtons:CreateButtons()
                     })
                     
                     if ColorPalette then
-                        -- Use panel-bg darkened by 20% towards black
-                        local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                        btn:SetBackdropColor(r * 0.8, g * 0.8, b * 0.8, a)
+                        -- Use same panel-bg color as container
+                        btn:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
                     else
-                        btn:SetBackdropColor(0.08, 0.08, 0.08, 0.8)
+                        btn:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
                     end
                     
                     btn.text = btn:CreateFontString(nil, "OVERLAY")
