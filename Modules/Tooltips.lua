@@ -32,6 +32,13 @@ function Tooltips:OnInitialize()
             showRole = true,
             showMythicScore = true,
             showTargetOf = true,
+            
+            -- Item Tooltips
+            qualityBorderColors = true,
+            
+            -- Combat
+            hideInCombat = false,
+            hideInInstance = false,
         }
     })
     
@@ -47,8 +54,11 @@ function Tooltips:OnInitialize()
         WorldMapCompareTooltip2,
     }
     
-    -- Cache for player data
+    -- Cache for player data and inspection throttling
     self.playerCache = {}
+    self.lastInspectTime = 0
+    self.lastInspectGUID = nil
+    self.inspectThrottle = 1.5  -- seconds
 end
 
 function Tooltips:OnEnable()
@@ -88,6 +98,10 @@ function Tooltips:Initialize()
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tooltip)
             self:OnTooltipSetUnit(tooltip)
         end)
+        -- Hook for item tooltips
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip)
+            self:OnTooltipSetItem(tooltip)
+        end)
     else
         -- Fallback for older API - hook OnShow and check for unit
         GameTooltip:HookScript("OnShow", function(tooltip)
@@ -98,8 +112,18 @@ function Tooltips:Initialize()
         end)
     end
     
+    -- Hook for combat hiding
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    
+    -- Hook for target-based inspection
+    self:RegisterEvent("PLAYER_TARGET_CHANGED")
+    
     -- Listen for inspect data
     self:RegisterEvent("INSPECT_READY")
+    
+    -- Position shopping tooltips intelligently
+    self:SecureHookScript(GameTooltip, "OnShow", "PositionShoppingTooltips")
     
     -- Listen for theme changes
     self:RegisterMessage("MIDNIGHTUI_THEME_CHANGED", "OnThemeChanged")
@@ -119,11 +143,19 @@ function Tooltips:StyleTooltips()
     end
 end
 
-function Tooltips:StyleTooltip(tooltip)
+function Tooltips:StyleTooltip(tooltip, itemQuality)
     if not tooltip or not self.ColorPalette then return end
     
     local br, bg, bb, ba = self.ColorPalette:GetColor("panel-border")
     local bgr, bgg, bgb, bga = self.ColorPalette:GetColor("tooltip-bg")
+    
+    -- Override border color with item quality color if enabled
+    if itemQuality and self.db.profile.qualityBorderColors then
+        local qualityColor = C_Item.GetItemQualityColor(itemQuality)
+        if qualityColor then
+            br, bg, bb = qualityColor:GetRGB()
+        end
+    end
     
     -- Apply backdrop alpha override if set
     if self.db.profile.backdropAlpha then
@@ -248,6 +280,77 @@ function Tooltips:OnThemeChanged()
 end
 
 -- ============================================================================
+-- Combat & Instance Handling
+-- ============================================================================
+
+function Tooltips:PLAYER_REGEN_DISABLED()
+    -- Entering combat
+    if self.db.profile.hideInCombat then
+        local inInstance = self.db.profile.hideInInstance and IsInInstance()
+        if not self.db.profile.hideInInstance or inInstance then
+            -- Hide all tooltips
+            for _, tooltip in ipairs(self.tooltips) do
+                if tooltip and tooltip:IsShown() then
+                    tooltip:Hide()
+                end
+            end
+        end
+    end
+end
+
+function Tooltips:PLAYER_REGEN_ENABLED()
+    -- Leaving combat - tooltips will show normally again
+end
+
+-- ============================================================================
+-- Item Tooltip Handling
+-- ============================================================================
+
+function Tooltips:OnTooltipSetItem(tooltip)
+    if not tooltip then return end
+    
+    -- Get item quality for border coloring
+    local _, item = tooltip:GetItem()
+    if item then
+        local itemQuality = C_Item.GetItemQualityByID(item)
+        if itemQuality and itemQuality >= Enum.ItemQuality.Uncommon then
+            -- Restyle with quality color
+            self:StyleTooltip(tooltip, itemQuality)
+        end
+    end
+end
+
+function Tooltips:PositionShoppingTooltips()
+    -- Position shopping tooltips intelligently based on GameTooltip position
+    if not GameTooltip:IsShown() then return end
+    
+    local shoppingTooltip1 = ShoppingTooltip1
+    local shoppingTooltip2 = ShoppingTooltip2
+    
+    if shoppingTooltip1 and shoppingTooltip1:IsShown() then
+        shoppingTooltip1:ClearAllPoints()
+        
+        -- Check if GameTooltip is on the right side of screen
+        local gameTooltipCenter = GameTooltip:GetCenter()
+        local screenWidth = GetScreenWidth()
+        
+        if gameTooltipCenter and gameTooltipCenter > (screenWidth / 2) then
+            -- GameTooltip is on right, place shopping tooltip on left
+            shoppingTooltip1:SetPoint("TOPRIGHT", GameTooltip, "TOPLEFT", -3, 0)
+        else
+            -- GameTooltip is on left, place shopping tooltip on right
+            shoppingTooltip1:SetPoint("TOPLEFT", GameTooltip, "TOPRIGHT", 3, 0)
+        end
+        
+        -- Position second shopping tooltip below first
+        if shoppingTooltip2 and shoppingTooltip2:IsShown() then
+            shoppingTooltip2:ClearAllPoints()
+            shoppingTooltip2:SetPoint("TOPLEFT", shoppingTooltip1, "BOTTOMLEFT", 0, -3)
+        end
+    end
+end
+
+-- ============================================================================
 -- Cursor Following
 -- ============================================================================
 
@@ -367,10 +470,8 @@ function Tooltips:OnTooltipSetUnit(tooltip)
         local cachedIlvl = self:GetCachedItemLevel(guid)
         if cachedIlvl then
             tooltip:AddLine("Item Level: " .. cachedIlvl, 1, 0.82, 0)
-        elseif CanInspect(unit) then
-            -- Request inspect data
-            NotifyInspect(unit)
         end
+        -- Don't request inspect here - handled by PLAYER_TARGET_CHANGED
     end
     
     -- Mythic+ Rating
@@ -423,7 +524,7 @@ end
 function Tooltips:INSPECT_READY(event, guid)
     if not guid then return end
     
-    -- Cache item level from inspect data
+    -- Cache item level from inspect data (GUID-based storage)
     local unit = self:GetUnitFromGUID(guid)
     if unit then
         local avgItemLevel, avgItemLevelEquipped = GetAverageItemLevel(unit)
@@ -436,6 +537,40 @@ function Tooltips:INSPECT_READY(event, guid)
     end
     
     ClearInspectPlayer()
+end
+
+function Tooltips:PLAYER_TARGET_CHANGED()
+    -- Target-based inspection with throttling
+    if not self.db.profile.showItemLevel then return end
+    
+    local unit = "target"
+    if not UnitExists(unit) or not UnitIsPlayer(unit) then return end
+    
+    local guid = UnitGUID(unit)
+    if not guid then return end
+    
+    -- Check if we already have cached data
+    local cached = self:GetCachedItemLevel(guid)
+    if cached then return end
+    
+    -- Check if we can inspect
+    if not CanInspect(unit) then return end
+    
+    -- Throttle inspect requests (1.5 second cooldown)
+    local currentTime = GetTime()
+    if currentTime - self.lastInspectTime < self.inspectThrottle then
+        return
+    end
+    
+    -- Don't spam the same player
+    if guid == self.lastInspectGUID and currentTime - self.lastInspectTime < 30 then
+        return
+    end
+    
+    -- Send inspect request (taint-safe)
+    self.lastInspectTime = currentTime
+    self.lastInspectGUID = guid
+    NotifyInspect(unit)
 end
 
 function Tooltips:GetUnitFromGUID(guid)
@@ -503,7 +638,7 @@ function Tooltips:GetOptions()
         args = {
             description = {
                 type = "description",
-                name = "Customize tooltip appearance and information display. Use the Tooltips toggle on the General tab to enable/disable this module.",
+                name = "Customize tooltip appearance and information display. Use the Tooltips toggle on the General tab to enable/disable this module.\n\n|cffFFD700Smart Inspection System:|r Item level data is cached for 5 minutes and only requested when you target a player (1.5s throttle to prevent API rate limiting).",
                 order = 1,
                 fontSize = "medium",
             },
@@ -568,6 +703,30 @@ function Tooltips:GetOptions()
                 type = "description",
                 name = " ",
                 order = 19,
+            },
+            
+            -- Item Tooltips
+            itemHeader = {
+                type = "header",
+                name = "Item Tooltips",
+                order = 19.5,
+            },
+            qualityBorderColors = {
+                type = "toggle",
+                name = "Quality Border Colors",
+                desc = "Color tooltip borders based on item quality (uncommon and above)",
+                order = 19.6,
+                get = function() return self.db.profile.qualityBorderColors end,
+                set = function(_, value)
+                    self.db.profile.qualityBorderColors = value
+                    self:UpdateSettings()
+                end,
+                disabled = function() return not self:IsEnabled() end,
+            },
+            spacer2b = {
+                type = "description",
+                name = " ",
+                order = 19.8,
             },
             
             -- Cursor Following
@@ -675,6 +834,40 @@ function Tooltips:GetOptions()
                 type = "description",
                 name = " ",
                 order = 29,
+            },
+            
+            -- Combat & Instances
+            combatHeader = {
+                type = "header",
+                name = "Combat & Instances",
+                order = 29.5,
+            },
+            hideInCombat = {
+                type = "toggle",
+                name = "Hide in Combat",
+                desc = "Hide tooltips when entering combat",
+                order = 29.6,
+                get = function() return self.db.profile.hideInCombat end,
+                set = function(_, value)
+                    self.db.profile.hideInCombat = value
+                end,
+                disabled = function() return not self:IsEnabled() end,
+            },
+            hideInInstance = {
+                type = "toggle",
+                name = "Only in Dungeons/Raids",
+                desc = "Only hide tooltips in combat when inside a dungeon or raid",
+                order = 29.7,
+                get = function() return self.db.profile.hideInInstance end,
+                set = function(_, value)
+                    self.db.profile.hideInInstance = value
+                end,
+                disabled = function() return not self:IsEnabled() or not self.db.profile.hideInCombat end,
+            },
+            spacer3b = {
+                type = "description",
+                name = " ",
+                order = 29.8,
             },
             
             -- Player Information
