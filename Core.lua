@@ -1080,12 +1080,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     verticalBorder:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 0, 0)
                     verticalBorder:SetPoint("BOTTOMLEFT", widget.treeframe, "BOTTOMRIGHT", 0, 0)
                     
-                    -- Horizontal border at bottom of content
+                    -- Horizontal border at top of content
                     local horizontalBorder = widget.frame:CreateTexture(nil, "OVERLAY")
                     horizontalBorder:SetColorTexture(ColorPalette:GetColor('panel-border'))
                     horizontalBorder:SetHeight(2)
-                    horizontalBorder:SetPoint("BOTTOMLEFT", widget.border or widget.content, "BOTTOMLEFT", 0, 0)
-                    horizontalBorder:SetPoint("BOTTOMRIGHT", widget.border or widget.content, "BOTTOMRIGHT", 0, 0)
+                    horizontalBorder:SetPoint("TOPLEFT", widget.border or widget.content, "TOPLEFT", 0, 0)
+                    horizontalBorder:SetPoint("TOPRIGHT", widget.border or widget.content, "TOPRIGHT", 0, 0)
                     
                     widget.customBorders = {verticalBorder, horizontalBorder}
                 end
