@@ -3560,6 +3560,7 @@ function MidnightUI:SaveCustomTheme()
         "MidnightGlass",
         "MidnightGreen",
         "MidnightTransparent",
+        "MidnightTransparentGold",
         "NeonSciFi"
     }
     for _, builtInName in ipairs(builtInThemes) do
