@@ -40,6 +40,7 @@ local defaults = {
             skins = true,
             bar = true,
             UIButtons = true,
+            tooltips = true,
             maps = true,
             actionbars = true,
             unitframes = true,
