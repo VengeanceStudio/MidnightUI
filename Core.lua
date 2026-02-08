@@ -2389,13 +2389,22 @@ function MidnightUI:GetThemeOptions()
         end
     end
     
-    -- Sort alphabetically
-    table.sort(availableThemes)
+    -- Function to convert theme names to readable format
+    local function GetDisplayName(themeName)
+        -- Add spaces before capital letters (except first)
+        local display = themeName:gsub("(%u)", " %1"):gsub("^ ", "")
+        return display
+    end
+    
+    -- Sort alphabetically by display name
+    table.sort(availableThemes, function(a, b)
+        return GetDisplayName(a) < GetDisplayName(b)
+    end)
     
     -- Build theme selection dropdown values
     local themeValues = {}
     for _, name in ipairs(availableThemes) do
-        themeValues[name] = name
+        themeValues[name] = GetDisplayName(name)
     end
     
     local options = {
