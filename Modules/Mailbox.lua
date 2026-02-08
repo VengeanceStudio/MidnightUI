@@ -25,7 +25,7 @@ function Mailbox:OnInitialize()
             carbonCopyEnabled = true,
             
             -- DoNotWant
-            doNotWantEnabled = true,
+            doNotWantEnabled = false,
             
             -- Express
             expressEnabled = true,
@@ -52,7 +52,7 @@ function Mailbox:OnInitialize()
             rakeEnabled = true,
             
             -- Select
-            selectEnabled = true,
+            selectEnabled = false,
             selectKeepFreeSlots = 0,
             
             -- TradeBlock
@@ -552,6 +552,8 @@ end
 -- ============================================================================
 
 function Mailbox:CreateDoNotWantIcons()
+    if not self.db.profile.doNotWantEnabled then return end
+    
     for i = 1, 7 do
         local mailItem = _G["MailItem" .. i]
         if mailItem and not mailItem.doNotWantIcon then
@@ -596,6 +598,8 @@ end
 -- ============================================================================
 
 function Mailbox:CreateSelectCheckboxes()
+    if not self.db.profile.selectEnabled then return end
+    
     for i = 1, 7 do
         local mailItem = _G["MailItem" .. i]
         if mailItem and not mailItem.selectCheckbox then
