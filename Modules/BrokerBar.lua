@@ -1422,42 +1422,51 @@ function BrokerBar:GetOptions()
                 type = "group",
                 childGroups = "tree",
                 order = 8, 
-                args = { 
-                    create = { 
-                        name = "Create New Bar", 
-                        type = "input", 
-                        order = 1, 
-                        set = function(_, v) 
-                            if v ~= "" and not self.db.profile.bars[v] then 
-                                local r, g, b, a = ColorPalette:GetColor('panel-bg')
-                                self.db.profile.bars[v] = { 
-                                    enabled = true, 
-                                    fullWidth = false, 
-                                    width = 400, 
-                                    height = 24, 
-                                    scale = 1.0, 
-                                    alpha = a or 0.6, 
-                                    color = {r = r, g = g, b = b}, 
-                                    texture = "Blizzard", 
-                                    skin = "Global", 
-                                    padding = 5, 
-                                    point = "CENTER", 
-                                    x = 0, 
-                                    y = 0 
-                                }
-                                self:CreateBarFrame(v)
-                                self:ApplyBarSettings(v)
-                                -- Refresh options to show new bar
-                                LibStub("AceConfigRegistry-3.0"):NotifyChange("MidnightUI")
-                            end 
-                        end 
-                    } 
-                } 
+                args = {} 
             },
             brokers = self:GetPluginOptions()
         }
     }
     local sortedBars = {}; for id in pairs(self.db.profile.bars) do table.insert(sortedBars, id) end; table.sort(sortedBars)
+    
+    -- Add "Create New Bar" as first item in tree
+    options.args.bars.args["_create"] = {
+        name = "Create New Bar",
+        type = "group",
+        order = 1,
+        args = {
+            create = {
+                name = "Bar Name",
+                type = "input",
+                order = 1,
+                set = function(_, v) 
+                    if v ~= "" and not self.db.profile.bars[v] then 
+                        local r, g, b, a = ColorPalette:GetColor('panel-bg')
+                        self.db.profile.bars[v] = { 
+                            enabled = true, 
+                            fullWidth = false, 
+                            width = 400, 
+                            height = 24, 
+                            scale = 1.0, 
+                            alpha = a or 0.6, 
+                            color = {r = r, g = g, b = b}, 
+                            texture = "Blizzard", 
+                            skin = "Global", 
+                            padding = 5, 
+                            point = "CENTER", 
+                            x = 0, 
+                            y = 0 
+                        }
+                        self:CreateBarFrame(v)
+                        self:ApplyBarSettings(v)
+                        -- Refresh options to show new bar
+                        LibStub("AceConfigRegistry-3.0"):NotifyChange("MidnightUI")
+                    end 
+                end 
+            }
+        }
+    }
+    
     for i, id in ipairs(sortedBars) do
         options.args.bars.args[id] = { 
             name = id, 
