@@ -64,6 +64,9 @@ function MidnightUI:OnInitialize()
 end
 
 function MidnightUI:OnEnable()
+    -- Load custom themes FIRST before validating
+    self:LoadCustomThemes()
+    
     -- Validate and migrate theme setting
     local ColorPalette = _G.MidnightUI_ColorPalette
     if ColorPalette and self.db.profile.theme.active then
@@ -77,11 +80,6 @@ function MidnightUI:OnEnable()
         -- Set the active theme in ColorPalette
         ColorPalette:SetActiveTheme(self.db.profile.theme.active)
     end
-    
-    -- Load custom themes on startup
-    C_Timer.After(0.05, function()
-        self:LoadCustomThemes()
-    end)
     
     -- Send the message after all modules have registered
     C_Timer.After(0.1, function()
