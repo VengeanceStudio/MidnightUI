@@ -147,26 +147,7 @@ local function Constructor()
     editbox:SetTextInsets(4, 4, 0, 0)
     editbox:SetJustifyH("CENTER")
     
-    slider:SetScript("OnValueChanged", function(self, value)
-        -- Format value based on step size for appropriate precision
-        local step = frame.step or 1
-        local decimals = 0
-        if step < 1 then
-            -- Count decimal places needed
-            local stepStr = tostring(step)
-            decimals = stepStr:match("%.(%d+)") and #stepStr:match("%.(%d+)") or 0
-        end
-        editbox:SetText(string.format("%." .. decimals .. "f", value))
-    end)
-    
-    editbox:SetScript("OnEnterPressed", function(self)
-        local value = tonumber(self:GetText())
-        if value then
-            slider:SetValue(value)
-        end
-        self:ClearFocus()
-    end)
-    
+    -- Create widget first so we can reference it in scripts
     local widget = {
         frame = frame,
         slider = slider,
@@ -180,6 +161,33 @@ local function Constructor()
     for method, func in pairs(methods) do
         widget[method] = func
     end
+    
+    -- Store widget reference on frame
+    frame.obj = widget
+    
+    -- Now set up scripts that need to fire callbacks
+    slider:SetScript("OnValueChanged", function(self, value)
+        -- Format value based on step size for appropriate precision
+        local step = frame.step or 1
+        local decimals = 0
+        if step < 1 then
+            -- Count decimal places needed
+            local stepStr = tostring(step)
+            decimals = stepStr:match("%.(%d+)") and #stepStr:match("%.(%d+)") or 0
+        end
+        editbox:SetText(string.format("%." .. decimals .. "f", value))
+        
+        -- Fire the callback so AceConfig can save the value
+        widget:Fire("OnValueChanged", value)
+    end)
+    
+    editbox:SetScript("OnEnterPressed", function(self)
+        local value = tonumber(self:GetText())
+        if value then
+            slider:SetValue(value)
+        end
+        self:ClearFocus()
+    end)
     
     return AceGUI:RegisterAsWidget(widget)
 end
