@@ -2244,6 +2244,12 @@ end
 
                     frames[key] = frame
                     
+                    -- Register with click-to-cast addons (Clique, etc.)
+                    if not ClickCastFrames then
+                        ClickCastFrames = {}
+                    end
+                    ClickCastFrames[frame] = true
+                    
                     -- Event-driven updates are already handled by UNIT_HEALTH, UNIT_POWER_UPDATE, etc.
                     -- No OnUpdate needed - reduces CPU usage significantly
                     
