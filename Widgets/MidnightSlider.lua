@@ -48,6 +48,7 @@ local methods = {
         self.min = min
         self.max = max
         self.step = step
+        self.frame.step = step  -- Store step on frame for OnValueChanged to access
     end,
     
     ["SetValue"] = function(self, value)
@@ -147,7 +148,15 @@ local function Constructor()
     editbox:SetJustifyH("CENTER")
     
     slider:SetScript("OnValueChanged", function(self, value)
-        editbox:SetText(tostring(math.floor(value + 0.5)))
+        -- Format value based on step size for appropriate precision
+        local step = frame.step or 1
+        local decimals = 0
+        if step < 1 then
+            -- Count decimal places needed
+            local stepStr = tostring(step)
+            decimals = stepStr:match("%.(%d+)") and #stepStr:match("%.(%d+)") or 0
+        end
+        editbox:SetText(string.format("%." .. decimals .. "f", value))
     end)
     
     editbox:SetScript("OnEnterPressed", function(self)
