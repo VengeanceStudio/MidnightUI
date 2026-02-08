@@ -319,9 +319,10 @@ function Tooltips:OnTooltipSetItem(tooltip)
     local _, item = tooltip:GetItem()
     if item then
         local itemQuality = C_Item.GetItemQualityByID(item)
-        if itemQuality and itemQuality >= Enum.ItemQuality.Uncommon then
-            -- Restyle with quality color
-            self:StyleTooltip(tooltip, itemQuality)
+        if itemQuality then
+            -- Only use quality color for uncommon+ items, but always restyle
+            local qualityForBorder = (itemQuality >= Enum.ItemQuality.Uncommon) and itemQuality or nil
+            self:StyleTooltip(tooltip, qualityForBorder)
         end
     end
 end
