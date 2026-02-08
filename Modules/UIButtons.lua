@@ -464,10 +464,15 @@ function UIButtons:GetOptions()
                 order = 4,
                 min = 0.5,
                 max = 2.0,
-                step = 0.1,
+                step = 0.01,
+                bigStep = 0.1,
+                isPercent = false,
                 get = function() return self.db.profile.scale end,
                 set = function(_, v)
                     self.db.profile.scale = v
+                    if container then
+                        container:SetScale(v)
+                    end
                     self:UpdateLayout()
                 end
             },
