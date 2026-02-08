@@ -131,48 +131,45 @@ function MidnightUI:OnEnable()
                     if openFrame and openFrame.frame and openFrame.frame.obj then
                         local treeGroup = openFrame.frame.obj
                         print("DEBUG: Found treeGroup, type:", type(treeGroup))
-                        print("DEBUG: Inspecting treeGroup properties:")
-                        for k, v in pairs(treeGroup) do
-                            if type(k) == "string" and (k:find("tree") or k:find("Tree") or k:find("button") or k:find("Button")) then
-                                print("DEBUG:   ", k, "=", type(v))
-                            end
-                        end
                         
-                        -- Try longer delay for buttons to be created
-                        C_Timer.After(0.5, function()
-                            print("DEBUG: Checking again after 0.5s delay")
-                            if treeGroup.buttons then
-                                print("DEBUG: Found tree buttons, count:", #treeGroup.buttons)
-                                for i, button in ipairs(treeGroup.buttons) do
-                                    if button and not button.MidnightClickHooked then
-                                        button:HookScript("OnClick", function()
-                                            print("DEBUG: Tree button", i, "clicked")
-                                            C_Timer.After(0.05, function()
-                                                -- Check what page we're on
-                                                local status = AceConfigDialog.OpenFrames["MidnightUI"]
-                                                if status and status.status and status.status.groups then
-                                                    local currentPage = status.status.groups.selected
-                                                    print("DEBUG: Current page after button click:", currentPage)
-                                                    
-                                                    if currentPage ~= "themes" and self.colorSwatchContainer then
-                                                        print("DEBUG: Not on themes page, destroying swatches")
-                                                        self.colorSwatchContainer:Hide()
-                                                        self.colorSwatchContainer:ClearAllPoints()
-                                                        self.colorSwatchContainer:SetParent(nil)
-                                                        self.colorSwatchContainer = nil
-                                                        self.themeColorSwatches = nil
-                                                    end
+                        -- Look for the actual tree frame in the widget
+                        if treeGroup.treeframe then
+                            print("DEBUG: Found treeGroup.treeframe")
+                            local treeFrame = treeGroup.treeframe
+                            
+                            -- Enumerate children to find buttons
+                            local children = {treeFrame:GetChildren()}
+                            print("DEBUG: treeFrame has", #children, "children")
+                            
+                            for i, child in ipairs(children) do
+                                print("DEBUG: Child", i, "type:", child:GetObjectType())
+                                if child:GetObjectType() == "Button" and not child.MidnightClickHooked then
+                                    print("DEBUG: Hooking button", i)
+                                    child:HookScript("OnClick", function()
+                                        print("DEBUG: Tree button clicked!")
+                                        C_Timer.After(0.05, function()
+                                            local status = AceConfigDialog.OpenFrames["MidnightUI"]
+                                            if status and status.status and status.status.groups then
+                                                local currentPage = status.status.groups.selected
+                                                print("DEBUG: Current page:", currentPage)
+                                                
+                                                if currentPage ~= "themes" and self.colorSwatchContainer then
+                                                    print("DEBUG: Destroying swatches")
+                                                    self.colorSwatchContainer:Hide()
+                                                    self.colorSwatchContainer:ClearAllPoints()
+                                                    self.colorSwatchContainer:SetParent(nil)
+                                                    self.colorSwatchContainer = nil
+                                                    self.themeColorSwatches = nil
                                                 end
-                                            end)
+                                            end
                                         end)
-                                        button.MidnightClickHooked = true
-                                    end
+                                    end)
+                                    child.MidnightClickHooked = true
                                 end
-                                print("DEBUG: Tree buttons hooked successfully")
-                            else
-                                print("DEBUG: treeGroup.buttons still not found after delay")
                             end
-                        end)
+                        else
+                            print("DEBUG: treeGroup.treeframe not found")
+                        end
                     else
                         print("DEBUG: Could not find treeGroup to hook")
                     end
