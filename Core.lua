@@ -131,44 +131,11 @@ function MidnightUI:OnEnable()
                     if openFrame and openFrame.frame and openFrame.frame.obj then
                         local treeGroup = openFrame.frame.obj
                         print("DEBUG: Found treeGroup, type:", type(treeGroup))
-                        
-                        -- Look for the actual tree frame in the widget
-                        if treeGroup.treeframe then
-                            print("DEBUG: Found treeGroup.treeframe")
-                            local treeFrame = treeGroup.treeframe
-                            
-                            -- Enumerate children to find buttons
-                            local children = {treeFrame:GetChildren()}
-                            print("DEBUG: treeFrame has", #children, "children")
-                            
-                            for i, child in ipairs(children) do
-                                print("DEBUG: Child", i, "type:", child:GetObjectType())
-                                if child:GetObjectType() == "Button" and not child.MidnightClickHooked then
-                                    print("DEBUG: Hooking button", i)
-                                    child:HookScript("OnClick", function()
-                                        print("DEBUG: Tree button clicked!")
-                                        C_Timer.After(0.05, function()
-                                            local status = AceConfigDialog.OpenFrames["MidnightUI"]
-                                            if status and status.status and status.status.groups then
-                                                local currentPage = status.status.groups.selected
-                                                print("DEBUG: Current page:", currentPage)
-                                                
-                                                if currentPage ~= "themes" and self.colorSwatchContainer then
-                                                    print("DEBUG: Destroying swatches")
-                                                    self.colorSwatchContainer:Hide()
-                                                    self.colorSwatchContainer:ClearAllPoints()
-                                                    self.colorSwatchContainer:SetParent(nil)
-                                                    self.colorSwatchContainer = nil
-                                                    self.themeColorSwatches = nil
-                                                end
-                                            end
-                                        end)
-                                    end)
-                                    child.MidnightClickHooked = true
-                                end
+                        print("DEBUG: ALL treeGroup properties:")
+                        for k, v in pairs(treeGroup) do
+                            if type(k) == "string" then
+                                print("DEBUG:   ", k, "=", type(v))
                             end
-                        else
-                            print("DEBUG: treeGroup.treeframe not found")
                         end
                     else
                         print("DEBUG: Could not find treeGroup to hook")
