@@ -20,6 +20,13 @@ function Tooltips:OnInitialize()
             fadeDelay = 0.2,
             scale = 1.0,
             
+            -- Tooltip Anchor (when not following cursor)
+            anchorPosition = {
+                point = "BOTTOMRIGHT",
+                x = -100,
+                y = 100
+            },
+            
             -- Player Information
             classColor = true,
             classColoredBorders = true,
@@ -65,6 +72,8 @@ end
 function Tooltips:OnEnable()
     -- Wait for theme system to be ready
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "Initialize")
+    -- Listen for move mode changes
+    self:RegisterMessage("MIDNIGHTUI_MOVEMODE_CHANGED", "OnMoveModeChanged")
 end
 
 function Tooltips:OnDisable()
@@ -125,6 +134,89 @@ function Tooltips:Initialize()
     
     -- Listen for theme changes
     self:RegisterMessage("MIDNIGHTUI_THEME_CHANGED", "OnThemeChanged")
+    
+    -- Create tooltip anchor frame
+    self:CreateTooltipAnchor()
+end
+
+-- ============================================================================
+-- Tooltip Anchor Frame (for non-cursor following mode)
+-- ============================================================================
+
+function Tooltips:CreateTooltipAnchor()
+    if self.anchorFrame then return end
+    
+    local Movable = MidnightUI:GetModule("Movable", true)
+    if not Movable then return end
+    
+    local frame = CreateFrame("Frame", "MidnightUI_TooltipAnchor", UIParent, "BackdropTemplate")
+    frame:SetSize(32, 32)
+    
+    local pos = self.db.profile.anchorPosition
+    frame:SetPoint(pos.point, UIParent, pos.point, pos.x, pos.y)
+    frame:SetFrameStrata("TOOLTIP")
+    frame:SetFrameLevel(100)
+    frame:SetMovable(true)
+    frame:SetClampedToScreen(true)
+    
+    -- Backdrop
+    frame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    
+    if self.ColorPalette then
+        frame:SetBackdropColor(self.ColorPalette:GetColor('panel-bg'))
+        frame:SetBackdropBorderColor(self.ColorPalette:GetColor('primary'))
+    else
+        frame:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
+        frame:SetBackdropBorderColor(0, 0.8, 1, 1)
+    end
+    
+    -- Text "T"
+    frame.text = frame:CreateFontString(nil, "OVERLAY")
+    if self.FontKit then
+        self.FontKit:SetFont(frame.text, "button", "normal")
+    else
+        frame.text:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+    end
+    frame.text:SetPoint("CENTER")
+    frame.text:SetText("T")
+    if self.ColorPalette then
+        frame.text:SetTextColor(self.ColorPalette:GetColor("text-primary"))
+    else
+        frame.text:SetTextColor(1, 1, 1, 1)
+    end
+    
+    -- Use Movable for drag functionality
+    Movable:MakeFrameDraggable(
+        frame,
+        function(point, x, y)
+            self.db.profile.anchorPosition = { point = point, x = x, y = y }
+            Movable:UpdateNudgeArrows(frame)
+        end,
+        function() return true end -- Always movable when visible
+    )
+    
+    -- Create nudge arrows
+    Movable:CreateNudgeArrows(frame, self.db)
+    
+    -- Hide by default (only show in move mode)
+    frame:Hide()
+    
+    self.anchorFrame = frame
+end
+
+function Tooltips:OnMoveModeChanged(event, moveMode)
+    if not self.anchorFrame then return end
+    
+    if moveMode then
+        self.anchorFrame:Show()
+    else
+        self.anchorFrame:Hide()
+    end
 end
 
 -- ============================================================================
@@ -271,9 +363,14 @@ function Tooltips:GameTooltip_SetDefaultAnchor(tooltip, parent)
             tooltip.FadeOut:SetStartDelay(self.db.profile.fadeDelay or 0.2)
         end
     else
-        -- Apply scale even when not cursor following
+        -- Use custom anchor position when not following cursor
         local scale = self.db.profile.scale or 1.0
         tooltip:SetScale(scale)
+        
+        -- Anchor to our custom position
+        local pos = self.db.profile.anchorPosition
+        tooltip:ClearAllPoints()
+        tooltip:SetPoint("BOTTOMLEFT", UIParent, pos.point, pos.x, pos.y)
     end
     
     -- Reapply styling when tooltip anchor is set
