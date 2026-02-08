@@ -2833,10 +2833,10 @@ function MidnightUI:CreateColorPaletteSwatches()
         border:SetColorTexture(ColorPalette:GetColor("panel-border"))
         border:SetDrawLayer("BACKGROUND", -1)
         
-        -- Create solid white background on top of border (so transparency is visible)
+        -- Create background using panel-bg (realistic preview of transparency)
         local background = swatchFrame:CreateTexture(nil, "BACKGROUND")
         background:SetAllPoints()
-        background:SetColorTexture(1, 1, 1, 1)  -- Solid white
+        background:SetColorTexture(ColorPalette:GetColor("panel-bg"))
         background:SetDrawLayer("BACKGROUND", 0)
         
         -- Create color texture on top
