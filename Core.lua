@@ -2684,7 +2684,16 @@ function MidnightUI:UpdateThemeColorSwatches()
         
         for colorKey, swatchData in pairs(self.themeColorSwatches) do
             if swatchData and swatchData.texture then
-                swatchData.texture:SetColorTexture(ColorPalette:GetColor(colorKey))
+                -- Check if there's a temp color for this key (unsaved changes)
+                local r, g, b, a
+                if self.tempThemeColors and self.tempThemeColors[colorKey] then
+                    local tempColor = self.tempThemeColors[colorKey]
+                    r, g, b, a = tempColor.r, tempColor.g, tempColor.b, tempColor.a
+                else
+                    -- Use the color from the active theme
+                    r, g, b, a = ColorPalette:GetColor(colorKey)
+                end
+                swatchData.texture:SetColorTexture(r, g, b, a)
             end
         end
     end
@@ -2822,7 +2831,16 @@ function MidnightUI:CreateColorPaletteSwatches()
         -- Create color texture
         local colorTexture = swatchFrame:CreateTexture(nil, "ARTWORK")
         colorTexture:SetAllPoints()
-        colorTexture:SetColorTexture(ColorPalette:GetColor(colorData.key))
+        
+        -- Check if there's a temp color (unsaved changes), otherwise use active theme
+        local r, g, b, a
+        if self.tempThemeColors and self.tempThemeColors[colorData.key] then
+            local tempColor = self.tempThemeColors[colorData.key]
+            r, g, b, a = tempColor.r, tempColor.g, tempColor.b, tempColor.a
+        else
+            r, g, b, a = ColorPalette:GetColor(colorData.key)
+        end
+        colorTexture:SetColorTexture(r, g, b, a)
         
         -- Create border
         local border = swatchFrame:CreateTexture(nil, "BORDER")
