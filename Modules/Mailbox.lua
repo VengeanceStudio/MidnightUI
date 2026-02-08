@@ -510,14 +510,9 @@ function Mailbox:SetupExpressShortcuts()
         end
     end
     
-    -- Hook bag items for Alt-Click to attach
-    self:SecureHook("ContainerFrameItemButton_OnModifiedClick", function(btn, mouseButton)
-        if IsAltKeyDown() and SendMailFrame:IsShown() then
-            local bag, slot = btn:GetParent():GetID(), btn:GetID()
-            PickupContainerItem(bag, slot)
-            ClickSendMailItemButton()
-        end
-    end)
+    -- Note: Alt-Click to attach bag items would require hooking modern container frame events
+    -- ContainerFrameItemButton_OnModifiedClick no longer exists in WoW 12.0
+    -- TODO: Implement using EventRegistry or ContainerFrame item button hooks when bag frame structure is known
 end
 
 -- ============================================================================
