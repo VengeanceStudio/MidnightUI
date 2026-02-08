@@ -1071,26 +1071,23 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.treeframe:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 6, -76)
                 widget.treeframe:SetPoint("BOTTOMLEFT", widget.frame, "BOTTOMLEFT", 6, 6)
                 
-                -- Style the scrollbar if it exists
-                if widget.scrollbar then
-                    local scrollbar = widget.scrollbar
-                    scrollbar:SetAlpha(1) -- Make it always visible
+                -- Create visible border overlays for TreeGroup
+                if not widget.customBorders then
+                    -- Vertical border between tree list and content
+                    local verticalBorder = widget.frame:CreateTexture(nil, "OVERLAY")
+                    verticalBorder:SetColorTexture(ColorPalette:GetColor('panel-border'))
+                    verticalBorder:SetWidth(2)
+                    verticalBorder:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 0, 0)
+                    verticalBorder:SetPoint("BOTTOMLEFT", widget.treeframe, "BOTTOMRIGHT", 0, 0)
                     
-                    -- Style the thumb
-                    local thumbTexture = scrollbar:GetThumbTexture()
-                    if thumbTexture then
-                        local r, g, b = ColorPalette:GetColor('accent-primary')
-                        thumbTexture:SetColorTexture(r, g, b, 1)
-                        thumbTexture:SetSize(12, 24)
-                    end
+                    -- Horizontal border at bottom of content
+                    local horizontalBorder = widget.frame:CreateTexture(nil, "OVERLAY")
+                    horizontalBorder:SetColorTexture(ColorPalette:GetColor('panel-border'))
+                    horizontalBorder:SetHeight(2)
+                    horizontalBorder:SetPoint("BOTTOMLEFT", widget.border or widget.content, "BOTTOMLEFT", 0, 0)
+                    horizontalBorder:SetPoint("BOTTOMRIGHT", widget.border or widget.content, "BOTTOMRIGHT", 0, 0)
                     
-                    -- Style the scrollbar track background
-                    if not scrollbar.midnightBg then
-                        scrollbar.midnightBg = scrollbar:CreateTexture(nil, "BACKGROUND")
-                        scrollbar.midnightBg:SetAllPoints(scrollbar)
-                        local r, g, b = ColorPalette:GetColor('panel-border')
-                        scrollbar.midnightBg:SetColorTexture(r, g, b, 1)
-                    end
+                    widget.customBorders = {verticalBorder, horizontalBorder}
                 end
                 
                 -- Style tree buttons (navigation items)
