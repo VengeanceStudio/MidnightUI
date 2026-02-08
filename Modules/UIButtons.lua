@@ -323,7 +323,7 @@ function UIButtons:CreateButtons()
             
             -- Tooltip
             btn:SetScript("OnEnter", function(self)
-                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                GameTooltip:SetOwner(self, "ANCHOR_NONE")
                 GameTooltip:SetText(data.tooltip)
                 GameTooltip:Show()
                 
