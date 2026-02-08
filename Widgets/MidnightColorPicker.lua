@@ -59,8 +59,9 @@ Scripts
 -------------------------------------------------------------------------------]]
 local function Control_OnEnter(frame)
 	frame.obj:Fire("OnEnter")
-	-- Highlight border on hover
-	frame:SetBackdropBorderColor(1, 1, 1, 1)
+	-- Highlight border on hover - brighten the accent color
+	local r, g, b = ColorPalette:GetColor('accent-primary')
+	frame:SetBackdropBorderColor(math.min(r * 1.5, 1), math.min(g * 1.5, 1), math.min(b * 1.5, 1), 1)
 end
 
 local function Control_OnLeave(frame)
