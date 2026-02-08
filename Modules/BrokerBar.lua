@@ -1563,7 +1563,7 @@ function BrokerBar:GetOptions()
                     type = "color", 
                     hasAlpha = true, 
                     order = 7,
-                    disabled = function() return self.db.profile.bars[id].useThemeColor end,
+                    hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     get = function() local c = self.db.profile.bars[id].color; return c.r, c.g, c.b, self.db.profile.bars[id].alpha end, 
                     set = function(_, r, g, b, a) 
                         self.db.profile.bars[id].useThemeColor = false
