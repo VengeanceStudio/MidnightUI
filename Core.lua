@@ -1374,7 +1374,7 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         end
         
         if widget.slider then
-            -- Style the slider track - make it thinner and teal
+            -- Style the slider track - make it thinner
             if widget.slider.SetBackdrop then
                 widget.slider:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -1382,9 +1382,10 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                     tile = false, edgeSize = 1,
                     insets = { left = 0, right = 0, top = 0, bottom = 0 }
                 })
-                -- Use teal color for the slider bar
-                widget.slider:SetBackdropColor(0.1608, 0.5216, 0.5804, 0.5)
-                widget.slider:SetBackdropBorderColor(0.1608, 0.5216, 0.5804, 1)
+                -- Use theme accent color for the slider bar
+                local r, g, b, a = ColorPalette:GetColor('accent-primary')
+                widget.slider:SetBackdropColor(r, g, b, 0.5)
+                widget.slider:SetBackdropBorderColor(r, g, b, 1)
             end
             
             -- Make the slider track thinner
