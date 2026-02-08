@@ -325,13 +325,24 @@ function UIButtons:CreateButtons()
             btn:SetScript("OnEnter", function(self)
                 GameTooltip:SetOwner(self, "ANCHOR_NONE")
                 GameTooltip:SetText(data.tooltip)
-                GameTooltip:Show()
                 
-                -- Trigger MidnightUI tooltip styling if available
+                -- Manually position tooltip using Tooltips module anchor
                 local Tooltips = MidnightUI:GetModule("Tooltips", true)
-                if Tooltips and Tooltips.StyleTooltip then
-                    Tooltips:StyleTooltip(GameTooltip)
+                if Tooltips then
+                    -- Use custom anchor position
+                    local pos = Tooltips.db.profile.anchorPosition
+                    local scale = Tooltips.db.profile.scale or 1.0
+                    GameTooltip:SetScale(scale)
+                    GameTooltip:ClearAllPoints()
+                    GameTooltip:SetPoint("BOTTOMLEFT", UIParent, pos.point, pos.x, pos.y)
+                    
+                    -- Apply styling
+                    if Tooltips.StyleTooltip then
+                        Tooltips:StyleTooltip(GameTooltip)
+                    end
                 end
+                
+                GameTooltip:Show()
             end)
             btn:SetScript("OnLeave", function(self)
                 GameTooltip:Hide()
