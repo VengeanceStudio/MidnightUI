@@ -58,6 +58,9 @@ ColorPalette:RegisterPalette("MidnightUIDefault", {
     ["border-inactive"] = {r = 0.2, g = 0.2, b = 0.35, a = 0.8},
     ["border-hover"] = {r = 0.0, g = 0.83, b = 1.0, a = 0.9},     -- Cyan highlight
     
+    -- Tooltip
+    ["tooltip-bg"] = {r = 0.08, g = 0.05, b = 0.15, a = 0.95},
+    
     -- Shadow and glow
     ["shadow"] = {r = 0.0, g = 0.0, b = 0.0, a = 0.5},
     ["glow-pink"] = {r = 1.0, g = 0.0, b = 0.6, a = 0.6},

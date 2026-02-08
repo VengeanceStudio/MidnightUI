@@ -53,6 +53,9 @@ ColorPalette:RegisterPalette("MidnightTransparent", {
     ["border-medium"] = {r = 0.35, g = 0.35, b = 0.40, a = 0.70},
     ["border-strong"] = {r = 0.45, g = 0.48, b = 0.55, a = 0.85},
     
+    -- Tooltip colors
+    ["tooltip-bg"] = {r = 0.05, g = 0.05, b = 0.05, a = 0.90},
+    
     -- Shadow & highlight
     ["shadow"] = {r = 0.0, g = 0.0, b = 0.0, a = 0.70},
     ["highlight"] = {r = 0.70, g = 0.75, b = 0.85, a = 0.25},

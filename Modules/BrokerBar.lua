@@ -320,7 +320,13 @@ function ApplyTooltipStyle(tip)
             edgeSize = 2,
             insets = { left = 2, right = 2, top = 2, bottom = 2 }
         })
-        tip:SetBackdropColor(ColorPalette:GetColor('tooltip-bg'))
+        -- Use tooltip-bg if it exists in theme, otherwise fallback to panel-bg
+        local bgColor = ColorPalette:GetColorTable('tooltip-bg')
+        if not bgColor or (bgColor.r == 1 and bgColor.g == 1 and bgColor.b == 1) then
+            -- tooltip-bg not defined or is the white fallback, use panel-bg instead
+            bgColor = ColorPalette:GetColorTable('panel-bg')
+        end
+        tip:SetBackdropColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a)
         tip:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     end
     
