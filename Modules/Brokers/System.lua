@@ -72,6 +72,7 @@ sysObj = LDB:NewDataObject("MidnightSystem", {
             -- Apply color to BOTH Name and Value
             tip:AddDoubleLine(data.n, memString, cr, cg, cb, cr, cg, cb)
         end
+        tip:Show()
         ApplyTooltipStyle(tip)
     end
 })
