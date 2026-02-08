@@ -1462,7 +1462,7 @@ function BrokerBar:GetOptions()
         options.args.bars.args[id] = { 
             name = id, 
             type = "group", 
-            order = 10 + i, 
+            order = 2 + i, 
             args = {
                 enabled = { 
                     name = "Enabled", 
