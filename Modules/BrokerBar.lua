@@ -1403,7 +1403,8 @@ function BrokerBar:GetOptions()
             },
             bars = { 
                 name = "Bars", 
-                type = "group", 
+                type = "group",
+                childGroups = "tree",
                 order = 8, 
                 args = { 
                     create = { 
