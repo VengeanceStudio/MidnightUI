@@ -240,7 +240,8 @@ function Tweaks:HookAutoDelete()
             
             if Tweaks.db.profile.autoDelete then
                 C_Timer.After(0.1, function()
-                    for i = 1, STATICPOPUP_NUMDIALOGS do
+                    local numDialogs = STATICPOPUP_NUMDIALOGS or 4  -- Default to 4 if constant is nil
+                    for i = 1, numDialogs do
                         local dialog = _G["StaticPopup" .. i]
                         if dialog and dialog:IsShown() and dialog.which == which then
                             local editBox = dialog.editBox

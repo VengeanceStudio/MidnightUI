@@ -923,7 +923,9 @@ function BrokerBar:ApplyBarSettings(barID)
     -- Use theme colors if available
     if ColorPalette then
         local r, g, b, a = ColorPalette:GetColor("panel-bg")
-        f.bg:SetVertexColor(r, g, b, db.alpha or a)
+        -- Use theme alpha, but allow db.alpha override if explicitly set and not default
+        local alpha = a  -- Always use theme alpha for consistency
+        f.bg:SetVertexColor(r, g, b, alpha)
         f:SetBackdropColor(ColorPalette:GetColor("bg-primary"))
         f:SetBackdropBorderColor(ColorPalette:GetColor("panel-border"))
     else
