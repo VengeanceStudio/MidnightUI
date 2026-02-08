@@ -159,7 +159,7 @@ function Tooltips:CreateTooltipAnchor()
     frame:SetMovable(true)
     frame:SetClampedToScreen(true)
     
-    -- Backdrop
+    -- Backdrop (match UnitFrame move boxes)
     frame:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -167,28 +167,14 @@ function Tooltips:CreateTooltipAnchor()
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     
-    if self.ColorPalette then
-        frame:SetBackdropColor(self.ColorPalette:GetColor('panel-bg'))
-        frame:SetBackdropBorderColor(self.ColorPalette:GetColor('primary'))
-    else
-        frame:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
-        frame:SetBackdropBorderColor(0, 0.8, 1, 1)
-    end
+    frame:SetBackdropColor(0, 0, 0, 0.8)
+    frame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
     
     -- Text "T"
-    frame.text = frame:CreateFontString(nil, "OVERLAY")
-    if self.FontKit then
-        self.FontKit:SetFont(frame.text, "button", "normal")
-    else
-        frame.text:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
-    end
+    frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.text:SetPoint("CENTER")
     frame.text:SetText("T")
-    if self.ColorPalette then
-        frame.text:SetTextColor(self.ColorPalette:GetColor("text-primary"))
-    else
-        frame.text:SetTextColor(1, 1, 1, 1)
-    end
+    frame.text:SetTextColor(1, 1, 1, 1)
     
     -- Use Movable for drag functionality
     Movable:MakeFrameDraggable(
