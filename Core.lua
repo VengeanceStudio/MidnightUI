@@ -1198,16 +1198,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Button" then
         if widget.frame then
-            -- Reduce button width for more compact appearance
-            C_Timer.After(0, function()
-                if widget.frame and widget.frame.GetWidth then
-                    local currentWidth = widget.frame:GetWidth()
-                    if currentWidth and currentWidth > 0 then
-                        widget.frame:SetWidth(currentWidth - 25)
-                    end
-                end
-            end)
-            
             -- Move button to the right and down slightly to avoid label overlap
             if not widget.customButtonMoved then
                 local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
@@ -1498,16 +1488,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
         
     elseif widgetType == "Dropdown" then
         if widget.frame then
-            -- Reduce overall dropdown widget width for more compact appearance
-            C_Timer.After(0, function()
-                if widget.frame and widget.frame.GetWidth then
-                    local currentWidth = widget.frame:GetWidth()
-                    if currentWidth and currentWidth > 0 then
-                        widget.frame:SetWidth(currentWidth - 30)
-                    end
-                end
-            end)
-            
             -- Move dropdown frame to the right to prevent border/label cutoff
             local point, relativeTo, relativePoint, xOfs, yOfs = widget.frame:GetPoint()
             if point and xOfs and yOfs then
@@ -2420,6 +2400,14 @@ function MidnightUI:GetThemeOptions()
             values = themeValues,
             get = function() return self.db.profile.theme.active end,
             set = function(_, value)
+                -- If it's a custom theme, reload it from the database first
+                if self.db.profile.theme.customThemes and self.db.profile.theme.customThemes[value] then
+                    local themeData = self.db.profile.theme.customThemes[value]
+                    if ColorPalette then
+                        ColorPalette:RegisterPalette(value, themeData)
+                    end
+                end
+                
                 self.db.profile.theme.active = value
                 if self.FrameFactory then
                     self.FrameFactory:SetTheme(value)
@@ -2430,6 +2418,10 @@ function MidnightUI:GetThemeOptions()
                 if self.FontKit then
                     self.FontKit:SetActiveTheme(value)
                 end
+                
+                -- Clear temp colors when switching themes
+                self.tempThemeColors = nil
+                
                 self:Print("Theme changed to " .. value .. ". Some changes may require a /reload to take full effect.")
                 
                 -- Refresh options to show current theme colors
