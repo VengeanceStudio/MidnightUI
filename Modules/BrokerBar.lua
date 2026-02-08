@@ -5,8 +5,9 @@ local LDB = LibStub("LibDataBroker-1.1")
 local LSM = LibStub("LibSharedMedia-3.0")
 local Masque = LibStub("Masque", true)
 
--- Framework integration
-local FrameFactory, ColorPalette, FontKit
+-- Framework integration - use global reference for ColorPalette
+local FrameFactory, FontKit
+local ColorPalette = _G.MidnightUI_ColorPalette
 
 -- Make BrokerBar globally accessible for broker files
 _G.BrokerBar = BrokerBar
