@@ -1398,6 +1398,7 @@ function BrokerBar:GetOptions()
             bars = { 
                 name = "Bars", 
                 type = "group", 
+                inline = true,
                 order = 8, 
                 args = { 
                     create = { 
