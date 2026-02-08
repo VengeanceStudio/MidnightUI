@@ -2556,7 +2556,11 @@ function MidnightUI:GetThemeOptions()
                 self:Print("Theme colors reset to defaults")
             end,
         },
-        openColorEditor = {
+        spacer8 = {
+            type = "description",
+            name = " ",
+            order = 19.75,
+        },        openColorEditor = {
             type = "execute",
             name = "Open Theme Editor",
             desc = "Opens a visual mockup window where you can click on elements to edit their colors",
