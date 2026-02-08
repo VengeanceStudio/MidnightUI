@@ -70,7 +70,7 @@ function Tooltips:StyleTooltips()
     if not self.ColorPalette then return end
     
     for _, tooltip in ipairs(self.tooltips) do
-        if tooltip and tooltip.SetBackdrop then
+        if tooltip then
             self:StyleTooltip(tooltip)
         end
     end
@@ -87,25 +87,55 @@ function Tooltips:StyleTooltip(tooltip)
         bga = self.db.profile.backdropAlpha
     end
     
-    -- Set backdrop
-    tooltip:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false,
-        tileSize = 16,
-        edgeSize = self.db.profile.borderSize or 2,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 }
-    })
-    
-    tooltip:SetBackdropColor(bgr, bgg, bgb, bga)
-    tooltip:SetBackdropBorderColor(br, bg, bb, ba)
-    
-    -- Style fonts if FontKit is available
-    if self.FontKit and tooltip.NineSlice then
-        -- Hook to update font when tooltip shows
-        if not self:IsHooked(tooltip, "OnShow") then
-            self:HookScript(tooltip, "OnShow", "OnTooltipShow")
+    -- Modern WoW uses NineSlice system for tooltips
+    if tooltip.NineSlice then
+        -- Style the NineSlice border textures
+        local borderSize = self.db.profile.borderSize or 2
+        
+        -- Set border color
+        if tooltip.NineSlice.TopEdge then
+            tooltip.NineSlice.TopEdge:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.TopEdge:SetHeight(borderSize)
         end
+        if tooltip.NineSlice.BottomEdge then
+            tooltip.NineSlice.BottomEdge:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.BottomEdge:SetHeight(borderSize)
+        end
+        if tooltip.NineSlice.LeftEdge then
+            tooltip.NineSlice.LeftEdge:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.LeftEdge:SetWidth(borderSize)
+        end
+        if tooltip.NineSlice.RightEdge then
+            tooltip.NineSlice.RightEdge:SetColorTexture(br, bg, bb, ba)
+            tooltip.NineSlice.RightEdge:SetWidth(borderSize)
+        end
+        
+        -- Set corner colors
+        if tooltip.NineSlice.TopLeftCorner then
+            tooltip.NineSlice.TopLeftCorner:SetColorTexture(br, bg, bb, ba)
+        end
+        if tooltip.NineSlice.TopRightCorner then
+            tooltip.NineSlice.TopRightCorner:SetColorTexture(br, bg, bb, ba)
+        end
+        if tooltip.NineSlice.BottomLeftCorner then
+            tooltip.NineSlice.BottomLeftCorner:SetColorTexture(br, bg, bb, ba)
+        end
+        if tooltip.NineSlice.BottomRightCorner then
+            tooltip.NineSlice.BottomRightCorner:SetColorTexture(br, bg, bb, ba)
+        end
+        
+        -- Create or update background texture
+        if not tooltip.MidnightBG then
+            tooltip.MidnightBG = tooltip:CreateTexture(nil, "BACKGROUND")
+            tooltip.MidnightBG:SetAllPoints(tooltip)
+            tooltip.MidnightBG:SetDrawLayer("BACKGROUND", -8)
+        end
+        tooltip.MidnightBG:SetColorTexture(bgr, bgg, bgb, bga)
+    end
+    
+    -- Hook to update font when tooltip shows
+    if self.FontKit and not self:IsHooked(tooltip, "OnShow") then
+        self:HookScript(tooltip, "OnShow", "OnTooltipShow")
     end
 end
 
