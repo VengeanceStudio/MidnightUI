@@ -921,16 +921,16 @@ function BrokerBar:ApplyBarSettings(barID)
     f:SetHeight(db.height or 24)
     f.bg:SetTexture(LSM:Fetch("statusbar", db.texture or "Flat"))
     
-    -- Use theme colors if available
+    -- Use saved color from database, or theme color as fallback
+    local r, g, b = db.color.r, db.color.g, db.color.b
+    local alpha = db.alpha or 0.6
+    f.bg:SetVertexColor(r, g, b, alpha)
+    
+    -- Use theme colors for backdrop if available
     if ColorPalette then
-        local r, g, b, a = ColorPalette:GetColor("panel-bg")
-        -- Use theme alpha, but allow db.alpha override if explicitly set and not default
-        local alpha = a  -- Always use theme alpha for consistency
-        f.bg:SetVertexColor(r, g, b, alpha)
         f:SetBackdropColor(ColorPalette:GetColor("bg-primary"))
         f:SetBackdropBorderColor(ColorPalette:GetColor("panel-border"))
     else
-        f.bg:SetVertexColor(db.color.r, db.color.g, db.color.b, db.alpha or 0.5)
         f:SetBackdropColor(0, 0, 0, 0)
         f:SetBackdropBorderColor(1, 1, 1, skin.borderAlpha)
     end
@@ -1397,7 +1397,9 @@ function BrokerBar:GetOptions()
             },
             bars = { 
                 name = "Bars", 
-                type = "group", 
+                type = "group",
+                inline = true,
+                childGroups = "tree",
                 order = 8, 
                 args = { 
                     create = { 
@@ -1414,7 +1416,7 @@ function BrokerBar:GetOptions()
                                     height = 24, 
                                     scale = 1.0, 
                                     alpha = a or 0.6, 
-                                    color = {r = r or 0.1, g = g or 0.1, b = b or 0.1}, 
+                                    color = {r = r, g = g, b = b}, 
                                     texture = "Blizzard", 
                                     skin = "Global", 
                                     padding = 5, 
@@ -1423,7 +1425,9 @@ function BrokerBar:GetOptions()
                                     y = 0 
                                 }
                                 self:CreateBarFrame(v)
-                                self:ApplyBarSettings(v) 
+                                self:ApplyBarSettings(v)
+                                -- Refresh options to show new bar
+                                LibStub("AceConfigRegistry-3.0"):NotifyChange("MidnightUI")
                             end 
                         end 
                     } 
