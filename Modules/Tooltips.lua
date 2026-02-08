@@ -8,7 +8,6 @@ local Tooltips = MidnightUI:NewModule("Tooltips", "AceEvent-3.0", "AceHook-3.0")
 function Tooltips:OnInitialize()
     self.db = MidnightUI.db:RegisterNamespace("Tooltips", {
         profile = {
-            enabled = true,
             borderSize = 2,
             backdropAlpha = 0.95,
             fontSize = 12,
@@ -53,8 +52,6 @@ function Tooltips:OnInitialize()
 end
 
 function Tooltips:OnEnable()
-    if not self.db.profile.enabled then return end
-    
     -- Wait for theme system to be ready
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "Initialize")
 end
@@ -212,8 +209,6 @@ function Tooltips:OnTooltipShow(tooltip)
 end
 
 function Tooltips:GameTooltip_SetDefaultAnchor(tooltip, parent)
-    if not self.db.profile.enabled then return end
-    
     -- Handle cursor following
     if self.db.profile.cursorFollow then
         tooltip:SetOwner(parent, "ANCHOR_CURSOR")
@@ -285,8 +280,6 @@ end
 -- ============================================================================
 
 function Tooltips:OnTooltipSetUnit(tooltip)
-    if not self.db.profile.enabled then return end
-    
     local _, unit = tooltip:GetUnit()
     if not unit or not UnitExists(unit) then return end
     
@@ -488,20 +481,7 @@ end
 -- Module Enable/Disable
 -- ============================================================================
 
-function Tooltips:Toggle()
-    if self.db.profile.enabled then
-        self:Disable()
-        self.db.profile.enabled = false
-        MidnightUI:Print("Tooltips disabled")
-    else
-        self.db.profile.enabled = true
-        self:Enable()
-        MidnightUI:Print("Tooltips enabled")
-    end
-end
-
 function Tooltips:UpdateSettings()
-    if not self.db.profile.enabled then return end
     
     -- Update cursor following
     if self.db.profile.cursorFollow then
@@ -521,30 +501,16 @@ function Tooltips:GetOptions()
         name = "Tooltips",
         type = "group",
         args = {
-            header = {
-                type = "header",
-                name = "Tooltip Styling",
+            description = {
+                type = "description",
+                name = "Customize tooltip appearance and information display. Use the Tooltips toggle on the General tab to enable/disable this module.",
                 order = 1,
-            },
-            enabled = {
-                type = "toggle",
-                name = "Enable Tooltip Styling",
-                desc = "Style all game tooltips with your active theme",
-                order = 2,
-                get = function() return self.db.profile.enabled end,
-                set = function(_, value)
-                    self.db.profile.enabled = value
-                    if value then
-                        self:Enable()
-                    else
-                        self:Disable()
-                    end
-                end,
+                fontSize = "medium",
             },
             spacer1 = {
                 type = "description",
                 name = " ",
-                order = 3,
+                order = 2,
             },
             
             -- Appearance Settings
@@ -566,7 +532,7 @@ function Tooltips:GetOptions()
                     self.db.profile.borderSize = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             backdropAlpha = {
                 type = "range",
@@ -581,7 +547,7 @@ function Tooltips:GetOptions()
                     self.db.profile.backdropAlpha = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             fontSize = {
                 type = "range",
@@ -596,7 +562,7 @@ function Tooltips:GetOptions()
                     self.db.profile.fontSize = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             spacer2 = {
                 type = "description",
@@ -620,7 +586,7 @@ function Tooltips:GetOptions()
                     self.db.profile.cursorFollow = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             cursorAnchor = {
                 type = "select",
@@ -643,7 +609,7 @@ function Tooltips:GetOptions()
                     self.db.profile.cursorAnchor = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled or not self.db.profile.cursorFollow end,
+                disabled = function() return not self:IsEnabled() or not self.db.profile.cursorFollow end,
             },
             offsetX = {
                 type = "range",
@@ -658,7 +624,7 @@ function Tooltips:GetOptions()
                     self.db.profile.offsetX = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled or not self.db.profile.cursorFollow end,
+                disabled = function() return not self:IsEnabled() or not self.db.profile.cursorFollow end,
             },
             offsetY = {
                 type = "range",
@@ -673,7 +639,7 @@ function Tooltips:GetOptions()
                     self.db.profile.offsetY = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled or not self.db.profile.cursorFollow end,
+                disabled = function() return not self:IsEnabled() or not self.db.profile.cursorFollow end,
             },
             fadeDelay = {
                 type = "range",
@@ -688,7 +654,7 @@ function Tooltips:GetOptions()
                     self.db.profile.fadeDelay = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             scale = {
                 type = "range",
@@ -703,7 +669,7 @@ function Tooltips:GetOptions()
                     self.db.profile.scale = value
                     self:UpdateSettings()
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             spacer3 = {
                 type = "description",
@@ -726,7 +692,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.classColor = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             showGuild = {
                 type = "toggle",
@@ -737,7 +703,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showGuild = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             yourGuildColor = {
                 type = "color",
@@ -751,7 +717,7 @@ function Tooltips:GetOptions()
                 set = function(_, r, g, b)
                     self.db.profile.yourGuildColor = {r = r, g = g, b = b}
                 end,
-                disabled = function() return not self.db.profile.enabled or not self.db.profile.showGuild end,
+                disabled = function() return not self:IsEnabled() or not self.db.profile.showGuild end,
             },
             otherGuildColor = {
                 type = "color",
@@ -765,7 +731,7 @@ function Tooltips:GetOptions()
                 set = function(_, r, g, b)
                     self.db.profile.otherGuildColor = {r = r, g = g, b = b}
                 end,
-                disabled = function() return not self.db.profile.enabled or not self.db.profile.showGuild end,
+                disabled = function() return not self:IsEnabled() or not self.db.profile.showGuild end,
             },
             showStatus = {
                 type = "toggle",
@@ -776,7 +742,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showStatus = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             showItemLevel = {
                 type = "toggle",
@@ -787,7 +753,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showItemLevel = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             showFaction = {
                 type = "toggle",
@@ -798,7 +764,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showFaction = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             showMount = {
                 type = "toggle",
@@ -809,7 +775,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showMount = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             showRole = {
                 type = "toggle",
@@ -820,7 +786,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showRole = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             showMythicScore = {
                 type = "toggle",
@@ -831,7 +797,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showMythicScore = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
             showTargetOf = {
                 type = "toggle",
@@ -842,7 +808,7 @@ function Tooltips:GetOptions()
                 set = function(_, value)
                     self.db.profile.showTargetOf = value
                 end,
-                disabled = function() return not self.db.profile.enabled end,
+                disabled = function() return not self:IsEnabled() end,
             },
         }
     }
