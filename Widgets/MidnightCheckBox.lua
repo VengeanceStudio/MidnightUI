@@ -103,8 +103,11 @@ local methods = {
             check:SetTexture("Interface\\Buttons\\UI-RadioButton")
             check:SetTexCoord(0.25, 0.5, 0, 1)
             check:SetBlendMode("ADD")
+            -- Apply theme color to radio button
+            check:SetVertexColor(ColorPalette:GetColor("accent-primary"))
             highlight:SetTexture("Interface\\Buttons\\UI-RadioButton")
             highlight:SetTexCoord(0.5, 0.75, 0, 1)
+            highlight:SetVertexColor(ColorPalette:GetColor("accent-primary"))
         else
             size = 24
             checkbg:SetTexture("Interface\\Buttons\\UI-CheckBox-Up")
@@ -112,8 +115,12 @@ local methods = {
             check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
             check:SetTexCoord(0, 1, 0, 1)
             check:SetBlendMode("BLEND")
+            -- Apply theme color to the check mark
+            check:SetVertexColor(ColorPalette:GetColor("accent-primary"))
             highlight:SetTexture("Interface\\Buttons\\UI-CheckBox-Highlight")
             highlight:SetTexCoord(0, 1, 0, 1)
+            -- Apply theme color to highlight
+            highlight:SetVertexColor(ColorPalette:GetColor("accent-primary"))
         end
         checkbg:SetHeight(size)
         checkbg:SetWidth(size)
@@ -182,11 +189,15 @@ local function Constructor()
     check:SetAllPoints(checkbg)
     check:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
     check:Hide()
+    -- Apply theme color to check mark
+    check:SetVertexColor(ColorPalette:GetColor("accent-primary"))
     
     local highlight = frame:CreateTexture(nil, "HIGHLIGHT")
     highlight:SetAllPoints(checkbg)
     highlight:SetTexture("Interface\\Buttons\\UI-CheckBox-Highlight")
     highlight:SetBlendMode("ADD")
+    -- Apply theme color to highlight
+    highlight:SetVertexColor(ColorPalette:GetColor("accent-primary"))
     
     local text = frame:CreateFontString(nil, "OVERLAY")
     text:SetPoint("LEFT", checkbg, "RIGHT", 5, 1)

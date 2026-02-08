@@ -13,16 +13,20 @@ local pairs = pairs
 local CreateFrame, UIParent = CreateFrame, UIParent
 
 -- Get our color palette
-local ColorPalette = MidnightUI and MidnightUI.ColorPalette or {
-    GetColor = function(_, key)
-        local colors = {
-            ['text-primary'] = {0.82, 0.82, 0.82},
-            ['accent-primary'] = {0.16, 0.52, 0.58},
-            ['panel-bg'] = {0.1, 0.1, 0.1},
-        }
-        return unpack(colors[key] or {1, 1, 1})
-    end
-}
+local ColorPalette = _G.MidnightUI_ColorPalette
+if not ColorPalette then
+    -- Fallback if not loaded yet
+    ColorPalette = {
+        GetColor = function(_, key)
+            local colors = {
+                ['text-primary'] = {0.82, 0.82, 0.82},
+                ['accent-primary'] = {0.16, 0.52, 0.58},
+                ['panel-bg'] = {0.1, 0.1, 0.1},
+            }
+            return unpack(colors[key] or {1, 1, 1})
+        end
+    }
+end
 
 --[[-----------------------------------------------------------------------------
 Methods
@@ -87,7 +91,9 @@ local function Constructor()
 	titletext:SetPoint("TOPRIGHT", -14, 0)
 	titletext:SetJustifyH("LEFT")
 	titletext:SetHeight(18)
-	local r, g, b = ColorPalette:GetColor('text-primary')
+	-- Use live ColorPalette reference
+	local palette = _G.MidnightUI_ColorPalette or ColorPalette
+	local r, g, b = palette:GetColor('text-primary')
 	titletext:SetTextColor(r, g, b)
 
 	local border = CreateFrame("Frame", nil, frame, "BackdropTemplate")
@@ -96,9 +102,9 @@ local function Constructor()
 	border:SetBackdrop(PaneBackdrop)
 	
 	-- Apply MidnightUI themed colors
-	local bgr, bgg, bgb = ColorPalette:GetColor('panel-bg')
+	local bgr, bgg, bgb = palette:GetColor('panel-bg')
 	border:SetBackdropColor(bgr, bgg, bgb, 0.8)
-	local borderr, borderg, borderb = ColorPalette:GetColor('accent-primary')
+	local borderr, borderg, borderb = palette:GetColor('accent-primary')
 	border:SetBackdropBorderColor(borderr, borderg, borderb, 1)
 
 	--Container Support
