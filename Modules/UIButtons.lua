@@ -93,8 +93,8 @@ function UIButtons:CreateContainer()
     
     container:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false, edgeSize = 0, -- Temporarily hidden (was 1)
+        edgeFile = nil, -- Border temporarily hidden (was "Interface\\Buttons\\WHITE8X8")
+        tile = false, edgeSize = 0,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     
