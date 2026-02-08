@@ -236,7 +236,8 @@ function Mailbox:CreateBlackBookUI()
     
     -- Hook autocomplete
     if self.db.profile.disableBlizzardAutocomplete then
-        SendMailNameEditBox:SetAutoCompleteParams(nil)
+        -- Modern WoW uses autoCompleteParams table directly
+        SendMailNameEditBox.autoCompleteParams = nil
     end
     
     -- Autofill last recipient
