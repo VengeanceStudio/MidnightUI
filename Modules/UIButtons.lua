@@ -93,7 +93,7 @@ function UIButtons:CreateContainer()
     
     container:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = nil, -- Border temporarily hidden (was "Interface\\Buttons\\WHITE8X8")
+        edgeFile = nil,
         tile = false, edgeSize = 0,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
@@ -101,10 +101,8 @@ function UIButtons:CreateContainer()
     -- Use ColorPalette if available, fallback to database
     if ColorPalette then
         container:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-        -- container:SetBackdropBorderColor(ColorPalette:GetColor('panel-border')) -- Border temporarily hidden
     else
         container:SetBackdropColor(unpack(self.db.profile.backgroundColor))
-        -- container:SetBackdropBorderColor(0, 0, 0, 1) -- Border temporarily hidden
     end
     
     -- Use Movable for drag functionality
@@ -196,18 +194,18 @@ function UIButtons:CreateButtons()
                 -- Apply framework styling manually for secure button
                 btn:SetBackdrop({
                     bgFile = "Interface\\Buttons\\WHITE8X8",
-                    edgeFile = "Interface\\Buttons\\WHITE8X8",
+                    edgeFile = nil,
                     tile = false,
                     tileSize = 16,
-                    edgeSize = 1,
-                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
+                    edgeSize = 0,
+                    insets = { left = 0, right = 0, top = 0, bottom = 0 }
                 })
                 if ColorPalette then
-                    btn:SetBackdropColor(ColorPalette:GetColor("button-bg"))
-                    btn:SetBackdropBorderColor(ColorPalette:GetColor("primary"))
+                    -- Use panel-bg darkened by 20% towards black
+                    local r, g, b, a = ColorPalette:GetColor("panel-bg")
+                    btn:SetBackdropColor(r * 0.8, g * 0.8, b * 0.8, a)
                 else
-                    btn:SetBackdropColor(0.1, 0.1, 0.15, 0.9)
-                    btn:SetBackdropBorderColor(0, 0.8, 1, 1)
+                    btn:SetBackdropColor(0.08, 0.08, 0.08, 0.9)
                 end
                 
                 btn.text = btn:CreateFontString(nil, "OVERLAY")
@@ -233,17 +231,17 @@ function UIButtons:CreateButtons()
                     btn:SetSize(32, 32)
                     btn:SetBackdrop({
                         bgFile = "Interface\\Buttons\\WHITE8X8",
-                        edgeFile = "Interface\\Buttons\\WHITE8X8",
-                        tile = false, edgeSize = 1,
+                        edgeFile = nil,
+                        tile = false, edgeSize = 0,
                         insets = { left = 0, right = 0, top = 0, bottom = 0 }
                     })
                     
                     if ColorPalette then
-                        btn:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-                        btn:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+                        -- Use panel-bg darkened by 20% towards black
+                        local r, g, b, a = ColorPalette:GetColor('panel-bg')
+                        btn:SetBackdropColor(r * 0.8, g * 0.8, b * 0.8, a)
                     else
-                        btn:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
-                        btn:SetBackdropBorderColor(0, 0, 0, 1)
+                        btn:SetBackdropColor(0.08, 0.08, 0.08, 0.8)
                     end
                     
                     btn.text = btn:CreateFontString(nil, "OVERLAY")
