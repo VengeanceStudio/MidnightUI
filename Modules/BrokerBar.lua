@@ -1005,9 +1005,8 @@ end
 function BrokerBar:OnDBReady()
     if not MidnightUI.db.profile.modules.bar then return end
     
-    -- Get framework systems
+    -- Get framework systems (ColorPalette already set at top of file)
     FrameFactory = MidnightUI.FrameFactory
-    ColorPalette = MidnightUI.ColorPalette
     FontKit = MidnightUI.FontKit
     
     -- Keep namespace as "Bar" for backwards compatibility with saved settings

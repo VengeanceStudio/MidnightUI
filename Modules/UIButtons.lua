@@ -20,7 +20,7 @@ function UIButtons:OnDBReady()
     
     -- Get framework systems
     FrameFactory = MidnightUI.FrameFactory
-    ColorPalette = MidnightUI.ColorPalette
+    ColorPalette = _G.MidnightUI_ColorPalette
     FontKit = MidnightUI.FontKit
 
     self.db = MidnightUI.db:RegisterNamespace("UIButtons", {

@@ -36,7 +36,7 @@ function Demo:CreateDemoFrame()
     
     -- Get framework systems (they're registered by now)
     FrameFactory = MidnightUI.FrameFactory
-    ColorPalette = MidnightUI.ColorPalette
+    ColorPalette = _G.MidnightUI_ColorPalette
     FontKit = MidnightUI.FontKit
     LayoutHelper = MidnightUI.LayoutHelper
     Atlas = MidnightUI.Atlas
