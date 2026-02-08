@@ -2750,6 +2750,21 @@ function MidnightUI:CreateColorPaletteSwatches()
     
     self.colorSwatchContainer = swatchContainer
     
+    -- Add OnUpdate script to check if we should still be visible
+    swatchContainer:SetScript("OnUpdate", function(self)
+        local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+        if AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"] then
+            local status = AceConfigDialog.OpenFrames["MidnightUI"].status
+            if status and status.groups and status.groups.selected ~= "themes" then
+                -- We're not on themes page anymore, hide immediately
+                self:Hide()
+                self:SetParent(nil)
+                MidnightUI.colorSwatchContainer = nil
+                MidnightUI.themeColorSwatches = nil
+            end
+        end
+    end)
+    
     -- Define the 8 core colors
     local coreColors = {
         {key = "panel-bg", name = "Panel\nBackground"},
