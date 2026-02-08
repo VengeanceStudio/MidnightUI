@@ -1166,7 +1166,8 @@ end
 function BrokerBar:GetPluginOptions()
     local options = { 
         name = "Brokers", 
-        type = "group", 
+        type = "group",
+        inline = true,
         childGroups = "tree", 
         args = {} 
     }
@@ -1395,33 +1396,26 @@ function BrokerBar:GetOptions()
                 get = function() return self.db.profile.locked end, 
                 set = function(_, v) self.db.profile.locked = v; for id in pairs(bars) do self:ApplyBarSettings(id) end end 
             },
-            barsAndBrokers = {
-                name = "Bars & Brokers",
-                type = "group",
+            bars = { 
+                name = "Bars", 
+                type = "group", 
                 inline = true,
-                order = 8,
-                args = {
-                    bars = { 
-                        name = "Bars", 
-                        type = "group", 
+                order = 8, 
+                args = { 
+                    create = { 
+                        name = "Create New Bar", 
+                        type = "input", 
                         order = 1, 
-                        args = { 
-                            create = { 
-                                name = "Create New Bar", 
-                                type = "input", 
-                                order = 1, 
-                                set = function(_, v) if v ~= "" and not self.db.profile.bars[v] then self.db.profile.bars[v] = { enabled = true, fullWidth = false, width = 400, height = 24, scale = 1.0, alpha = 0.5, color = {r=0,g=0,b=0}, texture = "Blizzard", skin = "Global", padding = 5, point = "CENTER", x = 0, y = 0 }; self:CreateBarFrame(v); self:ApplyBarSettings(v) end end 
-                            } 
-                        } 
-                    },
-                    brokers = self:GetPluginOptions()
-                }
-            }
+                        set = function(_, v) if v ~= "" and not self.db.profile.bars[v] then self.db.profile.bars[v] = { enabled = true, fullWidth = false, width = 400, height = 24, scale = 1.0, alpha = 0.5, color = {r=0,g=0,b=0}, texture = "Blizzard", skin = "Global", padding = 5, point = "CENTER", x = 0, y = 0 }; self:CreateBarFrame(v); self:ApplyBarSettings(v) end end 
+                    } 
+                } 
+            },
+            brokers = self:GetPluginOptions()
         }
     }
     local sortedBars = {}; for id in pairs(self.db.profile.bars) do table.insert(sortedBars, id) end; table.sort(sortedBars)
     for i, id in ipairs(sortedBars) do
-        options.args.barsAndBrokers.args.bars.args[id] = { 
+        options.args.bars.args[id] = { 
             name = id, 
             type = "group", 
             order = 10 + i, 
