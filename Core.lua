@@ -83,71 +83,9 @@ function MidnightUI:OnEnable()
             AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
-        -- Hook into AceConfigDialog Open to hook the TreeGroup selection
-        print("DEBUG: Starting Open hook setup")
+        -- Hook into AceConfigDialog Open (kept for future use if needed)
         if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
-            print("DEBUG: AceConfigDialog.Open exists and not yet hooked")
-            local originalOpen = AceConfigDialog.Open
-            AceConfigDialog.Open = function(appName, ...)
-                print("DEBUG: AceConfigDialog.Open called")
-                print("DEBUG: appName type:", type(appName), "value:", appName)
-                print("DEBUG: All args:", appName, ...)
-                
-                local result = originalOpen(appName, ...)
-                
-                -- Try to find our frame after opening
-                C_Timer.After(0.1, function()
-                    print("DEBUG: Checking OpenFrames table:")
-                    if AceConfigDialog.OpenFrames then
-                        for name, frame in pairs(AceConfigDialog.OpenFrames) do
-                            print("DEBUG: OpenFrame key:", name, "type:", type(name))
-                        end
-                    end
-                    
-                    local openFrame = AceConfigDialog.OpenFrames["MidnightUI"]
-                    print("DEBUG: Looking for openFrame:", openFrame)
-                    if openFrame then
-                        print("DEBUG: openFrame.frame:", openFrame.frame)
-                        if openFrame.frame then
-                            print("DEBUG: openFrame.frame.obj:", openFrame.frame.obj)
-                            local obj = openFrame.frame.obj
-                            if obj then
-                                print("DEBUG: obj type:", obj.type)
-                                print("DEBUG: Listing ALL methods on obj:")
-                                local methods = {}
-                                for k, v in pairs(obj) do
-                                    if type(v) == "function" and type(k) == "string" then
-                                        table.insert(methods, k)
-                                    end
-                                end
-                                table.sort(methods)
-                                for _, method in ipairs(methods) do
-                                    print("DEBUG:   - ", method)
-                                end
-                            end
-                        end
-                    end
-                    
-                    if openFrame and openFrame.frame and openFrame.frame.obj then
-                        local treeGroup = openFrame.frame.obj
-                        print("DEBUG: Found treeGroup, type:", type(treeGroup))
-                        print("DEBUG: ALL treeGroup properties:")
-                        for k, v in pairs(treeGroup) do
-                            if type(k) == "string" then
-                                print("DEBUG:   ", k, "=", type(v))
-                            end
-                        end
-                    else
-                        print("DEBUG: Could not find treeGroup to hook")
-                    end
-                end)
-                
-                return result
-            end
             AceConfigDialog.MidnightOpenHooked = true
-            print("DEBUG: Open hook installed")
-        else
-            print("DEBUG: Open hook not installed - either doesn't exist or already hooked")
         end
         
         -- Hook AceGUI:Create to use our custom widgets
@@ -2664,11 +2602,8 @@ function MidnightUI:CreateColorPaletteSwatches()
     local FontKit = _G.MidnightUI_FontKit
     if not ColorPalette or not FontKit then return end
     
-    print("DEBUG: CreateColorPaletteSwatches called")
-    
     -- Clean up old container if it exists
     if self.colorSwatchContainer then
-        print("DEBUG: Destroying existing container")
         self.colorSwatchContainer:Hide()
         self.colorSwatchContainer:SetParent(nil)
         self.colorSwatchContainer = nil
@@ -2687,17 +2622,21 @@ function MidnightUI:CreateColorPaletteSwatches()
     -- Check if we're on the Themes tab
     local status = appName.status
     if not status or not status.groups or not status.groups.selected then
-        print("DEBUG: No status or groups found")
         return
     end
     
     -- Only show on Themes tab
     if status.groups.selected ~= "themes" then
-        print("DEBUG: Not on themes page, aborting swatch creation")
         return
     end
     
-    print("DEBUG: On themes page, creating swatches")
+    -- Destroy any existing container first
+    if self.colorSwatchContainer then
+        self.colorSwatchContainer:Hide()
+        self.colorSwatchContainer:SetParent(nil)
+        self.colorSwatchContainer = nil
+        self.themeColorSwatches = nil
+    end
     
     local container = appName.frame.obj
     if not container or not container.content then return end
@@ -2741,7 +2680,8 @@ function MidnightUI:CreateColorPaletteSwatches()
     local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", contentFrame)
     swatchContainer:SetSize(800, 100)
     -- Position relative to the content frame with a left offset to account for tree width
-    swatchContainer:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 200, -280)
+    -- Increased Y offset to position below the "Click any color rectangle" text
+    swatchContainer:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 200, -400)
     
     -- Set frame strata and level to ensure it's on top
     local parentStrata = contentFrame:GetFrameStrata()
@@ -2836,7 +2776,6 @@ function MidnightUI:CreateColorPaletteSwatches()
     end
     
     swatchContainer:Show()
-    print("DEBUG: Swatches created and shown, container ID:", tostring(swatchContainer))
 end
 
 function MidnightUI:OpenColorEditorFrame()
@@ -3647,15 +3586,11 @@ end
 
 function MidnightUI:GetOptions()
     -- Cleanup check every time options are fetched
-    print("DEBUG: GetOptions called")
     if self.colorSwatchContainer then
-        print("DEBUG: GetOptions - colorSwatchContainer exists")
         local AceConfigDialog = LibStub("AceConfigDialog-3.0")
         if AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"] then
             local status = AceConfigDialog.OpenFrames["MidnightUI"].status
-            print("DEBUG: GetOptions - current page:", status and status.groups and status.groups.selected)
             if status and status.groups and status.groups.selected ~= "themes" then
-                print("DEBUG: GetOptions - destroying swatches (not on themes page)")
                 self.colorSwatchContainer:Hide()
                 self.colorSwatchContainer:SetParent(nil)
                 self.colorSwatchContainer = nil
