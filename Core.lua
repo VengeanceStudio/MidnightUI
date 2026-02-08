@@ -2741,10 +2741,12 @@ function MidnightUI:CreateColorPaletteSwatches()
         -- Label below
         local label = FontKit:CreateFontString(swatchFrame, "body", "tiny")
         label:SetPoint("TOP", swatchFrame, "BOTTOM", 0, -4)
+        label:SetWidth(80)  -- Match swatch width
         label:SetText(colorData.name)
         label:SetTextColor(ColorPalette:GetColor("text-secondary"))
         label:SetJustifyH("CENTER")
-        label:SetWordWrap(false)
+        label:SetWordWrap(true)  -- Enable word wrap
+        label:SetMaxLines(0)  -- Allow unlimited lines
         
         -- Click handler
         swatchFrame:SetScript("OnClick", function()
