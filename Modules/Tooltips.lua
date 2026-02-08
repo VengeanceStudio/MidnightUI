@@ -159,22 +159,25 @@ function Tooltips:CreateTooltipAnchor()
     frame:SetMovable(true)
     frame:SetClampedToScreen(true)
     
-    -- Backdrop (match UnitFrame move boxes)
+    -- Backdrop (match UnitFrame move boxes exactly)
     frame:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false, edgeSize = 1,
+        tile = false,
+        edgeSize = 2,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     
-    frame:SetBackdropColor(0, 0, 0, 0.8)
-    frame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
+    frame:SetBackdropColor(0, 0.5, 0, 0.2)  -- Semi-transparent green
+    frame:SetBackdropBorderColor(0, 1, 0, 1) -- Bright green border
     
     -- Text "T"
-    frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
     frame.text:SetPoint("CENTER")
     frame.text:SetText("T")
     frame.text:SetTextColor(1, 1, 1, 1)
+    frame.text:SetShadowOffset(2, -2)
+    frame.text:SetShadowColor(0, 0, 0, 1)
     
     -- Use Movable for drag functionality
     Movable:MakeFrameDraggable(
