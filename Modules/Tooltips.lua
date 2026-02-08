@@ -407,17 +407,18 @@ function Tooltips:OnTooltipSetUnit(tooltip)
 end
 
 function Tooltips:GetUnitMountID(unit)
-    -- Check if unit has a mount buff
+    -- Check if unit has a mount buff using modern API
+    if not C_UnitAuras then return nil end
+    
     for i = 1, 40 do
-        local name, icon, count, debuffType, duration, expirationTime, source, isStealable, 
-              nameplateShowPersonal, spellId = UnitBuff(unit, i)
-        if not name then break end
+        local auraData = C_UnitAuras.GetBuffDataByIndex(unit, i)
+        if not auraData then break end
         
         -- Check if this buff is a mount
-        if C_MountJournal then
+        if auraData.spellId and C_MountJournal then
             for _, mountID in ipairs(C_MountJournal.GetMountIDs()) do
                 local mountName, mountSpellID = C_MountJournal.GetMountInfoByID(mountID)
-                if mountSpellID == spellId then
+                if mountSpellID == auraData.spellId then
                     return mountID
                 end
             end
