@@ -1071,6 +1071,28 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
                 widget.treeframe:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 6, -76)
                 widget.treeframe:SetPoint("BOTTOMLEFT", widget.frame, "BOTTOMLEFT", 6, 6)
                 
+                -- Style the scrollbar if it exists
+                if widget.scrollbar then
+                    local scrollbar = widget.scrollbar
+                    scrollbar:SetAlpha(1) -- Make it always visible
+                    
+                    -- Style the thumb
+                    local thumbTexture = scrollbar:GetThumbTexture()
+                    if thumbTexture then
+                        local r, g, b = ColorPalette:GetColor('accent-primary')
+                        thumbTexture:SetColorTexture(r, g, b, 1)
+                        thumbTexture:SetSize(12, 24)
+                    end
+                    
+                    -- Style the scrollbar track background
+                    if not scrollbar.midnightBg then
+                        scrollbar.midnightBg = scrollbar:CreateTexture(nil, "BACKGROUND")
+                        scrollbar.midnightBg:SetAllPoints(scrollbar)
+                        local r, g, b = ColorPalette:GetColor('panel-border')
+                        scrollbar.midnightBg:SetColorTexture(r, g, b, 1)
+                    end
+                end
+                
                 -- Style tree buttons (navigation items)
                 if not widget.treeButtonsStyled then
                     -- Store reference to widget for button click handling
