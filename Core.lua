@@ -2442,6 +2442,9 @@ function MidnightUI:GetThemeOptions()
                 -- Clear temp colors when switching themes
                 self.tempThemeColors = nil
                 
+                -- Notify modules that theme has changed
+                self:SendMessage("MIDNIGHTUI_THEME_CHANGED", value)
+                
                 self:Print("Theme changed to " .. value .. ". Some changes may require a /reload to take full effect.")
                 
                 -- Refresh options to show current theme colors
