@@ -926,6 +926,11 @@ function BrokerBar:ApplyBarSettings(barID)
     local r, g, b, alpha
     if db.useThemeColor and ColorPalette then
         r, g, b, alpha = ColorPalette:GetColor("panel-bg")
+        -- Fallback if ColorPalette returns nil (shouldn't happen but safety check)
+        if not r then
+            r, g, b = db.color.r, db.color.g, db.color.b
+            alpha = db.alpha or 0.6
+        end
     else
         r, g, b = db.color.r, db.color.g, db.color.b
         alpha = db.alpha or 0.6
