@@ -86,10 +86,20 @@ function Tooltips:Initialize()
         self:EnableCursorFollow()
     end
     
-    -- Hook unit tooltips for player information
-    GameTooltip:HookScript("OnTooltipSetUnit", function(tooltip)
-        self:OnTooltipSetUnit(tooltip)
-    end)
+    -- Hook unit tooltips for player information using modern API
+    if TooltipDataProcessor then
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tooltip)
+            self:OnTooltipSetUnit(tooltip)
+        end)
+    else
+        -- Fallback for older API - hook OnShow and check for unit
+        GameTooltip:HookScript("OnShow", function(tooltip)
+            local _, unit = tooltip:GetUnit()
+            if unit then
+                self:OnTooltipSetUnit(tooltip)
+            end
+        end)
+    end
     
     -- Listen for inspect data
     self:RegisterEvent("INSPECT_READY")
