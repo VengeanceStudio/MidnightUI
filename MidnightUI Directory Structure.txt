@@ -2,21 +2,71 @@ MidnightUI/
 │
 ├── MidnightUI.toc                          # Addon metadata & load order (Interface 12.0+)
 ├── Core.lua                                # Main engine, database, & module loader
+├── icon.png                                # Addon icon
 ├── LICENSE.txt                             # MIT License
 ├── README.md                               # Complete documentation & feature list
+├── FRAMEWORK_ARCHITECTURE.md               # Framework documentation
 ├── MidnightUI Directory Structure.txt      # This file
 │
 ├── Media/                                  # Textures, fonts, and sounds
+│   ├── Skull.tga                           # Skull texture asset
+│   └── Textures/                           # Additional texture assets
+│       └── Atlas/                          # Atlas texture files
+│
+├── Framework/                              # Core framework systems
+│   ├── Atlas.lua                           # Texture atlas management
+│   ├── ColorPalette.lua                    # Theme color system
+│   ├── FontKit.lua                         # Font management system
+│   ├── FrameFactory.lua                    # Frame creation utilities
+│   ├── LayoutHelper.lua                    # Layout positioning helpers
+│   └── README.md                           # Framework documentation
+│
+├── Themes/                                 # Color theme definitions
+│   ├── MidnightUIDefault.lua               # Default theme (purple/blue)
+│   ├── MidnightGlass.lua                   # Glass theme (transparent blue)
+│   ├── MidnightGreen.lua                   # Green theme
+│   ├── MidnightTransparent.lua             # Transparent blue theme (new default)
+│   ├── MidnightTransparentGold.lua         # Transparent gold theme
+│   ├── NeonSciFi.lua                       # Neon sci-fi theme (cyan/magenta)
+│   ├── MidnightDeathKnight.lua             # Death Knight class theme (crimson)
+│   ├── MidnightDemonHunter.lua             # Demon Hunter class theme (purple)
+│   ├── MidnightDruid.lua                   # Druid class theme (orange)
+│   ├── MidnightEvoker.lua                  # Evoker class theme (teal)
+│   ├── MidnightHunter.lua                  # Hunter class theme (lime)
+│   ├── MidnightMage.lua                    # Mage class theme (cyan)
+│   ├── MidnightMonk.lua                    # Monk class theme (jade)
+│   ├── MidnightPaladin.lua                 # Paladin class theme (pink)
+│   ├── MidnightPriest.lua                  # Priest class theme (white)
+│   ├── MidnightRogue.lua                   # Rogue class theme (yellow)
+│   ├── MidnightShaman.lua                  # Shaman class theme (blue)
+│   ├── MidnightWarlock.lua                 # Warlock class theme (lavender)
+│   ├── MidnightWarrior.lua                 # Warrior class theme (tan)
+│   └── README.md                           # Theme documentation
+│
+├── Widgets/                                # Custom AceGUI widgets
+│   ├── MidnightButton.lua                  # Styled button widget
+│   ├── MidnightCheckBox.lua                # Styled checkbox widget
+│   ├── MidnightColorPicker.lua             # Color picker widget
+│   ├── MidnightDropdown.lua                # Styled dropdown widget
+│   ├── MidnightDropdown-Pullout.lua        # Dropdown pullout menu
+│   ├── MidnightEditBox.lua                 # Styled text input widget
+│   ├── MidnightHeading.lua                 # Heading text widget
+│   ├── MidnightInlineGroup.lua             # Inline group container
+│   ├── MidnightMultiLineEditBox.lua        # Multi-line text input widget
+│   ├── MidnightSlider.lua                  # Styled slider widget
+│   └── MidnightTabGroup.lua                # Tab group container
 │
 ├── Modules/                                # Core addon modules
 │   ├── ActionBars.lua                      # Action bar customization & skinning
 │   ├── BrokerBar.lua                       # Info bars & LibDataBroker widgets system
 │   ├── Chat.lua                            # Chat frame enhancements
 │   ├── Cooldowns.lua                       # Cooldown timer manager (WIP)
+│   ├── FrameworkDemo.lua                   # Framework demo module
 │   ├── Maps.lua                            # Minimap customization
 │   ├── Movable.lua                         # Frame positioning & movement system
 │   ├── Setup.lua                           # First-time setup wizard
 │   ├── Skins.lua                           # Skin system (Midnight/Blizzard/Glass/Flat)
+│   ├── Tooltips.lua                        # Tooltip styling & customization
 │   ├── Tweaks.lua                          # Quality of life features & automation
 │   ├── UIButtons.lua                       # Menu & bag button styling
 │   ├── UnitFrames.lua                      # Unit frame core engine
@@ -153,9 +203,9 @@ MidnightUI/
 SUMMARY
 ================================================================================
 
-Total Modules: 11
-  - ActionBars, Bar (Info Bars), Chat, Cooldowns, Maps, Movable, Setup, Skins,
-    Tweaks, UIButtons, UnitFrames
+Total Modules: 13
+  - ActionBars, BrokerBar (Info Bars), Chat, Cooldowns, FrameworkDemo, Maps, 
+    Movable, Setup, Skins, Tooltips, Tweaks, UIButtons, UnitFrames
 
 Total Unit Frame Types: 6
   - Player, Target, Target of Target, Pet, Focus, Boss (1-5)
@@ -169,6 +219,22 @@ Total Libraries: 12
 Built-in Data Widgets (12):
   - System Info, Volume Mixer, Gold Tracker, Clock, Bag Space, Durability,
     Friends, Guild, Location, Difficulty, WoW Token, Item Level
+
+Built-in Themes (19):
+  - MidnightUIDefault, MidnightGlass, MidnightGreen, MidnightTransparent (default),
+    MidnightTransparentGold, NeonSciFi, MidnightDeathKnight, MidnightDemonHunter, 
+    MidnightDruid, MidnightEvoker, MidnightHunter, MidnightMage, MidnightMonk, 
+    MidnightPaladin, MidnightPriest, MidnightRogue, MidnightShaman, MidnightWarlock,
+    MidnightWarrior
+
+Custom Widgets (11):
+  - MidnightButton, MidnightCheckBox, MidnightColorPicker, MidnightDropdown,
+    MidnightEditBox, MidnightHeading, MidnightInlineGroup, MidnightMultiLineEditBox,
+    MidnightSlider, MidnightTabGroup
+
+Framework Systems (5):
+  - Atlas (texture management), ColorPalette (theme colors), FontKit (fonts),
+    FrameFactory (frame creation), LayoutHelper (positioning)
 
 Supported Skins: 4
   - Midnight (default), Blizzard, Glass, Flat
