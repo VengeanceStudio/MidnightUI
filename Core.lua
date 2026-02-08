@@ -2840,13 +2840,6 @@ function MidnightUI:CreateColorPaletteSwatches()
         end
         colorTexture:SetColorTexture(r, g, b, a)
         
-        -- Create thin border for definition only
-        local border = swatchFrame:CreateTexture(nil, "OVERLAY")
-        border:SetPoint("TOPLEFT", -1, 1)
-        border:SetPoint("BOTTOMRIGHT", 1, -1)
-        border:SetColorTexture(0, 0, 0, 0.3)  -- Very subtle black border
-        border:SetDrawLayer("OVERLAY", 0)
-        
         -- Label below
         local label = FontKit:CreateFontString(swatchFrame, "body", "tiny")
         label:SetPoint("TOP", swatchFrame, "BOTTOM", 0, -4)
@@ -2864,7 +2857,6 @@ function MidnightUI:CreateColorPaletteSwatches()
         
         -- Hover effect
         swatchFrame:SetScript("OnEnter", function()
-            border:SetColorTexture(ColorPalette:GetColor("accent-primary"))
             GameTooltip:SetOwner(swatchFrame, "ANCHOR_TOP")
             GameTooltip:SetText(colorData.name:gsub("\n", " "), 1, 1, 1)
             GameTooltip:AddLine("Click to change this color", 0.7, 0.7, 0.7)
@@ -2872,14 +2864,12 @@ function MidnightUI:CreateColorPaletteSwatches()
         end)
         
         swatchFrame:SetScript("OnLeave", function()
-            border:SetColorTexture(ColorPalette:GetColor("panel-border"))
             GameTooltip:Hide()
         end)
         
         -- Store for updates
         self.themeColorSwatches[colorData.key] = {
             texture = colorTexture,
-            border = border,
             frame = swatchFrame
         }
         
