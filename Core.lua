@@ -3593,7 +3593,19 @@ function MidnightUI:SaveCustomTheme()
         "MidnightGreen",
         "MidnightTransparent",
         "MidnightTransparentGold",
+        "MidnightDeathKnight",
         "MidnightDemonHunter",
+        "MidnightDruid",
+        "MidnightEvoker",
+        "MidnightHunter",
+        "MidnightMage",
+        "MidnightMonk",
+        "MidnightPaladin",
+        "MidnightPriest",
+        "MidnightRogue",
+        "MidnightShaman",
+        "MidnightWarlock",
+        "MidnightWarrior",
         "NeonSciFi"
     }
     for _, builtInName in ipairs(builtInThemes) do

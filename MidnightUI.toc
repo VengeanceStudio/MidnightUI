@@ -2,7 +2,7 @@
 ## Title: Midnight UI
 ## Notes: Complete Modern UI Replacement.
 ## Author: Vengeance
-## Version: 12.0.0.23
+## Version: 12.0.0.24
 ## IconTexture: Interface\AddOns\MidnightUI\icon.png
 ## SavedVariables: MidnightUIDB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDataBroker-1.1, Masque
@@ -49,7 +49,19 @@ Themes\MidnightGlass.lua
 Themes\MidnightGreen.lua
 Themes\MidnightTransparent.lua
 Themes\MidnightTransparentGold.lua
+Themes\MidnightDeathKnight.lua
 Themes\MidnightDemonHunter.lua
+Themes\MidnightDruid.lua
+Themes\MidnightEvoker.lua
+Themes\MidnightHunter.lua
+Themes\MidnightMage.lua
+Themes\MidnightMonk.lua
+Themes\MidnightPaladin.lua
+Themes\MidnightPriest.lua
+Themes\MidnightRogue.lua
+Themes\MidnightShaman.lua
+Themes\MidnightWarlock.lua
+Themes\MidnightWarrior.lua
 Themes\NeonSciFi.lua
 
 # ------------------------------------------------------------------------------
