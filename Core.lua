@@ -3670,31 +3670,6 @@ function MidnightUI:GetOptions()
                         order = 0.5,
                         fontSize = "large",
                     },
-                    themeHeader = { type = "header", order = 0.7, name = "UI Theme" },
-                    themeSelect = {
-                        type = "select",
-                        name = "Active Theme",
-                        desc = "Choose the visual theme for MidnightUI framework components.",
-                        order = 0.8,
-                        values = {
-                            ["MidnightGlass"] = "Midnight Dark Glass",
-                            ["NeonSciFi"] = "Neon Sci-Fi",
-                        },
-                        get = function(info) return self.db.profile.theme.active end,
-                        set = function(info, value)
-                            self.db.profile.theme.active = value
-                            if self.FrameFactory then
-                                self.FrameFactory:SetTheme(value)
-                            end
-                            if self.ColorPalette then
-                                self.ColorPalette:SetActiveTheme(value)
-                            end
-                            if self.FontKit then
-                                self.FontKit:SetActiveTheme(value)
-                            end
-                            self:Print("Theme changed to " .. value .. ". Some changes may require a /reload to take full effect.")
-                        end,
-                    },
                     resolutionHeader = {
                         type = "header",
                         name = "Resolution Scaling",
