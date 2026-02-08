@@ -177,7 +177,8 @@ local defaults = {
                 width = 600, 
                 height = 24, 
                 scale = 1.0,
-                alpha = 0.6, 
+                alpha = 0.6,
+                useThemeColor = true,
                 color = {r = 0.1, g = 0.1, b = 0.1}, 
                 texture = "Blizzard", 
                 skin = "Midnight",    
@@ -921,9 +922,14 @@ function BrokerBar:ApplyBarSettings(barID)
     f:SetHeight(db.height or 24)
     f.bg:SetTexture(LSM:Fetch("statusbar", db.texture or "Flat"))
     
-    -- Use saved color from database, or theme color as fallback
-    local r, g, b = db.color.r, db.color.g, db.color.b
-    local alpha = db.alpha or 0.6
+    -- Use theme color if useThemeColor flag is set, otherwise use saved color
+    local r, g, b, alpha
+    if db.useThemeColor and ColorPalette then
+        r, g, b, alpha = ColorPalette:GetColor("panel-bg")
+    else
+        r, g, b = db.color.r, db.color.g, db.color.b
+        alpha = db.alpha or 0.6
+    end
     f.bg:SetVertexColor(r, g, b, alpha)
     
     -- Use theme colors for backdrop if available
@@ -1397,9 +1403,7 @@ function BrokerBar:GetOptions()
             },
             bars = { 
                 name = "Bars", 
-                type = "group",
-                inline = true,
-                childGroups = "tree",
+                type = "group", 
                 order = 8, 
                 args = { 
                     create = { 
@@ -1510,13 +1514,26 @@ function BrokerBar:GetOptions()
                     get = function() return self.db.profile.bars[id].texture end, 
                     set = function(_, v) self.db.profile.bars[id].texture = v; self:ApplyBarSettings(id) end 
                 },
+                useThemeColor = {
+                    name = "Use Theme Color",
+                    type = "toggle",
+                    order = 6.5,
+                    get = function() return self.db.profile.bars[id].useThemeColor end,
+                    set = function(_, v) self.db.profile.bars[id].useThemeColor = v; self:ApplyBarSettings(id) end
+                },
                 color = { 
                     name = "Color", 
                     type = "color", 
                     hasAlpha = true, 
-                    order = 7, 
+                    order = 7,
+                    disabled = function() return self.db.profile.bars[id].useThemeColor end,
                     get = function() local c = self.db.profile.bars[id].color; return c.r, c.g, c.b, self.db.profile.bars[id].alpha end, 
-                    set = function(_, r, g, b, a) self.db.profile.bars[id].color = {r=r, g=g, b=b}; self.db.profile.bars[id].alpha = a; self:ApplyBarSettings(id) end 
+                    set = function(_, r, g, b, a) 
+                        self.db.profile.bars[id].useThemeColor = false
+                        self.db.profile.bars[id].color = {r=r, g=g, b=b}
+                        self.db.profile.bars[id].alpha = a
+                        self:ApplyBarSettings(id) 
+                    end 
                 },
                 delete = {
                     name = "Delete Bar",
