@@ -12,7 +12,7 @@ local pairs = pairs
 local CreateFrame, UIParent = CreateFrame, UIParent
 
 -- Get our color palette
-local ColorPalette = MidnightUI and MidnightUI.ColorPalette or {
+local ColorPalette = _G.MidnightUI_ColorPalette or {
     GetColor = function(_, key)
         local colors = {
             ['text-primary'] = {0.82, 0.82, 0.82},
