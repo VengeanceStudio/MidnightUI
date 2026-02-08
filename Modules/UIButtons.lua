@@ -225,6 +225,24 @@ function UIButtons:CreateButtons()
                 -- Use framework button for non-secure buttons
                 if FrameFactory then
                     btn = FrameFactory:CreateButton(container, 32, 32, data.text)
+                    
+                    -- Override FrameFactory styling to remove borders and darken background
+                    if btn.SetBackdrop then
+                        btn:SetBackdrop({
+                            bgFile = "Interface\\Buttons\\WHITE8X8",
+                            edgeFile = nil,
+                            tile = false, edgeSize = 0,
+                            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+                        })
+                        
+                        if ColorPalette then
+                            -- Use panel-bg darkened by 20% towards black
+                            local r, g, b, a = ColorPalette:GetColor('panel-bg')
+                            btn:SetBackdropColor(r * 0.8, g * 0.8, b * 0.8, a)
+                        else
+                            btn:SetBackdropColor(0.08, 0.08, 0.08, 0.8)
+                        end
+                    end
                 else
                     -- Fallback to basic button if framework not available
                     btn = CreateFrame("Button", "MidnightUIButton_"..key, container, "BackdropTemplate")
