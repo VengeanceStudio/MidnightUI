@@ -240,7 +240,8 @@ function Tweaks:HookAutoDelete()
             
             if Tweaks.db.profile.autoDelete then
                 C_Timer.After(0.1, function()
-                    local numDialogs = STATICPOPUP_NUMDIALOGS or 4  -- Default to 4 if constant is nil
+                    -- STATICPOPUP_NUMDIALOGS doesn't exist in modern WoW, default to 4
+                    local numDialogs = 4
                     for i = 1, numDialogs do
                         local dialog = _G["StaticPopup" .. i]
                         if dialog and dialog:IsShown() and dialog.which == which then
