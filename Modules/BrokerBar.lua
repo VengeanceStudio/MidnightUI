@@ -1404,7 +1404,28 @@ function BrokerBar:GetOptions()
                         name = "Create New Bar", 
                         type = "input", 
                         order = 1, 
-                        set = function(_, v) if v ~= "" and not self.db.profile.bars[v] then self.db.profile.bars[v] = { enabled = true, fullWidth = false, width = 400, height = 24, scale = 1.0, alpha = 0.5, color = {r=0,g=0,b=0}, texture = "Blizzard", skin = "Global", padding = 5, point = "CENTER", x = 0, y = 0 }; self:CreateBarFrame(v); self:ApplyBarSettings(v) end end 
+                        set = function(_, v) 
+                            if v ~= "" and not self.db.profile.bars[v] then 
+                                local r, g, b, a = ColorPalette:GetColor('panel-bg')
+                                self.db.profile.bars[v] = { 
+                                    enabled = true, 
+                                    fullWidth = false, 
+                                    width = 400, 
+                                    height = 24, 
+                                    scale = 1.0, 
+                                    alpha = a or 0.6, 
+                                    color = {r = r or 0.1, g = g or 0.1, b = b or 0.1}, 
+                                    texture = "Blizzard", 
+                                    skin = "Global", 
+                                    padding = 5, 
+                                    point = "CENTER", 
+                                    x = 0, 
+                                    y = 0 
+                                }
+                                self:CreateBarFrame(v)
+                                self:ApplyBarSettings(v) 
+                            end 
+                        end 
                     } 
                 } 
             },
