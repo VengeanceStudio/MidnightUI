@@ -137,6 +137,40 @@ function Tooltips:Initialize()
     
     -- Create tooltip anchor frame
     self:CreateTooltipAnchor()
+    
+    -- Hook all tooltips that show after this point (catches addon tooltips)
+    self:HookAllTooltips()
+end
+
+function Tooltips:HookAllTooltips()
+    -- Hook the global tooltip creation function to catch all tooltips
+    local orig_CreateFrame = CreateFrame
+    CreateFrame = function(frameType, name, parent, template, ...)
+        local frame = orig_CreateFrame(frameType, name, parent, template, ...)
+        
+        -- If it's a GameTooltip type frame, hook it
+        if frameType == "GameTooltip" or (template and template:find("Tooltip")) then
+            if frame and frame.GetObjectType and not self:IsHooked(frame, "OnShow") then
+                self:HookScript(frame, "OnShow", function(tooltip)
+                    self:StyleTooltip(tooltip)
+                end)
+            end
+        end
+        
+        return frame
+    end
+    
+    -- Also scan for existing tooltips that might not be in our hardcoded list
+    for _, frame in pairs({EnumerateFrames()}) do
+        if frame and frame.GetObjectType then
+            local objType = frame:GetObjectType()
+            if objType == "GameTooltip" and not self:IsHooked(frame, "OnShow") then
+                self:HookScript(frame, "OnShow", function(tooltip)
+                    self:StyleTooltip(tooltip)
+                end)
+            end
+        end
+    end
 end
 
 -- ============================================================================
