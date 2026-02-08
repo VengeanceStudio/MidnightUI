@@ -341,7 +341,20 @@ function Mailbox:ShowBlackBookMenu(button)
     
     -- Show menu
     if #menu > 0 then
-        EasyMenu(menu, CreateFrame("Frame", "MidnightUI_BlackBookMenu", UIParent, "UIDropDownMenuTemplate"), "cursor", 0, 0, "MENU")
+        local menuFrame = CreateFrame("Frame", "MidnightUI_BlackBookMenu", UIParent, "UIDropDownMenuTemplate")
+        if UIDropDownMenu_Initialize then
+            UIDropDownMenu_Initialize(menuFrame, function(frame, level)
+                for i, item in ipairs(menu) do
+                    local info = UIDropDownMenu_CreateInfo()
+                    info.text = item.text
+                    info.isTitle = item.isTitle
+                    info.notCheckable = item.notCheckable
+                    info.func = item.func
+                    UIDropDownMenu_AddButton(info, level)
+                end
+            end, "MENU")
+            ToggleDropDownMenu(1, nil, menuFrame, button, 0, 0)
+        end
     end
 end
 
