@@ -416,7 +416,14 @@ function UIButtons:UpdateLayout()
     
     container:SetSize(totalWidth, 36)
     container:SetScale(self.db.profile.scale)
-    container:SetBackdropColor(unpack(self.db.profile.backgroundColor))
+    
+    -- Update background color if available
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if ColorPalette then
+        container:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+    elseif self.db.profile.backgroundColor then
+        container:SetBackdropColor(unpack(self.db.profile.backgroundColor))
+    end
     
     -- Position buttons from left to right
     for i, data in ipairs(sortedButtons) do
