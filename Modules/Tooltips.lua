@@ -22,7 +22,7 @@ function Tooltips:OnInitialize()
             
             -- Player Information
             classColor = true,
-            classColoredBorders = false,
+            classColoredBorders = true,
             showGuild = true,
             yourGuildColor = {r = 0.25, g = 1.0, b = 0.25},
             otherGuildColor = {r = 0.67, g = 0.83, b = 0.45},
