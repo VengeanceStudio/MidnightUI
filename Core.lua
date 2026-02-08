@@ -2681,7 +2681,7 @@ function MidnightUI:CreateColorPaletteSwatches()
     swatchContainer:SetSize(800, 100)
     -- Position relative to the content frame with a left offset to account for tree width
     -- Increased Y offset to position below the "Click any color rectangle" text
-    swatchContainer:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 200, -400)
+    swatchContainer:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 200, -390)
     
     -- Set frame strata and level to ensure it's on top
     local parentStrata = contentFrame:GetFrameStrata()
