@@ -21,6 +21,7 @@ local defaults = {
         
         -- Colors
         showBackground = true,
+        showFrameBorder = false,
         backgroundColor = {0.05, 0.05, 0.05, 0.9},
         borderColor = {0.2, 0.8, 1.0, 1.0},
         
@@ -176,13 +177,6 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
             frame.midnightBg:Hide()
         end
         
-        -- Show/hide based on setting
-        if db.showBackground then
-            frame.midnightBg:Show()
-        else
-            frame.midnightBg:Hide()
-        end
-        
         -- Border textures
         local borderSize = 2
         local r, g, b, a = unpack(db.borderColor)
@@ -214,6 +208,19 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBorderRight:SetPoint("TOPRIGHT", frame.midnightBgFrame, "TOPRIGHT", 0, 0)
         frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame.midnightBgFrame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderRight:SetWidth(borderSize)
+        
+        -- Show/hide frame borders based on setting
+        if db.showFrameBorder then
+            frame.midnightBorderTop:Show()
+            frame.midnightBorderBottom:Show()
+            frame.midnightBorderLeft:Show()
+            frame.midnightBorderRight:Show()
+        else
+            frame.midnightBorderTop:Hide()
+            frame.midnightBorderBottom:Hide()
+            frame.midnightBorderLeft:Hide()
+            frame.midnightBorderRight:Hide()
+        end
         
         -- Make sure the background frame updates position if the viewer moves
         frame:HookScript("OnUpdate", function()
@@ -346,6 +353,19 @@ function Cooldowns:UpdateColors()
                 frame.midnightBorderBottom:SetColorTexture(r, g, b, a)
                 frame.midnightBorderLeft:SetColorTexture(r, g, b, a)
                 frame.midnightBorderRight:SetColorTexture(r, g, b, a)
+                
+                -- Show/hide frame borders based on setting
+                if db.showFrameBorder then
+                    frame.midnightBorderTop:Show()
+                    frame.midnightBorderBottom:Show()
+                    frame.midnightBorderLeft:Show()
+                    frame.midnightBorderRight:Show()
+                else
+                    frame.midnightBorderTop:Hide()
+                    frame.midnightBorderBottom:Hide()
+                    frame.midnightBorderLeft:Hide()
+                    frame.midnightBorderRight:Hide()
+                end
             end
             
             -- Update child icon borders
@@ -496,6 +516,32 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.showBackground end,
                 set = function(_, v)
                     self.db.profile.showBackground = v
+                    self:UpdateColors()
+                end
+            },
+                        showFrameBorder = {
+                name = "Show Frame Border",
+                desc = "Show or hide the border around the entire Cooldown Manager frame. Individual icon borders are controlled separately.",
+                type = "toggle",
+                order = 30.6,
+                width = "full",
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.showFrameBorder end,
+                set = function(_, v)
+                    self.db.profile.showFrameBorder = v
+                    self:UpdateColors()
+                end
+            },
+                        showFrameBorder = {
+                name = "Show Frame Border",
+                desc = "Show or hide the border around the entire Cooldown Manager frame. Individual icon borders are controlled separately.",
+                type = "toggle",
+                order = 30.6,
+                width = "full",
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.showFrameBorder end,
+                set = function(_, v)
+                    self.db.profile.showFrameBorder = v
                     self:UpdateColors()
                 end
             },
