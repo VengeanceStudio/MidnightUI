@@ -184,31 +184,29 @@ function ResourceBars:SetupPrimaryResourceBar()
     frame.statusBar = statusBar
     self.primaryBar = frame
     
-    -- Create green highlight overlay for move mode
-    frame.movableHighlight = frame:CreateTexture(nil, "OVERLAY")
-    frame.movableHighlight:SetAllPoints()
-    frame.movableHighlight:SetColorTexture(0, 1, 0, 0.3)
-    frame.movableHighlight:SetDrawLayer("OVERLAY", 7)
-    frame.movableHighlight:Hide()
-    
-    -- Create border for move mode
-    frame.movableBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-    frame.movableBorder:SetAllPoints()
-    frame.movableBorder:SetBackdrop({
+    -- Create green highlight overlay for move mode (parented to UIParent to avoid alpha inheritance)
+    frame.movableHighlightFrame = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+    frame.movableHighlightFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+    frame.movableHighlightFrame:SetFrameLevel(10000)
+    frame.movableHighlightFrame:SetAllPoints(frame)
+    frame.movableHighlightFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
         edgeSize = 2,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
-    frame.movableBorder:SetBackdropBorderColor(0, 1, 0, 1)
-    frame.movableBorder:SetFrameLevel(frame:GetFrameLevel() + 10)
-    frame.movableBorder:Hide()
+    frame.movableHighlightFrame:SetBackdropColor(0, 0.5, 0, 0.2)
+    frame.movableHighlightFrame:SetBackdropBorderColor(0, 1, 0, 1)
+    frame.movableHighlightFrame:Hide()
     
-    -- Create label text for move mode
-    frame.movableLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    -- Create label text on overlay frame
+    frame.movableLabel = frame.movableHighlightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.movableLabel:SetPoint("CENTER")
     frame.movableLabel:SetText("Primary Resource Bar")
     frame.movableLabel:SetTextColor(1, 1, 1, 1)
-    frame.movableLabel:SetDrawLayer("OVERLAY", 7)
-    frame.movableLabel:Hide()
+    frame.movableLabel:SetShadowOffset(2, -2)
+    frame.movableLabel:SetShadowColor(0, 0, 0, 1)
     
     frame:Show()
     
@@ -377,31 +375,29 @@ function ResourceBars:SetupSecondaryResourceBar()
     frame.segments = {}
     self.secondaryBar = frame
     
-    -- Create green highlight overlay for move mode
-    frame.movableHighlight = frame:CreateTexture(nil, "OVERLAY")
-    frame.movableHighlight:SetAllPoints()
-    frame.movableHighlight:SetColorTexture(0, 1, 0, 0.3)
-    frame.movableHighlight:SetDrawLayer("OVERLAY", 7)
-    frame.movableHighlight:Hide()
-    
-    -- Create border for move mode
-    frame.movableBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-    frame.movableBorder:SetAllPoints()
-    frame.movableBorder:SetBackdrop({
+    -- Create green highlight overlay for move mode (parented to UIParent to avoid alpha inheritance)
+    frame.movableHighlightFrame = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+    frame.movableHighlightFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+    frame.movableHighlightFrame:SetFrameLevel(10000)
+    frame.movableHighlightFrame:SetAllPoints(frame)
+    frame.movableHighlightFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
         edgeSize = 2,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
-    frame.movableBorder:SetBackdropBorderColor(0, 1, 0, 1)
-    frame.movableBorder:SetFrameLevel(frame:GetFrameLevel() + 10)
-    frame.movableBorder:Hide()
+    frame.movableHighlightFrame:SetBackdropColor(0, 0.5, 0, 0.2)
+    frame.movableHighlightFrame:SetBackdropBorderColor(0, 1, 0, 1)
+    frame.movableHighlightFrame:Hide()
     
-    -- Create label text for move mode
-    frame.movableLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    -- Create label text on overlay frame
+    frame.movableLabel = frame.movableHighlightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.movableLabel:SetPoint("CENTER")
     frame.movableLabel:SetText("Secondary Resource Bar")
     frame.movableLabel:SetTextColor(1, 1, 1, 1)
-    frame.movableLabel:SetDrawLayer("OVERLAY", 7)
-    frame.movableLabel:Hide()
+    frame.movableLabel:SetShadowOffset(2, -2)
+    frame.movableLabel:SetShadowColor(0, 0, 0, 1)
     
     -- Create segments
     self:CreateSecondarySegments()
@@ -524,40 +520,20 @@ function ResourceBars:OnMoveModeChanged(event, enabled)
         self.primaryBar:EnableMouse(enabled)
         if enabled then
             self.primaryBar:SetAlpha(0.3)
-            self.primaryBar.movableHighlight:SetAlpha(1.0 / 0.3)  -- Compensate for parent alpha
-            self.primaryBar.movableBorder:SetAlpha(1.0 / 0.3)
-            self.primaryBar.movableLabel:SetAlpha(1.0 / 0.3)
-            self.primaryBar.movableHighlight:Show()
-            self.primaryBar.movableBorder:Show()
-            self.primaryBar.movableLabel:Show()
+            self.primaryBar.movableHighlightFrame:Show()
         else
             self.primaryBar:SetAlpha(1.0)
-            self.primaryBar.movableHighlight:SetAlpha(1.0)
-            self.primaryBar.movableBorder:SetAlpha(1.0)
-            self.primaryBar.movableLabel:SetAlpha(1.0)
-            self.primaryBar.movableHighlight:Hide()
-            self.primaryBar.movableBorder:Hide()
-            self.primaryBar.movableLabel:Hide()
+            self.primaryBar.movableHighlightFrame:Hide()
         end
     end
     if self.secondaryBar then
         self.secondaryBar:EnableMouse(enabled)
         if enabled then
             self.secondaryBar:SetAlpha(0.3)
-            self.secondaryBar.movableHighlight:SetAlpha(1.0 / 0.3)
-            self.secondaryBar.movableBorder:SetAlpha(1.0 / 0.3)
-            self.secondaryBar.movableLabel:SetAlpha(1.0 / 0.3)
-            self.secondaryBar.movableHighlight:Show()
-            self.secondaryBar.movableBorder:Show()
-            self.secondaryBar.movableLabel:Show()
+            self.secondaryBar.movableHighlightFrame:Show()
         else
             self.secondaryBar:SetAlpha(1.0)
-            self.secondaryBar.movableHighlight:SetAlpha(1.0)
-            self.secondaryBar.movableBorder:SetAlpha(1.0)
-            self.secondaryBar.movableLabel:SetAlpha(1.0)
-            self.secondaryBar.movableHighlight:Hide()
-            self.secondaryBar.movableBorder:Hide()
-            self.secondaryBar.movableLabel:Hide()
+            self.secondaryBar.movableHighlightFrame:Hide()
         end
     end
 end
