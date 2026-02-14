@@ -46,6 +46,8 @@ local defaults = {
             actionbars = true,
             unitframes = true,
             cooldowns = false,
+            resourceBars = true,
+            castBar = true,
             tweaks = true,
             setup = true
         }
@@ -3971,6 +3973,14 @@ function MidnightUI:GetOptions()
                             self.db.profile.modules.cooldowns = v
                             C_UI.Reload()
                         end },
+                    resourceBars = { name = "Resource Bars", type = "toggle", order = 2.71, width = "full",
+                        desc = "Display primary and secondary resource bars (mana, energy, combo points, etc.)",
+                        get = function() return self.db.profile.modules.resourceBars end,
+                        set = function(_, v) self.db.profile.modules.resourceBars = v; C_UI.Reload() end },
+                    castBar = { name = "Cast Bar", type = "toggle", order = 2.72, width = "full",
+                        desc = "Display a custom player cast bar",
+                        get = function() return self.db.profile.modules.castBar end,
+                        set = function(_, v) self.db.profile.modules.castBar = v; C_UI.Reload() end },
                     tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full",
                         get = function() return self.db.profile.modules.tweaks end,
                         set = function(_, v) self.db.profile.modules.tweaks = v; C_UI.Reload() end }

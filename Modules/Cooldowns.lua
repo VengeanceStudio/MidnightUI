@@ -2,6 +2,10 @@ local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local Cooldowns = MidnightUI:NewModule("Cooldowns", "AceEvent-3.0", "AceHook-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 
+-- Get ColorPalette and FontKit from Framework
+local ColorPalette = MidnightUI.ColorPalette
+local FontKit = MidnightUI.FontKit
+
 -- -----------------------------------------------------------------------------
 -- DATABASE DEFAULTS
 -- -----------------------------------------------------------------------------
@@ -13,10 +17,10 @@ local defaults = {
         locked = false,
         point = "CENTER",
         x = 0,
-        y = 200,
+        y = 150,
         scale = 1.0,
-        iconSize = 40,
-        iconSpacing = 2,
+        iconSize = 36,
+        iconSpacing = 4,
         
         -- Layout
         growthDirection = "RIGHT", -- RIGHT, LEFT, UP, DOWN
@@ -25,23 +29,19 @@ local defaults = {
         -- Appearance
         showBorder = true,
         borderColor = {0, 0, 0, 1},
-        backgroundColor = {0.1, 0.1, 0.1, 0.5},
+        backgroundColor = {0, 0, 0, 0.5},
         
         -- Font (for cooldown text)
         font = "Friz Quadrata TT",
-        fontSize = 14,
+        fontSize = 12,
         fontOutline = "OUTLINE",
         
         -- Filtering
-        showOnlyMine = true,
-        categoryFilter = {
-            interrupts = true,
-            defensives = true,
-            externals = true,
-            immunities = true,
-            cc = true,
-            utility = true,
-        }
+        minCooldown = 10, -- Only track cooldowns longer than this (seconds)
+        showOffensives = true,
+        showDefensives = true,
+        showUtility = true,
+        showMovement = false,
     }
 }
 
