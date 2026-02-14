@@ -448,9 +448,8 @@ local function GetTagValue(tagName, unit)
             end
             
             if ok and pct ~= nil then
-                -- Floor to whole number (works with secret values)
-                local flooredPct = math.floor(pct)
-                return tostring(flooredPct)
+                -- Format to whole number (%.0f handles secret values properly)
+                return string.format("%.0f", pct)
             end
         end
         
