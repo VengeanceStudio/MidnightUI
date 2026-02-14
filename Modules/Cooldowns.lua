@@ -599,23 +599,26 @@ function Cooldowns:UpdateAttachment()
     if not ResourceBars or not ResourceBars.primaryBar then return end
     
     local db = self.db.profile
-    local anchor = ResourceBars.primaryBar
     
-    -- Find the Essential Cooldown Viewer to attach (main one)
-    local mainFrame = _G["EssentialCooldownViewer"]
-    if not mainFrame then return end
+    -- Find the Essential Cooldown Viewer (this is our anchor)
+    local essentialFrame = _G["EssentialCooldownViewer"]
+    if not essentialFrame then return end
     
-    -- Position relative to resource bar
-    mainFrame:ClearAllPoints()
+    -- Attach RESOURCE BAR to Essential Cooldowns (not the other way around!)
+    ResourceBars.primaryBar:ClearAllPoints()
     
     if db.attachPosition == "BOTTOM" then
-        mainFrame:SetPoint("TOP", anchor, "BOTTOM", db.attachOffsetX, db.attachOffsetY)
+        -- Resource bar goes ABOVE Essential (Essential is below)
+        ResourceBars.primaryBar:SetPoint("BOTTOM", essentialFrame, "TOP", db.attachOffsetX, -db.attachOffsetY)
     elseif db.attachPosition == "TOP" then
-        mainFrame:SetPoint("BOTTOM", anchor, "TOP", db.attachOffsetX, db.attachOffsetY)
+        -- Resource bar goes BELOW Essential (Essential is above)
+        ResourceBars.primaryBar:SetPoint("TOP", essentialFrame, "BOTTOM", db.attachOffsetX, -db.attachOffsetY)
     elseif db.attachPosition == "LEFT" then
-        mainFrame:SetPoint("RIGHT", anchor, "LEFT", db.attachOffsetX, db.attachOffsetY)
+        -- Resource bar goes RIGHT of Essential (Essential is left)
+        ResourceBars.primaryBar:SetPoint("LEFT", essentialFrame, "RIGHT", -db.attachOffsetX, db.attachOffsetY)
     elseif db.attachPosition == "RIGHT" then
-        mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
+        -- Resource bar goes LEFT of Essential (Essential is right)
+        ResourceBars.primaryBar:SetPoint("RIGHT", essentialFrame, "LEFT", -db.attachOffsetX, db.attachOffsetY)
     end
     
     -- Update frame grouping if enabled
