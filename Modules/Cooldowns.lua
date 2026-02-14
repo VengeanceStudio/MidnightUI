@@ -35,6 +35,38 @@ local defaults = {
         attachPosition = "BOTTOM",
         attachOffsetX = 0,
         attachOffsetY = -2,
+        
+        -- Frame Grouping (attach frames to each other)
+        groupFrames = false,
+        
+        -- Individual frame settings
+        frames = {
+            essential = {
+                enabled = true,
+                isAnchor = true,  -- Main anchor frame
+            },
+            utility = {
+                enabled = true,
+                attachTo = "essential",
+                attachPosition = "BOTTOM",
+                offsetX = 0,
+                offsetY = -2,
+            },
+            buffs = {
+                enabled = true,
+                attachTo = "utility",
+                attachPosition = "BOTTOM",
+                offsetX = 0,
+                offsetY = -2,
+            },
+            bars = {
+                enabled = true,
+                attachTo = "buffs",
+                attachPosition = "BOTTOM",
+                offsetX = 0,
+                offsetY = -2,
+            },
+        },
     }
 }
 
@@ -411,6 +443,48 @@ function Cooldowns:UpdateIconBorders(parent)
 end
 
 -- -----------------------------------------------------------------------------
+-- FRAME GROUPING
+-- -----------------------------------------------------------------------------
+function Cooldowns:UpdateFrameGrouping()
+    if not self.db.profile.groupFrames then return end
+    
+    local db = self.db.profile
+    
+    -- Map of frame names to WoW global names
+    local frameMap = {
+        essential = "EssentialCooldownViewer",
+        utility = "UtilityCooldownViewer",
+        buffs = "BuffIconCooldownViewer",
+        bars = "BuffBarCooldownViewer",
+    }
+    
+    -- Process each frame
+    for frameName, settings in pairs(db.frames) do
+        local frame = _G[frameMap[frameName]]
+        if frame and settings.enabled and not settings.isAnchor then
+            -- Find the anchor frame
+            local anchorFrameName = frameMap[settings.attachTo]
+            local anchorFrame = _G[anchorFrameName]
+            
+            if anchorFrame then
+                frame:ClearAllPoints()
+                
+                local pos = settings.attachPosition
+                if pos == "BOTTOM" then
+                    frame:SetPoint("TOP", anchorFrame, "BOTTOM", settings.offsetX, settings.offsetY)
+                elseif pos == "TOP" then
+                    frame:SetPoint("BOTTOM", anchorFrame, "TOP", settings.offsetX, settings.offsetY)
+                elseif pos == "LEFT" then
+                    frame:SetPoint("RIGHT", anchorFrame, "LEFT", settings.offsetX, settings.offsetY)
+                elseif pos == "RIGHT" then
+                    frame:SetPoint("LEFT", anchorFrame, "RIGHT", settings.offsetX, settings.offsetY)
+                end
+            end
+        end
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- RESOURCE BAR ATTACHMENT
 -- -----------------------------------------------------------------------------
 function Cooldowns:UpdateAttachment()
@@ -439,6 +513,9 @@ function Cooldowns:UpdateAttachment()
     elseif db.attachPosition == "RIGHT" then
         mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
     end
+    
+    -- Update frame grouping if enabled
+    self:UpdateFrameGrouping()
 end
 
 -- -----------------------------------------------------------------------------
@@ -702,6 +779,240 @@ function Cooldowns:GetOptions()
                 set = function(_, v)
                     self.db.profile.attachOffsetY = v
                     self:UpdateAttachment()
+                end
+            },
+            
+            -- Frame Grouping
+            headerGrouping = { type = "header", name = "Frame Grouping", order = 60 },
+            
+            groupFrames = {
+                name = "Enable Frame Grouping",
+                desc = "Attach cooldown frames to each other so they move and resize as a group.",
+                type = "toggle",
+                order = 61,
+                width = "full",
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.groupFrames end,
+                set = function(_, v)
+                    self.db.profile.groupFrames = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            groupingDesc = {
+                type = "description",
+                name = "Configure how each cooldown frame attaches to others. Essential Cooldowns is the main anchor frame.",
+                order = 62,
+                hidden = function() return not self.db.profile.groupFrames end,
+            },
+            
+            -- Utility Cooldowns
+            headerUtility = { type = "header", name = "Utility Cooldowns", order = 70, hidden = function() return not self.db.profile.groupFrames end },
+            
+            utilityAttachTo = {
+                name = "Attach To",
+                desc = "Which frame to attach Utility Cooldowns to.",
+                type = "select",
+                order = 71,
+                values = {
+                    ["essential"] = "Essential Cooldowns",
+                    ["buffs"] = "Tracked Buffs",
+                    ["bars"] = "Tracked Bars",
+                },
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.utility.attachTo end,
+                set = function(_, v)
+                    self.db.profile.frames.utility.attachTo = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            utilityPosition = {
+                name = "Position",
+                desc = "Where to attach relative to the anchor frame.",
+                type = "select",
+                order = 72,
+                values = {
+                    ["BOTTOM"] = "Below",
+                    ["TOP"] = "Above",
+                    ["LEFT"] = "Left",
+                    ["RIGHT"] = "Right"
+                },
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.utility.attachPosition end,
+                set = function(_, v)
+                    self.db.profile.frames.utility.attachPosition = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            utilityOffsetX = {
+                name = "Horizontal Offset",
+                type = "range",
+                order = 73,
+                min = -200, max = 200, step = 1,
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.utility.offsetX end,
+                set = function(_, v)
+                    self.db.profile.frames.utility.offsetX = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            utilityOffsetY = {
+                name = "Vertical Offset",
+                type = "range",
+                order = 74,
+                min = -200, max = 200, step = 1,
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.utility.offsetY end,
+                set = function(_, v)
+                    self.db.profile.frames.utility.offsetY = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            -- Tracked Buffs
+            headerBuffs = { type = "header", name = "Tracked Buffs", order = 80, hidden = function() return not self.db.profile.groupFrames end },
+            
+            buffsAttachTo = {
+                name = "Attach To",
+                desc = "Which frame to attach Tracked Buffs to.",
+                type = "select",
+                order = 81,
+                values = {
+                    ["essential"] = "Essential Cooldowns",
+                    ["utility"] = "Utility Cooldowns",
+                    ["bars"] = "Tracked Bars",
+                },
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.buffs.attachTo end,
+                set = function(_, v)
+                    self.db.profile.frames.buffs.attachTo = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            buffsPosition = {
+                name = "Position",
+                desc = "Where to attach relative to the anchor frame.",
+                type = "select",
+                order = 82,
+                values = {
+                    ["BOTTOM"] = "Below",
+                    ["TOP"] = "Above",
+                    ["LEFT"] = "Left",
+                    ["RIGHT"] = "Right"
+                },
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.buffs.attachPosition end,
+                set = function(_, v)
+                    self.db.profile.frames.buffs.attachPosition = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            buffsOffsetX = {
+                name = "Horizontal Offset",
+                type = "range",
+                order = 83,
+                min = -200, max = 200, step = 1,
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.buffs.offsetX end,
+                set = function(_, v)
+                    self.db.profile.frames.buffs.offsetX = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            buffsOffsetY = {
+                name = "Vertical Offset",
+                type = "range",
+                order = 84,
+                min = -200, max = 200, step = 1,
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.buffs.offsetY end,
+                set = function(_, v)
+                    self.db.profile.frames.buffs.offsetY = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            -- Tracked Bars
+            headerBars = { type = "header", name = "Tracked Bars", order = 90, hidden = function() return not self.db.profile.groupFrames end },
+            
+            barsAttachTo = {
+                name = "Attach To",
+                desc = "Which frame to attach Tracked Bars to.",
+                type = "select",
+                order = 91,
+                values = {
+                    ["essential"] = "Essential Cooldowns",
+                    ["utility"] = "Utility Cooldowns",
+                    ["buffs"] = "Tracked Buffs",
+                },
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.bars.attachTo end,
+                set = function(_, v)
+                    self.db.profile.frames.bars.attachTo = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            barsPosition = {
+                name = "Position",
+                desc = "Where to attach relative to the anchor frame.",
+                type = "select",
+                order = 92,
+                values = {
+                    ["BOTTOM"] = "Below",
+                    ["TOP"] = "Above",
+                    ["LEFT"] = "Left",
+                    ["RIGHT"] = "Right"
+                },
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.bars.attachPosition end,
+                set = function(_, v)
+                    self.db.profile.frames.bars.attachPosition = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            barsOffsetX = {
+                name = "Horizontal Offset",
+                type = "range",
+                order = 93,
+                min = -200, max = 200, step = 1,
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.bars.offsetX end,
+                set = function(_, v)
+                    self.db.profile.frames.bars.offsetX = v
+                    self:UpdateFrameGrouping()
+                end
+            },
+            
+            barsOffsetY = {
+                name = "Vertical Offset",
+                type = "range",
+                order = 94,
+                min = -200, max = 200, step = 1,
+                hidden = function() return not self.db.profile.groupFrames end,
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.frames.bars.offsetY end,
+                set = function(_, v)
+                    self.db.profile.frames.bars.offsetY = v
+                    self:UpdateFrameGrouping()
                 end
             },
         }
