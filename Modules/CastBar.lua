@@ -166,6 +166,22 @@ function CastBar:SetupCastBar()
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
         iconFrame.texture = icon
         
+        -- Create green highlight overlay for icon in move mode
+        iconFrame.movableHighlightFrame = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+        iconFrame.movableHighlightFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+        iconFrame.movableHighlightFrame:SetFrameLevel(10000)
+        iconFrame.movableHighlightFrame:SetAllPoints(iconFrame)
+        iconFrame.movableHighlightFrame:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 2,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        })
+        iconFrame.movableHighlightFrame:SetBackdropColor(0, 0.5, 0, 0.2)
+        iconFrame.movableHighlightFrame:SetBackdropBorderColor(0, 1, 0, 1)
+        iconFrame.movableHighlightFrame:Hide()
+        
         frame.icon = iconFrame
     end
     
@@ -506,10 +522,23 @@ function CastBar:OnMoveModeChanged(event, enabled)
         self.castBar:SetAlpha(0.3)
         self.castBar:Show() -- Show in move mode even if not casting
         self.castBar.movableHighlightFrame:Show()
+        
+        -- Show icon overlay if icon exists
+        if self.castBar.icon and self.castBar.icon.movableHighlightFrame then
+            self.castBar.icon:SetAlpha(0.3)
+            self.castBar.icon.movableHighlightFrame:Show()
+        end
     else
         self.castBar:EnableMouse(false)
         self.castBar:SetAlpha(1.0)
         self.castBar.movableHighlightFrame:Hide()
+        
+        -- Hide icon overlay
+        if self.castBar.icon and self.castBar.icon.movableHighlightFrame then
+            self.castBar.icon:SetAlpha(1.0)
+            self.castBar.icon.movableHighlightFrame:Hide()
+        end
+        
         -- Hide if not actually casting
         if not self.castBar.casting and not self.castBar.channeling then
             self.castBar:Hide()
