@@ -346,24 +346,35 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     if not frame.midnightBgFrame then
         local parent = frame:GetParent() or UIParent
         
+        -- For BuffBar, find the actual container with the bars
+        local targetFrame = frame
+        if frameName == "BuffBarCooldownViewer" then
+            -- BuffBar has a ScrollChild or container - find it
+            for _, child in ipairs({frame:GetChildren()}) do
+                if child:GetObjectType() == "Frame" and child:GetNumChildren() > 0 then
+                    -- This is likely the container with the actual bars
+                    targetFrame = child
+                    break
+                end
+            end
+        end
+        
         frame.midnightBgFrame = CreateFrame("Frame", nil, parent)
         frame.midnightBgFrame:SetFrameStrata("BACKGROUND")
         frame.midnightBgFrame:SetFrameLevel(1)
         
-        -- For BuffBar, we need to find the actual content container
+        -- Set points based on target frame
         if frameName == "BuffBarCooldownViewer" then
-            -- The bars are typically in a container child frame
-            -- Set initial points, but we'll adjust after layout
-            frame.midnightBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-            frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+            frame.midnightBgFrame:SetPoint("TOPLEFT", targetFrame, "TOPLEFT", -2, 2)
+            frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", targetFrame, "BOTTOMRIGHT", 2, -2)
             
-            -- Hook into layout updates to adjust background size
+            -- Hook to keep it sized correctly
             if not frame.midnightLayoutHooked then
-                frame:HookScript("OnSizeChanged", function()
+                targetFrame:HookScript("OnSizeChanged", function()
                     if frame.midnightBgFrame then
                         frame.midnightBgFrame:ClearAllPoints()
-                        frame.midnightBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-                        frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+                        frame.midnightBgFrame:SetPoint("TOPLEFT", targetFrame, "TOPLEFT", -2, 2)
+                        frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", targetFrame, "BOTTOMRIGHT", 2, -2)
                     end
                 end)
                 frame.midnightLayoutHooked = true
@@ -434,14 +445,16 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
             frame.midnightBorderRight:Hide()
         end
         
+        -- Store target frame reference for updates
+        frame.midnightTargetFrame = targetFrame
+        
         -- Make sure the background frame updates position if the viewer moves
         frame:HookScript("OnUpdate", function()
-            if frame.midnightBgFrame then
+            if frame.midnightBgFrame and frame.midnightTargetFrame then
                 if frameName == "BuffBarCooldownViewer" then
-                    -- For BuffBar, use manual points to ensure proper sizing
                     frame.midnightBgFrame:ClearAllPoints()
-                    frame.midnightBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-                    frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+                    frame.midnightBgFrame:SetPoint("TOPLEFT", frame.midnightTargetFrame, "TOPLEFT", -2, 2)
+                    frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame.midnightTargetFrame, "BOTTOMRIGHT", 2, -2)
                 else
                     frame.midnightBgFrame:SetAllPoints(frame)
                 end
