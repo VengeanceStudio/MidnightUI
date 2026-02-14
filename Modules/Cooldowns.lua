@@ -235,50 +235,61 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetBackdrop(nil)
     end
     
-    -- Function to strip styling from a frame
-    local function StripTextures(f)
-        -- Hide NineSlice
-        if f.NineSlice then
-            f.NineSlice:Hide()
-            f.NineSlice:SetAlpha(0)
-        end
-        
-        -- Hide all texture regions
-        for i = 1, f:GetNumRegions() do
-            local region = select(i, f:GetRegions())
-            if region and region:GetObjectType() == "Texture" then
-                -- Don't hide icon textures (they usually have "icon" in their name)
-                local regionName = region:GetName()
-                if not regionName or not regionName:lower():find("icon") then
-                    region:Hide()
-                    region:SetAlpha(0)
+    -- Only aggressively strip textures for BuffBarCooldownViewer (Tracked Bars)
+    -- Other frames (Essential, Utility, BuffIcon) need their icons visible
+    local frameName = frame:GetName()
+    if frameName == "BuffBarCooldownViewer" then
+        -- Function to strip styling from tracked bar frames
+        local function StripTextures(f)
+            -- Hide NineSlice
+            if f.NineSlice then
+                f.NineSlice:Hide()
+                f.NineSlice:SetAlpha(0)
+            end
+            
+            -- Hide all texture regions except icons
+            for i = 1, f:GetNumRegions() do
+                local region = select(i, f:GetRegions())
+                if region and region:GetObjectType() == "Texture" then
+                    local regionName = region:GetName()
+                    -- Don't hide textures with "icon" in name, or that are cooldown swipes
+                    if not regionName or (not regionName:lower():find("icon") and not regionName:lower():find("cooldown")) then
+                        region:Hide()
+                        region:SetAlpha(0)
+                    end
+                end
+            end
+            
+            -- Hide common named elements
+            local elementsToHide = {
+                "Background", "Bg", "Border", "NineSlice", "TopEdge", "BottomEdge",
+                "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
+                "BottomLeftCorner", "BottomRightCorner", "Center"
+            }
+            for _, elementName in ipairs(elementsToHide) do
+                if f[elementName] then
+                    f[elementName]:Hide()
+                    f[elementName]:SetAlpha(0)
                 end
             end
         end
         
-        -- Hide common named elements
-        local elementsToHide = {
-            "Background", "Bg", "Border", "NineSlice", "TopEdge", "BottomEdge",
-            "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
-            "BottomLeftCorner", "BottomRightCorner", "Center"
-        }
-        for _, elementName in ipairs(elementsToHide) do
-            if f[elementName] then
-                f[elementName]:Hide()
-                f[elementName]:SetAlpha(0)
+        -- Strip textures from main frame
+        StripTextures(frame)
+        
+        -- Strip textures from all children (where the bars actually are)
+        for _, child in ipairs({frame:GetChildren()}) do
+            StripTextures(child)
+            -- Also strip from grandchildren
+            for _, grandchild in ipairs({child:GetChildren()}) do
+                StripTextures(grandchild)
             end
         end
-    end
-    
-    -- Strip textures from main frame
-    StripTextures(frame)
-    
-    -- Strip textures from all children (where the bars actually are)
-    for _, child in ipairs({frame:GetChildren()}) do
-        StripTextures(child)
-        -- Also strip from grandchildren
-        for _, grandchild in ipairs({child:GetChildren()}) do
-            StripTextures(grandchild)
+    else
+        -- For other frames, only hide NineSlice
+        if frame.NineSlice then
+            frame.NineSlice:Hide()
+            frame.NineSlice:SetAlpha(0)
         end
     end
     
