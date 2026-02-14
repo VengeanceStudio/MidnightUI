@@ -506,6 +506,9 @@ function CastBar:OnMoveModeChanged(event, enabled)
     if enabled then
         self.castBar:EnableMouse(true)
         self.castBar:SetAlpha(0.3)
+        self.castBar.movableHighlight:SetAlpha(1.0 / 0.3)  -- Compensate for parent alpha
+        self.castBar.movableBorder:SetAlpha(1.0 / 0.3)
+        self.castBar.movableLabel:SetAlpha(1.0 / 0.3)
         self.castBar:Show() -- Show in move mode even if not casting
         self.castBar.movableHighlight:Show()
         self.castBar.movableBorder:Show()
@@ -513,6 +516,9 @@ function CastBar:OnMoveModeChanged(event, enabled)
     else
         self.castBar:EnableMouse(false)
         self.castBar:SetAlpha(1.0)
+        self.castBar.movableHighlight:SetAlpha(1.0)
+        self.castBar.movableBorder:SetAlpha(1.0)
+        self.castBar.movableLabel:SetAlpha(1.0)
         self.castBar.movableHighlight:Hide()
         self.castBar.movableBorder:Hide()
         self.castBar.movableLabel:Hide()
