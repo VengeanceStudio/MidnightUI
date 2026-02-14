@@ -142,25 +142,29 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetScale(db.scale)
     end
     
-    -- Always use texture method for more reliable styling
+    -- Create background
     if not frame.midnightBg then
-        -- Create background texture
         frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
         frame.midnightBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-        frame.midnightBg:SetPoint("TOPLEFT", frame, "TOPLEFT", -5, 5)
-        frame.midnightBg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5, -5)
+        frame.midnightBg:SetAllPoints(frame)
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
-        
-        -- Create border texture
-        frame.midnightBorder = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
-        frame.midnightBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
-        frame.midnightBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", -7, 7)
-        frame.midnightBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 7, -7)
-        frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
     else
-        -- Update existing textures
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
-        frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
+    end
+    
+    -- Create border using NineSlice
+    if not frame.midnightBorderFrame then
+        frame.midnightBorderFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+        frame.midnightBorderFrame:SetAllPoints(frame)
+        frame.midnightBorderFrame:SetFrameLevel(frame:GetFrameLevel() + 1)
+        
+        frame.midnightBorderFrame:SetBackdrop({
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 2,
+        })
+        frame.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
+    else
+        frame.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
     end
     
     -- Style child cooldown icons
@@ -261,22 +265,20 @@ function Cooldowns:UpdateColors()
     -- Update all styled frames
     for frame in pairs(self.styledFrames) do
         if frame and frame:IsShown() then
-            -- Update textures
+            -- Update background
             if frame.midnightBg then
                 frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
             end
             
-            if frame.midnightBorder then
-                frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
+            -- Update border
+            if frame.midnightBorderFrame then
+                frame.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
             end
             
             -- Update child icon borders
             self:UpdateIconBorders(frame)
         end
     end
-    
-    -- Force update immediately
-    self:FindAndSkinCooldownManager()
 end
 
 function Cooldowns:UpdateIconBorders(parent)
