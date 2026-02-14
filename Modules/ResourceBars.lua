@@ -264,9 +264,9 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
         if db.showPercentage then
-            -- Show percentage only
+            -- Show percentage only - UnitPowerPercent returns secret value, just display it
             local percentage = UnitPowerPercent("player", powerType)
-            statusBar.text:SetText(math.floor(percentage) .. "%")
+            statusBar.text:SetText(percentage .. "%")
         else
             -- Show current / max values
             statusBar.text:SetText(current .. " / " .. maximum)
