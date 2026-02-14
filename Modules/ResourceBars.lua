@@ -78,18 +78,14 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function ResourceBars:OnInitialize()
-    print("|cff00ccffMidnightUI ResourceBars:|r OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
 end
 
 function ResourceBars:OnDBReady()
-    print("|cff00ccffMidnightUI ResourceBars:|r OnDBReady called")
     if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.resourceBars then
-        print("|cffff0000MidnightUI ResourceBars:|r Module disabled or DB not ready")
         self:Disable()
         return
     end
-    print("|cff00ff00MidnightUI ResourceBars:|r Module enabled, registering events...")
     
     self.db = MidnightUI.db:RegisterNamespace("ResourceBars", defaults)
     
@@ -109,7 +105,6 @@ function ResourceBars:OnDBReady()
     
     -- If player is already in world, set up immediately
     if IsPlayerInWorld and IsPlayerInWorld() then
-        print("|cff00ccffMidnightUI ResourceBars:|r Player already in world, setting up immediately...")
         C_Timer.After(0.5, function()
             self:SetupPrimaryResourceBar()
             self:SetupSecondaryResourceBar()
@@ -300,7 +295,6 @@ end
 -- -----------------------------------------------------------------------------
 function ResourceBars:SetupSecondaryResourceBar()
     if not self.db.profile.secondary.enabled then 
-        print("|cff00ccffMidnightUI ResourceBars:|r Secondary bar disabled in settings")
         return 
     end
     
