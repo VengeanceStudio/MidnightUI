@@ -264,12 +264,19 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
         if db.showPercentage then
-            -- Calculate percentage manually with nil check
-            if current and maximum and maximum > 0 then
-                local percentage = math.floor((current / maximum) * 100)
+            -- Try to calculate percentage, but if values are secrets it will fail
+            local success, percentage = pcall(function()
+                if not current or not maximum or maximum == 0 then
+                    return 0
+                end
+                return math.floor((current / maximum) * 100)
+            end)
+            
+            if success and percentage then
                 statusBar.text:SetText(percentage .. "%")
             else
-                statusBar.text:SetText("-%")
+                -- Values are secrets, can't calculate percentage - show current/max instead
+                statusBar.text:SetText(current .. " / " .. maximum)
             end
         else
             -- Show current / max values
