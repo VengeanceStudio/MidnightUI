@@ -60,6 +60,8 @@ function Cooldowns:OnDBReady()
 end
 
 function Cooldowns:PLAYER_ENTERING_WORLD()
+    print("MidnightUI Cooldowns: PLAYER_ENTERING_WORLD fired, scheduling scans...")
+    
     -- Try immediately
     self:FindAndSkinCooldownManager()
     
