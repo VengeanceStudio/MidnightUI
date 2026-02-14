@@ -363,7 +363,9 @@ function Cooldowns:StyleSingleIcon(icon)
         icon.CircleMask:Hide()
         icon.CircleMask:SetAlpha(0)
         icon.CircleMask:SetSize(0.01, 0.01)
-    end in children
+    end
+    
+    -- Check all children for masks
     for _, child in pairs({icon:GetChildren()}) do
         local name = child:GetName()
         if name and (name:find("Mask") or name:find("Portrait")) then
@@ -393,20 +395,8 @@ function Cooldowns:StyleSingleIcon(icon)
                 if region and region.GetObjectType and region:GetObjectType() == "MaskTexture" then
                     region:Hide()
                     region:SetAlpha(0)
-                end()
-        if name and (name:find("Mask") or name:find("Portrait")) then
-            child:Hide()
-            child:SetAlpha(0)
-        end
-        
-        -- Also check nested frames for masks
-        if child.IconMask then
-            child.IconMask:Hide()
-            child.IconMask:SetAlpha(0)
-        end
-        if child.CircleMask then
-            child.CircleMask:Hide()
-            child.CircleMask:SetAlpha(0)
+                end
+            end
         end
     end
     
