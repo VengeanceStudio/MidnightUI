@@ -40,7 +40,6 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function Cooldowns:OnInitialize()
-    print("MidnightUI Cooldowns: OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
     self.styledFrames = {}
     self.hookedLayouts = {}
@@ -48,33 +47,10 @@ function Cooldowns:OnInitialize()
 end
 
 function Cooldowns:OnDBReady()
-    print("MidnightUI Cooldowns: OnDBReady called")
-    
-    if not MidnightUI.db then
-        print("MidnightUI Cooldowns: MidnightUI.db is nil!")
+    if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.cooldowns then
         self:Disable()
         return
     end
-    
-    if not MidnightUI.db.profile then
-        print("MidnightUI Cooldowns: MidnightUI.db.profile is nil!")
-        self:Disable()
-        return
-    end
-    
-    if not MidnightUI.db.profile.modules then
-        print("MidnightUI Cooldowns: MidnightUI.db.profile.modules is nil!")
-        self:Disable()
-        return
-    end
-    
-    if not MidnightUI.db.profile.modules.cooldowns then
-        print("MidnightUI Cooldowns: Module is DISABLED in settings (modules.cooldowns = false)")
-        self:Disable()
-        return
-    end
-    
-    print("MidnightUI Cooldowns: Module is ENABLED, registering namespace and events...")
     
     self.db = MidnightUI.db:RegisterNamespace("Cooldowns", defaults)
     
@@ -82,11 +58,8 @@ function Cooldowns:OnDBReady()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("ADDON_LOADED")
     
-    print("MidnightUI Cooldowns: Events registered successfully")
-    
     -- Check if we're already in world (PLAYER_ENTERING_WORLD may have fired before we registered)
     if IsPlayerInWorld and IsPlayerInWorld() then
-        print("MidnightUI Cooldowns: Already in world, triggering scan immediately")
         C_Timer.After(0.5, function()
             self:FindAndSkinCooldownManager()
         end)
@@ -97,8 +70,6 @@ function Cooldowns:OnDBReady()
 end
 
 function Cooldowns:PLAYER_ENTERING_WORLD()
-    print("MidnightUI Cooldowns: PLAYER_ENTERING_WORLD fired, scheduling scans...")
-    
     -- Try immediately
     self:FindAndSkinCooldownManager()
     
@@ -176,24 +147,21 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     
     local db = self.db.profile
     
-    print("Styling", frame:GetName(), "- FrameLevel:", frame:GetFrameLevel(), "FrameStrata:", frame:GetFrameStrata())
-    
     -- Apply scale
     if frame.SetScale then
         frame:SetScale(db.scale)
     end
     
-    -- Create background overlay (higher level)
+    -- Create background overlay
     if not frame.midnightBg then
         frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND")
         frame.midnightBg:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBg:SetAllPoints(frame)
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
         frame.midnightBg:SetDrawLayer("BACKGROUND", 7)
-        print("  Created background texture")
     end
     
-    -- Create border overlay using textures (not backdrop)
+    -- Create border using 4 texture strips
     if not frame.midnightBorderTop then
         local borderSize = 2
         local r, g, b, a = unpack(db.borderColor)
@@ -229,15 +197,12 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBorderRight:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
         frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderRight:SetWidth(borderSize)
-        
-        print("  Created border textures (4 sides)")
     end
     
     -- Style child cooldown icons
     self:StyleCooldownIcons(frame)
     
     self.styledFrames[frame] = true
-    print("  Styling complete for", frame:GetName())
 end
 
 function Cooldowns:StyleCooldownIcons(parent)
