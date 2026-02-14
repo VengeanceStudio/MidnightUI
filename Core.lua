@@ -4160,6 +4160,10 @@ function MidnightUI:GetOptions()
             dbKey = "tweaks"
         elseif name == "Setup" then
             dbKey = "setup"
+        elseif name == "ResourceBars" then
+            dbKey = "resourceBars"
+        elseif name == "CastBar" then
+            dbKey = "castBar"
         else
             dbKey = string.lower(name)
         end
