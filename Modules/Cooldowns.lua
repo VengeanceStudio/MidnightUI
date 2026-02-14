@@ -157,6 +157,75 @@ end
 -- -----------------------------------------------------------------------------
 -- FIND AND SKIN WOW 12.0 COOLDOWN MANAGER
 -- -----------------------------------------------------------------------------
+
+function Cooldowns:StripBlizzardBorders(frame)
+    -- Recursively strip Blizzard border/background textures while preserving buff bar fills
+    local function StripAllBorders(f)
+        if not f then return end
+        
+        -- Remove backdrop
+        if f.SetBackdrop then
+            pcall(function() f:SetBackdrop(nil) end)
+        end
+        
+        -- Hide NineSlice and hook it to stay hidden
+        if f.NineSlice then
+            f.NineSlice:Hide()
+            f.NineSlice:SetAlpha(0)
+            if not f.NineSlice.midnightHooked then
+                hooksecurefunc(f.NineSlice, "Show", function()
+                    f.NineSlice:Hide()
+                end)
+                f.NineSlice.midnightHooked = true
+            end
+        end
+        
+        -- Hide textures that are borders/backgrounds (small or edge-positioned)
+        -- but NOT StatusBar textures which are the buff bar fills
+        for i = 1, f:GetNumRegions() do
+            local region = select(i, f:GetRegions())
+            if region and region:GetObjectType() == "Texture" then
+                -- Get texture properties
+                local width, height = region:GetSize()
+                local drawLayer, sublevel = region:GetDrawLayer()
+                
+                -- Hide if it looks like a border (thin texture) or background
+                -- Keep buff bar fills which are typically wider and in ARTWORK/OVERLAY
+                local shouldHide = false
+                if (width and width < 5) or (height and height < 5) then
+                    -- Thin texture = border
+                    shouldHide = true
+                elseif drawLayer == "BACKGROUND" or drawLayer == "BORDER" then
+                    -- Background/border layer = not a buff bar fill
+                    shouldHide = true
+                end
+                
+                if shouldHide then
+                    region:SetDrawLayer("BACKGROUND", -8)
+                    region:Hide()
+                    region:SetAlpha(0)
+                    -- Hook Show to keep it hidden
+                    if not region.midnightHooked then
+                        hooksecurefunc(region, "Show", function()
+                            region:Hide()
+                        end)
+                        region.midnightHooked = true
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Apply to frame and all descendants
+    StripAllBorders(frame)
+    for _, child in ipairs({frame:GetChildren()}) do
+        StripAllBorders(child)
+        for _, grandchild in ipairs({child:GetChildren()}) do
+            StripAllBorders(grandchild)
+        end
+    end
+end
+
 function Cooldowns:FindAndSkinCooldownManager()
     if not self.db.profile.skinCooldownManager then return end
     
@@ -185,6 +254,10 @@ function Cooldowns:FindAndSkinCooldownManager()
             if frame.UpdateLayout then
                 hooksecurefunc(frame, "UpdateLayout", function()
                     Cooldowns:StyleCooldownIcons(frame)
+                    -- Re-strip Blizzard textures for BuffBar after layout updates
+                    if frameName == "BuffBarCooldownViewer" then
+                        Cooldowns:StripBlizzardBorders(frame)
+                    end
                     -- Update resource bar widths when Essential layout changes
                     if frameName == "EssentialCooldownViewer" then
                         Cooldowns:UpdateResourceBarWidths()
@@ -235,63 +308,16 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetBackdrop(nil)
     end
     
-    -- Only aggressively strip textures for BuffBarCooldownViewer (Tracked Bars)
-    -- Other frames (Essential, Utility, BuffIcon) need their icons visible
-    local frameName = frame:GetName()
-    if frameName == "BuffBarCooldownViewer" then
-        -- Function to strip styling intelligently
-        local function StripBordersOnly(f)
-            -- Hide NineSlice
-            if f.NineSlice then
-                f.NineSlice:Hide()
-                f.NineSlice:SetAlpha(0)
-            end
-            
-            -- Remove backdrop
-            if f.SetBackdrop then
-                f:SetBackdrop(nil)
-            end
-            
-            -- Hide specific named border elements
-            local elementsToHide = {
-                "Background", "Bg", "Border", "TopEdge", "BottomEdge",
-                "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
-                "BottomLeftCorner", "BottomRightCorner", "NineSlice"
-            }
-            for _, elementName in ipairs(elementsToHide) do
-                if f[elementName] then
-                    f[elementName]:Hide()
-                    f[elementName]:SetAlpha(0)
-                end
-            end
-            
-            -- Hide textures that are border-sized (thin edges)
-            for i = 1, f:GetNumRegions() do
-                local region = select(i, f:GetRegions())
-                if region and region:GetObjectType() == "Texture" then
-                    local width, height = region:GetSize()
-                    -- Hide if it's a thin texture (likely a border, < 5 pixels in one dimension)
-                    if (width and width < 5) or (height and height < 5) then
-                        region:Hide()
-                        region:SetAlpha(0)
-                    end
-                end
-            end
-        end
-        
-        -- Strip borders from main frame and all descendants
-        StripBordersOnly(frame)
-        for _, child in ipairs({frame:GetChildren()}) do
-            StripBordersOnly(child)
-            for _, grandchild in ipairs({child:GetChildren()}) do
-                StripBordersOnly(grandchild)
-            end
-        end
-    else
-        -- For other frames, only hide NineSlice
-        if frame.NineSlice then
-            frame.NineSlice:Hide()
-            frame.NineSlice:SetAlpha(0)
+    -- Hide Blizzard's default borders/backdrop for all frames
+    if frame.NineSlice then
+        frame.NineSlice:Hide()
+        frame.NineSlice:SetAlpha(0)
+        -- Hook to prevent it from showing again
+        if not frame.midnightNineSliceHooked then
+            hooksecurefunc(frame.NineSlice, "Show", function()
+                frame.NineSlice:Hide()
+            end)
+            frame.midnightNineSliceHooked = true
         end
     end
     
@@ -328,6 +354,7 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBorderTop:SetPoint("TOPLEFT", frame.midnightBgFrame, "TOPLEFT", 0, 0)
         frame.midnightBorderTop:SetPoint("TOPRIGHT", frame.midnightBgFrame, "TOPRIGHT", 0, 0)
         frame.midnightBorderTop:SetHeight(borderSize)
+        frame.midnightBorderTop:SetDrawLayer("OVERLAY", 7)
         
         frame.midnightBorderBottom = frame.midnightBgFrame:CreateTexture(nil, "ARTWORK")
         frame.midnightBorderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
@@ -335,6 +362,7 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBorderBottom:SetPoint("BOTTOMLEFT", frame.midnightBgFrame, "BOTTOMLEFT", 0, 0)
         frame.midnightBorderBottom:SetPoint("BOTTOMRIGHT", frame.midnightBgFrame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderBottom:SetHeight(borderSize)
+        frame.midnightBorderBottom:SetDrawLayer("OVERLAY", 7)
         
         frame.midnightBorderLeft = frame.midnightBgFrame:CreateTexture(nil, "ARTWORK")
         frame.midnightBorderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
@@ -342,6 +370,7 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBorderLeft:SetPoint("TOPLEFT", frame.midnightBgFrame, "TOPLEFT", 0, 0)
         frame.midnightBorderLeft:SetPoint("BOTTOMLEFT", frame.midnightBgFrame, "BOTTOMLEFT", 0, 0)
         frame.midnightBorderLeft:SetWidth(borderSize)
+        frame.midnightBorderLeft:SetDrawLayer("OVERLAY", 7)
         
         frame.midnightBorderRight = frame.midnightBgFrame:CreateTexture(nil, "ARTWORK")
         frame.midnightBorderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
@@ -349,6 +378,7 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBorderRight:SetPoint("TOPRIGHT", frame.midnightBgFrame, "TOPRIGHT", 0, 0)
         frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame.midnightBgFrame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderRight:SetWidth(borderSize)
+        frame.midnightBorderRight:SetDrawLayer("OVERLAY", 7)
         
         -- Show/hide frame borders based on setting
         if db.showFrameBorder then
