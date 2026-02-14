@@ -52,6 +52,11 @@ local defaults = {
             width = 250,
             height = 12,
             
+            -- Attachment
+            attachToPrimary = false,
+            attachPosition = "BELOW", -- "ABOVE" or "BELOW"
+            attachSpacing = 2, -- Spacing between bars when attached
+            
             -- Appearance
             showBorder = true,
             showBackground = true,
@@ -303,6 +308,18 @@ function ResourceBars:SetupSecondaryResourceBar()
     if not useSecondary then return end
     
     if self.secondaryBar then
+        -- Update position if attachment settings changed
+        local db = self.db.profile.secondary
+        self.secondaryBar:ClearAllPoints()
+        if db.attachToPrimary and self.primaryBar then
+            if db.attachPosition == "ABOVE" then
+                self.secondaryBar:SetPoint("BOTTOM", self.primaryBar, "TOP", 0, db.attachSpacing)
+            else -- "BELOW"
+                self.secondaryBar:SetPoint("TOP", self.primaryBar, "BOTTOM", 0, -db.attachSpacing)
+            end
+        else
+            self.secondaryBar:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+        end
         self:UpdateSecondaryResourceBar()
         return
     end
@@ -312,7 +329,19 @@ function ResourceBars:SetupSecondaryResourceBar()
     -- Create main frame
     local frame = CreateFrame("Frame", "MidnightUI_SecondaryResourceBar", UIParent, "BackdropTemplate")
     frame:SetSize(db.width, db.height)
-    frame:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+    
+    -- Set position based on attachment setting
+    if db.attachToPrimary and self.primaryBar then
+        frame:ClearAllPoints()
+        if db.attachPosition == "ABOVE" then
+            frame:SetPoint("BOTTOM", self.primaryBar, "TOP", 0, db.attachSpacing)
+        else -- "BELOW"
+            frame:SetPoint("TOP", self.primaryBar, "BOTTOM", 0, -db.attachSpacing)
+        end
+    else
+        frame:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+    end
+    
     frame:SetMovable(true)
     frame:EnableMouse(false)
     frame:SetClampedToScreen(true)
@@ -616,6 +645,49 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.secondary.height end,
                 set = function(_, v)
                     self.db.profile.secondary.height = v
+                    ReloadUI()
+                end
+            },
+            secondaryAttach = {
+                name = "Attach to Primary Bar",
+                desc = "Automatically position the secondary bar relative to the primary bar.",
+                type = "toggle",
+                order = 24,
+                disabled = function() return not self.db.profile.secondary.enabled end,
+                get = function() return self.db.profile.secondary.attachToPrimary end,
+                set = function(_, v)
+                    self.db.profile.secondary.attachToPrimary = v
+                    ReloadUI()
+                end
+            },
+            secondaryAttachPosition = {
+                name = "Attach Position",
+                desc = "Position the secondary bar above or below the primary bar.",
+                type = "select",
+                order = 25,
+                disabled = function() return not self.db.profile.secondary.enabled or not self.db.profile.secondary.attachToPrimary end,
+                values = {
+                    ["ABOVE"] = "Above",
+                    ["BELOW"] = "Below"
+                },
+                get = function() return self.db.profile.secondary.attachPosition end,
+                set = function(_, v)
+                    self.db.profile.secondary.attachPosition = v
+                    ReloadUI()
+                end
+            },
+            secondaryAttachSpacing = {
+                name = "Attach Spacing",
+                desc = "Spacing between primary and secondary bars when attached.",
+                type = "range",
+                order = 26,
+                min = 0,
+                max = 20,
+                step = 1,
+                disabled = function() return not self.db.profile.secondary.enabled or not self.db.profile.secondary.attachToPrimary end,
+                get = function() return self.db.profile.secondary.attachSpacing end,
+                set = function(_, v)
+                    self.db.profile.secondary.attachSpacing = v
                     ReloadUI()
                 end
             },
