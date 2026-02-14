@@ -263,7 +263,7 @@ function Cooldowns:StyleSingleIcon(icon)
         iconTexture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     end
     
-    -- Add border around the icon
+    -- Add border around the icon (but DON'T create the black inner texture!)
     if not icon.midnightBorder then
         icon.midnightBorder = icon:CreateTexture(nil, "OVERLAY")
         icon.midnightBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
@@ -271,12 +271,6 @@ function Cooldowns:StyleSingleIcon(icon)
         icon.midnightBorder:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 2, -2)
         icon.midnightBorder:SetColorTexture(unpack(db.borderColor))
         icon.midnightBorder:SetDrawLayer("OVERLAY", 7)
-        
-        -- Create inner cutout
-        icon.midnightInner = icon:CreateTexture(nil, "BORDER")
-        icon.midnightInner:SetTexture("Interface\\Buttons\\WHITE8X8")
-        icon.midnightInner:SetAllPoints(icon)
-        icon.midnightInner:SetColorTexture(0, 0, 0, 1)
     end
     
     -- Style cooldown text if it exists
