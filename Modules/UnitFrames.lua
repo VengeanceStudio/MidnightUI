@@ -448,22 +448,8 @@ local function GetTagValue(tagName, unit)
             end
             
             if ok and pct ~= nil then
-                -- Try to format the percentage as a whole number
-                local pctNum = tonumber(pct)
-                if pctNum and type(pctNum) == "number" then
-                    -- Use string.format to return whole number
-                    local ok2, formatted = pcall(string.format, "%.0f", pctNum)
-                    if ok2 and formatted then
-                        return formatted
-                    end
-                    -- If format failed, try to floor and return
-                    local ok3, floored = pcall(math.floor, pctNum)
-                    if ok3 and floored then
-                        return tostring(floored)
-                    end
-                end
-                -- If conversion failed, return raw value
-                return tostring(pct)
+                -- Return the raw value directly (SetText handles secret values)
+                return pct
             end
         end
         
@@ -526,22 +512,8 @@ local function GetTagValue(tagName, unit)
             end
             
             if ok and pct ~= nil then
-                -- Try to format the percentage as a whole number
-                local pctNum = tonumber(pct)
-                if pctNum and type(pctNum) == "number" then
-                    -- Use string.format to return whole number
-                    local ok2, formatted = pcall(string.format, "%.0f", pctNum)
-                    if ok2 and formatted then
-                        return formatted
-                    end
-                    -- If format failed, try to floor and return
-                    local ok3, floored = pcall(math.floor, pctNum)
-                    if ok3 and floored then
-                        return tostring(floored)
-                    end
-                end
-                -- If conversion failed, return raw value as string
-                return tostring(pct)
+                -- Return the raw value directly (SetText handles secret values)
+                return pct
             end
         end
         
