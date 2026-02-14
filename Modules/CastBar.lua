@@ -211,6 +211,30 @@ function CastBar:SetupCastBar()
     
     self.castBar = frame
     
+    -- Create green highlight overlay for move mode
+    frame.movableHighlight = frame:CreateTexture(nil, "OVERLAY")
+    frame.movableHighlight:SetAllPoints()
+    frame.movableHighlight:SetColorTexture(0, 1, 0, 0.2)
+    frame.movableHighlight:SetDrawLayer("OVERLAY", 7)
+    frame.movableHighlight:Hide()
+    
+    -- Create border for move mode
+    frame.movableBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    frame.movableBorder:SetAllPoints()
+    frame.movableBorder:SetBackdrop({
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        edgeSize = 2,
+    })
+    frame.movableBorder:SetBackdropBorderColor(0, 1, 0, 1)
+    frame.movableBorder:Hide()
+    
+    -- Create label text for move mode
+    frame.movableLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    frame.movableLabel:SetPoint("CENTER")
+    frame.movableLabel:SetText("Cast Bar")
+    frame.movableLabel:SetTextColor(1, 1, 1, 1)
+    frame.movableLabel:Hide()
+    
     -- Setup dragging
     self:SetupDragging()
     
@@ -480,8 +504,14 @@ function CastBar:OnMoveModeChanged(event, enabled)
     if enabled then
         self.castBar:EnableMouse(true)
         self.castBar:Show() -- Show in move mode even if not casting
+        self.castBar.movableHighlight:Show()
+        self.castBar.movableBorder:Show()
+        self.castBar.movableLabel:Show()
     else
         self.castBar:EnableMouse(false)
+        self.castBar.movableHighlight:Hide()
+        self.castBar.movableBorder:Hide()
+        self.castBar.movableLabel:Hide()
         -- Hide if not actually casting
         if not self.castBar.casting and not self.castBar.channeling then
             self.castBar:Hide()

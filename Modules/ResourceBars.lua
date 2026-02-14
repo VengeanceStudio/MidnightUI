@@ -178,6 +178,30 @@ function ResourceBars:SetupPrimaryResourceBar()
     frame.statusBar = statusBar
     self.primaryBar = frame
     
+    -- Create green highlight overlay for move mode
+    frame.movableHighlight = frame:CreateTexture(nil, "OVERLAY")
+    frame.movableHighlight:SetAllPoints()
+    frame.movableHighlight:SetColorTexture(0, 1, 0, 0.2)
+    frame.movableHighlight:SetDrawLayer("OVERLAY", 7)
+    frame.movableHighlight:Hide()
+    
+    -- Create border for move mode
+    frame.movableBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    frame.movableBorder:SetAllPoints()
+    frame.movableBorder:SetBackdrop({
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        edgeSize = 2,
+    })
+    frame.movableBorder:SetBackdropBorderColor(0, 1, 0, 1)
+    frame.movableBorder:Hide()
+    
+    -- Create label text for move mode
+    frame.movableLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    frame.movableLabel:SetPoint("CENTER")
+    frame.movableLabel:SetText("Primary Resource Bar")
+    frame.movableLabel:SetTextColor(1, 1, 1, 1)
+    frame.movableLabel:Hide()
+    
     frame:Show()
     
     -- Setup dragging
@@ -294,6 +318,30 @@ function ResourceBars:SetupSecondaryResourceBar()
     frame.resourceType = resourceType
     frame.segments = {}
     self.secondaryBar = frame
+    
+    -- Create green highlight overlay for move mode
+    frame.movableHighlight = frame:CreateTexture(nil, "OVERLAY")
+    frame.movableHighlight:SetAllPoints()
+    frame.movableHighlight:SetColorTexture(0, 1, 0, 0.2)
+    frame.movableHighlight:SetDrawLayer("OVERLAY", 7)
+    frame.movableHighlight:Hide()
+    
+    -- Create border for move mode
+    frame.movableBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    frame.movableBorder:SetAllPoints()
+    frame.movableBorder:SetBackdrop({
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        edgeSize = 2,
+    })
+    frame.movableBorder:SetBackdropBorderColor(0, 1, 0, 1)
+    frame.movableBorder:Hide()
+    
+    -- Create label text for move mode
+    frame.movableLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    frame.movableLabel:SetPoint("CENTER")
+    frame.movableLabel:SetText("Secondary Resource Bar")
+    frame.movableLabel:SetTextColor(1, 1, 1, 1)
+    frame.movableLabel:Hide()
     
     -- Create segments
     self:CreateSecondarySegments()
@@ -414,9 +462,27 @@ end
 function ResourceBars:OnMoveModeChanged(event, enabled)
     if self.primaryBar then
         self.primaryBar:EnableMouse(enabled)
+        if enabled then
+            self.primaryBar.movableHighlight:Show()
+            self.primaryBar.movableBorder:Show()
+            self.primaryBar.movableLabel:Show()
+        else
+            self.primaryBar.movableHighlight:Hide()
+            self.primaryBar.movableBorder:Hide()
+            self.primaryBar.movableLabel:Hide()
+        end
     end
     if self.secondaryBar then
         self.secondaryBar:EnableMouse(enabled)
+        if enabled then
+            self.secondaryBar.movableHighlight:Show()
+            self.secondaryBar.movableBorder:Show()
+            self.secondaryBar.movableLabel:Show()
+        else
+            self.secondaryBar.movableHighlight:Hide()
+            self.secondaryBar.movableBorder:Hide()
+            self.secondaryBar.movableLabel:Hide()
+        end
     end
 end
 
