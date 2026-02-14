@@ -180,27 +180,25 @@ function Cooldowns:StripBlizzardBorders(frame)
             end
         end
         
-        -- Hide textures that are borders/backgrounds (small or edge-positioned)
-        -- but NOT StatusBar textures which are the buff bar fills
+        -- For BuffBar, we need to be more aggressive but preserve actual bar fill textures
+        -- Bar fills are typically StatusBar textures (GetStatusBarTexture) or very wide textures
         for i = 1, f:GetNumRegions() do
             local region = select(i, f:GetRegions())
             if region and region:GetObjectType() == "Texture" then
                 -- Get texture properties
                 local width, height = region:GetSize()
                 local drawLayer, sublevel = region:GetDrawLayer()
+                local texturePath = region:GetTexture()
                 
-                -- Hide if it looks like a border (thin texture) or background
-                -- Keep buff bar fills which are typically wider and in ARTWORK/OVERLAY
-                local shouldHide = false
-                if (width and width < 5) or (height and height < 5) then
-                    -- Thin texture = border
-                    shouldHide = true
-                elseif drawLayer == "BACKGROUND" or drawLayer == "BORDER" then
-                    -- Background/border layer = not a buff bar fill
-                    shouldHide = true
+                -- Assume buff bar fills are wide (> 50 pixels) and not thin borders
+                -- Everything else gets hidden
+                local isLikelyBarFill = false
+                if width and height and width > 50 and height > 10 then
+                    -- Wide texture, likely a buff bar fill - keep it
+                    isLikelyBarFill = true
                 end
                 
-                if shouldHide then
+                if not isLikelyBarFill then
                     region:SetDrawLayer("BACKGROUND", -8)
                     region:Hide()
                     region:SetAlpha(0)
