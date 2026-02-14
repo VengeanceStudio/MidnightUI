@@ -257,20 +257,16 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
         if db.showPercentage then
-            -- Calculate percentage safely (avoid tainted values)
+            -- Get percentage from the status bar itself to avoid taint
+            local _, maxVal = statusBar:GetMinMaxValues()
+            local currentVal = statusBar:GetValue()
             local percentage = 0
             
-            -- Use fallback calculation that's safe from taint
-            if current and maximum and maximum > 0 then
-                local ok, pct = pcall(function()
-                    return math.floor((current / maximum) * 100)
-                end)
-                if ok and pct then
-                    percentage = pct
-                end
+            if maxVal and maxVal > 0 and currentVal then
+                percentage = math.floor((currentVal / maxVal) * 100)
             end
             
-            -- Display percentage (secret value safe)
+            -- Display percentage
             statusBar.text:SetText(string.format("%d%%", percentage))
         else
             -- Show current / max values
