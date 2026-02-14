@@ -36,6 +36,10 @@ local defaults = {
         attachOffsetX = 0,
         attachOffsetY = -2,
         
+        -- Resource bar width matching
+        matchPrimaryBarWidth = false,
+        matchSecondaryBarWidth = false,
+        
         -- Frame Grouping (attach frames to each other)
         groupFrames = false,
         
@@ -158,6 +162,10 @@ function Cooldowns:FindAndSkinCooldownManager()
             if frame.UpdateLayout then
                 hooksecurefunc(frame, "UpdateLayout", function()
                     self:StyleCooldownIcons(frame)
+                    -- Update resource bar widths when Essential layout changes
+                    if frameName == "EssentialCooldownViewer" then
+                        self:UpdateResourceBarWidths()
+                    end
                 end)
                 self.hookedLayouts[frameName] = true
             end
@@ -490,6 +498,62 @@ function Cooldowns:UpdateFrameGrouping()
 end
 
 -- -----------------------------------------------------------------------------
+-- RESOURCE BAR WIDTH MATCHING
+-- -----------------------------------------------------------------------------
+function Cooldowns:UpdateResourceBarWidths()
+    local db = self.db.profile
+    
+    -- Get the Essential Cooldown Viewer
+    local essentialFrame = _G["EssentialCooldownViewer"]
+    if not essentialFrame then return end
+    
+    local essentialWidth = essentialFrame:GetWidth()
+    if not essentialWidth or essentialWidth == 0 then return end
+    
+    -- Get ResourceBars module
+    local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
+    if not ResourceBars then return end
+    
+    -- Match primary bar width if enabled
+    if db.matchPrimaryBarWidth and ResourceBars.primaryBar then
+        ResourceBars.primaryBar:SetWidth(essentialWidth)
+    end
+    
+    -- Match secondary bar width if enabled
+    if db.matchSecondaryBarWidth and ResourceBars.secondaryBar then
+        ResourceBars.secondaryBar:SetWidth(essentialWidth)
+    end
+end
+
+-- -----------------------------------------------------------------------------
+-- RESOURCE BAR WIDTH MATCHING
+-- -----------------------------------------------------------------------------
+function Cooldowns:UpdateResourceBarWidths()
+    local db = self.db.profile
+    
+    -- Get the Essential Cooldown Viewer
+    local essentialFrame = _G["EssentialCooldownViewer"]
+    if not essentialFrame then return end
+    
+    local essentialWidth = essentialFrame:GetWidth()
+    if not essentialWidth or essentialWidth == 0 then return end
+    
+    -- Get ResourceBars module
+    local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
+    if not ResourceBars then return end
+    
+    -- Match primary bar width if enabled
+    if db.matchPrimaryBarWidth and ResourceBars.primaryBar then
+        ResourceBars.primaryBar:SetWidth(essentialWidth)
+    end
+    
+    -- Match secondary bar width if enabled
+    if db.matchSecondaryBarWidth and ResourceBars.secondaryBar then
+        ResourceBars.secondaryBar:SetWidth(essentialWidth)
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- RESOURCE BAR ATTACHMENT
 -- -----------------------------------------------------------------------------
 function Cooldowns:UpdateAttachment()
@@ -521,6 +585,9 @@ function Cooldowns:UpdateAttachment()
     
     -- Update frame grouping if enabled
     self:UpdateFrameGrouping()
+    
+    -- Update resource bar widths if enabled
+    self:UpdateResourceBarWidths()
 end
 
 -- -----------------------------------------------------------------------------
@@ -784,6 +851,37 @@ function Cooldowns:GetOptions()
                 set = function(_, v)
                     self.db.profile.attachOffsetY = v
                     self:UpdateAttachment()
+                end
+            },
+            
+            -- Width Matching
+            headerWidthMatch = { type = "header", name = "Resource Bar Width Matching", order = 55 },
+            
+            matchPrimaryBarWidth = {
+                name = "Match Primary Bar Width",
+                desc = "Make the Primary Resource Bar width match the Essential Cooldowns bar width.",
+                type = "toggle",
+                order = 56,
+                width = "full",
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.matchPrimaryBarWidth end,
+                set = function(_, v)
+                    self.db.profile.matchPrimaryBarWidth = v
+                    self:UpdateResourceBarWidths()
+                end
+            },
+            
+            matchSecondaryBarWidth = {
+                name = "Match Secondary Bar Width",
+                desc = "Make the Secondary Resource Bar width match the Essential Cooldowns bar width.",
+                type = "toggle",
+                order = 57,
+                width = "full",
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.matchSecondaryBarWidth end,
+                set = function(_, v)
+                    self.db.profile.matchSecondaryBarWidth = v
+                    self:UpdateResourceBarWidths()
                 end
             },
             
