@@ -339,7 +339,8 @@ function Cooldowns:StyleSingleIcon(icon)
     -- Don't hide masks as they may be required for icons to display
     if iconTexture and iconTexture.GetObjectType and iconTexture:GetObjectType() == "Texture" then
         if iconTexture.SetTexCoord then
-            iconTexture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+            -- More aggressive crop to remove rounded corners completely
+            iconTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
         end
     end
     
@@ -347,10 +348,9 @@ function Cooldowns:StyleSingleIcon(icon)
     if not icon.midnightBorderFrame then
         icon.midnightBorderFrame = CreateFrame("Frame", nil, icon, "BackdropTemplate")
         
-        -- Inset the border slightly to match where the icon texture actually is
-        -- Most WoW icon frames have a small inset
-        icon.midnightBorderFrame:SetPoint("TOPLEFT", icon, "TOPLEFT", 2, -2)
-        icon.midnightBorderFrame:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -2, 2)
+        -- Tighter inset to match the cropped icon texture
+        icon.midnightBorderFrame:SetPoint("TOPLEFT", icon, "TOPLEFT", 1, -1)
+        icon.midnightBorderFrame:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -1, 1)
         
         icon.midnightBorderFrame:SetFrameStrata("MEDIUM")
         icon.midnightBorderFrame:SetFrameLevel(icon:GetFrameLevel() + 5)
