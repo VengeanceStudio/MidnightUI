@@ -357,7 +357,7 @@ function Cooldowns:StyleSingleIcon(icon)
         
         icon.midnightBorderFrame:SetBackdrop({
             edgeFile = "Interface\\Buttons\\WHITE8X8",
-            edgeSize = 1,
+            edgeSize = 2,
         })
         icon.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
         
