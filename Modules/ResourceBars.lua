@@ -257,27 +257,16 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
         if db.showPercentage then
-            -- Use UnitPowerPercent with ScaleTo100 like unit frames do
-            local percentage
-            if UnitPowerPercent and CurveConstants and CurveConstants.ScaleTo100 then
-                local ok, pct = pcall(UnitPowerPercent, "player", powerType, false, CurveConstants.ScaleTo100)
-                if ok and pct ~= nil then
-                    percentage = math.floor(pct)  -- Round to whole number
-                end
-            end
+            -- Calculate percentage safely (avoid tainted values)
+            local percentage = 0
             
-            -- Fallback to calculation if API not available
-            if not percentage then
+            -- Use fallback calculation that's safe from taint
+            if current and maximum and maximum > 0 then
                 local ok, pct = pcall(function()
-                    if not current or not maximum or maximum == 0 then
-                        return 0
-                    end
                     return math.floor((current / maximum) * 100)
                 end)
                 if ok and pct then
                     percentage = pct
-                else
-                    percentage = 0
                 end
             end
             
