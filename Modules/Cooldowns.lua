@@ -317,11 +317,17 @@ function Cooldowns:StyleSingleIcon(icon)
     
     local db = self.db.profile
     
-    -- Find the icon texture
+    -- Find the icon texture - may be nested
     local iconTexture = icon.icon or icon.Icon or icon.texture
     
+    -- If iconTexture is a frame, look for the actual texture inside it
+    if iconTexture and iconTexture.GetObjectType and iconTexture:GetObjectType() == "Frame" then
+        -- Check for common texture names
+        iconTexture = iconTexture.Icon or iconTexture.icon or iconTexture.texture
+    end
+    
     -- Always reapply these settings even if already styled
-    if iconTexture then
+    if iconTexture and iconTexture.GetObjectType and iconTexture:GetObjectType() == "Texture" then
         -- Crop edges more aggressively to remove rounded corners
         -- This cuts off about 10% from each edge for perfectly square icons
         if iconTexture.SetTexCoord then
@@ -330,19 +336,7 @@ function Cooldowns:StyleSingleIcon(icon)
         
         -- Force the texture to fill the entire frame
         iconTexture:ClearAllPoints()
-        iconTexture:SetAllPoints(icon)
-        
-        -- Hook the texture to maintain square coords if they get reset
-        if not iconTexture.midnightHooked then
-            hooksecurefunc(iconTexture, "SetTexture", function()
-                if iconTexture.SetTexCoord then
-                    C_Timer.After(0, function()
-                        iconTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-                    end)
-                end
-            end)
-            iconTexture.midnightHooked = true
-        end
+        iconTexture:SetAllPoints(iconTexture:GetParent())
     end
     
     -- Always check for and hide mask frames
@@ -363,9 +357,19 @@ function Cooldowns:StyleSingleIcon(icon)
             child:Hide()
             child:SetAlpha(0)
         end
+        
+        -- Also check nested frames for masks
+        if child.IconMask then
+            child.IconMask:Hide()
+            child.IconMask:SetAlpha(0)
+        end
+        if child.CircleMask then
+            child.CircleMask:Hide()
+            child.CircleMask:SetAlpha(0)
+        end
     end
     
-    -- Look for mask textures
+    -- Look for mask textures in all regions
     for i = 1, icon:GetNumRegions() do
         local region = select(i, icon:GetRegions())
         if region and region:GetObjectType() == "Texture" then
