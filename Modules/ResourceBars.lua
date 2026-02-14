@@ -239,15 +239,28 @@ function ResourceBars:UpdatePrimaryResourceBar()
         end
     end
     
-    -- Update text - use safe percentage API instead of math
+    -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
-        local percentage = UnitPowerPercent("player", powerType) or 0
-        local text = db.textFormat
-        -- For text display, convert to string (safe operation)
-        text = text:gsub("%[curpp%]", tostring(current))
-        text = text:gsub("%[maxpp%]", tostring(maximum))
-        text = text:gsub("%[perpp%]", tostring(math.floor(percentage)))
-        statusBar.text:SetText(text)
+        local percentage = UnitPowerPercent("player", powerType)
+        local format = db.textFormat
+        
+        -- Replace tokens with actual values (secret values are fine)
+        if format:find("%[curpp%]") and format:find("%[maxpp%]") and format:find("%[perpp%]") then
+            -- All three tokens - build string manually without gsub
+            local parts = {}
+            for part in format:gmatch("[^%[]+") do
+                table.insert(parts, part)
+            end
+            -- Format: "[curpp] / [maxpp]" becomes parts with separators
+            -- Simpler: just construct the common format directly
+            statusBar.text:SetText(current .. " / " .. maximum)
+        elseif format:find("%[perpp%]") then
+            -- Just percentage
+            statusBar.text:SetText(math.floor(percentage) .. "%")
+        else
+            -- Default format
+            statusBar.text:SetText(current .. " / " .. maximum)
+        end
     end
 end
 
