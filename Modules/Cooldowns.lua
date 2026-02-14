@@ -40,6 +40,7 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function Cooldowns:OnInitialize()
+    print("MidnightUI Cooldowns: OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
     self.styledFrames = {}
     self.hookedLayouts = {}
@@ -47,16 +48,41 @@ function Cooldowns:OnInitialize()
 end
 
 function Cooldowns:OnDBReady()
-    if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.cooldowns then
+    print("MidnightUI Cooldowns: OnDBReady called")
+    
+    if not MidnightUI.db then
+        print("MidnightUI Cooldowns: MidnightUI.db is nil!")
         self:Disable()
         return
     end
+    
+    if not MidnightUI.db.profile then
+        print("MidnightUI Cooldowns: MidnightUI.db.profile is nil!")
+        self:Disable()
+        return
+    end
+    
+    if not MidnightUI.db.profile.modules then
+        print("MidnightUI Cooldowns: MidnightUI.db.profile.modules is nil!")
+        self:Disable()
+        return
+    end
+    
+    if not MidnightUI.db.profile.modules.cooldowns then
+        print("MidnightUI Cooldowns: Module is DISABLED in settings (modules.cooldowns = false)")
+        self:Disable()
+        return
+    end
+    
+    print("MidnightUI Cooldowns: Module is ENABLED, registering namespace and events...")
     
     self.db = MidnightUI.db:RegisterNamespace("Cooldowns", defaults)
     
     -- Register events
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("ADDON_LOADED")
+    
+    print("MidnightUI Cooldowns: Events registered successfully")
 end
 
 function Cooldowns:PLAYER_ENTERING_WORLD()
