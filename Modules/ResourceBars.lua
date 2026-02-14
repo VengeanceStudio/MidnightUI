@@ -257,17 +257,18 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
         if db.showPercentage then
-            -- Get percentage from the status bar itself to avoid taint
-            local _, maxVal = statusBar:GetMinMaxValues()
-            local currentVal = statusBar:GetValue()
-            local percentage = 0
-            
-            if maxVal and maxVal > 0 and currentVal then
-                percentage = math.floor((currentVal / maxVal) * 100)
+            -- Use UnitPowerPercent but format to remove decimals
+            local percentage
+            if UnitPowerPercent and CurveConstants and CurveConstants.ScaleTo100 then
+                percentage = UnitPowerPercent("player", powerType, false, CurveConstants.ScaleTo100)
             end
             
-            -- Display percentage
-            statusBar.text:SetText(string.format("%d%%", percentage))
+            -- Display percentage with format string that rounds to integer
+            if percentage then
+                statusBar.text:SetFormattedText("%.0f%%", percentage)
+            else
+                statusBar.text:SetText("0%")
+            end
         else
             -- Show current / max values
             statusBar.text:SetText(current .. " / " .. maximum)
