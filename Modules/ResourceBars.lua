@@ -36,6 +36,7 @@ local defaults = {
             
             -- Text
             showText = true,
+            showPercentage = false, -- Show percentage instead of current/max values
             textFormat = "[curpp] / [maxpp]",
             font = "Friz Quadrata TT",
             fontSize = 12,
@@ -214,7 +215,21 @@ function ResourceBars:SetupPrimaryResourceBar()
     -- Setup dragging
     self:SetupDragging(frame, "primary")
     
-    -- Don't call update here - let the events handle it once player data is loaded
+    -- Set initial color based on power type
+    local powerType = UnitPowerType("player")
+    if db.customColor then
+        statusBar:SetStatusBarColor(unpack(db.customColor))
+    else
+        local info = PowerBarColor[powerType]
+        if info then
+            statusBar:SetStatusBarColor(info.r, info.g, info.b)
+        end
+    end
+    
+    -- Call update after a short delay to populate values safely
+    C_Timer.After(0.1, function()
+        self:UpdatePrimaryResourceBar()
+    end)
 end
 
 function ResourceBars:UpdatePrimaryResourceBar()
@@ -248,24 +263,12 @@ function ResourceBars:UpdatePrimaryResourceBar()
     
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
-        local percentage = UnitPowerPercent("player", powerType)
-        local format = db.textFormat
-        
-        -- Replace tokens with actual values (secret values are fine)
-        if format:find("%[curpp%]") and format:find("%[maxpp%]") and format:find("%[perpp%]") then
-            -- All three tokens - build string manually without gsub
-            local parts = {}
-            for part in format:gmatch("[^%[]+") do
-                table.insert(parts, part)
-            end
-            -- Format: "[curpp] / [maxpp]" becomes parts with separators
-            -- Simpler: just construct the common format directly
-            statusBar.text:SetText(current .. " / " .. maximum)
-        elseif format:find("%[perpp%]") then
-            -- Just percentage
+        if db.showPercentage then
+            -- Show percentage only
+            local percentage = UnitPowerPercent("player", powerType)
             statusBar.text:SetText(math.floor(percentage) .. "%")
         else
-            -- Default format
+            -- Show current / max values
             statusBar.text:SetText(current .. " / " .. maximum)
         end
     end
@@ -605,6 +608,20 @@ function ResourceBars:GetOptions()
                 set = function(_, v)
                     self.db.profile.primary.showText = v
                     ReloadUI()
+                end
+            },
+            primaryShowPercentage = {
+                name = "Show Percentage",
+                desc = "Display resource as percentage instead of current/max values.",
+                type = "toggle",
+                order = 15,
+                disabled = function() return not self.db.profile.primary.enabled or not self.db.profile.primary.showText end,
+                get = function() return self.db.profile.primary.showPercentage end,
+                set = function(_, v)
+                    self.db.profile.primary.showPercentage = v
+                    if self.primaryBar then
+                        self:UpdatePrimaryResourceBar()
+                    end
                 end
             },
             
