@@ -84,6 +84,14 @@ function CastBar:OnDBReady()
     
     -- Register for Move Mode changes
     self:RegisterMessage("MIDNIGHTUI_MOVEMODE_CHANGED", "OnMoveModeChanged")
+    
+    -- If player is already in world, set up immediately
+    if IsPlayerInWorld and IsPlayerInWorld() then
+        print("|cff00ccffMidnightUI CastBar:|r Player already in world, setting up immediately...")
+        C_Timer.After(0.5, function()
+            self:SetupCastBar()
+        end)
+    end
 end
 
 function CastBar:PLAYER_ENTERING_WORLD()
