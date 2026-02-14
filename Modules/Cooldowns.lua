@@ -95,6 +95,7 @@ function Cooldowns:OnDBReady()
     -- Register events
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("ADDON_LOADED")
+    self:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
     
     -- Check if we're already in world (PLAYER_ENTERING_WORLD may have fired before we registered)
     if IsPlayerInWorld and IsPlayerInWorld() then
@@ -129,6 +130,14 @@ function Cooldowns:ADDON_LOADED(event, addonName)
             self:FindAndSkinCooldownManager()
         end)
     end
+end
+
+function Cooldowns:EDIT_MODE_LAYOUTS_UPDATED()
+    -- Reapply positioning when exiting Edit Mode
+    C_Timer.After(0.2, function()
+        self:UpdateAttachment()
+        self:UpdateFrameGrouping()
+    end)
 end
 
 -- -----------------------------------------------------------------------------
