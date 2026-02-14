@@ -229,31 +229,50 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetScale(db.scale)
     end
     
-    -- Hide Blizzard's default background textures
+    -- Aggressively remove Blizzard's default styling
+    -- Remove backdrop
+    if frame.SetBackdrop then
+        frame:SetBackdrop(nil)
+    end
+    
+    -- Hide NineSlice (Blizzard's common border system)
+    if frame.NineSlice then
+        frame.NineSlice:Hide()
+        frame.NineSlice:SetAlpha(0)
+        if frame.NineSlice.SetBorderBlendMode then
+            frame.NineSlice:SetBorderBlendMode("DISABLE")
+        end
+    end
+    
+    -- Hide all texture regions that look like borders or backgrounds
     for i = 1, frame:GetNumRegions() do
         local region = select(i, frame:GetRegions())
         if region and region:GetObjectType() == "Texture" then
-            local texture = region:GetTexture()
-            -- Hide common Blizzard background/border textures
-            if texture and (
-                texture:find("Background") or 
-                texture:find("Border") or
-                texture:find("Edge") or
-                texture:find("Corner") or
-                texture:find("UI-Frame") or
-                texture == 136548 -- Common background texture ID
-            ) then
+            local texturePath = region:GetTexture()
+            -- Hide if it's a texture path (not nil or a texture object)
+            if texturePath and type(texturePath) == "string" then
+                region:Hide()
+                region:SetAlpha(0)
+            elseif type(texturePath) == "number" and texturePath > 0 then
+                -- Also hide if it has a texture ID
                 region:Hide()
                 region:SetAlpha(0)
             end
         end
     end
     
-    -- Also check for named background elements
-    if frame.Background then frame.Background:Hide() end
-    if frame.Border then frame.Border:Hide() end
-    if frame.Bg then frame.Bg:Hide() end
-    if frame.NineSlice then frame.NineSlice:Hide() end
+    -- Hide common named background/border elements
+    local elementsToHide = {
+        "Background", "Bg", "Border", "NineSlice", "TopEdge", "BottomEdge",
+        "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
+        "BottomLeftCorner", "BottomRightCorner", "Center"
+    }
+    for _, elementName in ipairs(elementsToHide) do
+        if frame[elementName] then
+            frame[elementName]:Hide()
+            frame[elementName]:SetAlpha(0)
+        end
+    end
     
     -- Create a background frame that is parented to the viewer's parent
     -- This ensures it renders completely behind the viewer
