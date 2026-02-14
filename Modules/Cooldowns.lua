@@ -20,6 +20,7 @@ local defaults = {
         scale = 1.0,
         
         -- Colors
+        showBackground = true,
         backgroundColor = {0.05, 0.05, 0.05, 0.9},
         borderColor = {0.2, 0.8, 1.0, 1.0},
         
@@ -168,6 +169,20 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBg:SetAllPoints(frame.midnightBgFrame)
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
         
+        -- Show/hide based on setting
+        if db.showBackground then
+            frame.midnightBg:Show()
+        else
+            frame.midnightBg:Hide()
+        end
+        
+        -- Show/hide based on setting
+        if db.showBackground then
+            frame.midnightBg:Show()
+        else
+            frame.midnightBg:Hide()
+        end
+        
         -- Border textures
         local borderSize = 2
         local r, g, b, a = unpack(db.borderColor)
@@ -315,6 +330,13 @@ function Cooldowns:UpdateColors()
             -- Update background
             if frame.midnightBg then
                 frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
+                
+                -- Show/hide based on setting
+                if db.showBackground then
+                    frame.midnightBg:Show()
+                else
+                    frame.midnightBg:Hide()
+                end
             end
             
             -- Update border (4 sides)
@@ -463,6 +485,20 @@ function Cooldowns:GetOptions()
             
             -- Colors
             headerColors = { type = "header", name = "Colors", order = 30 },
+            
+            showBackground = {
+                name = "Show Background",
+                desc = "Show or hide the background behind the Cooldown Manager.",
+                type = "toggle",
+                order = 30.5,
+                width = "full",
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.showBackground end,
+                set = function(_, v)
+                    self.db.profile.showBackground = v
+                    self:UpdateColors()
+                end
+            },
             
             backgroundColor = {
                 name = "Background Color",
