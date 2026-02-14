@@ -580,11 +580,24 @@ function Cooldowns:UpdateResourceBarWidths()
     -- Match primary bar width if enabled
     if db.matchPrimaryBarWidth and ResourceBars.primaryBar then
         ResourceBars.primaryBar:SetWidth(essentialWidth)
+        ResourceBars.db.profile.primary.width = essentialWidth
     end
     
     -- Match secondary bar width if enabled
     if db.matchSecondaryBarWidth and ResourceBars.secondaryBar then
         ResourceBars.secondaryBar:SetWidth(essentialWidth)
+        ResourceBars.db.profile.secondary.width = essentialWidth
+        
+        -- Recreate segments to redistribute them across the new width
+        if ResourceBars.secondaryBar.segments then
+            for _, segment in ipairs(ResourceBars.secondaryBar.segments) do
+                segment:Hide()
+                segment:SetParent(nil)
+            end
+            wipe(ResourceBars.secondaryBar.segments)
+        end
+        ResourceBars:CreateSecondarySegments()
+        ResourceBars:UpdateSecondaryResourceBar()
     end
 end
 
