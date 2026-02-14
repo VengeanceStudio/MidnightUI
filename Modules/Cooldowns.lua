@@ -287,10 +287,18 @@ function Cooldowns:StyleSingleIcon(icon)
     
     -- Add a simple thin border using a backdrop on a separate frame
     if not icon.midnightBorderFrame then
-        icon.midnightBorderFrame = CreateFrame("Frame", nil, icon:GetParent() or UIParent, "BackdropTemplate")
-        icon.midnightBorderFrame:SetAllPoints(icon)
+        icon.midnightBorderFrame = CreateFrame("Frame", nil, icon, "BackdropTemplate")
+        
+        -- If there's an icon texture, match its size, otherwise use the full frame with slight inset
+        if iconTexture then
+            icon.midnightBorderFrame:SetAllPoints(iconTexture)
+        else
+            icon.midnightBorderFrame:SetPoint("TOPLEFT", icon, "TOPLEFT", 2, -2)
+            icon.midnightBorderFrame:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -2, 2)
+        end
+        
         icon.midnightBorderFrame:SetFrameStrata("LOW")
-        icon.midnightBorderFrame:SetFrameLevel(1)
+        icon.midnightBorderFrame:SetFrameLevel(icon:GetFrameLevel() + 1)
         
         icon.midnightBorderFrame:SetBackdrop({
             edgeFile = "Interface\\Buttons\\WHITE8X8",
