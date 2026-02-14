@@ -42,6 +42,7 @@ local defaults = {
 function Cooldowns:OnInitialize()
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
     self.styledFrames = {}
+    self.hookedLayouts = {}
 end
 
 function Cooldowns:OnDBReady()
@@ -78,55 +79,58 @@ end
 function Cooldowns:FindAndSkinCooldownManager()
     if not self.db.profile.skinCooldownManager then return end
     
-    -- WoW 12.0 Cooldown Manager Frame Structure:
-    -- - CooldownManagerFrame (top-level parent)
-    -- - CooldownManagerEssentialsFrame (rotational abilities)
-    -- - CooldownManagerUtilityFrame (defensives/utility)
-    -- - CooldownManagerTrackedBuffsFrame (offensive buffs/procs)
-    -- - CooldownManagerTrackedBarsFrame (horizontal duration bars)
+    -- WoW 12.0 Cooldown Manager Frame Structure (actual frame names from /fstack):
+    -- - EssentialCooldownViewer (essential/rotational abilities)
+    -- - UtilityCooldownViewer (defensives/utility)
+    -- - BuffIconCooldownViewer (offensive buffs/procs)
     
     local foundFrames = {}
     
-    -- Find the main Cooldown Manager frame
-    local mainFrame = _G["CooldownManagerFrame"]
-    if mainFrame then
-        print("MidnightUI Cooldowns: Found CooldownManagerFrame")
-        self:ApplyCooldownManagerSkin(mainFrame)
-        foundFrames.main = true
-    end
-    
-    -- Find and skin the group frames
-    local groupFrames = {
-        ["CooldownManagerEssentialsFrame"] = "Essential Cooldowns",
-        ["CooldownManagerUtilityFrame"] = "Utility Cooldowns",
-        ["CooldownManagerTrackedBuffsFrame"] = "Tracked Buffs",
-        ["CooldownManagerTrackedBarsFrame"] = "Tracked Bars",
+    -- Find and skin the viewer frames
+    local viewerFrames = {
+        ["EssentialCooldownViewer"] = "Essential Cooldowns",
+        ["UtilityCooldownViewer"] = "Utility Cooldowns",
+        ["BuffIconCooldownViewer"] = "Buff Icon Cooldowns",
     }
     
-    for frameName, groupName in pairs(groupFrames) do
+    for frameName, displayName in pairs(viewerFrames) do
         local frame = _G[frameName]
         if frame then
-            print("MidnightUI Cooldowns: Found", groupName, "("..frameName..")")
+            print("MidnightUI Cooldowns: Found", displayName, "("..frameName..")")
             self:ApplyCooldownManagerSkin(frame)
             foundFrames[frameName] = true
+        else
+            print("MidnightUI Cooldowns:", frameName, "not found")
         end
     end
     
-    -- Hook UpdateLayout if main frame exists
-    if mainFrame and not self.hookedUpdateLayout then
-        if mainFrame.UpdateLayout then
-            hooksecurefunc(mainFrame, "UpdateLayout", function()
-                self:UpdateAllCooldownFrames()
-            end)
-            self.hookedUpdateLayout = true
+    -- Hook UpdateLayout on each viewer if it exists
+    for frameName in pairs(viewerFrames) do
+        local frame = _G[frameName]
+        if frame and not self.hookedLayouts[frameName] then
+            if frame.UpdateLayout then
+                hooksecurefunc(frame, "UpdateLayout", function()
+                    self:StyleCooldownIcons(frame)
+                end)
+                self.hookedLayouts[frameName] = true
+                print("MidnightUI Cooldowns: Hooked UpdateLayout for", frameName)
+            end
+            
+            -- Also hook Update if it exists
+            if frame.Update then
+                hooksecurefunc(frame, "Update", function()
+                    self:StyleCooldownIcons(frame)
+                end)
+                print("MidnightUI Cooldowns: Hooked Update for", frameName)
+            end
         end
     end
     
     if next(foundFrames) then
-        print("MidnightUI Cooldowns: Successfully skinned Cooldown Manager frames")
+        print("MidnightUI Cooldowns: Successfully skinned", #foundFrames, "Cooldown Manager viewer(s)")
         self:UpdateAttachment()
     else
-        print("MidnightUI Cooldowns: Cooldown Manager frames not found. Make sure you have enabled the Cooldown Manager in WoW's Edit Mode.")
+        print("MidnightUI Cooldowns: No Cooldown Manager viewers found. Make sure you have enabled the Cooldown Manager in WoW's Edit Mode.")
     end
 end
 
@@ -328,10 +332,10 @@ function Cooldowns:UpdateAttachment()
     local db = self.db.profile
     local anchor = ResourceBars.primaryBar
     
-    -- Find the main Cooldown Manager frame to attach
-    local mainFrame = _G["CooldownManagerFrame"]
+    -- Find the Essential Cooldown Viewer to attach (main one)
+    local mainFrame = _G["EssentialCooldownViewer"]
     if not mainFrame then
-        print("MidnightUI Cooldowns: CooldownManagerFrame not found for attachment")
+        print("MidnightUI Cooldowns: EssentialCooldownViewer not found for attachment")
         return
     end
     
@@ -348,7 +352,7 @@ function Cooldowns:UpdateAttachment()
         mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
     end
     
-    print("MidnightUI Cooldowns: Attached CooldownManagerFrame to ResourceBar at", db.attachPosition)
+    print("MidnightUI Cooldowns: Attached EssentialCooldownViewer to ResourceBar at", db.attachPosition)
 end
 
 -- -----------------------------------------------------------------------------
