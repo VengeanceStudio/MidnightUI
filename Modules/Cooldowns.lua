@@ -335,42 +335,11 @@ function Cooldowns:StyleSingleIcon(icon)
         iconTexture = iconTexture.Icon or iconTexture.icon or iconTexture.texture
     end
     
-    -- Always reapply these settings even if already styled
+    -- Apply texture coordinate cropping to cut off rounded corners
+    -- Don't hide masks as they may be required for icons to display
     if iconTexture and iconTexture.GetObjectType and iconTexture:GetObjectType() == "Texture" then
-        -- Make sure the icon is visible
-        iconTexture:Show()
-        iconTexture:SetAlpha(1)
-        
-        -- Use cropped texture coordinates to cut off rounded corners
         if iconTexture.SetTexCoord then
-            iconTexture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-        end
-        
-        -- Try to disable any atlas-based masking
-        if iconTexture.SetAtlas then
-            iconTexture:SetAtlas(nil)
-        end
-    end
-    
-    -- Only hide MaskTexture objects, not frames or regular textures
-    for i = 1, icon:GetNumRegions() do
-        local region = select(i, icon:GetRegions())
-        if region and region.GetObjectType and region:GetObjectType() == "MaskTexture" then
-            region:Hide()
-            region:SetAlpha(0)
-        end
-    end
-    
-    -- Check children for MaskTexture objects only
-    for _, child in pairs({icon:GetChildren()}) do
-        if child.GetRegions then
-            for i = 1, select('#', child:GetRegions()) do
-                local region = select(i, child:GetRegions())
-                if region and region.GetObjectType and region:GetObjectType() == "MaskTexture" then
-                    region:Hide()
-                    region:SetAlpha(0)
-                end
-            end
+            iconTexture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
         end
     end
     
