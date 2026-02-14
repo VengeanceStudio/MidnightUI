@@ -180,30 +180,27 @@ function Cooldowns:FindAndSkinCooldownManager()
                     if frameName == "EssentialCooldownViewer" then
                         Cooldowns:UpdateResourceBarWidths()
                     end
-                    -- Reapply positioning after layout updates
-                    C_Timer.After(0.1, function()
-                        Cooldowns:UpdateAttachment()
-                    end)
+                    -- Reapply positioning directly instead of creating timer
+                    if not Cooldowns.updateAttachmentPending then
+                        Cooldowns.updateAttachmentPending = true
+                        C_Timer.After(0.1, function()
+                            Cooldowns:UpdateAttachment()
+                            Cooldowns.updateAttachmentPending = false
+                        end)
+                    end
                 end)
                 self.hookedLayouts[frameName] = true
             end
             
-            -- Also hook Update if it exists
+            -- Also hook Update if it exists (throttled to 0.5s)
             if frame.Update then
                 hooksecurefunc(frame, "Update", function()
-                    Cooldowns:StyleCooldownIcons(frame)
-                end)
-            end
-            
-            -- Add periodic refresh to maintain square icons
-            if not frame.midnightRefreshTimer then
-                -- Store function reference to avoid creating new closures
-                local refreshFunc = function()
-                    if frame and frame:IsShown() then
+                    local now = GetTime()
+                    if now - Cooldowns.lastStyleUpdate > 0.5 then
                         Cooldowns:StyleCooldownIcons(frame)
+                        Cooldowns.lastStyleUpdate = now
                     end
-                end
-                frame.midnightRefreshTimer = C_Timer.NewTicker(2, refreshFunc)
+                end)
             end
         end
     end
@@ -317,6 +314,25 @@ function Cooldowns:StyleCooldownIcons(parent)
     if not parent then return end
     
     local db = self.db.profile
+    
+    -- Limit how many icons we track to prevent unbounded table growth
+    local MAX_TRACKED_ICONS = 200
+    local iconCount = 0
+    for _ in pairs(self.styledIcons) do
+        iconCount = iconCount + 1
+    end
+    
+    -- Clear old entries if we exceed limit
+    if iconCount > MAX_TRACKED_ICONS then
+        -- Keep only icons that still exist
+        local newTable = {}
+        for icon, _ in pairs(self.styledIcons) do
+            if icon and icon:IsShown() then
+                newTable[icon] = true
+            end
+        end
+        self.styledIcons = newTable
+    end
     
     -- Look for icon template instances
     if parent.icons then
