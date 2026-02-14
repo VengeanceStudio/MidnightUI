@@ -147,7 +147,9 @@ function CastBar:SetupCastBar()
     -- Spell icon
     if db.showIcon then
         local iconFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-        iconFrame:SetSize(db.iconSize, db.iconSize)
+        -- Icon size matches bar height for a square appearance
+        local iconSize = db.height
+        iconFrame:SetSize(iconSize, iconSize)
         
         if db.iconPosition == "LEFT" then
             iconFrame:SetPoint("RIGHT", frame, "LEFT", -4, 0)
@@ -577,7 +579,9 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.width end,
                 set = function(_, v)
                     self.db.profile.width = v
-                    ReloadUI()
+                    if self.castBar then
+                        self.castBar:SetWidth(v)
+                    end
                 end
             },
             height = {
@@ -590,7 +594,13 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.height end,
                 set = function(_, v)
                     self.db.profile.height = v
-                    ReloadUI()
+                    if self.castBar then
+                        self.castBar:SetHeight(v)
+                        -- Resize icon to match new bar height
+                        if self.castBar.icon then
+                            self.castBar.icon:SetSize(v, v)
+                        end
+                    end
                 end
             },
             
@@ -602,7 +612,11 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.showIcon end,
                 set = function(_, v)
                     self.db.profile.showIcon = v
-                    ReloadUI()
+                    if self.castBar then
+                        self.castBar:Hide()
+                        self.castBar = nil
+                        self:SetupCastBar()
+                    end
                 end
             },
             iconPosition = {
@@ -617,7 +631,11 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.iconPosition end,
                 set = function(_, v)
                     self.db.profile.iconPosition = v
-                    ReloadUI()
+                    if self.castBar then
+                        self.castBar:Hide()
+                        self.castBar = nil
+                        self:SetupCastBar()
+                    end
                 end
             },
             showLatency = {
@@ -628,7 +646,7 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.showLatency end,
                 set = function(_, v)
                     self.db.profile.showLatency = v
-                    ReloadUI()
+                    -- Setting saved, will apply on next cast
                 end
             },
             showShieldBorder = {
@@ -639,7 +657,7 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.showShieldBorder end,
                 set = function(_, v)
                     self.db.profile.showShieldBorder = v
-                    ReloadUI()
+                    -- Setting saved, will apply on next cast
                 end
             },
             
@@ -651,7 +669,13 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.showSpellName end,
                 set = function(_, v)
                     self.db.profile.showSpellName = v
-                    ReloadUI()
+                    if self.castBar and self.castBar.spellName then
+                        if v then
+                            self.castBar.spellName:Show()
+                        else
+                            self.castBar.spellName:Hide()
+                        end
+                    end
                 end
             },
             showCastTime = {
@@ -661,7 +685,13 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.showCastTime end,
                 set = function(_, v)
                     self.db.profile.showCastTime = v
-                    ReloadUI()
+                    if self.castBar and self.castBar.castTime then
+                        if v then
+                            self.castBar.castTime:Show()
+                        else
+                            self.castBar.castTime:Hide()
+                        end
+                    end
                 end
             },
             font = {
@@ -673,7 +703,11 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.font end,
                 set = function(_, v)
                     self.db.profile.font = v
-                    ReloadUI()
+                    if self.castBar then
+                        self.castBar:Hide()
+                        self.castBar = nil
+                        self:SetupCastBar()
+                    end
                 end
             },
             fontSize = {
@@ -686,7 +720,15 @@ function CastBar:GetOptions()
                 get = function() return self.db.profile.fontSize end,
                 set = function(_, v)
                     self.db.profile.fontSize = v
-                    ReloadUI()
+                    if self.castBar then
+                        local font = LSM:Fetch("font", self.db.profile.font)
+                        if self.castBar.spellName then
+                            self.castBar.spellName:SetFont(font, v, self.db.profile.fontOutline)
+                        end
+                        if self.castBar.castTime then
+                            self.castBar.castTime:SetFont(font, v, self.db.profile.fontOutline)
+                        end
+                    end
                 end
             },
             
