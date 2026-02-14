@@ -535,8 +535,11 @@ function Tooltips:OnTooltipSetUnit(tooltip)
         
         -- Class coloring for player names
         if self.db.profile.classColor and classColor then
-            tooltip:ClearLines()
-            tooltip:AddLine(name, classColor.r, classColor.g, classColor.b)
+            -- Modify the first line's color instead of clearing and re-adding
+            local textLeft1 = _G[tooltip:GetName().."TextLeft1"]
+            if textLeft1 then
+                textLeft1:SetTextColor(classColor.r, classColor.g, classColor.b)
+            end
         end
     end
     
