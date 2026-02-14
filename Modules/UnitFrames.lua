@@ -448,7 +448,11 @@ local function GetTagValue(tagName, unit)
             end
             
             if ok and pct ~= nil then
-                -- Return the raw value directly (SetText handles secret values)
+                -- Floor to whole number for clean display
+                local pctNum = tonumber(pct)
+                if pctNum and type(pctNum) == "number" then
+                    return tostring(math.floor(pctNum))
+                end
                 return pct
             end
         end
