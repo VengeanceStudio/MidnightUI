@@ -26,7 +26,7 @@ local defaults = {
         borderColor = {0.2, 0.8, 1.0, 1.0},
         
         -- Font
-        font = "Expressway",
+        font = "Friz Quadrata TT",
         fontSize = 14,
         fontFlag = "OUTLINE",
         
@@ -603,7 +603,7 @@ function Cooldowns:GetOptions()
                     return out
                 end,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
-                get = function() return self.db.profile.font end,
+                get = function() return self.db.profile.font or "Friz Quadrata TT" end,
                 set = function(_, v)
                     self.db.profile.font = v
                     -- Font changes would require frame recreation
