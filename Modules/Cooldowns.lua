@@ -263,44 +263,18 @@ function Cooldowns:StyleSingleIcon(icon)
         iconTexture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     end
     
-    -- Add border using 4 separate strips (so it doesn't cover the icon)
-    if not icon.midnightBorderTop then
-        local borderSize = 1
-        local r, g, b, a = unpack(db.borderColor)
-        
-        -- Create borders on a separate overlay frame
-        icon.midnightBorderFrame = CreateFrame("Frame", nil, icon:GetParent() or UIParent)
+    -- Add a simple thin border using a backdrop on a separate frame
+    if not icon.midnightBorderFrame then
+        icon.midnightBorderFrame = CreateFrame("Frame", nil, icon:GetParent() or UIParent, "BackdropTemplate")
         icon.midnightBorderFrame:SetAllPoints(icon)
         icon.midnightBorderFrame:SetFrameStrata("LOW")
         icon.midnightBorderFrame:SetFrameLevel(1)
         
-        icon.midnightBorderTop = icon.midnightBorderFrame:CreateTexture(nil, "BACKGROUND")
-        icon.midnightBorderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
-        icon.midnightBorderTop:SetColorTexture(r, g, b, a)
-        icon.midnightBorderTop:SetPoint("TOPLEFT", icon, "TOPLEFT", -borderSize, borderSize)
-        icon.midnightBorderTop:SetPoint("TOPRIGHT", icon, "TOPRIGHT", borderSize, borderSize)
-        icon.midnightBorderTop:SetHeight(borderSize)
-        
-        icon.midnightBorderBottom = icon.midnightBorderFrame:CreateTexture(nil, "BACKGROUND")
-        icon.midnightBorderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
-        icon.midnightBorderBottom:SetColorTexture(r, g, b, a)
-        icon.midnightBorderBottom:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", -borderSize, -borderSize)
-        icon.midnightBorderBottom:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", borderSize, -borderSize)
-        icon.midnightBorderBottom:SetHeight(borderSize)
-        
-        icon.midnightBorderLeft = icon.midnightBorderFrame:CreateTexture(nil, "BACKGROUND")
-        icon.midnightBorderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
-        icon.midnightBorderLeft:SetColorTexture(r, g, b, a)
-        icon.midnightBorderLeft:SetPoint("TOPLEFT", icon, "TOPLEFT", -borderSize, borderSize)
-        icon.midnightBorderLeft:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", -borderSize, -borderSize)
-        icon.midnightBorderLeft:SetWidth(borderSize)
-        
-        icon.midnightBorderRight = icon.midnightBorderFrame:CreateTexture(nil, "BACKGROUND")
-        icon.midnightBorderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
-        icon.midnightBorderRight:SetColorTexture(r, g, b, a)
-        icon.midnightBorderRight:SetPoint("TOPRIGHT", icon, "TOPRIGHT", borderSize, borderSize)
-        icon.midnightBorderRight:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", borderSize, -borderSize)
-        icon.midnightBorderRight:SetWidth(borderSize)
+        icon.midnightBorderFrame:SetBackdrop({
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 1,
+        })
+        icon.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
     end
     
     -- Style cooldown text if it exists
@@ -362,16 +336,12 @@ function Cooldowns:UpdateIconBorders(parent)
     if not parent then return end
     
     local db = self.db.profile
-    local r, g, b, a = unpack(db.borderColor)
     
     -- Update icon borders in icons table
     if parent.icons then
         for _, icon in pairs(parent.icons) do
-            if icon and icon.midnightBorderTop then
-                icon.midnightBorderTop:SetColorTexture(r, g, b, a)
-                icon.midnightBorderBottom:SetColorTexture(r, g, b, a)
-                icon.midnightBorderLeft:SetColorTexture(r, g, b, a)
-                icon.midnightBorderRight:SetColorTexture(r, g, b, a)
+            if icon and icon.midnightBorderFrame then
+                icon.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
             end
         end
     end
@@ -379,11 +349,8 @@ function Cooldowns:UpdateIconBorders(parent)
     -- Update child borders
     if parent.GetChildren then
         for _, child in ipairs({parent:GetChildren()}) do
-            if child and child.midnightBorderTop then
-                child.midnightBorderTop:SetColorTexture(r, g, b, a)
-                child.midnightBorderBottom:SetColorTexture(r, g, b, a)
-                child.midnightBorderLeft:SetColorTexture(r, g, b, a)
-                child.midnightBorderRight:SetColorTexture(r, g, b, a)
+            if child and child.midnightBorderFrame then
+                child.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
             end
             
             if child.GetChildren then
