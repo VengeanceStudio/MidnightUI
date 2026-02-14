@@ -117,6 +117,7 @@ function Cooldowns:FindAndSkinCooldownManager()
         ["EssentialCooldownViewer"] = "Essential Cooldowns",
         ["UtilityCooldownViewer"] = "Utility Cooldowns",
         ["BuffIconCooldownViewer"] = "Buff Icon Cooldowns",
+        ["BuffBarCooldownViewer"] = "Buff Bar Cooldowns",
     }
     
     for frameName, displayName in pairs(viewerFrames) do
@@ -169,7 +170,9 @@ function Cooldowns:FindAndSkinCooldownManager()
     end
     
     if next(foundFrames) then
-        print("MidnightUI Cooldowns: Successfully skinned", #foundFrames, "Cooldown Manager viewer(s)")
+        local count = 0
+        for _ in pairs(foundFrames) do count = count + 1 end
+        print("MidnightUI Cooldowns: Successfully skinned", count, "Cooldown Manager viewer(s)")
         self:UpdateAttachment()
     else
         print("MidnightUI Cooldowns: No Cooldown Manager viewers found.")
