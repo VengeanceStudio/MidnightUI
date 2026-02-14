@@ -321,9 +321,10 @@ function Cooldowns:StyleSingleIcon(icon)
     local iconTexture = icon.icon or icon.Icon or icon.texture
     
     if iconTexture then
-        -- Use full square texture coordinates for perfectly square icons
+        -- Crop edges to remove rounded corners and zoom in slightly
+        -- This cuts off about 7% from each edge, making the icon perfectly square
         if iconTexture.SetTexCoord then
-            iconTexture:SetTexCoord(0, 1, 0, 1)
+            iconTexture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
         end
         
         -- Force the texture to fill the entire frame
@@ -345,13 +346,8 @@ function Cooldowns:StyleSingleIcon(icon)
     if not icon.midnightBorderFrame then
         icon.midnightBorderFrame = CreateFrame("Frame", nil, icon, "BackdropTemplate")
         
-        -- If there's an icon texture, match its size, otherwise use the full frame with slight inset
-        if iconTexture then
-            icon.midnightBorderFrame:SetAllPoints(iconTexture)
-        else
-            icon.midnightBorderFrame:SetPoint("TOPLEFT", icon, "TOPLEFT", 2, -2)
-            icon.midnightBorderFrame:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -2, 2)
-        end
+        -- Match the icon size exactly for tight border
+        icon.midnightBorderFrame:SetAllPoints(icon)
         
         icon.midnightBorderFrame:SetFrameStrata("MEDIUM")
         icon.midnightBorderFrame:SetFrameLevel(icon:GetFrameLevel() + 5)
