@@ -202,10 +202,13 @@ function ResourceBars:UpdatePrimaryResourceBar()
     
     -- Get power type and values
     local powerType = UnitPowerType("player")
-    local current = UnitPower("player", powerType) or 0
-    local maximum = UnitPowerMax("player", powerType) or 100
+    local current = UnitPower("player", powerType)
+    local maximum = UnitPowerMax("player", powerType)
     
-    -- Update bar
+    -- Safety check - if values aren't ready yet, skip update
+    if not current or not maximum then return end
+    
+    -- Update bar (safe to use secrets with SetValue/SetMinMaxValues)
     statusBar:SetMinMaxValues(0, maximum)
     statusBar:SetValue(current)
     
@@ -220,12 +223,14 @@ function ResourceBars:UpdatePrimaryResourceBar()
         end
     end
     
-    -- Update text
+    -- Update text - use safe percentage API instead of math
     if db.showText and statusBar.text then
+        local percentage = UnitPowerPercent("player", powerType) or 0
         local text = db.textFormat
+        -- For text display, convert to string (safe operation)
         text = text:gsub("%[curpp%]", tostring(current))
         text = text:gsub("%[maxpp%]", tostring(maximum))
-        text = text:gsub("%[perpp%]", tostring(maximum > 0 and math.floor((current / maximum) * 100) or 0))
+        text = text:gsub("%[perpp%]", tostring(math.floor(percentage)))
         statusBar.text:SetText(text)
     end
 end
