@@ -202,8 +202,8 @@ function ResourceBars:UpdatePrimaryResourceBar()
     
     -- Get power type and values
     local powerType = UnitPowerType("player")
-    local current = UnitPower("player", powerType)
-    local maximum = UnitPowerMax("player", powerType)
+    local current = UnitPower("player", powerType) or 0
+    local maximum = UnitPowerMax("player", powerType) or 100
     
     -- Update bar
     statusBar:SetMinMaxValues(0, maximum)
