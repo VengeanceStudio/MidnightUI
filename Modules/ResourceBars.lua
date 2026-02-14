@@ -264,10 +264,13 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
         if db.showPercentage then
-            -- Use UnitPowerFraction which returns 0-1, multiply by 100 for percentage
-            local fraction = UnitPowerFraction("player", powerType) or 0
-            local percentage = math.floor(fraction * 100)
-            statusBar.text:SetText(percentage .. "%")
+            -- Calculate percentage manually with nil check
+            if current and maximum and maximum > 0 then
+                local percentage = math.floor((current / maximum) * 100)
+                statusBar.text:SetText(percentage .. "%")
+            else
+                statusBar.text:SetText("-%")
+            end
         else
             -- Show current / max values
             statusBar.text:SetText(current .. " / " .. maximum)
