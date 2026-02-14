@@ -142,28 +142,24 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetScale(db.scale)
     end
     
-    -- Create backdrop if frame supports it
-    if frame.SetBackdrop then
-        frame:SetBackdrop({
-            bgFile = "Interface\\Buttons\\WHITE8X8",
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            tile = false,
-            edgeSize = 2,
-            insets = { left = 2, right = 2, top = 2, bottom = 2 }
-        })
-        frame:SetBackdropColor(unpack(db.backgroundColor))
-        frame:SetBackdropBorderColor(unpack(db.borderColor))
-    elseif not frame.midnightBg then
-        -- Create background texture if no backdrop support
-        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND")
+    -- Always use texture method for more reliable styling
+    if not frame.midnightBg then
+        -- Create background texture
+        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
         frame.midnightBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-        frame.midnightBg:SetAllPoints(frame)
+        frame.midnightBg:SetPoint("TOPLEFT", frame, "TOPLEFT", -5, 5)
+        frame.midnightBg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5, -5)
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
         
-        frame.midnightBorder = frame:CreateTexture(nil, "BORDER")
+        -- Create border texture
+        frame.midnightBorder = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
         frame.midnightBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
-        frame.midnightBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", -2, 2)
-        frame.midnightBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 2, -2)
+        frame.midnightBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", -7, 7)
+        frame.midnightBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 7, -7)
+        frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
+    else
+        -- Update existing textures
+        frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
         frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
     end
     
@@ -265,16 +261,12 @@ function Cooldowns:UpdateColors()
     -- Update all styled frames
     for frame in pairs(self.styledFrames) do
         if frame and frame:IsShown() then
-            -- Update backdrop colors
-            if frame.SetBackdropColor then
-                frame:SetBackdropColor(unpack(db.backgroundColor))
-            elseif frame.midnightBg then
+            -- Update textures
+            if frame.midnightBg then
                 frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
             end
             
-            if frame.SetBackdropBorderColor then
-                frame.SetBackdropBorderColor(unpack(db.borderColor))
-            elseif frame.midnightBorder then
+            if frame.midnightBorder then
                 frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
             end
             
@@ -282,6 +274,9 @@ function Cooldowns:UpdateColors()
             self:UpdateIconBorders(frame)
         end
     end
+    
+    -- Force update immediately
+    self:FindAndSkinCooldownManager()
 end
 
 function Cooldowns:UpdateIconBorders(parent)
