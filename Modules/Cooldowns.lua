@@ -152,15 +152,18 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetScale(db.scale)
     end
     
-    -- Create a background frame that sits BEHIND everything
+    -- Create a background frame that is parented to the viewer's parent
+    -- This ensures it renders completely behind the viewer
     if not frame.midnightBgFrame then
-        frame.midnightBgFrame = CreateFrame("Frame", nil, frame)
+        local parent = frame:GetParent() or UIParent
+        
+        frame.midnightBgFrame = CreateFrame("Frame", nil, parent)
         frame.midnightBgFrame:SetAllPoints(frame)
-        frame.midnightBgFrame:SetFrameLevel(frame:GetFrameLevel() - 1)
-        frame.midnightBgFrame:SetFrameStrata(frame:GetFrameStrata())
+        frame.midnightBgFrame:SetFrameStrata("BACKGROUND")
+        frame.midnightBgFrame:SetFrameLevel(1)
         
         -- Background texture
-        frame.midnightBg = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -8)
+        frame.midnightBg = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND")
         frame.midnightBg:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBg:SetAllPoints(frame.midnightBgFrame)
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
@@ -169,33 +172,40 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         local borderSize = 2
         local r, g, b, a = unpack(db.borderColor)
         
-        frame.midnightBorderTop = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
+        frame.midnightBorderTop = frame.midnightBgFrame:CreateTexture(nil, "ARTWORK")
         frame.midnightBorderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderTop:SetColorTexture(r, g, b, a)
         frame.midnightBorderTop:SetPoint("TOPLEFT", frame.midnightBgFrame, "TOPLEFT", 0, 0)
         frame.midnightBorderTop:SetPoint("TOPRIGHT", frame.midnightBgFrame, "TOPRIGHT", 0, 0)
         frame.midnightBorderTop:SetHeight(borderSize)
         
-        frame.midnightBorderBottom = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
+        frame.midnightBorderBottom = frame.midnightBgFrame:CreateTexture(nil, "ARTWORK")
         frame.midnightBorderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderBottom:SetColorTexture(r, g, b, a)
         frame.midnightBorderBottom:SetPoint("BOTTOMLEFT", frame.midnightBgFrame, "BOTTOMLEFT", 0, 0)
         frame.midnightBorderBottom:SetPoint("BOTTOMRIGHT", frame.midnightBgFrame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderBottom:SetHeight(borderSize)
         
-        frame.midnightBorderLeft = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
+        frame.midnightBorderLeft = frame.midnightBgFrame:CreateTexture(nil, "ARTWORK")
         frame.midnightBorderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderLeft:SetColorTexture(r, g, b, a)
         frame.midnightBorderLeft:SetPoint("TOPLEFT", frame.midnightBgFrame, "TOPLEFT", 0, 0)
         frame.midnightBorderLeft:SetPoint("BOTTOMLEFT", frame.midnightBgFrame, "BOTTOMLEFT", 0, 0)
         frame.midnightBorderLeft:SetWidth(borderSize)
         
-        frame.midnightBorderRight = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
+        frame.midnightBorderRight = frame.midnightBgFrame:CreateTexture(nil, "ARTWORK")
         frame.midnightBorderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderRight:SetColorTexture(r, g, b, a)
         frame.midnightBorderRight:SetPoint("TOPRIGHT", frame.midnightBgFrame, "TOPRIGHT", 0, 0)
         frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame.midnightBgFrame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderRight:SetWidth(borderSize)
+        
+        -- Make sure the background frame updates position if the viewer moves
+        frame:HookScript("OnUpdate", function()
+            if frame.midnightBgFrame then
+                frame.midnightBgFrame:SetAllPoints(frame)
+            end
+        end)
     else
         -- Update existing colors
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
