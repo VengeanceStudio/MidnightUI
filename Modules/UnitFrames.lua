@@ -2772,7 +2772,17 @@ end
 
 
                 function UnitFrames:PLAYER_TARGET_CHANGED()
-                    if self.db.profile.showTarget then self:UpdateUnitFrame("TargetFrame", "target") end
+                    if self.db.profile.showTarget then 
+                        -- Force show target frame if target exists (fixes self-targeting after login)
+                        local targetFrame = _G["MidnightUI_TargetFrame"]
+                        if targetFrame and UnitExists("target") then
+                            targetFrame:Show()
+                            if targetFrame.healthBar then targetFrame.healthBar:Show() end
+                            if targetFrame.powerBar then targetFrame.powerBar:Show() end
+                            if targetFrame.infoBar then targetFrame.infoBar:Show() end
+                        end
+                        self:UpdateUnitFrame("TargetFrame", "target")
+                    end
                     if self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
                     if self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
                 end
