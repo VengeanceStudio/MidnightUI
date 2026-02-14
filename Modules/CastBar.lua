@@ -84,7 +84,12 @@ end
 
 function CastBar:PLAYER_ENTERING_WORLD()
     C_Timer.After(0.5, function()
-        self:SetupCastBar()
+        if self.db and self.db.profile then
+            print("|cff00ccffMidnightUI CastBar:|r Setting up cast bar...")
+            self:SetupCastBar()
+        else
+            print("|cffff0000MidnightUI CastBar:|r Database not ready!")
+        end
     end)
 end
 
@@ -93,6 +98,8 @@ end
 -- -----------------------------------------------------------------------------
 function CastBar:SetupCastBar()
     if self.castBar then return end
+    
+    print("|cff00ccffMidnightUI CastBar:|r Creating cast bar frame...")
     
     local db = self.db.profile
     

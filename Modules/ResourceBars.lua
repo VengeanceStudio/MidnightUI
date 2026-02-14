@@ -100,8 +100,13 @@ end
 
 function ResourceBars:PLAYER_ENTERING_WORLD()
     C_Timer.After(0.5, function()
-        self:SetupPrimaryResourceBar()
-        self:SetupSecondaryResourceBar()
+        if self.db and self.db.profile then
+            print("|cff00ccffMidnightUI ResourceBars:|r Setting up bars...")
+            self:SetupPrimaryResourceBar()
+            self:SetupSecondaryResourceBar()
+        else
+            print("|cffff0000MidnightUI ResourceBars:|r Database not ready!")
+        end
     end)
 end
 
@@ -109,12 +114,17 @@ end
 -- PRIMARY RESOURCE BAR (Mana, Energy, Rage, Focus, etc.)
 -- -----------------------------------------------------------------------------
 function ResourceBars:SetupPrimaryResourceBar()
-    if not self.db.profile.primary.enabled then return end
+    if not self.db.profile.primary.enabled then 
+        print("|cff00ccffMidnightUI ResourceBars:|r Primary bar disabled in settings")
+        return 
+    end
     
     if self.primaryBar then
         self:UpdatePrimaryResourceBar()
         return
     end
+    
+    print("|cff00ccffMidnightUI ResourceBars:|r Creating primary resource bar...")
     
     local db = self.db.profile.primary
     
@@ -160,6 +170,9 @@ function ResourceBars:SetupPrimaryResourceBar()
     
     frame.statusBar = statusBar
     self.primaryBar = frame
+    
+    print("|cff00ccffMidnightUI ResourceBars:|r Primary bar created and shown at " .. db.point)
+    frame:Show()
     
     -- Setup dragging
     self:SetupDragging(frame, "primary")
@@ -208,7 +221,10 @@ end
 -- SECONDARY RESOURCE BAR (Holy Power, Chi, Runes, Combo Points, etc.)
 -- -----------------------------------------------------------------------------
 function ResourceBars:SetupSecondaryResourceBar()
-    if not self.db.profile.secondary.enabled then return end
+    if not self.db.profile.secondary.enabled then 
+        print("|cff00ccffMidnightUI ResourceBars:|r Secondary bar disabled in settings")
+        return 
+    end
     
     -- Check if player class uses a secondary resource
     local _, class = UnitClass("player")
