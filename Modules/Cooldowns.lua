@@ -166,6 +166,10 @@ function Cooldowns:FindAndSkinCooldownManager()
                     if frameName == "EssentialCooldownViewer" then
                         self:UpdateResourceBarWidths()
                     end
+                    -- Reapply positioning after layout updates
+                    C_Timer.After(0.1, function()
+                        self:UpdateAttachment()
+                    end)
                 end)
                 self.hookedLayouts[frameName] = true
             end
@@ -175,6 +179,19 @@ function Cooldowns:FindAndSkinCooldownManager()
                 hooksecurefunc(frame, "Update", function()
                     self:StyleCooldownIcons(frame)
                 end)
+            end
+            
+            -- Hook SetPoint to intercept Edit Mode repositioning
+            if not frame.midnightHookedSetPoint then
+                hooksecurefunc(frame, "SetPoint", function(self)
+                    -- If we're attached to resource bar, reapply our positioning after a brief delay
+                    if Cooldowns.db.profile.attachToResourceBar then
+                        C_Timer.After(0.05, function()
+                            Cooldowns:UpdateAttachment()
+                        end)
+                    end
+                end)
+                frame.midnightHookedSetPoint = true
             end
             
             -- Add periodic refresh to maintain square icons
