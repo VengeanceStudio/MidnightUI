@@ -626,6 +626,39 @@ function Cooldowns:UpdateAttachment()
         mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
     end
     
+    -- Update Edit Mode's saved position to match our positioning
+    C_Timer.After(0, function()
+        if EditModeManagerFrame and mainFrame then
+            local point, relativeTo, relativePoint, x, y = mainFrame:GetPoint()
+            
+            -- Try to update the Edit Mode system
+            if mainFrame.system then
+                pcall(function()
+                    if mainFrame.system.SetPoint then
+                        mainFrame.system:SetPoint(point, relativeTo, relativePoint, x, y)
+                    end
+                    
+                    -- Update saved layout data
+                    if EditModeManagerFrame.GetActiveLayout then
+                        local layout = EditModeManagerFrame:GetActiveLayout()
+                        if layout and mainFrame.system.systemIndex then
+                            local systemInfo = layout:GetSystemInfo(mainFrame.system.systemIndex)
+                            if systemInfo then
+                                systemInfo.anchorInfo = {
+                                    point = point,
+                                    relativeTo = relativeTo and relativeTo:GetName() or "UIParent",
+                                    relativePoint = relativePoint,
+                                    offsetX = x,
+                                    offsetY = y
+                                }
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+    
     -- Update frame grouping if enabled
     self:UpdateFrameGrouping()
     
