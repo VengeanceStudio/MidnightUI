@@ -223,9 +223,9 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text
     if db.showText and statusBar.text then
         local text = db.textFormat
-        text = text:gsub("%[curpp%]", current)
-        text = text:gsub("%[maxpp%]", maximum)
-        text = text:gsub("%[perpp%]", maximum > 0 and math.floor((current / maximum) * 100) or 0)
+        text = text:gsub("%[curpp%]", tostring(current))
+        text = text:gsub("%[maxpp%]", tostring(maximum))
+        text = text:gsub("%[perpp%]", tostring(maximum > 0 and math.floor((current / maximum) * 100) or 0))
         statusBar.text:SetText(text)
     end
 end
