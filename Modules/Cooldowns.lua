@@ -320,9 +320,30 @@ function Cooldowns:StyleSingleIcon(icon)
     -- Find the icon texture
     local iconTexture = icon.icon or icon.Icon or icon.texture
     
-    if iconTexture and iconTexture.SetTexCoord then
+    if iconTexture then
+        -- Remove any circular mask
+        if iconTexture.SetMask then
+            iconTexture:SetMask(nil)
+        end
+        
         -- Use full square texture coordinates for perfectly square icons
-        iconTexture:SetTexCoord(0, 1, 0, 1)
+        if iconTexture.SetTexCoord then
+            iconTexture:SetTexCoord(0, 1, 0, 1)
+        end
+        
+        -- Force the texture to fill the entire frame
+        iconTexture:ClearAllPoints()
+        iconTexture:SetAllPoints(icon)
+    end
+    
+    -- Remove circular mask from the icon frame itself
+    if icon.SetMask then
+        icon:SetMask(nil)
+    end
+    
+    -- Check for and remove IconMask if it exists
+    if icon.IconMask then
+        icon.IconMask:Hide()
     end
     
     -- Add a simple thin border using a backdrop on a separate frame
