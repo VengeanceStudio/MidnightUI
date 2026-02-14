@@ -239,32 +239,19 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     -- Other frames (Essential, Utility, BuffIcon) need their icons visible
     local frameName = frame:GetName()
     if frameName == "BuffBarCooldownViewer" then
-        -- Function to strip styling from tracked bar frames
-        local function StripTextures(f)
+        -- Function to strip ONLY border/background styling, preserve bar fills
+        local function StripBorders(f)
             -- Hide NineSlice
             if f.NineSlice then
                 f.NineSlice:Hide()
                 f.NineSlice:SetAlpha(0)
             end
             
-            -- Hide all texture regions except icons
-            for i = 1, f:GetNumRegions() do
-                local region = select(i, f:GetRegions())
-                if region and region:GetObjectType() == "Texture" then
-                    local regionName = region:GetName()
-                    -- Don't hide textures with "icon" in name, or that are cooldown swipes
-                    if not regionName or (not regionName:lower():find("icon") and not regionName:lower():find("cooldown")) then
-                        region:Hide()
-                        region:SetAlpha(0)
-                    end
-                end
-            end
-            
-            -- Hide common named elements
+            -- Hide only specific named border elements, NOT all textures
             local elementsToHide = {
-                "Background", "Bg", "Border", "NineSlice", "TopEdge", "BottomEdge",
+                "Background", "Bg", "Border", "TopEdge", "BottomEdge",
                 "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
-                "BottomLeftCorner", "BottomRightCorner", "Center"
+                "BottomLeftCorner", "BottomRightCorner"
             }
             for _, elementName in ipairs(elementsToHide) do
                 if f[elementName] then
@@ -274,16 +261,12 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
             end
         end
         
-        -- Strip textures from main frame
-        StripTextures(frame)
+        -- Strip borders from main frame
+        StripBorders(frame)
         
-        -- Strip textures from all children (where the bars actually are)
+        -- Strip borders from children
         for _, child in ipairs({frame:GetChildren()}) do
-            StripTextures(child)
-            -- Also strip from grandchildren
-            for _, grandchild in ipairs({child:GetChildren()}) do
-                StripTextures(grandchild)
-            end
+            StripBorders(child)
         end
     else
         -- For other frames, only hide NineSlice
