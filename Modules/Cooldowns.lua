@@ -321,8 +321,8 @@ function Cooldowns:StyleSingleIcon(icon)
     local iconTexture = icon.icon or icon.Icon or icon.texture
     
     if iconTexture and iconTexture.SetTexCoord then
-        -- Crop the icon
-        iconTexture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        -- Use full square texture coordinates for perfectly square icons
+        iconTexture:SetTexCoord(0, 1, 0, 1)
     end
     
     -- Add a simple thin border using a backdrop on a separate frame
