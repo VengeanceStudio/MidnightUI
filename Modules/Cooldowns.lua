@@ -82,6 +82,11 @@ function Cooldowns:OnInitialize()
     self.styledFrames = {}
     self.hookedLayouts = {}
     self.styledIcons = {}
+    
+    -- Throttle flags to prevent memory leaks
+    self.updateAttachmentPending = false
+    self.editModeUpdatePending = false
+    self.lastStyleUpdate = 0
 end
 
 function Cooldowns:OnDBReady()
@@ -133,15 +138,19 @@ function Cooldowns:ADDON_LOADED(event, addonName)
 end
 
 function Cooldowns:EDIT_MODE_LAYOUTS_UPDATED()
+    -- Throttle this event to prevent repeated calls
+    if self.editModeUpdatePending then return end
+    self.editModeUpdatePending = true
+    
     -- Immediately reapply positioning when Edit Mode updates layouts
-    -- This happens when entering AND exiting Edit Mode
     self:UpdateAttachment()
     self:UpdateFrameGrouping()
     
     -- Also reapply after a delay to catch late updates
-    C_Timer.After(0.1, function()
-        self:UpdateAttachment()
-        self:UpdateFrameGrouping()
+    C_Timer.After(0.2, function()
+        Cooldowns:UpdateAttachment()
+        Cooldowns:UpdateFrameGrouping()
+        Cooldowns.editModeUpdatePending = false
     end)
 end
 
@@ -360,6 +369,9 @@ end
 function Cooldowns:StyleSingleIcon(icon)
     if not icon then return end
     
+    -- Skip if already fully styled to prevent redundant work
+    if self.styledIcons[icon] then return end
+    
     local db = self.db.profile
     
     -- Find the icon texture - may be nested
@@ -396,23 +408,23 @@ function Cooldowns:StyleSingleIcon(icon)
             edgeSize = 2,
         })
         icon.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
-        
-        self.styledIcons[icon] = true
     end
     
-    -- Style cooldown text if it exists
-    if icon.cooldownText then
+    -- Style cooldown text if it exists (only once)
+    if icon.cooldownText and not icon.cooldownText.midnightStyled then
         local fontPath = LSM:Fetch("font", db.font)
         if fontPath then
             icon.cooldownText:SetFont(fontPath, db.fontSize, db.fontFlag)
+            icon.cooldownText.midnightStyled = true
         end
     end
     
-    -- Style duration text if it exists
-    if icon.durationText then
+    -- Style duration text if it exists (only once)
+    if icon.durationText and not icon.durationText.midnightStyled then
         local fontPath = LSM:Fetch("font", db.font)
         if fontPath then
             icon.durationText:SetFont(fontPath, db.fontSize, db.fontFlag)
+            icon.durationText.midnightStyled = true
         end
     end
     
