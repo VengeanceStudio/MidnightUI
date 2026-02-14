@@ -328,15 +328,17 @@ function Cooldowns:StyleSingleIcon(icon)
     
     -- Always reapply these settings even if already styled
     if iconTexture and iconTexture.GetObjectType and iconTexture:GetObjectType() == "Texture" then
-        -- Crop edges more aggressively to remove rounded corners
-        -- This cuts off about 10% from each edge for perfectly square icons
+        -- Crop edges very aggressively to remove rounded corners and zoom in
+        -- This cuts off about 15% from each edge for perfectly square icons
         if iconTexture.SetTexCoord then
-            iconTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+            iconTexture:SetTexCoord(0.15, 0.85, 0.15, 0.85)
         end
         
-        -- Force the texture to fill the entire frame
+        -- Expand the texture beyond the parent frame to fill more space
         iconTexture:ClearAllPoints()
-        iconTexture:SetAllPoints(iconTexture:GetParent())
+        local parent = iconTexture:GetParent()
+        iconTexture:SetPoint("TOPLEFT", parent, "TOPLEFT", -2, 2)
+        iconTexture:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 2, -2)
     end
     
     -- Always check for and hide mask frames
