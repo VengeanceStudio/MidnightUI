@@ -152,51 +152,58 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetScale(db.scale)
     end
     
-    -- Create background overlay
-    if not frame.midnightBg then
-        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND")
+    -- Create a background frame that sits BEHIND everything
+    if not frame.midnightBgFrame then
+        frame.midnightBgFrame = CreateFrame("Frame", nil, frame)
+        frame.midnightBgFrame:SetAllPoints(frame)
+        frame.midnightBgFrame:SetFrameLevel(frame:GetFrameLevel() - 1)
+        frame.midnightBgFrame:SetFrameStrata(frame:GetFrameStrata())
+        
+        -- Background texture
+        frame.midnightBg = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -8)
         frame.midnightBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-        frame.midnightBg:SetAllPoints(frame)
+        frame.midnightBg:SetAllPoints(frame.midnightBgFrame)
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
-        frame.midnightBg:SetDrawLayer("BACKGROUND", 7)
-    end
-    
-    -- Create border using 4 texture strips
-    if not frame.midnightBorderTop then
+        
+        -- Border textures
         local borderSize = 2
         local r, g, b, a = unpack(db.borderColor)
         
-        -- Top border
-        frame.midnightBorderTop = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderTop = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
         frame.midnightBorderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderTop:SetColorTexture(r, g, b, a)
-        frame.midnightBorderTop:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-        frame.midnightBorderTop:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+        frame.midnightBorderTop:SetPoint("TOPLEFT", frame.midnightBgFrame, "TOPLEFT", 0, 0)
+        frame.midnightBorderTop:SetPoint("TOPRIGHT", frame.midnightBgFrame, "TOPRIGHT", 0, 0)
         frame.midnightBorderTop:SetHeight(borderSize)
         
-        -- Bottom border
-        frame.midnightBorderBottom = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderBottom = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
         frame.midnightBorderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderBottom:SetColorTexture(r, g, b, a)
-        frame.midnightBorderBottom:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-        frame.midnightBorderBottom:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        frame.midnightBorderBottom:SetPoint("BOTTOMLEFT", frame.midnightBgFrame, "BOTTOMLEFT", 0, 0)
+        frame.midnightBorderBottom:SetPoint("BOTTOMRIGHT", frame.midnightBgFrame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderBottom:SetHeight(borderSize)
         
-        -- Left border
-        frame.midnightBorderLeft = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderLeft = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
         frame.midnightBorderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderLeft:SetColorTexture(r, g, b, a)
-        frame.midnightBorderLeft:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-        frame.midnightBorderLeft:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+        frame.midnightBorderLeft:SetPoint("TOPLEFT", frame.midnightBgFrame, "TOPLEFT", 0, 0)
+        frame.midnightBorderLeft:SetPoint("BOTTOMLEFT", frame.midnightBgFrame, "BOTTOMLEFT", 0, 0)
         frame.midnightBorderLeft:SetWidth(borderSize)
         
-        -- Right border
-        frame.midnightBorderRight = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderRight = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND", nil, -7)
         frame.midnightBorderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBorderRight:SetColorTexture(r, g, b, a)
-        frame.midnightBorderRight:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-        frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        frame.midnightBorderRight:SetPoint("TOPRIGHT", frame.midnightBgFrame, "TOPRIGHT", 0, 0)
+        frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame.midnightBgFrame, "BOTTOMRIGHT", 0, 0)
         frame.midnightBorderRight:SetWidth(borderSize)
+    else
+        -- Update existing colors
+        frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
+        local r, g, b, a = unpack(db.borderColor)
+        frame.midnightBorderTop:SetColorTexture(r, g, b, a)
+        frame.midnightBorderBottom:SetColorTexture(r, g, b, a)
+        frame.midnightBorderLeft:SetColorTexture(r, g, b, a)
+        frame.midnightBorderRight:SetColorTexture(r, g, b, a)
     end
     
     -- Style child cooldown icons
