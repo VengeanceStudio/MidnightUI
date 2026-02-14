@@ -83,6 +83,17 @@ function Cooldowns:OnDBReady()
     self:RegisterEvent("ADDON_LOADED")
     
     print("MidnightUI Cooldowns: Events registered successfully")
+    
+    -- Check if we're already in world (PLAYER_ENTERING_WORLD may have fired before we registered)
+    if IsPlayerInWorld and IsPlayerInWorld() then
+        print("MidnightUI Cooldowns: Already in world, triggering scan immediately")
+        C_Timer.After(0.5, function()
+            self:FindAndSkinCooldownManager()
+        end)
+        C_Timer.After(2, function()
+            self:FindAndSkinCooldownManager()
+        end)
+    end
 end
 
 function Cooldowns:PLAYER_ENTERING_WORLD()
