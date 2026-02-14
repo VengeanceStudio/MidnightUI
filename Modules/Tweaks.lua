@@ -266,12 +266,32 @@ function Tweaks:HideBagBar()
         BagsBar:Hide()
         BagsBar:SetAlpha(0)
         BagsBar:UnregisterAllEvents()
+        
+        -- Hook Show to prevent it from appearing
+        if not BagsBar.midnightHooked then
+            hooksecurefunc(BagsBar, "Show", function()
+                if Tweaks.db and Tweaks.db.profile.hideBagBar then
+                    BagsBar:Hide()
+                end
+            end)
+            BagsBar.midnightHooked = true
+        end
     end
     if MicroButtonAndBagsBar and MicroButtonAndBagsBar.BagsBar then
         MicroButtonAndBagsBar.BagsBar:SetParent(hiddenFrame)
         MicroButtonAndBagsBar.BagsBar:Hide()
         MicroButtonAndBagsBar.BagsBar:SetAlpha(0)
         MicroButtonAndBagsBar.BagsBar:UnregisterAllEvents()
+        
+        -- Hook Show to prevent it from appearing
+        if not MicroButtonAndBagsBar.BagsBar.midnightHooked then
+            hooksecurefunc(MicroButtonAndBagsBar.BagsBar, "Show", function()
+                if Tweaks.db and Tweaks.db.profile.hideBagBar then
+                    MicroButtonAndBagsBar.BagsBar:Hide()
+                end
+            end)
+            MicroButtonAndBagsBar.BagsBar.midnightHooked = true
+        end
     end
     
     -- Also try to hide EditMode bag bar
@@ -281,6 +301,16 @@ function Tweaks:HideBagBar()
             bagBar:SetParent(hiddenFrame)
             bagBar:Hide()
             bagBar:SetAlpha(0)
+            
+            -- Hook Show to prevent it from appearing
+            if not bagBar.midnightHooked then
+                hooksecurefunc(bagBar, "Show", function()
+                    if Tweaks.db and Tweaks.db.profile.hideBagBar then
+                        bagBar:Hide()
+                    end
+                end)
+                bagBar.midnightHooked = true
+            end
         end
     end
 end
