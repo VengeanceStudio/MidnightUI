@@ -297,8 +297,8 @@ function Cooldowns:StyleSingleIcon(icon)
             icon.midnightBorderFrame:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -2, 2)
         end
         
-        icon.midnightBorderFrame:SetFrameStrata("LOW")
-        icon.midnightBorderFrame:SetFrameLevel(icon:GetFrameLevel() + 1)
+        icon.midnightBorderFrame:SetFrameStrata("MEDIUM")
+        icon.midnightBorderFrame:SetFrameLevel(icon:GetFrameLevel() + 5)
         
         icon.midnightBorderFrame:SetBackdrop({
             edgeFile = "Interface\\Buttons\\WHITE8X8",
