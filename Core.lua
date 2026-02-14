@@ -3963,13 +3963,9 @@ function MidnightUI:GetOptions()
                         get = function() return self.db.profile.modules.unitframes end,
                         set = function(_, v) self.db.profile.modules.unitframes = v; C_UI.Reload() end },
                     cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full",
-                        desc = "Work in progress - Cannot be enabled at this time.",
+                        desc = "Skins and enhances Blizzard's cooldown display manager.",
                         get = function() return self.db.profile.modules.cooldowns end,
-                        set = function(_, v)
-                            if v then
-                                print("|cffff6b6b[MidnightUI]|r Cooldown Manager is a work in progress and cannot be enabled at this time.")
-                                return
-                            end
+                        set = function(_, v) 
                             self.db.profile.modules.cooldowns = v
                             C_UI.Reload()
                         end },
