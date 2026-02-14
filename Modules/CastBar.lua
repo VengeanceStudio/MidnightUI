@@ -54,18 +54,14 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function CastBar:OnInitialize()
-    print("|cff00ccffMidnightUI CastBar:|r OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
 end
 
 function CastBar:OnDBReady()
-    print("|cff00ccffMidnightUI CastBar:|r OnDBReady called")
     if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.castBar then
-        print("|cffff0000MidnightUI CastBar:|r Module disabled or DB not ready")
         self:Disable()
         return
     end
-    print("|cff00ff00MidnightUI CastBar:|r Module enabled, registering events...")
     
     self.db = MidnightUI.db:RegisterNamespace("CastBar", defaults)
     
@@ -87,7 +83,6 @@ function CastBar:OnDBReady()
     
     -- If player is already in world, set up immediately
     if IsPlayerInWorld and IsPlayerInWorld() then
-        print("|cff00ccffMidnightUI CastBar:|r Player already in world, setting up immediately...")
         C_Timer.After(0.5, function()
             self:SetupCastBar()
         end)
@@ -97,10 +92,7 @@ end
 function CastBar:PLAYER_ENTERING_WORLD()
     C_Timer.After(0.5, function()
         if self.db and self.db.profile then
-            print("|cff00ccffMidnightUI CastBar:|r Setting up cast bar...")
             self:SetupCastBar()
-        else
-            print("|cffff0000MidnightUI CastBar:|r Database not ready!")
         end
     end)
 end
@@ -110,8 +102,6 @@ end
 -- -----------------------------------------------------------------------------
 function CastBar:SetupCastBar()
     if self.castBar then return end
-    
-    print("|cff00ccffMidnightUI CastBar:|r Creating cast bar frame...")
     
     local db = self.db.profile
     

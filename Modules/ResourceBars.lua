@@ -114,11 +114,8 @@ end
 function ResourceBars:PLAYER_ENTERING_WORLD()
     C_Timer.After(0.5, function()
         if self.db and self.db.profile then
-            print("|cff00ccffMidnightUI ResourceBars:|r Setting up bars...")
             self:SetupPrimaryResourceBar()
             self:SetupSecondaryResourceBar()
-        else
-            print("|cffff0000MidnightUI ResourceBars:|r Database not ready!")
         end
     end)
 end
@@ -128,7 +125,6 @@ end
 -- -----------------------------------------------------------------------------
 function ResourceBars:SetupPrimaryResourceBar()
     if not self.db.profile.primary.enabled then 
-        print("|cff00ccffMidnightUI ResourceBars:|r Primary bar disabled in settings")
         return 
     end
     
@@ -136,8 +132,6 @@ function ResourceBars:SetupPrimaryResourceBar()
         self:UpdatePrimaryResourceBar()
         return
     end
-    
-    print("|cff00ccffMidnightUI ResourceBars:|r Creating primary resource bar...")
     
     local db = self.db.profile.primary
     
@@ -184,7 +178,6 @@ function ResourceBars:SetupPrimaryResourceBar()
     frame.statusBar = statusBar
     self.primaryBar = frame
     
-    print("|cff00ccffMidnightUI ResourceBars:|r Primary bar created and shown at " .. db.point)
     frame:Show()
     
     -- Setup dragging
