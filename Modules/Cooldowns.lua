@@ -69,12 +69,26 @@ function Cooldowns:SkinBlizzardCooldownManager()
     -- Check for EditMode overlays
     if EditModeManagerFrame and EditModeManagerFrame.registeredSystemFrames then
         for _, systemFrame in ipairs(EditModeManagerFrame.registeredSystemFrames) do
-            if systemFrame and systemFrame.system and 
-               (systemFrame.system == "SpellActivationOverlay" or 
-                systemFrame.system == "ActionBar" or
-                systemFrame.system:find("Cooldown")) then
-                cooldownFrame = systemFrame
-                break
+            if systemFrame and systemFrame.system then
+                -- system might be a number (Enum value) or string, handle both
+                local systemType = type(systemFrame.system)
+                if systemType == "string" then
+                    if systemFrame.system == "SpellActivationOverlay" or 
+                       systemFrame.system == "ActionBar" or
+                       systemFrame.system:find("Cooldown") then
+                        cooldownFrame = systemFrame
+                        break
+                    end
+                elseif systemType == "number" then
+                    -- For numeric enum values, check system constants
+                    if Enum and Enum.EditModeSystem then
+                        if systemFrame.system == Enum.EditModeSystem.ActionBar or
+                           systemFrame.system == Enum.EditModeSystem.SpellActivationOverlay then
+                            cooldownFrame = systemFrame
+                            break
+                        end
+                    end
+                end
             end
         end
     end
