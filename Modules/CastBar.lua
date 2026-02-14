@@ -54,14 +54,18 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function CastBar:OnInitialize()
+    print("|cff00ccffMidnightUI CastBar:|r OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
 end
 
 function CastBar:OnDBReady()
+    print("|cff00ccffMidnightUI CastBar:|r OnDBReady called")
     if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.castBar then
+        print("|cffff0000MidnightUI CastBar:|r Module disabled or DB not ready")
         self:Disable()
         return
     end
+    print("|cff00ff00MidnightUI CastBar:|r Module enabled, registering events...")
     
     self.db = MidnightUI.db:RegisterNamespace("CastBar", defaults)
     

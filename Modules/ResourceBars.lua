@@ -72,14 +72,18 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function ResourceBars:OnInitialize()
+    print("|cff00ccffMidnightUI ResourceBars:|r OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
 end
 
 function ResourceBars:OnDBReady()
+    print("|cff00ccffMidnightUI ResourceBars:|r OnDBReady called")
     if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.resourceBars then
+        print("|cffff0000MidnightUI ResourceBars:|r Module disabled or DB not ready")
         self:Disable()
         return
     end
+    print("|cff00ff00MidnightUI ResourceBars:|r Module enabled, registering events...")
     
     self.db = MidnightUI.db:RegisterNamespace("ResourceBars", defaults)
     
