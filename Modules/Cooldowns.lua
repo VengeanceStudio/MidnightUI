@@ -133,8 +133,21 @@ function Cooldowns:ADDON_LOADED(event, addonName)
 end
 
 function Cooldowns:EDIT_MODE_LAYOUTS_UPDATED()
-    -- Reapply positioning when exiting Edit Mode
-    C_Timer.After(0.2, function()
+    -- Reapply positioning when exiting Edit Mode with multiple attempts
+    -- Blizzard may restore positions after this event, so we need several tries
+    C_Timer.After(0.1, function()
+        self:UpdateAttachment()
+        self:UpdateFrameGrouping()
+    end)
+    C_Timer.After(0.3, function()
+        self:UpdateAttachment()
+        self:UpdateFrameGrouping()
+    end)
+    C_Timer.After(0.5, function()
+        self:UpdateAttachment()
+        self:UpdateFrameGrouping()
+    end)
+    C_Timer.After(1, function()
         self:UpdateAttachment()
         self:UpdateFrameGrouping()
     end)
