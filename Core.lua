@@ -4172,6 +4172,8 @@ function MidnightUI:GetOptions()
                 displayName = "Skinning"
             elseif name == "BrokerBar" then 
                 displayName = "Data Brokers"
+            elseif name == "Cooldowns" then
+                displayName = "Cooldown Manager"
             end
             if name == "UnitFrames" then
                 options.args.unitframes = module:GetOptions()
