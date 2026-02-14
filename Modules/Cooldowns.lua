@@ -239,19 +239,24 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     -- Other frames (Essential, Utility, BuffIcon) need their icons visible
     local frameName = frame:GetName()
     if frameName == "BuffBarCooldownViewer" then
-        -- Function to strip ONLY border/background styling, preserve bar fills
-        local function StripBorders(f)
+        -- Function to strip styling intelligently
+        local function StripBordersOnly(f)
             -- Hide NineSlice
             if f.NineSlice then
                 f.NineSlice:Hide()
                 f.NineSlice:SetAlpha(0)
             end
             
-            -- Hide only specific named border elements, NOT all textures
+            -- Remove backdrop
+            if f.SetBackdrop then
+                f:SetBackdrop(nil)
+            end
+            
+            -- Hide specific named border elements
             local elementsToHide = {
                 "Background", "Bg", "Border", "TopEdge", "BottomEdge",
                 "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
-                "BottomLeftCorner", "BottomRightCorner"
+                "BottomLeftCorner", "BottomRightCorner", "NineSlice"
             }
             for _, elementName in ipairs(elementsToHide) do
                 if f[elementName] then
@@ -259,14 +264,28 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
                     f[elementName]:SetAlpha(0)
                 end
             end
+            
+            -- Hide textures that are border-sized (thin edges)
+            for i = 1, f:GetNumRegions() do
+                local region = select(i, f:GetRegions())
+                if region and region:GetObjectType() == "Texture" then
+                    local width, height = region:GetSize()
+                    -- Hide if it's a thin texture (likely a border, < 5 pixels in one dimension)
+                    if (width and width < 5) or (height and height < 5) then
+                        region:Hide()
+                        region:SetAlpha(0)
+                    end
+                end
+            end
         end
         
-        -- Strip borders from main frame
-        StripBorders(frame)
-        
-        -- Strip borders from children
+        -- Strip borders from main frame and all descendants
+        StripBordersOnly(frame)
         for _, child in ipairs({frame:GetChildren()}) do
-            StripBorders(child)
+            StripBordersOnly(child)
+            for _, grandchild in ipairs({child:GetChildren()}) do
+                StripBordersOnly(grandchild)
+            end
         end
     else
         -- For other frames, only hide NineSlice
