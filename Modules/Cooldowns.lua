@@ -59,14 +59,23 @@ function Cooldowns:OnDBReady()
 end
 
 function Cooldowns:PLAYER_ENTERING_WORLD()
+    -- Try immediately
+    self:FindAndSkinCooldownManager()
+    
+    -- Try again after 1 second
     C_Timer.After(1, function()
+        self:FindAndSkinCooldownManager()
+    end)
+    
+    -- Try again after 3 seconds (in case frames load late)
+    C_Timer.After(3, function()
         self:FindAndSkinCooldownManager()
     end)
 end
 
 function Cooldowns:ADDON_LOADED(event, addonName)
     -- Hook into PlayerSpells addon if it loads
-    if addonName == "Blizzard_PlayerSpells" then
+    if addonName == "Blizzard_PlayerSpells" or addonName == "Blizzard_EditMode" then
         C_Timer.After(0.5, function()
             self:FindAndSkinCooldownManager()
         end)
@@ -77,7 +86,12 @@ end
 -- FIND AND SKIN WOW 12.0 COOLDOWN MANAGER
 -- -----------------------------------------------------------------------------
 function Cooldowns:FindAndSkinCooldownManager()
-    if not self.db.profile.skinCooldownManager then return end
+    if not self.db.profile.skinCooldownManager then 
+        print("MidnightUI Cooldowns: Skinning is disabled in settings")
+        return 
+    end
+    
+    print("MidnightUI Cooldowns: Searching for Cooldown Manager frames...")
     
     -- WoW 12.0 Cooldown Manager Frame Structure (actual frame names from /fstack):
     -- - EssentialCooldownViewer (essential/rotational abilities)
@@ -100,7 +114,23 @@ function Cooldowns:FindAndSkinCooldownManager()
             self:ApplyCooldownManagerSkin(frame)
             foundFrames[frameName] = true
         else
-            print("MidnightUI Cooldowns:", frameName, "not found")
+            print("MidnightUI Cooldowns:", frameName, "not found (nil)")
+        end
+    end
+    
+    -- Also try to find any frame with "Cooldown" in the name
+    print("MidnightUI Cooldowns: Scanning all global frames for 'Cooldown' or 'Viewer'...")
+    local count = 0
+    for name, frame in pairs(_G) do
+        if type(frame) == "table" and frame.GetObjectType and pcall(frame.GetObjectType, frame) then
+            if type(name) == "string" and (name:find("Cooldown") or name:find("Viewer")) then
+                print("MidnightUI Cooldowns: Found global frame:", name)
+                count = count + 1
+                if count > 20 then
+                    print("MidnightUI Cooldowns: (stopping after 20 matches)")
+                    break
+                end
+            end
         end
     end
     
@@ -130,7 +160,8 @@ function Cooldowns:FindAndSkinCooldownManager()
         print("MidnightUI Cooldowns: Successfully skinned", #foundFrames, "Cooldown Manager viewer(s)")
         self:UpdateAttachment()
     else
-        print("MidnightUI Cooldowns: No Cooldown Manager viewers found. Make sure you have enabled the Cooldown Manager in WoW's Edit Mode.")
+        print("MidnightUI Cooldowns: No Cooldown Manager viewers found.")
+        print("MidnightUI Cooldowns: Make sure the Cooldown Manager is enabled in WoW's Edit Mode (ESC > Edit Mode)")
     end
 end
 
