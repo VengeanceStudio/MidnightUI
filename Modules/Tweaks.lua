@@ -52,9 +52,19 @@ function Tweaks:OnDBReady()
     self:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
     self:RegisterEvent("MERCHANT_SHOW")
     self:RegisterEvent("MERCHANT_CLOSED")
+    self:RegisterEvent("ADDON_LOADED")
     
     if self.db.profile.autoScreenshot then
         self:RegisterEvent("ACHIEVEMENT_EARNED")
+    end
+    
+    -- Immediate bag bar hiding setup
+    if self.db.profile.hideBagBar then
+        self:HideBagBar()
+        -- Set up repeated attempts to catch late-loading frames
+        C_Timer.After(0.5, function() self:HideBagBar() end)
+        C_Timer.After(2, function() self:HideBagBar() end)
+        C_Timer.After(5, function() self:HideBagBar() end)
     end
     
     -- Hook cutscene frames for auto-skip
@@ -105,6 +115,17 @@ function Tweaks:PLAYER_LOGIN()
     end
 end
 
+function Tweaks:ADDON_LOADED(event, addonName)
+    -- Hide bag bar when relevant addons load
+    if addonName == "Blizzard_EditMode" or addonName == "Blizzard_BagBar" then
+        if self.db and self.db.profile.hideBagBar then
+            C_Timer.After(0.5, function()
+                self:HideBagBar()
+            end)
+        end
+    end
+end
+
 function Tweaks:PLAYER_ENTERING_WORLD()
     -- Apply tweaks with delays
     C_Timer.After(0.1, function() self:ApplyTweaks() end)
@@ -112,6 +133,13 @@ function Tweaks:PLAYER_ENTERING_WORLD()
     C_Timer.After(1, function() self:ApplyTweaks() end)
     C_Timer.After(2, function() self:ApplyTweaks() end)
     C_Timer.After(5, function() self:ApplyTweaks() end)
+    
+    -- Bag bar hiding with repeated attempts
+    if self.db.profile.hideBagBar then
+        self:HideBagBar()
+        C_Timer.After(1, function() self:HideBagBar() end)
+        C_Timer.After(3, function() self:HideBagBar() end)
+    end
     
     -- Reveal map if enabled
     if self.db.profile.revealMap then
