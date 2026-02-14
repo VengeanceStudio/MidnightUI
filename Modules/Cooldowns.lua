@@ -596,8 +596,12 @@ function Cooldowns:GetOptions()
                 desc = "Font for cooldown text.",
                 type = "select",
                 order = 41,
-                dialogControl = "LSM30_Font",
-                values = LSM:HashTable("font"),
+                values = function()
+                    local fonts = LSM:List("font")
+                    local out = {}
+                    for _, font in ipairs(fonts) do out[font] = font end
+                    return out
+                end,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.font end,
                 set = function(_, v)
