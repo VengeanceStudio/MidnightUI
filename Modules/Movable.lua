@@ -10,6 +10,9 @@ local Movable = MidnightUI:NewModule("Movable", "AceEvent-3.0")
 Movable.registeredFrames = {}
 Movable.registeredNudgeFrames = {}
 
+-- Store Blizzard frames that have been made movable
+Movable.blizzardFrames = {}
+
 -- Grid settings
 local GRID_SIZE = 16
 local gridFrame = nil
@@ -196,13 +199,29 @@ end
 -- ============================================================================
 
 function Movable:OnInitialize()
+    -- Initialize database namespace for saving Blizzard frame positions
+    self.db = MidnightUI.db:RegisterNamespace("Movable", {
+        profile = {
+            blizzardFramePositions = {},
+            enableBlizzardFrameMovement = true,
+        }
+    })
+    
     if MidnightUI and MidnightUI.RegisterMessage then
         MidnightUI:RegisterMessage("MIDNIGHTUI_MOVEMODE_CHANGED", function(_, enabled)
             Movable:OnMoveModeChanged("MIDNIGHTUI_MOVEMODE_CHANGED", enabled)
         end)
     end
 end
+
 function Movable:OnEnable()
+    -- Initialize Blizzard frame movement
+    if self.db and self.db.profile.enableBlizzardFrameMovement then
+        C_Timer.After(1, function()
+            self:InitializeBlizzardFrames()
+        end)
+    end
+    
     -- Listen for move mode changes (grid only)
     Movable:RegisterMessage("MIDNIGHTUI_MOVEMODE_CHANGED", function(event, enabled)
         if enabled then
@@ -1138,6 +1157,173 @@ function Movable:HideNudgeArrows(container)
     for _, arrow in pairs(container.arrows) do
         arrow:Hide()
     end
+end
+
+-- ============================================================================
+-- BLIZZARD FRAME MOVEMENT
+-- Make default Blizzard UI frames draggable
+-- ============================================================================
+
+-- List of common Blizzard frames to make movable
+local BLIZZARD_FRAMES = {
+    -- Character & Equipment
+    "CharacterFrame",
+    "PaperDollFrame",
+    "ReputationFrame",
+    "TokenFrame",
+    
+    -- Spellbook & Professions
+    "SpellBookFrame",
+    "PlayerSpellsFrame",
+    "ProfessionsFrame",
+    
+    -- Social
+    "FriendsFrame",
+    "GuildFrame",
+    "CommunitiesFrame",
+    "LFGParentFrame",
+    "PVEFrame",
+    "RaidInfoFrame",
+    
+    -- Collections
+    "CollectionsJournal",
+    "MountJournal",
+    "PetJournal",
+    "ToyBox",
+    "HeirloomsJournal",
+    "WardrobeFrame",
+    
+    -- Adventure Guide & Quests
+    "EncounterJournal",
+    "WorldMapFrame",
+    "QuestLogPopupDetailFrame",
+    "QuestFrame",
+    
+    -- Achievements & Calendar
+    "AchievementFrame",
+    "CalendarFrame",
+    
+    -- Mail & Merchants
+    "MailFrame",
+    "MerchantFrame",
+    "GossipFrame",
+    
+    -- Bags & Bank
+    "ContainerFrameCombinedBags",
+    "BankFrame",
+    
+    -- Game Menu & Settings
+    "GameMenuFrame",
+    "VideoOptionsFrame",
+    "InterfaceOptionsFrame",
+    "SettingsPanel",
+    
+    -- Talents & Specialization  
+    "PlayerTalentFrame",
+    "ClassTalentFrame",
+    
+    -- Tracking & Timers
+    "TimeManagerFrame",
+    "StopwatchFrame",
+    
+    -- Auction House
+    "AuctionHouseFrame",
+    
+    -- Trade & Crafting
+    "TradeFrame",
+    "CraftFrame",
+    "TradeSkillFrame",
+    
+    -- Macro & Keybinds
+    "MacroFrame",
+    "KeyBindingFrame",
+    
+    -- Loot & Groups
+    "LootFrame",
+    "GroupLootContainer",
+    "MasterLooterFrame",
+    "RaidParentFrame",
+    
+    -- Misc
+    "HelpFrame",
+    "TicketStatusFrame",
+    "ItemTextFrame",
+    "DressUpFrame",
+    "InspectFrame",
+    "QuestChoiceFrame",
+}
+
+function Movable:MakeBlizzardFrameMovable(frameName)
+    local frame = _G[frameName]
+    if not frame then return end
+    
+    -- Skip if already made movable
+    if self.blizzardFrames[frameName] then return end
+    
+    -- Make frame movable
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:SetClampedToScreen(true)
+    
+    -- Register for dragging on left mouse button
+    frame:RegisterForDrag("LeftButton")
+    
+    -- Set up drag scripts
+    frame:SetScript("OnDragStart", function(self)
+        self:StartMoving()
+    end)
+    
+    frame:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        -- Save position
+        local point, _, relativePoint, x, y = self:GetPoint()
+        if not Movable.db then return end
+        if not Movable.db.profile.blizzardFramePositions then
+            Movable.db.profile.blizzardFramePositions = {}
+        end
+        Movable.db.profile.blizzardFramePositions[frameName] = {
+            point = point,
+            relativePoint = relativePoint,
+            x = x,
+            y = y,
+        }
+    end)
+    
+    -- Mark as handled
+    self.blizzardFrames[frameName] = true
+    
+    -- Restore saved position if it exists
+    if self.db and self.db.profile.blizzardFramePositions and self.db.profile.blizzardFramePositions[frameName] then
+        local pos = self.db.profile.blizzardFramePositions[frameName]
+        frame:ClearAllPoints()
+        frame:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
+    end
+end
+
+function Movable:InitializeBlizzardFrames()
+    -- Make all listed frames movable
+    for _, frameName in ipairs(BLIZZARD_FRAMES) do
+        self:MakeBlizzardFrameMovable(frameName)
+    end
+    
+    -- Set up a hook to catch frames that load later
+    C_Timer.After(2, function()
+        for _, frameName in ipairs(BLIZZARD_FRAMES) do
+            self:MakeBlizzardFrameMovable(frameName)
+        end
+    end)
+    
+    -- Hook ADDON_LOADED to catch addon frames as they load
+    self:RegisterEvent("ADDON_LOADED")
+end
+
+function Movable:ADDON_LOADED(event, addonName)
+    -- Re-attempt to make frames movable when relevant addons load
+    C_Timer.After(0.5, function()
+        for _, frameName in ipairs(BLIZZARD_FRAMES) do
+            self:MakeBlizzardFrameMovable(frameName)
+        end
+    end)
 end
 
 return Movable
