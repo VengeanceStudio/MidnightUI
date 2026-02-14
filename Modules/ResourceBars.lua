@@ -262,7 +262,7 @@ function ResourceBars:UpdatePrimaryResourceBar()
             if UnitPowerPercent and CurveConstants and CurveConstants.ScaleTo100 then
                 local ok, pct = pcall(UnitPowerPercent, "player", powerType, false, CurveConstants.ScaleTo100)
                 if ok and pct ~= nil then
-                    percentage = pct
+                    percentage = math.floor(pct)  -- Round to whole number
                 end
             end
             
@@ -282,7 +282,7 @@ function ResourceBars:UpdatePrimaryResourceBar()
             end
             
             -- Display percentage (secret value safe)
-            statusBar.text:SetText(percentage .. "%")
+            statusBar.text:SetText(string.format("%d%%", percentage))
         else
             -- Show current / max values
             statusBar.text:SetText(current .. " / " .. maximum)
