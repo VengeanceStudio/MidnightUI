@@ -262,20 +262,32 @@ function ResourceBars:UpdatePrimaryResourceBar()
     -- Update text - pass secret values directly without converting
     if db.showText and statusBar.text then
         if db.showPercentage then
-            -- Try to calculate percentage, but if values are secrets it will fail
-            local success, percentage = pcall(function()
-                if not current or not maximum or maximum == 0 then
-                    return 0
+            -- Use UnitPowerPercent with ScaleTo100 like unit frames do
+            local percentage
+            if UnitPowerPercent and CurveConstants and CurveConstants.ScaleTo100 then
+                local ok, pct = pcall(UnitPowerPercent, "player", powerType, false, CurveConstants.ScaleTo100)
+                if ok and pct ~= nil then
+                    percentage = pct
                 end
-                return math.floor((current / maximum) * 100)
-            end)
-            
-            if success and percentage then
-                statusBar.text:SetText(percentage .. "%")
-            else
-                -- Values are secrets, can't calculate percentage - show current/max instead
-                statusBar.text:SetText(current .. " / " .. maximum)
             end
+            
+            -- Fallback to calculation if API not available
+            if not percentage then
+                local ok, pct = pcall(function()
+                    if not current or not maximum or maximum == 0 then
+                        return 0
+                    end
+                    return math.floor((current / maximum) * 100)
+                end)
+                if ok and pct then
+                    percentage = pct
+                else
+                    percentage = 0
+                end
+            end
+            
+            -- Display percentage (secret value safe)
+            statusBar.text:SetText(percentage .. "%")
         else
             -- Show current / max values
             statusBar.text:SetText(current .. " / " .. maximum)
