@@ -313,13 +313,14 @@ function Cooldowns:StyleCooldownIcons(parent)
 end
 
 function Cooldowns:StyleSingleIcon(icon)
-    if not icon or self.styledIcons[icon] then return end
+    if not icon then return end
     
     local db = self.db.profile
     
     -- Find the icon texture
     local iconTexture = icon.icon or icon.Icon or icon.texture
     
+    -- Always reapply these settings even if already styled
     if iconTexture then
         -- Crop edges to remove rounded corners and zoom in slightly
         -- This cuts off about 7% from each edge, making the icon perfectly square
@@ -332,17 +333,27 @@ function Cooldowns:StyleSingleIcon(icon)
         iconTexture:SetAllPoints(icon)
     end
     
-    -- Check for and hide IconMask if it exists
+    -- Always check for and hide mask frames
     if icon.IconMask then
         icon.IconMask:Hide()
+        icon.IconMask:SetAlpha(0)
     end
     
-    -- Check for CircleMask and hide it
     if icon.CircleMask then
         icon.CircleMask:Hide()
+        icon.CircleMask:SetAlpha(0)
     end
     
-    -- Add a simple thin border using a backdrop on a separate frame
+    -- Check for Portrait or Mask textures
+    for _, child in pairs({icon:GetChildren()}) do
+        local name = child:GetName()
+        if name and (name:find("Mask") or name:find("Portrait")) then
+            child:Hide()
+            child:SetAlpha(0)
+        end
+    end
+    
+    -- Add border frame only once
     if not icon.midnightBorderFrame then
         icon.midnightBorderFrame = CreateFrame("Frame", nil, icon, "BackdropTemplate")
         
@@ -357,6 +368,8 @@ function Cooldowns:StyleSingleIcon(icon)
             edgeSize = 1,
         })
         icon.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
+        
+        self.styledIcons[icon] = true
     end
     
     -- Style cooldown text if it exists
