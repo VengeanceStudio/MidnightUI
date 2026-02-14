@@ -579,7 +579,12 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.primary.enabled end,
                 set = function(_, v)
                     self.db.profile.primary.enabled = v
-                    ReloadUI()
+                    if v then
+                        self:SetupPrimaryResourceBar()
+                    elseif self.primaryBar then
+                        self.primaryBar:Hide()
+                        self.primaryBar = nil
+                    end
                 end
             },
             primaryWidth = {
@@ -593,7 +598,9 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.primary.width end,
                 set = function(_, v)
                     self.db.profile.primary.width = v
-                    ReloadUI()
+                    if self.primaryBar then
+                        self.primaryBar:SetWidth(v)
+                    end
                 end
             },
             primaryHeight = {
@@ -607,7 +614,9 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.primary.height end,
                 set = function(_, v)
                     self.db.profile.primary.height = v
-                    ReloadUI()
+                    if self.primaryBar then
+                        self.primaryBar:SetHeight(v)
+                    end
                 end
             },
             primaryShowText = {
@@ -618,7 +627,14 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.primary.showText end,
                 set = function(_, v)
                     self.db.profile.primary.showText = v
-                    ReloadUI()
+                    if self.primaryBar and self.primaryBar.statusBar.text then
+                        if v then
+                            self.primaryBar.statusBar.text:Show()
+                            self:UpdatePrimaryResourceBar()
+                        else
+                            self.primaryBar.statusBar.text:Hide()
+                        end
+                    end
                 end
             },
             primaryShowPercentage = {
@@ -645,7 +661,12 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.secondary.enabled end,
                 set = function(_, v)
                     self.db.profile.secondary.enabled = v
-                    ReloadUI()
+                    if v then
+                        self:SetupSecondaryResourceBar()
+                    elseif self.secondaryBar then
+                        self.secondaryBar:Hide()
+                        self.secondaryBar = nil
+                    end
                 end
             },
             secondaryWidth = {
@@ -659,7 +680,10 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.secondary.width end,
                 set = function(_, v)
                     self.db.profile.secondary.width = v
-                    ReloadUI()
+                    if self.secondaryBar then
+                        self.secondaryBar:SetWidth(v)
+                        self:CreateSecondarySegments()
+                    end
                 end
             },
             secondaryHeight = {
@@ -673,7 +697,10 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.secondary.height end,
                 set = function(_, v)
                     self.db.profile.secondary.height = v
-                    ReloadUI()
+                    if self.secondaryBar then
+                        self.secondaryBar:SetHeight(v)
+                        self:CreateSecondarySegments()
+                    end
                 end
             },
             secondaryAttach = {
@@ -685,7 +712,9 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.secondary.attachToPrimary end,
                 set = function(_, v)
                     self.db.profile.secondary.attachToPrimary = v
-                    ReloadUI()
+                    if self.secondaryBar then
+                        self:SetupSecondaryResourceBar()
+                    end
                 end
             },
             secondaryAttachPosition = {
@@ -701,7 +730,9 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.secondary.attachPosition end,
                 set = function(_, v)
                     self.db.profile.secondary.attachPosition = v
-                    ReloadUI()
+                    if self.secondaryBar then
+                        self:SetupSecondaryResourceBar()
+                    end
                 end
             },
             secondaryAttachSpacing = {
@@ -716,7 +747,9 @@ function ResourceBars:GetOptions()
                 get = function() return self.db.profile.secondary.attachSpacing end,
                 set = function(_, v)
                     self.db.profile.secondary.attachSpacing = v
-                    ReloadUI()
+                    if self.secondaryBar then
+                        self:SetupSecondaryResourceBar()
+                    end
                 end
             },
         }
