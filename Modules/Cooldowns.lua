@@ -179,9 +179,10 @@ function Cooldowns:StyleCooldownChild(child)
 end
 
 function Cooldowns:HookSpellActivationOverlays()
-    -- Hook the spell activation overlay system
-    if SpellActivationOverlayFrame then
-        if not self.hookedOverlays then
+    -- Hook the spell activation overlay system (if it exists)
+    if SpellActivationOverlayFrame and not self.hookedOverlays then
+        -- Check if the function exists before trying to hook it
+        if SpellActivationOverlay_ShowOverlay and type(SpellActivationOverlay_ShowOverlay) == "function" then
             hooksecurefunc("SpellActivationOverlay_ShowOverlay", function(frame, spellID, texture, position, scale, r, g, b)
                 -- Could add custom styling here if needed
                 -- For now, just ensure it's visible and properly positioned
