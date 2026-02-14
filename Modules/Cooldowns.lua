@@ -137,40 +137,68 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     
     local db = self.db.profile
     
+    print("Styling", frame:GetName(), "- FrameLevel:", frame:GetFrameLevel(), "FrameStrata:", frame:GetFrameStrata())
+    
     -- Apply scale
     if frame.SetScale then
         frame:SetScale(db.scale)
     end
     
-    -- Create background
+    -- Create background overlay (higher level)
     if not frame.midnightBg then
-        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND")
         frame.midnightBg:SetTexture("Interface\\Buttons\\WHITE8X8")
         frame.midnightBg:SetAllPoints(frame)
         frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
-    else
-        frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
+        frame.midnightBg:SetDrawLayer("BACKGROUND", 7)
+        print("  Created background texture")
     end
     
-    -- Create border using NineSlice
-    if not frame.midnightBorderFrame then
-        frame.midnightBorderFrame = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-        frame.midnightBorderFrame:SetAllPoints(frame)
-        frame.midnightBorderFrame:SetFrameLevel(frame:GetFrameLevel() + 1)
+    -- Create border overlay using textures (not backdrop)
+    if not frame.midnightBorderTop then
+        local borderSize = 2
+        local r, g, b, a = unpack(db.borderColor)
         
-        frame.midnightBorderFrame:SetBackdrop({
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            edgeSize = 2,
-        })
-        frame.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
-    else
-        frame.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
+        -- Top border
+        frame.midnightBorderTop = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
+        frame.midnightBorderTop:SetColorTexture(r, g, b, a)
+        frame.midnightBorderTop:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+        frame.midnightBorderTop:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+        frame.midnightBorderTop:SetHeight(borderSize)
+        
+        -- Bottom border
+        frame.midnightBorderBottom = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
+        frame.midnightBorderBottom:SetColorTexture(r, g, b, a)
+        frame.midnightBorderBottom:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+        frame.midnightBorderBottom:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        frame.midnightBorderBottom:SetHeight(borderSize)
+        
+        -- Left border
+        frame.midnightBorderLeft = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
+        frame.midnightBorderLeft:SetColorTexture(r, g, b, a)
+        frame.midnightBorderLeft:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+        frame.midnightBorderLeft:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+        frame.midnightBorderLeft:SetWidth(borderSize)
+        
+        -- Right border
+        frame.midnightBorderRight = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
+        frame.midnightBorderRight:SetColorTexture(r, g, b, a)
+        frame.midnightBorderRight:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+        frame.midnightBorderRight:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        frame.midnightBorderRight:SetWidth(borderSize)
+        
+        print("  Created border textures (4 sides)")
     end
     
     -- Style child cooldown icons
     self:StyleCooldownIcons(frame)
     
     self.styledFrames[frame] = true
+    print("  Styling complete for", frame:GetName())
 end
 
 function Cooldowns:StyleCooldownIcons(parent)
@@ -270,9 +298,13 @@ function Cooldowns:UpdateColors()
                 frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
             end
             
-            -- Update border
-            if frame.midnightBorderFrame then
-                frame.midnightBorderFrame:SetBackdropBorderColor(unpack(db.borderColor))
+            -- Update border (4 sides)
+            local r, g, b, a = unpack(db.borderColor)
+            if frame.midnightBorderTop then
+                frame.midnightBorderTop:SetColorTexture(r, g, b, a)
+                frame.midnightBorderBottom:SetColorTexture(r, g, b, a)
+                frame.midnightBorderLeft:SetColorTexture(r, g, b, a)
+                frame.midnightBorderRight:SetColorTexture(r, g, b, a)
             end
             
             -- Update child icon borders
