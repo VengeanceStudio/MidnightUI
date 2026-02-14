@@ -190,8 +190,7 @@ function ResourceBars:SetupPrimaryResourceBar()
     -- Setup dragging
     self:SetupDragging(frame, "primary")
     
-    -- Initial update
-    self:UpdatePrimaryResourceBar()
+    -- Don't call update here - let the events handle it once player data is loaded
 end
 
 function ResourceBars:UpdatePrimaryResourceBar()
@@ -309,8 +308,7 @@ function ResourceBars:SetupSecondaryResourceBar()
     -- Setup dragging
     self:SetupDragging(frame, "secondary")
     
-    -- Initial update
-    self:UpdateSecondaryResourceBar()
+    -- Don't call update here - let the events handle it once player data is loaded
 end
 
 function ResourceBars:CreateSecondarySegments()
