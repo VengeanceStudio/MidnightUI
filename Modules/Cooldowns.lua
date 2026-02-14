@@ -229,6 +229,32 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetScale(db.scale)
     end
     
+    -- Hide Blizzard's default background textures
+    for i = 1, frame:GetNumRegions() do
+        local region = select(i, frame:GetRegions())
+        if region and region:GetObjectType() == "Texture" then
+            local texture = region:GetTexture()
+            -- Hide common Blizzard background/border textures
+            if texture and (
+                texture:find("Background") or 
+                texture:find("Border") or
+                texture:find("Edge") or
+                texture:find("Corner") or
+                texture:find("UI-Frame") or
+                texture == 136548 -- Common background texture ID
+            ) then
+                region:Hide()
+                region:SetAlpha(0)
+            end
+        end
+    end
+    
+    -- Also check for named background elements
+    if frame.Background then frame.Background:Hide() end
+    if frame.Border then frame.Border:Hide() end
+    if frame.Bg then frame.Bg:Hide() end
+    if frame.NineSlice then frame.NineSlice:Hide() end
+    
     -- Create a background frame that is parented to the viewer's parent
     -- This ensures it renders completely behind the viewer
     if not frame.midnightBgFrame then
