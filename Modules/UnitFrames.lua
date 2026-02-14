@@ -2781,10 +2781,27 @@ end
                             if targetFrame.powerBar then targetFrame.powerBar:Show() end
                             if targetFrame.infoBar then targetFrame.infoBar:Show() end
                         end
-                        self:UpdateUnitFrame("TargetFrame", "target")
+                        -- Delay update slightly to allow unit data to populate
+                        C_Timer.After(0.05, function()
+                            if UnitExists("target") then
+                                self:UpdateUnitFrame("TargetFrame", "target")
+                            end
+                        end)
                     end
-                    if self.db.profile.showTargetTarget then self:UpdateUnitFrame("TargetTargetFrame", "targettarget") end
-                    if self.db.profile.showFocus then self:UpdateUnitFrame("FocusFrame", "focus") end
+                    if self.db.profile.showTargetTarget then 
+                        C_Timer.After(0.05, function()
+                            if UnitExists("targettarget") then
+                                self:UpdateUnitFrame("TargetTargetFrame", "targettarget")
+                            end
+                        end)
+                    end
+                    if self.db.profile.showFocus then 
+                        C_Timer.After(0.05, function()
+                            if UnitExists("focus") then
+                                self:UpdateUnitFrame("FocusFrame", "focus")
+                            end
+                        end)
+                    end
                 end
 
                 function UnitFrames:UNIT_HEALTH(event, unit)
