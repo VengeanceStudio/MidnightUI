@@ -175,14 +175,14 @@ function Cooldowns:FindAndSkinCooldownManager()
         if frame and not self.hookedLayouts[frameName] then
             if frame.UpdateLayout then
                 hooksecurefunc(frame, "UpdateLayout", function()
-                    self:StyleCooldownIcons(frame)
+                    Cooldowns:StyleCooldownIcons(frame)
                     -- Update resource bar widths when Essential layout changes
                     if frameName == "EssentialCooldownViewer" then
-                        self:UpdateResourceBarWidths()
+                        Cooldowns:UpdateResourceBarWidths()
                     end
                     -- Reapply positioning after layout updates
                     C_Timer.After(0.1, function()
-                        self:UpdateAttachment()
+                        Cooldowns:UpdateAttachment()
                     end)
                 end)
                 self.hookedLayouts[frameName] = true
@@ -191,17 +191,19 @@ function Cooldowns:FindAndSkinCooldownManager()
             -- Also hook Update if it exists
             if frame.Update then
                 hooksecurefunc(frame, "Update", function()
-                    self:StyleCooldownIcons(frame)
+                    Cooldowns:StyleCooldownIcons(frame)
                 end)
             end
             
             -- Add periodic refresh to maintain square icons
             if not frame.midnightRefreshTimer then
-                frame.midnightRefreshTimer = C_Timer.NewTicker(2, function()
+                -- Store function reference to avoid creating new closures
+                local refreshFunc = function()
                     if frame and frame:IsShown() then
-                        self:StyleCooldownIcons(frame)
+                        Cooldowns:StyleCooldownIcons(frame)
                     end
-                end)
+                end
+                frame.midnightRefreshTimer = C_Timer.NewTicker(2, refreshFunc)
             end
         end
     end

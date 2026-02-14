@@ -74,14 +74,8 @@ function Tweaks:OnDBReady()
         end)
     end
     
-    -- Create a constant ticker to enforce bag bar hiding
-    if not self.bagBarTicker then
-        self.bagBarTicker = C_Timer.NewTicker(0.5, function()
-            if self.db and self.db.profile.hideBagBar then
-                self:HideBagBar()
-            end
-        end)
-    end
+    -- Use event-based approach instead of constant ticker
+    -- Bag bar hiding is handled by UPDATE_INVENTORY_DURABILITY event
 end
 
 function Tweaks:UPDATE_INVENTORY_DURABILITY()
