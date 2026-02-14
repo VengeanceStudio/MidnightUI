@@ -347,8 +347,10 @@ function Cooldowns:StyleSingleIcon(icon)
     if not icon.midnightBorderFrame then
         icon.midnightBorderFrame = CreateFrame("Frame", nil, icon, "BackdropTemplate")
         
-        -- Match the icon size exactly for tight border
-        icon.midnightBorderFrame:SetAllPoints(icon)
+        -- Inset the border slightly to match where the icon texture actually is
+        -- Most WoW icon frames have a small inset
+        icon.midnightBorderFrame:SetPoint("TOPLEFT", icon, "TOPLEFT", 2, -2)
+        icon.midnightBorderFrame:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -2, 2)
         
         icon.midnightBorderFrame:SetFrameStrata("MEDIUM")
         icon.midnightBorderFrame:SetFrameLevel(icon:GetFrameLevel() + 5)
