@@ -176,6 +176,15 @@ function Cooldowns:FindAndSkinCooldownManager()
                     self:StyleCooldownIcons(frame)
                 end)
             end
+            
+            -- Add periodic refresh to maintain square icons
+            if not frame.midnightRefreshTimer then
+                frame.midnightRefreshTimer = C_Timer.NewTicker(2, function()
+                    if frame and frame:IsShown() then
+                        self:StyleCooldownIcons(frame)
+                    end
+                end)
+            end
         end
     end
     
@@ -328,33 +337,63 @@ function Cooldowns:StyleSingleIcon(icon)
     
     -- Always reapply these settings even if already styled
     if iconTexture and iconTexture.GetObjectType and iconTexture:GetObjectType() == "Texture" then
-        -- Crop edges very aggressively to remove rounded corners and zoom in
-        -- This cuts off about 15% from each edge for perfectly square icons
+        -- Use full texture without cropping
         if iconTexture.SetTexCoord then
-            iconTexture:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+            iconTexture:SetTexCoord(0, 1, 0, 1)
         end
         
-        -- Expand the texture beyond the parent frame to fill more space
+        -- Fill the parent frame
         iconTexture:ClearAllPoints()
-        local parent = iconTexture:GetParent()
-        iconTexture:SetPoint("TOPLEFT", parent, "TOPLEFT", -2, 2)
-        iconTexture:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 2, -2)
+        iconTexture:SetAllPoints(iconTexture:GetParent())
+        
+        -- Try to disable any atlas-based masking
+        if iconTexture.SetAtlas then
+            iconTexture:SetAtlas(nil)
+        end
     end
     
     -- Always check for and hide mask frames
     if icon.IconMask then
         icon.IconMask:Hide()
         icon.IconMask:SetAlpha(0)
+        icon.IconMask:SetSize(0.01, 0.01)
     end
     
     if icon.CircleMask then
         icon.CircleMask:Hide()
         icon.CircleMask:SetAlpha(0)
-    end
-    
-    -- Check for Portrait or Mask textures
+        icon.CircleMask:SetSize(0.01, 0.01)
+    end in children
     for _, child in pairs({icon:GetChildren()}) do
         local name = child:GetName()
+        if name and (name:find("Mask") or name:find("Portrait")) then
+            child:Hide()
+            child:SetAlpha(0)
+            if child.SetSize then
+                child:SetSize(0.01, 0.01)
+            end
+        end
+        
+        -- Also check nested frames for masks
+        if child.IconMask then
+            child.IconMask:Hide()
+            child.IconMask:SetAlpha(0)
+            child.IconMask:SetSize(0.01, 0.01)
+        end
+        if child.CircleMask then
+            child.CircleMask:Hide()
+            child.CircleMask:SetAlpha(0)
+            child.CircleMask:SetSize(0.01, 0.01)
+        end
+        
+        -- Check child regions for mask textures
+        if child.GetRegions then
+            for i = 1, select('#', child:GetRegions()) do
+                local region = select(i, child:GetRegions())
+                if region and region.GetObjectType and region:GetObjectType() == "MaskTexture" then
+                    region:Hide()
+                    region:SetAlpha(0)
+                end()
         if name and (name:find("Mask") or name:find("Portrait")) then
             child:Hide()
             child:SetAlpha(0)
