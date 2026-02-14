@@ -322,15 +322,27 @@ function Cooldowns:StyleSingleIcon(icon)
     
     -- Always reapply these settings even if already styled
     if iconTexture then
-        -- Crop edges to remove rounded corners and zoom in slightly
-        -- This cuts off about 7% from each edge, making the icon perfectly square
+        -- Crop edges more aggressively to remove rounded corners
+        -- This cuts off about 10% from each edge for perfectly square icons
         if iconTexture.SetTexCoord then
-            iconTexture:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+            iconTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
         end
         
         -- Force the texture to fill the entire frame
         iconTexture:ClearAllPoints()
         iconTexture:SetAllPoints(icon)
+        
+        -- Hook the texture to maintain square coords if they get reset
+        if not iconTexture.midnightHooked then
+            hooksecurefunc(iconTexture, "SetTexture", function()
+                if iconTexture.SetTexCoord then
+                    C_Timer.After(0, function()
+                        iconTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+                    end)
+                end
+            end)
+            iconTexture.midnightHooked = true
+        end
     end
     
     -- Always check for and hide mask frames
@@ -350,6 +362,18 @@ function Cooldowns:StyleSingleIcon(icon)
         if name and (name:find("Mask") or name:find("Portrait")) then
             child:Hide()
             child:SetAlpha(0)
+        end
+    end
+    
+    -- Look for mask textures
+    for i = 1, icon:GetNumRegions() do
+        local region = select(i, icon:GetRegions())
+        if region and region:GetObjectType() == "Texture" then
+            local texturePath = region:GetTexture()
+            if texturePath and type(texturePath) == "string" and texturePath:lower():find("mask") then
+                region:Hide()
+                region:SetAlpha(0)
+            end
         end
     end
     
