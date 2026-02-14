@@ -78,55 +78,55 @@ end
 function Cooldowns:FindAndSkinCooldownManager()
     if not self.db.profile.skinCooldownManager then return end
     
-    -- In WoW 12.0+, the Cooldown Manager is a separate frame that displays spell cooldowns
-    -- It's NOT the action bars - it's a resource tracker showing your spell icons
+    -- WoW 12.0 Cooldown Manager Frame Structure:
+    -- - CooldownManagerFrame (top-level parent)
+    -- - CooldownManagerEssentialsFrame (rotational abilities)
+    -- - CooldownManagerUtilityFrame (defensives/utility)
+    -- - CooldownManagerTrackedBuffsFrame (offensive buffs/procs)
+    -- - CooldownManagerTrackedBarsFrame (horizontal duration bars)
     
-    -- Try to find the frame through EditMode first
-    local cooldownFrame = nil
+    local foundFrames = {}
     
-    if EditModeManagerFrame and EditModeManagerFrame.registeredSystemFrames then
-        for _, systemFrame in ipairs(EditModeManagerFrame.registeredSystemFrames) do
-            if systemFrame then
-                -- Look for frames that might be the cooldown manager
-                local frameName = systemFrame:GetName()
-                if frameName and (
-                    frameName:find("Cooldown") or 
-                    frameName:find("SpellActivation") or
-                    frameName == "PlayerCastingBarFrame" -- Sometimes cooldowns attach here
-                ) then
-                    print("MidnightUI Cooldowns: Found potential frame:", frameName)
-                    cooldownFrame = systemFrame
-                    break
-                end
-            end
+    -- Find the main Cooldown Manager frame
+    local mainFrame = _G["CooldownManagerFrame"]
+    if mainFrame then
+        print("MidnightUI Cooldowns: Found CooldownManagerFrame")
+        self:ApplyCooldownManagerSkin(mainFrame)
+        foundFrames.main = true
+    end
+    
+    -- Find and skin the group frames
+    local groupFrames = {
+        ["CooldownManagerEssentialsFrame"] = "Essential Cooldowns",
+        ["CooldownManagerUtilityFrame"] = "Utility Cooldowns",
+        ["CooldownManagerTrackedBuffsFrame"] = "Tracked Buffs",
+        ["CooldownManagerTrackedBarsFrame"] = "Tracked Bars",
+    }
+    
+    for frameName, groupName in pairs(groupFrames) do
+        local frame = _G[frameName]
+        if frame then
+            print("MidnightUI Cooldowns: Found", groupName, "("..frameName..")")
+            self:ApplyCooldownManagerSkin(frame)
+            foundFrames[frameName] = true
         end
     end
     
-    -- Try direct global references
-    if not cooldownFrame then
-        local possibleFrames = {
-            "PlayerSpellsFrame",
-            "SpellbookFrame",
-            "SpellActivationOverlayFrame",
-            "CooldownFrame",
-            "PlayerCooldownFrame",
-        }
-        
-        for _, frameName in ipairs(possibleFrames) do
-            local frame = _G[frameName]
-            if frame then
-                print("MidnightUI Cooldowns: Found frame via global:", frameName)
-                cooldownFrame = frame
-                break
-            end
+    -- Hook UpdateLayout if main frame exists
+    if mainFrame and not self.hookedUpdateLayout then
+        if mainFrame.UpdateLayout then
+            hooksecurefunc(mainFrame, "UpdateLayout", function()
+                self:UpdateAllCooldownFrames()
+            end)
+            self.hookedUpdateLayout = true
         end
     end
     
-    if cooldownFrame then
-        self:ApplyCooldownManagerSkin(cooldownFrame)
+    if next(foundFrames) then
+        print("MidnightUI Cooldowns: Successfully skinned Cooldown Manager frames")
         self:UpdateAttachment()
     else
-        print("MidnightUI Cooldowns: Could not find Cooldown Manager frame. It may not be visible yet.")
+        print("MidnightUI Cooldowns: Cooldown Manager frames not found. Make sure you have enabled the Cooldown Manager in WoW's Edit Mode.")
     end
 end
 
@@ -153,56 +153,108 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         })
         frame:SetBackdropColor(unpack(db.backgroundColor))
         frame:SetBackdropBorderColor(unpack(db.borderColor))
+    elseif not frame.midnightBg then
+        -- Create background texture if no backdrop support
+        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND")
+        frame.midnightBg:SetTexture("Interface\\Buttons\\WHITE8X8")
+        frame.midnightBg:SetAllPoints(frame)
+        frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
+        
+        frame.midnightBorder = frame:CreateTexture(nil, "BORDER")
+        frame.midnightBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
+        frame.midnightBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", -2, 2)
+        frame.midnightBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 2, -2)
+        frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
     end
     
-    -- Style child cooldown icons
-    self:StyleCooldownChildren(frame)
-    
-    -- Hook to catch new children being added
-    if not self.hookedChildCreation then
-        hooksecurefunc(frame, "Show", function()
-            C_Timer.After(0.1, function()
-                self:StyleCooldownChildren(frame)
-            end)
-        end)
-        self.hookedChildCreation = true
-    end
+    -- Style child cooldown icons using the CooldownManagerIconTemplate
+    self:StyleCooldownIcons(frame)
     
     self.styledFrames[frame] = true
 end
 
-function Cooldowns:StyleCooldownChildren(parent)
-    if not parent or not parent.GetChildren then return end
+function Cooldowns:StyleCooldownIcons(parent)
+    if not parent then return end
     
     local db = self.db.profile
     
-    for _, child in ipairs({parent:GetChildren()}) do
-        if child and not child.midnightStyled then
-            -- Look for cooldown icon frames
-            if child.icon or child.Icon then
-                local icon = child.icon or child.Icon
-                
-                -- Crop the icon
-                if icon.SetTexCoord then
-                    icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-                end
-                
-                -- Add border
-                if not child.midnightBorder then
-                    child.midnightBorder = child:CreateTexture(nil, "OVERLAY")
-                    child.midnightBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
-                    child.midnightBorder:SetAllPoints(child)
-                    child.midnightBorder:SetColorTexture(unpack(db.borderColor))
-                    child.midnightBorder:SetDrawLayer("OVERLAY", 7)
-                end
-                
-                child.midnightStyled = true
+    -- Look for icon template instances
+    if parent.icons then
+        for _, icon in pairs(parent.icons) do
+            self:StyleSingleIcon(icon)
+        end
+    end
+    
+    -- Also check for direct children
+    if parent.GetChildren then
+        for _, child in ipairs({parent:GetChildren()}) do
+            -- Check if it's an icon frame
+            if child.icon or child.Icon or child.texture then
+                self:StyleSingleIcon(child)
             end
             
-            -- Recursively style children
+            -- Recursively check children
             if child.GetChildren then
-                self:StyleCooldownChildren(child)
+                self:StyleCooldownIcons(child)
             end
+        end
+    end
+end
+
+function Cooldowns:StyleSingleIcon(icon)
+    if not icon or icon.midnightStyled then return end
+    
+    local db = self.db.profile
+    
+    -- Find the icon texture
+    local iconTexture = icon.icon or icon.Icon or icon.texture
+    
+    if iconTexture and iconTexture.SetTexCoord then
+        -- Crop the icon
+        iconTexture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    end
+    
+    -- Add border around the icon
+    if not icon.midnightBorder then
+        icon.midnightBorder = icon:CreateTexture(nil, "OVERLAY")
+        icon.midnightBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
+        icon.midnightBorder:SetPoint("TOPLEFT", icon, "TOPLEFT", -2, 2)
+        icon.midnightBorder:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 2, -2)
+        icon.midnightBorder:SetColorTexture(unpack(db.borderColor))
+        icon.midnightBorder:SetDrawLayer("OVERLAY", 7)
+        
+        -- Create inner cutout
+        icon.midnightInner = icon:CreateTexture(nil, "BORDER")
+        icon.midnightInner:SetTexture("Interface\\Buttons\\WHITE8X8")
+        icon.midnightInner:SetAllPoints(icon)
+        icon.midnightInner:SetColorTexture(0, 0, 0, 1)
+    end
+    
+    -- Style cooldown text if it exists
+    if icon.cooldownText then
+        local fontPath = LSM:Fetch("font", db.font)
+        if fontPath then
+            icon.cooldownText:SetFont(fontPath, db.fontSize, db.fontFlag)
+        end
+    end
+    
+    -- Style duration text if it exists
+    if icon.durationText then
+        local fontPath = LSM:Fetch("font", db.font)
+        if fontPath then
+            icon.durationText:SetFont(fontPath, db.fontSize, db.fontFlag)
+        end
+    end
+    
+    icon.midnightStyled = true
+end
+
+function Cooldowns:UpdateAllCooldownFrames()
+    -- Called when CooldownManagerFrame updates its layout
+    -- Re-style any new icons that appeared
+    for frame in pairs(self.styledFrames) do
+        if frame and frame:IsShown() then
+            self:StyleCooldownIcons(frame)
         end
     end
 end
@@ -213,31 +265,49 @@ function Cooldowns:UpdateColors()
     -- Update all styled frames
     for frame in pairs(self.styledFrames) do
         if frame and frame:IsShown() then
+            -- Update backdrop colors
             if frame.SetBackdropColor then
                 frame:SetBackdropColor(unpack(db.backgroundColor))
-            end
-            if frame.SetBackdropBorderColor then
-                frame:SetBackdropBorderColor(unpack(db.borderColor))
+            elseif frame.midnightBg then
+                frame.midnightBg:SetColorTexture(unpack(db.backgroundColor))
             end
             
-            -- Update child borders
-            self:UpdateChildBorders(frame)
+            if frame.SetBackdropBorderColor then
+                frame.SetBackdropBorderColor(unpack(db.borderColor))
+            elseif frame.midnightBorder then
+                frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
+            end
+            
+            -- Update child icon borders
+            self:UpdateIconBorders(frame)
         end
     end
 end
 
-function Cooldowns:UpdateChildBorders(parent)
-    if not parent or not parent.GetChildren then return end
+function Cooldowns:UpdateIconBorders(parent)
+    if not parent then return end
     
     local db = self.db.profile
     
-    for _, child in ipairs({parent:GetChildren()}) do
-        if child and child.midnightBorder then
-            child.midnightBorder:SetColorTexture(unpack(db.borderColor))
+    -- Update icon borders in icons table
+    if parent.icons then
+        for _, icon in pairs(parent.icons) do
+            if icon and icon.midnightBorder then
+                icon.midnightBorder:SetColorTexture(unpack(db.borderColor))
+            end
         end
-        
-        if child.GetChildren then
-            self:UpdateChildBorders(child)
+    end
+    
+    -- Update child borders
+    if parent.GetChildren then
+        for _, child in ipairs({parent:GetChildren()}) do
+            if child and child.midnightBorder then
+                child.midnightBorder:SetColorTexture(unpack(db.borderColor))
+            end
+            
+            if child.GetChildren then
+                self:UpdateIconBorders(child)
+            end
         end
     end
 end
@@ -250,29 +320,35 @@ function Cooldowns:UpdateAttachment()
     
     -- Try to find the MidnightUI ResourceBars module
     local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
-    if not ResourceBars or not ResourceBars.primaryBar then return end
+    if not ResourceBars or not ResourceBars.primaryBar then 
+        print("MidnightUI Cooldowns: ResourceBars module not found or primary bar not created")
+        return 
+    end
     
     local db = self.db.profile
     local anchor = ResourceBars.primaryBar
     
-    -- Find a cooldown frame to attach
-    for frame in pairs(self.styledFrames) do
-        if frame and frame:IsShown() then
-            frame:ClearAllPoints()
-            
-            if db.attachPosition == "BOTTOM" then
-                frame:SetPoint("TOP", anchor, "BOTTOM", db.attachOffsetX, db.attachOffsetY)
-            elseif db.attachPosition == "TOP" then
-                frame:SetPoint("BOTTOM", anchor, "TOP", db.attachOffsetX, db.attachOffsetY)
-            elseif db.attachPosition == "LEFT" then
-                frame:SetPoint("RIGHT", anchor, "LEFT", db.attachOffsetX, db.attachOffsetY)
-            elseif db.attachPosition == "RIGHT" then
-                frame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
-            end
-            
-            break -- Only attach the first found frame
-        end
+    -- Find the main Cooldown Manager frame to attach
+    local mainFrame = _G["CooldownManagerFrame"]
+    if not mainFrame then
+        print("MidnightUI Cooldowns: CooldownManagerFrame not found for attachment")
+        return
     end
+    
+    -- Position relative to resource bar
+    mainFrame:ClearAllPoints()
+    
+    if db.attachPosition == "BOTTOM" then
+        mainFrame:SetPoint("TOP", anchor, "BOTTOM", db.attachOffsetX, db.attachOffsetY)
+    elseif db.attachPosition == "TOP" then
+        mainFrame:SetPoint("BOTTOM", anchor, "TOP", db.attachOffsetX, db.attachOffsetY)
+    elseif db.attachPosition == "LEFT" then
+        mainFrame:SetPoint("RIGHT", anchor, "LEFT", db.attachOffsetX, db.attachOffsetY)
+    elseif db.attachPosition == "RIGHT" then
+        mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
+    end
+    
+    print("MidnightUI Cooldowns: Attached CooldownManagerFrame to ResourceBar at", db.attachPosition)
 end
 
 -- -----------------------------------------------------------------------------
