@@ -618,10 +618,6 @@ function Cooldowns:UpdateAttachment()
         mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
     end
     
-    -- Make the frame ignore Edit Mode movements by setting it as user-placed
-    mainFrame:SetMovable(false)
-    mainFrame:SetUserPlaced(true)
-    
     -- Update frame grouping if enabled
     self:UpdateFrameGrouping()
     
