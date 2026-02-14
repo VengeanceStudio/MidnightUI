@@ -40,47 +40,36 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function Cooldowns:OnInitialize()
-    print("MidnightUI Cooldowns: OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
     self.styledFrames = {}
     self.hookedLayouts = {}
+    self.styledIcons = {}
 end
 
 function Cooldowns:OnDBReady()
-    print("MidnightUI Cooldowns: OnDBReady called")
-    
     if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.cooldowns then
-        print("MidnightUI Cooldowns: Module is DISABLED in settings")
         self:Disable()
         return
     end
-    
-    print("MidnightUI Cooldowns: Module is ENABLED, initializing...")
     
     self.db = MidnightUI.db:RegisterNamespace("Cooldowns", defaults)
     
     -- Register events
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("ADDON_LOADED")
-    
-    print("MidnightUI Cooldowns: Events registered, waiting for PLAYER_ENTERING_WORLD")
 end
 
 function Cooldowns:PLAYER_ENTERING_WORLD()
-    print("MidnightUI Cooldowns: PLAYER_ENTERING_WORLD fired")
-    
     -- Try immediately
     self:FindAndSkinCooldownManager()
     
     -- Try again after 1 second
     C_Timer.After(1, function()
-        print("MidnightUI Cooldowns: Trying again after 1 second...")
         self:FindAndSkinCooldownManager()
     end)
     
     -- Try again after 3 seconds (in case frames load late)
     C_Timer.After(3, function()
-        print("MidnightUI Cooldowns: Trying again after 3 seconds...")
         self:FindAndSkinCooldownManager()
     end)
 end
@@ -98,17 +87,7 @@ end
 -- FIND AND SKIN WOW 12.0 COOLDOWN MANAGER
 -- -----------------------------------------------------------------------------
 function Cooldowns:FindAndSkinCooldownManager()
-    if not self.db.profile.skinCooldownManager then 
-        print("MidnightUI Cooldowns: Skinning is disabled in settings")
-        return 
-    end
-    
-    print("MidnightUI Cooldowns: Searching for Cooldown Manager frames...")
-    
-    -- WoW 12.0 Cooldown Manager Frame Structure (actual frame names from /fstack):
-    -- - EssentialCooldownViewer (essential/rotational abilities)
-    -- - UtilityCooldownViewer (defensives/utility)
-    -- - BuffIconCooldownViewer (offensive buffs/procs)
+    if not self.db.profile.skinCooldownManager then return end
     
     local foundFrames = {}
     
@@ -123,27 +102,8 @@ function Cooldowns:FindAndSkinCooldownManager()
     for frameName, displayName in pairs(viewerFrames) do
         local frame = _G[frameName]
         if frame then
-            print("MidnightUI Cooldowns: Found", displayName, "("..frameName..")")
             self:ApplyCooldownManagerSkin(frame)
             foundFrames[frameName] = true
-        else
-            print("MidnightUI Cooldowns:", frameName, "not found (nil)")
-        end
-    end
-    
-    -- Also try to find any frame with "Cooldown" in the name
-    print("MidnightUI Cooldowns: Scanning all global frames for 'Cooldown' or 'Viewer'...")
-    local count = 0
-    for name, frame in pairs(_G) do
-        if type(frame) == "table" and frame.GetObjectType and pcall(frame.GetObjectType, frame) then
-            if type(name) == "string" and (name:find("Cooldown") or name:find("Viewer")) then
-                print("MidnightUI Cooldowns: Found global frame:", name)
-                count = count + 1
-                if count > 20 then
-                    print("MidnightUI Cooldowns: (stopping after 20 matches)")
-                    break
-                end
-            end
         end
     end
     
@@ -156,7 +116,6 @@ function Cooldowns:FindAndSkinCooldownManager()
                     self:StyleCooldownIcons(frame)
                 end)
                 self.hookedLayouts[frameName] = true
-                print("MidnightUI Cooldowns: Hooked UpdateLayout for", frameName)
             end
             
             -- Also hook Update if it exists
@@ -164,19 +123,12 @@ function Cooldowns:FindAndSkinCooldownManager()
                 hooksecurefunc(frame, "Update", function()
                     self:StyleCooldownIcons(frame)
                 end)
-                print("MidnightUI Cooldowns: Hooked Update for", frameName)
             end
         end
     end
     
     if next(foundFrames) then
-        local count = 0
-        for _ in pairs(foundFrames) do count = count + 1 end
-        print("MidnightUI Cooldowns: Successfully skinned", count, "Cooldown Manager viewer(s)")
         self:UpdateAttachment()
-    else
-        print("MidnightUI Cooldowns: No Cooldown Manager viewers found.")
-        print("MidnightUI Cooldowns: Make sure the Cooldown Manager is enabled in WoW's Edit Mode (ESC > Edit Mode)")
     end
 end
 
@@ -184,8 +136,6 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     if not frame or self.styledFrames[frame] then return end
     
     local db = self.db.profile
-    
-    print("MidnightUI Cooldowns: Applying skin to frame:", frame:GetName() or "unnamed")
     
     -- Apply scale
     if frame.SetScale then
@@ -217,7 +167,7 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.midnightBorder:SetColorTexture(unpack(db.borderColor))
     end
     
-    -- Style child cooldown icons using the CooldownManagerIconTemplate
+    -- Style child cooldown icons
     self:StyleCooldownIcons(frame)
     
     self.styledFrames[frame] = true
@@ -252,7 +202,7 @@ function Cooldowns:StyleCooldownIcons(parent)
 end
 
 function Cooldowns:StyleSingleIcon(icon)
-    if not icon or icon.midnightStyled then return end
+    if not icon or self.styledIcons[icon] then return end
     
     local db = self.db.profile
     
@@ -296,7 +246,7 @@ function Cooldowns:StyleSingleIcon(icon)
         end
     end
     
-    icon.midnightStyled = true
+    self.styledIcons[icon] = true
 end
 
 function Cooldowns:UpdateAllCooldownFrames()
@@ -370,20 +320,14 @@ function Cooldowns:UpdateAttachment()
     
     -- Try to find the MidnightUI ResourceBars module
     local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
-    if not ResourceBars or not ResourceBars.primaryBar then 
-        print("MidnightUI Cooldowns: ResourceBars module not found or primary bar not created")
-        return 
-    end
+    if not ResourceBars or not ResourceBars.primaryBar then return end
     
     local db = self.db.profile
     local anchor = ResourceBars.primaryBar
     
     -- Find the Essential Cooldown Viewer to attach (main one)
     local mainFrame = _G["EssentialCooldownViewer"]
-    if not mainFrame then
-        print("MidnightUI Cooldowns: EssentialCooldownViewer not found for attachment")
-        return
-    end
+    if not mainFrame then return end
     
     -- Position relative to resource bar
     mainFrame:ClearAllPoints()
@@ -397,8 +341,6 @@ function Cooldowns:UpdateAttachment()
     elseif db.attachPosition == "RIGHT" then
         mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
     end
-    
-    print("MidnightUI Cooldowns: Attached EssentialCooldownViewer to ResourceBar at", db.attachPosition)
 end
 
 -- -----------------------------------------------------------------------------
