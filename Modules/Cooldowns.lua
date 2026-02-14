@@ -235,42 +235,50 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame:SetBackdrop(nil)
     end
     
-    -- Hide NineSlice (Blizzard's common border system)
-    if frame.NineSlice then
-        frame.NineSlice:Hide()
-        frame.NineSlice:SetAlpha(0)
-        if frame.NineSlice.SetBorderBlendMode then
-            frame.NineSlice:SetBorderBlendMode("DISABLE")
+    -- Function to strip styling from a frame
+    local function StripTextures(f)
+        -- Hide NineSlice
+        if f.NineSlice then
+            f.NineSlice:Hide()
+            f.NineSlice:SetAlpha(0)
         end
-    end
-    
-    -- Hide all texture regions that look like borders or backgrounds
-    for i = 1, frame:GetNumRegions() do
-        local region = select(i, frame:GetRegions())
-        if region and region:GetObjectType() == "Texture" then
-            local texturePath = region:GetTexture()
-            -- Hide if it's a texture path (not nil or a texture object)
-            if texturePath and type(texturePath) == "string" then
-                region:Hide()
-                region:SetAlpha(0)
-            elseif type(texturePath) == "number" and texturePath > 0 then
-                -- Also hide if it has a texture ID
-                region:Hide()
-                region:SetAlpha(0)
+        
+        -- Hide all texture regions
+        for i = 1, f:GetNumRegions() do
+            local region = select(i, f:GetRegions())
+            if region and region:GetObjectType() == "Texture" then
+                -- Don't hide icon textures (they usually have "icon" in their name)
+                local regionName = region:GetName()
+                if not regionName or not regionName:lower():find("icon") then
+                    region:Hide()
+                    region:SetAlpha(0)
+                end
+            end
+        end
+        
+        -- Hide common named elements
+        local elementsToHide = {
+            "Background", "Bg", "Border", "NineSlice", "TopEdge", "BottomEdge",
+            "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
+            "BottomLeftCorner", "BottomRightCorner", "Center"
+        }
+        for _, elementName in ipairs(elementsToHide) do
+            if f[elementName] then
+                f[elementName]:Hide()
+                f[elementName]:SetAlpha(0)
             end
         end
     end
     
-    -- Hide common named background/border elements
-    local elementsToHide = {
-        "Background", "Bg", "Border", "NineSlice", "TopEdge", "BottomEdge",
-        "LeftEdge", "RightEdge", "TopLeftCorner", "TopRightCorner",
-        "BottomLeftCorner", "BottomRightCorner", "Center"
-    }
-    for _, elementName in ipairs(elementsToHide) do
-        if frame[elementName] then
-            frame[elementName]:Hide()
-            frame[elementName]:SetAlpha(0)
+    -- Strip textures from main frame
+    StripTextures(frame)
+    
+    -- Strip textures from all children (where the bars actually are)
+    for _, child in ipairs({frame:GetChildren()}) do
+        StripTextures(child)
+        -- Also strip from grandchildren
+        for _, grandchild in ipairs({child:GetChildren()}) do
+            StripTextures(grandchild)
         end
     end
     
