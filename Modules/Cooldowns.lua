@@ -347,9 +347,30 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         local parent = frame:GetParent() or UIParent
         
         frame.midnightBgFrame = CreateFrame("Frame", nil, parent)
-        frame.midnightBgFrame:SetAllPoints(frame)
         frame.midnightBgFrame:SetFrameStrata("BACKGROUND")
         frame.midnightBgFrame:SetFrameLevel(1)
+        
+        -- For BuffBar, we need to find the actual content container
+        if frameName == "BuffBarCooldownViewer" then
+            -- The bars are typically in a container child frame
+            -- Set initial points, but we'll adjust after layout
+            frame.midnightBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+            frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+            
+            -- Hook into layout updates to adjust background size
+            if not frame.midnightLayoutHooked then
+                frame:HookScript("OnSizeChanged", function()
+                    if frame.midnightBgFrame then
+                        frame.midnightBgFrame:ClearAllPoints()
+                        frame.midnightBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+                        frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+                    end
+                end)
+                frame.midnightLayoutHooked = true
+            end
+        else
+            frame.midnightBgFrame:SetAllPoints(frame)
+        end
         
         -- Background texture
         frame.midnightBg = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND")
@@ -416,7 +437,14 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         -- Make sure the background frame updates position if the viewer moves
         frame:HookScript("OnUpdate", function()
             if frame.midnightBgFrame then
-                frame.midnightBgFrame:SetAllPoints(frame)
+                if frameName == "BuffBarCooldownViewer" then
+                    -- For BuffBar, use manual points to ensure proper sizing
+                    frame.midnightBgFrame:ClearAllPoints()
+                    frame.midnightBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+                    frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+                else
+                    frame.midnightBgFrame:SetAllPoints(frame)
+                end
             end
         end)
     else
