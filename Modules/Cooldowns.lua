@@ -133,21 +133,13 @@ function Cooldowns:ADDON_LOADED(event, addonName)
 end
 
 function Cooldowns:EDIT_MODE_LAYOUTS_UPDATED()
-    -- Reapply positioning when exiting Edit Mode with multiple attempts
-    -- Blizzard may restore positions after this event, so we need several tries
+    -- Immediately reapply positioning when Edit Mode updates layouts
+    -- This happens when entering AND exiting Edit Mode
+    self:UpdateAttachment()
+    self:UpdateFrameGrouping()
+    
+    -- Also reapply after a delay to catch late updates
     C_Timer.After(0.1, function()
-        self:UpdateAttachment()
-        self:UpdateFrameGrouping()
-    end)
-    C_Timer.After(0.3, function()
-        self:UpdateAttachment()
-        self:UpdateFrameGrouping()
-    end)
-    C_Timer.After(0.5, function()
-        self:UpdateAttachment()
-        self:UpdateFrameGrouping()
-    end)
-    C_Timer.After(1, function()
         self:UpdateAttachment()
         self:UpdateFrameGrouping()
     end)
@@ -626,38 +618,9 @@ function Cooldowns:UpdateAttachment()
         mainFrame:SetPoint("LEFT", anchor, "RIGHT", db.attachOffsetX, db.attachOffsetY)
     end
     
-    -- Update Edit Mode's saved position to match our positioning
-    C_Timer.After(0, function()
-        if EditModeManagerFrame and mainFrame then
-            local point, relativeTo, relativePoint, x, y = mainFrame:GetPoint()
-            
-            -- Try to update the Edit Mode system
-            if mainFrame.system then
-                pcall(function()
-                    if mainFrame.system.SetPoint then
-                        mainFrame.system:SetPoint(point, relativeTo, relativePoint, x, y)
-                    end
-                    
-                    -- Update saved layout data
-                    if EditModeManagerFrame.GetActiveLayout then
-                        local layout = EditModeManagerFrame:GetActiveLayout()
-                        if layout and mainFrame.system.systemIndex then
-                            local systemInfo = layout:GetSystemInfo(mainFrame.system.systemIndex)
-                            if systemInfo then
-                                systemInfo.anchorInfo = {
-                                    point = point,
-                                    relativeTo = relativeTo and relativeTo:GetName() or "UIParent",
-                                    relativePoint = relativePoint,
-                                    offsetX = x,
-                                    offsetY = y
-                                }
-                            end
-                        end
-                    end
-                end)
-            end
-        end
-    end)
+    -- Make the frame ignore Edit Mode movements by setting it as user-placed
+    mainFrame:SetMovable(false)
+    mainFrame:SetUserPlaced(true)
     
     -- Update frame grouping if enabled
     self:UpdateFrameGrouping()
