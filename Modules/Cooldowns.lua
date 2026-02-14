@@ -40,35 +40,47 @@ local defaults = {
 -- INITIALIZATION
 -- -----------------------------------------------------------------------------
 function Cooldowns:OnInitialize()
+    print("MidnightUI Cooldowns: OnInitialize called")
     self:RegisterMessage("MIDNIGHTUI_DB_READY", "OnDBReady")
     self.styledFrames = {}
     self.hookedLayouts = {}
 end
 
 function Cooldowns:OnDBReady()
+    print("MidnightUI Cooldowns: OnDBReady called")
+    
     if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.cooldowns then
+        print("MidnightUI Cooldowns: Module is DISABLED in settings")
         self:Disable()
         return
     end
+    
+    print("MidnightUI Cooldowns: Module is ENABLED, initializing...")
     
     self.db = MidnightUI.db:RegisterNamespace("Cooldowns", defaults)
     
     -- Register events
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("ADDON_LOADED")
+    
+    print("MidnightUI Cooldowns: Events registered, waiting for PLAYER_ENTERING_WORLD")
 end
 
 function Cooldowns:PLAYER_ENTERING_WORLD()
+    print("MidnightUI Cooldowns: PLAYER_ENTERING_WORLD fired")
+    
     -- Try immediately
     self:FindAndSkinCooldownManager()
     
     -- Try again after 1 second
     C_Timer.After(1, function()
+        print("MidnightUI Cooldowns: Trying again after 1 second...")
         self:FindAndSkinCooldownManager()
     end)
     
     -- Try again after 3 seconds (in case frames load late)
     C_Timer.After(3, function()
+        print("MidnightUI Cooldowns: Trying again after 3 seconds...")
         self:FindAndSkinCooldownManager()
     end)
 end
