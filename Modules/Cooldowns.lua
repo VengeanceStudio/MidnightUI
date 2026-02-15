@@ -383,18 +383,13 @@ end
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    -- Check if C_CooldownViewer exists
+    -- Dump all C_CooldownViewer functions
     if C_CooldownViewer then
-        print("C_CooldownViewer EXISTS!")
-        if C_CooldownViewer.GetValidAlertTypes then
-            print("  GetValidAlertTypes exists")
+        print("=== C_CooldownViewer functions ===")
+        for k, v in pairs(C_CooldownViewer) do
+            print(string.format("  %s = %s", k, type(v)))
         end
-        if C_CooldownViewer.GetTrackedCooldowns then
-            print("  GetTrackedCooldowns exists")
-        end
-        if C_CooldownViewer.GetCooldownInfo then
-            print("  GetCooldownInfo exists")
-        end
+        print("===================================")
     end
     
     local blizzFrame = _G["BuffBarCooldownViewer"]
