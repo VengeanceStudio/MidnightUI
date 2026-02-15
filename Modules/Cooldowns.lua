@@ -926,38 +926,38 @@ function Cooldowns:CreateBar(parent, index)
     bar:SetValue(1)
     bar:Hide()
     
-    -- Add border
+    -- Add border (1px outside the bar)
     bar:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
         edgeSize = 1,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
-    bar:SetBackdropColor(0, 0, 0, 0)  -- Transparent background (statusbar will show through)
     local br, bg, bb, ba = unpack(db.barBorderColor)
     bar:SetBackdropBorderColor(br, bg, bb, ba)  -- Configurable border color
     
-    -- Background
-    bar.bg = bar:CreateTexture(nil, "BACKGROUND")
+    -- Background behind the status bar (darker color for empty portion)
+    bar.bg = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
     bar.bg:SetTexture("Interface\\Buttons\\WHITE8X8")
-    bar.bg:SetAllPoints()
-    bar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.5)
+    bar.bg:SetPoint("TOPLEFT", bar, "TOPLEFT", 1, -1)
+    bar.bg:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", -1, 1)
+    bar.bg:SetVertexColor(0.1, 0.1, 0.1, 0.8)
     
-    -- Icon
+    -- Icon (if enabled)
+    bar.icon = nil
     if db.showIcons then
-        bar.icon = bar:CreateTexture(nil, "ARTWORK")
-        bar.icon:SetSize(db.iconSize, db.iconSize)
+        bar.icon = bar:CreateTexture(nil, "OVERLAY")
+        bar.icon:SetSize(db.barHeight - 2, db.barHeight - 2)
         bar.icon:SetPoint("LEFT", bar, "LEFT", 2, 0)
         bar.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
     end
     
-    -- Name text
+    -- Name text (high sublevel to ensure visibility)
     local fontPath = LSM:Fetch("font", db.font)
     local fontFlag = db.fontFlag or "OUTLINE"
-    bar.name = bar:CreateFontString(nil, "OVERLAY")
+    bar.name = bar:CreateFontString(nil, "OVERLAY", nil, 7)
     bar.name:SetFont(fontPath, db.fontSize, fontFlag)
-    if db.showIcons then
+    if db.showIcons and bar.icon then
         bar.name:SetPoint("LEFT", bar.icon, "RIGHT", 4, 0)
     else
         bar.name:SetPoint("LEFT", bar, "LEFT", 4, 0)
@@ -966,7 +966,7 @@ function Cooldowns:CreateBar(parent, index)
     bar.name:SetTextColor(1, 1, 1)
     
     -- Timer text (always create it, just hide if not needed)
-    bar.timer = bar:CreateFontString(nil, "OVERLAY")
+    bar.timer = bar:CreateFontString(nil, "OVERLAY", nil, 7)
     bar.timer:SetFont(fontPath, db.fontSize, fontFlag)
     bar.timer:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
     bar.timer:SetJustifyH("RIGHT")
@@ -976,8 +976,9 @@ function Cooldowns:CreateBar(parent, index)
     end
     
     -- Stack count
-    if db.showIcons then
-        bar.stack = bar:CreateFontString(nil, "OVERLAY")
+    bar.stack = nil
+    if db.showIcons and bar.icon then
+        bar.stack = bar:CreateFontString(nil, "OVERLAY", nil, 7)
         bar.stack:SetFont(fontPath, db.fontSize + 2, fontFlag)
         bar.stack:SetPoint("LEFT", bar.icon, "BOTTOMLEFT", 0, 0)
         bar.stack:SetJustifyH("LEFT")
