@@ -379,7 +379,7 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data - pass through Blizzard's bar frames directly
+-- WoW 12.0: Get tracked bars data - hybrid approach for combat/non-combat
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
@@ -389,17 +389,31 @@ function Cooldowns:GetTrackedBarsData()
         return cooldowns
     end
     
-    -- Iterate through bars - but use the bar's visibility as the filter
+    local inCombat = InCombatLockdown()
+    
+    -- Iterate through bars
     for i = 1, blizzFrame:GetNumChildren() do
         local child = select(i, blizzFrame:GetChildren())
         if child and child.Bar then
             local bar = child.Bar
             
-            -- Check alpha - Blizzard might hide bars by setting alpha to 0
-            local barAlpha = bar:GetAlpha()
+            local shouldShow = false
             
-            -- Only include bars that Blizzard is showing (alpha > 0)
-            if barAlpha and barAlpha > 0 then
+            if inCombat then
+                -- In combat: Use alpha (Blizzard sets alpha=0 for inactive bars)
+                local barAlpha = bar:GetAlpha()
+                if barAlpha and barAlpha > 0 then
+                    shouldShow = true
+                end
+            else
+                -- Out of combat: Check value > 0 (can compare safely)
+                local ok, value = pcall(function() return bar:GetValue() end)
+                if ok and value and value > 0 then
+                    shouldShow = true
+                end
+            end
+            
+            if shouldShow then
                 -- Pass through the bar data
                 local data = {
                     icon = bar.Icon and bar.Icon:GetTexture() or 136243,
