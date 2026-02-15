@@ -180,21 +180,35 @@ function Cooldowns:StripBlizzardBorders(frame)
             end
         end
         
-        -- If this is a StatusBar, hide its border textures
+        -- If this is a StatusBar, hide its border textures but keep background
         if f.GetStatusBarTexture then
             local barTexture = f:GetStatusBarTexture()
-            -- Hide ALL textures that aren't the main bar fill
+            -- Hide textures that are borders, but keep bar fill and background
             for i = 1, f:GetNumRegions() do
                 local region = select(i, f:GetRegions())
                 if region and region:GetObjectType() == "Texture" and region ~= barTexture then
-                    region:SetDrawLayer("BACKGROUND", -8)
-                    region:Hide()
-                    region:SetAlpha(0)
-                    if not region.midnightHooked then
-                        hooksecurefunc(region, "Show", function()
-                            region:Hide()
-                        end)
-                        region.midnightHooked = true
+                    local width, height = region:GetSize()
+                    local drawLayer = region:GetDrawLayer()
+                    
+                    -- Only hide if it's clearly a border (thin texture)
+                    -- Keep backgrounds which are typically full-sized
+                    local shouldHide = false
+                    if width and height and ((width < 10) or (height < 10)) then
+                        shouldHide = true
+                    elseif drawLayer == "BORDER" then
+                        shouldHide = true
+                    end
+                    
+                    if shouldHide then
+                        region:SetDrawLayer("BACKGROUND", -8)
+                        region:Hide()
+                        region:SetAlpha(0)
+                        if not region.midnightHooked then
+                            hooksecurefunc(region, "Show", function()
+                                region:Hide()
+                            end)
+                            region.midnightHooked = true
+                        end
                     end
                 end
             end
@@ -346,42 +360,10 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     if not frame.midnightBgFrame then
         local parent = frame:GetParent() or UIParent
         
-        -- For BuffBar, find the actual container with the bars
-        local targetFrame = frame
-        if frameName == "BuffBarCooldownViewer" then
-            -- BuffBar has a ScrollChild or container - find it
-            for _, child in ipairs({frame:GetChildren()}) do
-                if child:GetObjectType() == "Frame" and child:GetNumChildren() > 0 then
-                    -- This is likely the container with the actual bars
-                    targetFrame = child
-                    break
-                end
-            end
-        end
-        
         frame.midnightBgFrame = CreateFrame("Frame", nil, parent)
-        frame.midnightBgFrame:SetFrameStrata("BACKGROUND")
-        frame.midnightBgFrame:SetFrameLevel(1)
-        
-        -- Set points based on target frame
-        if frameName == "BuffBarCooldownViewer" then
-            frame.midnightBgFrame:SetPoint("TOPLEFT", targetFrame, "TOPLEFT", -2, 2)
-            frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", targetFrame, "BOTTOMRIGHT", 2, -2)
-            
-            -- Hook to keep it sized correctly
-            if not frame.midnightLayoutHooked then
-                targetFrame:HookScript("OnSizeChanged", function()
-                    if frame.midnightBgFrame then
-                        frame.midnightBgFrame:ClearAllPoints()
-                        frame.midnightBgFrame:SetPoint("TOPLEFT", targetFrame, "TOPLEFT", -2, 2)
-                        frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", targetFrame, "BOTTOMRIGHT", 2, -2)
-                    end
-                end)
-                frame.midnightLayoutHooked = true
-            end
-        else
-            frame.midnightBgFrame:SetAllPoints(frame)
-        end
+        frame.midnightBgFrame:SetAllPoints(frame)
+        frame.midnightBgFrame:SetFrameStrata("LOW")
+        frame.midnightBgFrame:SetFrameLevel(frame:GetFrameLevel() - 1)
         
         -- Background texture
         frame.midnightBg = frame.midnightBgFrame:CreateTexture(nil, "BACKGROUND")
@@ -445,19 +427,10 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
             frame.midnightBorderRight:Hide()
         end
         
-        -- Store target frame reference for updates
-        frame.midnightTargetFrame = targetFrame
-        
         -- Make sure the background frame updates position if the viewer moves
         frame:HookScript("OnUpdate", function()
-            if frame.midnightBgFrame and frame.midnightTargetFrame then
-                if frameName == "BuffBarCooldownViewer" then
-                    frame.midnightBgFrame:ClearAllPoints()
-                    frame.midnightBgFrame:SetPoint("TOPLEFT", frame.midnightTargetFrame, "TOPLEFT", -2, 2)
-                    frame.midnightBgFrame:SetPoint("BOTTOMRIGHT", frame.midnightTargetFrame, "BOTTOMRIGHT", 2, -2)
-                else
-                    frame.midnightBgFrame:SetAllPoints(frame)
-                end
+            if frame.midnightBgFrame then
+                frame.midnightBgFrame:SetAllPoints(frame)
             end
         end)
     else
