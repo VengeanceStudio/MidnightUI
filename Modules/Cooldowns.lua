@@ -430,8 +430,6 @@ function Cooldowns:GetTrackedBarsData()
             if spellInfo then
                 print("Cooldown " .. i .. ": " .. spellInfo.name .. " -> Bar: " .. barData.name)
                 local bar = barData.bar
-            
-            if spellInfo then
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
                 -- Determine if this bar is active
