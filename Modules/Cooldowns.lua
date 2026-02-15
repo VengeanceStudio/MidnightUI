@@ -1208,18 +1208,34 @@ function Cooldowns:UpdateIconDisplay(frame)
                 -- Normal number (out of combat or whitelisted spell)
                 -- Only show if max > 1 or if we know it's a charge-based spell
                 local showCharges = false
-                if maxType == "number" and max > 1 then
-                    showCharges = true
-                elseif current ~= 1 then
-                    showCharges = true
+                
+                -- Even if type is "number", need pcall for comparison (WoW 12.0 secret protection)
+                if maxType == "number" and max then
+                    local ok, result = pcall(function() return max > 1 end)
+                    if ok and result then
+                        showCharges = true
+                    end
+                end
+                
+                if not showCharges and current then
+                    local ok, result = pcall(function() return current ~= 1 end)
+                    if ok and result then
+                        showCharges = true
+                    end
                 end
                 
                 if showCharges then
                     icon.stackText:SetText(string.format("%d", current))
                     icon.stackText:Show()
                     
-                    -- Visual feedback based on charge availability
-                    if current == 0 then
+                    -- Visual feedback based on charge availability (with pcall)
+                    local isZero = false
+                    if current then
+                        local ok, result = pcall(function() return current == 0 end)
+                        if ok then isZero = result end
+                    end
+                    
+                    if isZero then
                         icon.texture:SetDesaturated(true)
                         icon.stackText:SetTextColor(1, 0, 0) -- Red for 0 charges
                     else
