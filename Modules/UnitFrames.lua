@@ -512,8 +512,9 @@ local function GetTagValue(tagName, unit)
             end
             
             if ok and pct ~= nil then
-                -- Return the raw value directly (SetText handles secret values)
-                return pct
+                -- Format as whole number percentage
+                local formatted = string.format("%.0f%%", pct)
+                return formatted
             end
         end
         
@@ -528,7 +529,7 @@ local function GetTagValue(tagName, unit)
             if ppNum and maxNum and type(ppNum) == "number" and type(maxNum) == "number" and maxNum > 0 then
                 local ok, pct = pcall(function() return math.floor((ppNum / maxNum) * 100) end)
                 if ok and pct and type(pct) == "number" then
-                    return tostring(pct)
+                    return string.format("%.0f%%", pct)
                 end
             end
         end
