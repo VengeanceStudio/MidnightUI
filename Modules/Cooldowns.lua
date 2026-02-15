@@ -215,6 +215,7 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.icons = {}
+        f.activeIcons = {}
         f.displayType = "essential"
         f:Show()
         self.customFrames.essential = f
@@ -237,6 +238,7 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.icons = {}
+        f.activeIcons = {}
         f.displayType = "utility"
         f:Show()
         self.customFrames.utility = f
@@ -259,6 +261,7 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.icons = {}
+        f.activeIcons = {}
         f.displayType = "buffs"
         f:Show()
         self.customFrames.buffs = f
@@ -281,6 +284,7 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.bars = {}
+        f.activeBars = {}
         f.displayType = "cooldowns"
         f:Show()
         self.customFrames.cooldowns = f
