@@ -288,13 +288,12 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, check if they have a Bar element AND a valid auraInstanceID
-            -- Pooled frames always have Bar but only active ones have auraInstanceID
-            local hasBar = child.Bar ~= nil
-            local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
-            shouldInclude = hasBar and hasValidAura
+            -- For tracked bars, just include all children with Bar element
+            -- Unlike buffs, bars don't use auraInstanceID for filtering
+            -- We'll rely on icon extraction to filter valid bars
+            shouldInclude = child.Bar ~= nil
             
-            print("  Child has Bar:", hasBar, "has auraInstanceID:", hasValidAura, "shouldInclude:", shouldInclude)
+            print("  Child has Bar:", child.Bar ~= nil, "shouldInclude:", shouldInclude)
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
