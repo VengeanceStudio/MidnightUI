@@ -471,19 +471,41 @@ function Cooldowns:GetCooldownData(displayName)
                 
                 -- For essential and utility cooldowns, get charges from spell charges API (WoW 12.0)
                 if displayName == "essential" or displayName == "utility" then
-                    -- Try to find spellID from the child frame
+                    -- Try multiple methods to find spellID from the child frame
                     local spellID = child.spellID
+                    
+                    -- Try alternate spellID locations
+                    if not spellID and child.spell then
+                        spellID = child.spell
+                    end
+                    if not spellID and child.Spell then
+                        spellID = child.Spell
+                    end
+                    if not spellID and child.GetSpellID then
+                        spellID = child:GetSpellID()
+                    end
+                    
+                    -- Try to get spell name and lookup spellID
+                    if not spellID and data.name and data.name ~= "" then
+                        -- Try to find the spell ID from the spell name
+                        local spellInfo = C_Spell.GetSpellInfo(data.name)
+                        if spellInfo and spellInfo.spellID then
+                            spellID = spellInfo.spellID
+                        end
+                    end
+                    
                     if spellID then
+                        data.spellID = spellID -- Store for later use
                         local chargeInfo = C_Spell.GetSpellCharges(spellID)
-                        if chargeInfo and chargeInfo.currentCharges then
+                        if chargeInfo then
                             -- Handle Secret Values in restricted combat (12.0 security)
-                            if type(chargeInfo.currentCharges) == "number" then
-                                data.charges = chargeInfo.currentCharges
-                                data.maxCharges = chargeInfo.maxCharges
-                            else
-                                -- Secret Value detected - use last known value or hide
-                                data.charges = nil
-                                data.maxCharges = nil
+                            if chargeInfo.currentCharges and type(chargeInfo.currentCharges) == "number" then
+                                -- Use Applications charge count if available, otherwise use API
+                                if not data.charges or data.charges == 1 then
+                                    data.charges = chargeInfo.currentCharges
+                                end
+                                -- Always get maxCharges from API
+                                data.maxCharges = chargeInfo.maxCharges or 1
                             end
                         end
                     end
@@ -1108,10 +1130,21 @@ function Cooldowns:UpdateIconDisplay(frame)
         end
         
         -- Handle charges (WoW 12.0 display logic)
-        if cooldownData.maxCharges and cooldownData.maxCharges > 1 then
+        -- Show charges if we have charge data and either maxCharges > 1 OR charges is explicitly set
+        local hasCharges = (cooldownData.maxCharges and cooldownData.maxCharges > 1) or 
+                          (cooldownData.charges and cooldownData.charges ~= 1)
+        
+        if hasCharges then
             -- Show charge count
             local current = cooldownData.charges or 0
-            icon.stackText:SetText(current)
+            local max = cooldownData.maxCharges or 1
+            
+            -- Display as "current/max" or just "current" if max is unknown
+            if max > 1 then
+                icon.stackText:SetText(string.format("%d", current))
+            else
+                icon.stackText:SetText(string.format("%d", current))
+            end
             icon.stackText:Show()
             
             -- Desaturate and color text if 0 charges
@@ -1130,7 +1163,7 @@ function Cooldowns:UpdateIconDisplay(frame)
                 icon:HideOverlayGlow()
             end
         else
-            -- No charge system or only 1 charge - hide charge counter
+            -- No charge system - hide charge counter
             icon.stackText:Hide()
             icon.texture:SetDesaturated(false)
             icon.stackText:SetTextColor(1, 1, 1)
