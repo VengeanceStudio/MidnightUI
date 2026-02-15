@@ -521,14 +521,16 @@ function Cooldowns:GetCooldownData(displayName)
                         data.spellID = spellID -- Store for later use
                         local chargeInfo = C_Spell.GetSpellCharges(spellID)
                         if chargeInfo then
-                            -- Handle Secret Values in restricted combat (12.0 security)
-                            if chargeInfo.currentCharges and type(chargeInfo.currentCharges) == "number" then
+                            -- Store charge values even if they're secret (WoW 12.0 pass-through)
+                            -- FontString can render secret values even though we can't read them
+                            if chargeInfo.currentCharges then
                                 -- Use Applications charge count if available, otherwise use API
                                 if not data.charges or data.charges == 1 then
-                                    data.charges = chargeInfo.currentCharges
+                                    data.charges = chargeInfo.currentCharges -- Store even if secret
                                 end
-                                -- Always get maxCharges from API
-                                data.maxCharges = chargeInfo.maxCharges or 1
+                            end
+                            if chargeInfo.maxCharges then
+                                data.maxCharges = chargeInfo.maxCharges -- Store even if secret
                             end
                         end
                     end
