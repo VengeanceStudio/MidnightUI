@@ -383,29 +383,72 @@ end
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    if not C_CooldownViewer or not C_CooldownViewer.GetCooldownViewerCategorySet then
+    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
         return cooldowns
     end
     
-    -- Check if Enum.CooldownViewerCategory exists
-    if Enum and Enum.CooldownViewerCategory then
-        print("=== Enum.CooldownViewerCategory ===")
-        for k, v in pairs(Enum.CooldownViewerCategory) do
-            print(string.format("  %s = %s", k, tostring(v)))
+    -- Get tracked bar cooldowns (TrackedBar = 3)
+    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
+    if not trackedIDs then
+        return cooldowns
+    end
+    
+    -- Debug: Check first cooldown info structure
+    if #trackedIDs > 0 then
+        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(trackedIDs[1])
+        if info then
+            print("=== GetCooldownViewerCooldownInfo fields ===")
+            for k, v in pairs(info) do
+                print(string.format("  %s = %s", k, tostring(v)))
+            end
+            print("===")
+        end
+    end
+    
+    -- Process each tracked bar cooldown
+    for _, cooldownID in ipairs(trackedIDs) do
+        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
+        
+        -- Try various fields to determine if active
+        if info then
+            local spellID = info.spellID or cooldownID
+            local spellInfo = C_Spell.GetSpellInfo(spellID)
+            local iconTexture = C_Spell.GetSpellTexture(spellID)
             
-            -- Try getting cooldowns for this category
-            local ok, result = pcall(function() 
-                return C_CooldownViewer.GetCooldownViewerCategorySet(v) 
-            end)
-            
-            if ok and result and #result > 0 then
-                print(string.format("    SUCCESS! Got %d cooldowns", #result))
+            if spellInfo and iconTexture then
+                local data = {
+                    icon = iconTexture,
+                    name = spellInfo.name or "",
+                    spellID = spellID,
+                    remainingTime = 0,
+                    charges = 1,
+                }
+                
+                -- Get duration from info (check various field names)
+                if info.startTime and info.duration then
+                    local remaining = (info.startTime + info.duration) - GetTime()
+                    if remaining > 0 then
+                        data.remainingTime = remaining
+                        data.duration = info.duration
+                    end
+                elseif info.expirationTime then
+                    local remaining = info.expirationTime - GetTime()
+                    if remaining > 0 then
+                        data.remainingTime = remaining
+                    end
+                end
+                
+                table.insert(cooldowns, data)
             end
         end
-        print("===================================")
-    else
-        print("Enum.CooldownViewerCategory does not exist")
     end
+    
+    return cooldowns
+end
+
+-- Keep the old frame-based method as fallback
+function Cooldowns:GetTrackedBarsDataFallback()
+    local cooldowns = {}
     
     local blizzFrame = _G["BuffBarCooldownViewer"]
     if not blizzFrame then
