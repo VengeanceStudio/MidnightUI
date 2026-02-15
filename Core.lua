@@ -2144,11 +2144,11 @@ function MidnightUI:SkinConfigFrame(frame)
             frame.logoTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -18)
         end
         
-        -- Create draggable area over the top portion of the frame
+        -- Create draggable area over the top portion of the frame (excluding close button area)
         if not frame.dragArea then
             frame.dragArea = CreateFrame("Frame", nil, frame)
             frame.dragArea:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-            frame.dragArea:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+            frame.dragArea:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -50, 0)  -- Leave 50px for close button
             frame.dragArea:SetHeight(100)
             frame.dragArea:EnableMouse(true)
             frame.dragArea:RegisterForDrag("LeftButton")
