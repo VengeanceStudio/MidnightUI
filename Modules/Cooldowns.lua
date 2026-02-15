@@ -272,14 +272,6 @@ function Cooldowns:GetCooldownData(displayName)
     local cooldowns = {}
     local children = {blizzFrame:GetChildren()}
     
-    -- Debug output for tracked bars
-    if displayName == "cooldowns" then
-        print("MidnightUI Debug: Found", #children, "children in BuffBarCooldownViewer")
-        for i, child in ipairs(children) do
-            print("  Child", i, "- Has Bar:", child.Bar ~= nil, "Has Icon:", child.Icon ~= nil, "Width:", child:GetWidth(), "auraInstanceID:", child.auraInstanceID or "nil")
-        end
-    end
-    
     for _, child in ipairs(children) do
         -- For tracked buffs, check if frame has valid data
         -- For tracked bars, check if they have bar element and valid auraInstanceID
@@ -307,18 +299,35 @@ function Cooldowns:GetCooldownData(displayName)
         if hasContent and shouldInclude then
             local iconTexture = nil
             
+            -- Debug for bars
+            if displayName == "cooldowns" then
+                print("MidnightUI Debug: Processing bar with auraInstanceID:", child.auraInstanceID, "Bar.Icon exists:", child.Bar and child.Bar.Icon ~= nil)
+            end
+            
             -- For tracked bars, get icon from Bar.Icon
             if displayName == "cooldowns" and child.Bar and child.Bar.Icon then
                 if child.Bar.Icon.GetTexture then
                     iconTexture = child.Bar.Icon:GetTexture()
+                    if displayName == "cooldowns" then
+                        print("  Got texture from Bar.Icon:GetTexture():", iconTexture)
+                    end
                 elseif child.Bar.Icon.Texture then
                     iconTexture = child.Bar.Icon.Texture:GetTexture()
+                    if displayName == "cooldowns" then
+                        print("  Got texture from Bar.Icon.Texture:GetTexture():", iconTexture)
+                    end
                 else
                     -- Look for texture children in Bar.Icon
                     local regions = {child.Bar.Icon:GetRegions()}
+                    if displayName == "cooldowns" then
+                        print("  Searching", #regions, "regions in Bar.Icon")
+                    end
                     for _, region in ipairs(regions) do
                         if region:GetObjectType() == "Texture" then
                             iconTexture = region:GetTexture()
+                            if displayName == "cooldowns" then
+                                print("  Found texture in region:", iconTexture)
+                            end
                             if iconTexture then break end
                         end
                     end
