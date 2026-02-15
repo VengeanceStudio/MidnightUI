@@ -407,8 +407,16 @@ function Cooldowns:SetupMoveMode(displayName, displayTitle, dbKey)
     frame.movableHighlightLabel:SetShadowColor(0, 0, 0, 1)
     frame.movableHighlightFrame:Hide() -- Hide by default
     
-    -- Enable alpha for move mode fading
-    frame.SetAlpha = frame.SetAlpha or function(self, alpha)
+    -- Store original SetAlpha and create custom one for move mode fading
+    if not frame.originalSetAlpha then
+        frame.originalSetAlpha = frame.SetAlpha
+    end
+    frame.SetAlpha = function(self, alpha)
+        -- Call original SetAlpha if it exists
+        if self.originalSetAlpha then
+            self.originalSetAlpha(self, alpha)
+        end
+        -- Also fade all icons/bars
         for _, icon in pairs(self.icons or {}) do
             if icon:IsShown() then
                 icon:SetAlpha(alpha)
