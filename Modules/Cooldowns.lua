@@ -393,15 +393,20 @@ function Cooldowns:GetTrackedBarsData()
         return cooldowns
     end
     
-    -- Debug: Check first cooldown info structure
-    if #trackedIDs > 0 then
-        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(trackedIDs[1])
-        if info then
-            print("=== GetCooldownViewerCooldownInfo fields ===")
-            for k, v in pairs(info) do
-                print(string.format("  %s = %s", k, tostring(v)))
+    -- Get the Blizzard frame for duration info
+    local blizzFrame = _G["BuffBarCooldownViewer"]
+    local frameBars = {}
+    
+    if blizzFrame then
+        for i = 1, blizzFrame:GetNumChildren() do
+            local child = select(i, blizzFrame:GetChildren())
+            if child and child.Bar then
+                local bar = child.Bar
+                -- Match by spell ID
+                if bar.spellID then
+                    frameBars[bar.spellID] = bar
+                end
             end
-            print("===")
         end
     end
     
@@ -409,9 +414,9 @@ function Cooldowns:GetTrackedBarsData()
     for _, cooldownID in ipairs(trackedIDs) do
         local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
         
-        -- Try various fields to determine if active
-        if info then
-            local spellID = info.spellID or cooldownID
+        -- Only show bars that have an active aura (hasAura = true)
+        if info and info.hasAura and info.isKnown then
+            local spellID = info.overrideSpellID or info.spellID or cooldownID
             local spellInfo = C_Spell.GetSpellInfo(spellID)
             local iconTexture = C_Spell.GetSpellTexture(spellID)
             
@@ -424,101 +429,27 @@ function Cooldowns:GetTrackedBarsData()
                     charges = 1,
                 }
                 
-                -- Get duration from info (check various field names)
-                if info.startTime and info.duration then
-                    local remaining = (info.startTime + info.duration) - GetTime()
-                    if remaining > 0 then
+                -- Get duration from the actual frame bar if available
+                local bar = frameBars[spellID]
+                if bar then
+                    -- Use pass-through to avoid secret value issues in combat
+                    local ok, remaining = pcall(function()
+                        return bar:GetValue()
+                    end)
+                    if ok and remaining and remaining > 0 then
                         data.remainingTime = remaining
-                        data.duration = info.duration
-                    end
-                elseif info.expirationTime then
-                    local remaining = info.expirationTime - GetTime()
-                    if remaining > 0 then
-                        data.remainingTime = remaining
+                        
+                        -- Get max duration
+                        local maxOk, maxDuration = pcall(function()
+                            return select(2, bar:GetMinMaxValues())
+                        end)
+                        if maxOk and maxDuration then
+                            data.duration = maxDuration
+                        end
                     end
                 end
                 
                 table.insert(cooldowns, data)
-            end
-        end
-    end
-    
-    return cooldowns
-end
-
--- Keep the old frame-based method as fallback
-function Cooldowns:GetTrackedBarsDataFallback()
-    local cooldowns = {}
-    
-    local blizzFrame = _G["BuffBarCooldownViewer"]
-    if not blizzFrame then
-        return cooldowns
-    end
-    
-    local children = {blizzFrame:GetChildren()}
-    
-    for _, child in ipairs(children) do
-        -- Check if child has a Bar and if that Bar is shown
-        if child.Bar and child.Bar:IsShown() then
-            -- Get spell name
-            local name = ""
-            if child.Bar.Name and child.Bar.Name.GetText then
-                local ok, result = pcall(function() return child.Bar.Name:GetText() end)
-                if ok then name = result or "" end
-            end
-            
-            -- Check if name is valid
-            local hasValidName = false
-            if name then
-                local ok, result = pcall(function() return name ~= "" end)
-                if ok and result then
-                    hasValidName = true
-                end
-            end
-            
-            if hasValidName then
-                -- Get spellID and icon
-                local spellID = nil
-                local iconTexture = nil
-                
-                local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
-                if ok and spellInfo then
-                    spellID = spellInfo.spellID
-                end
-                
-                if spellID then
-                    iconTexture = C_Spell.GetSpellTexture(spellID)
-                end
-                
-                if iconTexture then
-                    local data = {
-                        icon = iconTexture,
-                        name = name,
-                        spellID = spellID,
-                        remainingTime = 0,
-                        charges = 1,
-                    }
-                    
-                    -- Try to get duration from aura
-                    if spellID then
-                        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                        if auraData then
-                            if auraData.duration and type(auraData.duration) == "number" then
-                                data.duration = auraData.duration
-                            end
-                            
-                            if auraData.expirationTime and type(auraData.expirationTime) == "number" then
-                                if auraData.expirationTime == 0 then
-                                    data.remainingTime = 0
-                                else
-                                    data.remainingTime = auraData.expirationTime - GetTime()
-                                end
-                            end
-                        end
-                    end
-                    
-                    table.insert(cooldowns, data)
-                end
             end
         end
     end
