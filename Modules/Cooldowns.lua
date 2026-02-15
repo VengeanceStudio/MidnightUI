@@ -472,8 +472,10 @@ function Cooldowns:GetCooldownData(displayName)
                     local spellID = child.spellID
                     if spellID then
                         local chargeInfo = C_Spell.GetSpellCharges(spellID)
-                        if chargeInfo and chargeInfo.currentCharges and chargeInfo.currentCharges > 1 then
-                            data.charges = chargeInfo.currentCharges
+                        if chargeInfo and chargeInfo.currentCharges then
+                            if chargeInfo.currentCharges > 1 then
+                                data.charges = chargeInfo.currentCharges
+                            end
                         end
                     end
                 end
@@ -705,7 +707,7 @@ function Cooldowns:CreateCustomDisplays()
     
     -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
-        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
+        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent, "BackdropTemplate")
         
         -- Load saved position or use default
         local pos = db.customBuffBars.position
@@ -721,6 +723,17 @@ function Cooldowns:CreateCustomDisplays()
         f:SetSize(frameWidth, 90)
         f:SetFrameStrata("MEDIUM")
         f:EnableMouse(true)
+        
+        -- Add border to parent frame
+        f:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 1,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        })
+        f:SetBackdropColor(0, 0, 0, 0)  -- Transparent background
+        f:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)  -- Gray border for visibility
         
         f.bars = {}
         f.activeBars = {}
@@ -931,7 +944,7 @@ function Cooldowns:CreateBar(parent, index)
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
     bar:SetBackdropColor(0, 0, 0, 0)  -- Transparent background (statusbar will show through)
-    bar:SetBackdropBorderColor(0, 0, 0, 1)  -- Black border
+    bar:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)  -- Gray border for visibility
     
     -- Background
     bar.bg = bar:CreateTexture(nil, "BACKGROUND")
