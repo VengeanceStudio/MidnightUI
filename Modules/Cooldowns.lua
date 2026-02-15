@@ -381,17 +381,22 @@ end
 
 -- WoW 12.0: Get tracked bars data using C_CooldownViewer API and visibility info
 function Cooldowns:GetTrackedBarsData()
+    print("=== GetTrackedBarsData() CALLED ===")
     local cooldowns = {}
     
     if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
+        print("Missing C_CooldownViewer or Enum")
         return cooldowns
     end
     
     -- Get tracked bar cooldowns (TrackedBar = 3)
     local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
     if not trackedIDs then
+        print("No trackedIDs returned")
         return cooldowns
     end
+    
+    print("Found " .. #trackedIDs .. " tracked IDs")
     
     -- Get the Blizzard frame for duration info
     local blizzFrame = _G["BuffBarCooldownViewer"]
