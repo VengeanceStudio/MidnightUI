@@ -416,40 +416,11 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, check if there's an active aura with this name
+            -- For tracked bars, trust Blizzard's filtering
+            -- If the frame has a Bar element and non-zero size, Blizzard considers it active
             local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
             local hasBar = child.Bar ~= nil
-            
-            shouldInclude = false
-            
-            if hasBar and hasSize then
-                -- Get spell name
-                local name = ""
-                if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
-                    local ok, result = pcall(function() return child.Bar.Name:GetText() end)
-                    if ok then name = result or "" end
-                end
-                
-                if name and name ~= "" then
-                    -- Try to find the spell by name and get its spellID
-                    local spellID = nil
-                    local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
-                    if ok and spellInfo then
-                        spellID = spellInfo.spellID
-                    end
-                    
-                    if spellID then
-                        -- Check if there's an active aura with this spellID
-                        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                        shouldInclude = (auraData ~= nil)
-                        
-                        print(string.format("TrackedBar: %s | spellID=%s | hasAura=%s", 
-                            name, tostring(spellID), tostring(shouldInclude)))
-                    else
-                        print(string.format("TrackedBar: %s | Could not find spellID", name))
-                    end
-                end
-            end
+            shouldInclude = hasBar and hasSize
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
