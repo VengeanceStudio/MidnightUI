@@ -273,21 +273,27 @@ function Cooldowns:GetCooldownData(displayName)
     local children = {blizzFrame:GetChildren()}
     
     for _, child in ipairs(children) do
-        -- For tracked buffs/bars, check if frame has actual content
-        -- We can't use IsShown() because parent is hidden, and can't check secret isActive
-        -- Instead, check if the frame has a valid auraInstanceID or cooldownID set
+        -- For tracked buffs, check if frame has valid data
+        -- For tracked bars, check if they have bar element and size
         local shouldInclude = true
         
-        if displayName == "buffs" or displayName == "cooldowns" then
+        if displayName == "buffs" then
             -- Only include if the child has an auraInstanceID (indicates active tracking)
-            -- or if it has a non-zero width (Blizzard sizes inactive frames to 0)
+            -- and has size (Blizzard sizes inactive frames to 0)
             local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
+        elseif displayName == "cooldowns" then
+            -- For tracked bars, check if they have Bar element and non-zero width
+            -- Bars need duration data to display properly
+            local hasBar = child.Bar ~= nil
+            local hasSize = child:GetWidth() > 0
+            shouldInclude = hasBar and hasSize
         end
         
-        -- Check if child has an Icon and should be included
-        if child.Icon and shouldInclude then
+        -- Check if child has an Icon (or Bar for tracked bars) and should be included
+        local hasContent = child.Icon or (displayName == "cooldowns" and child.Bar)
+        if hasContent and shouldInclude then
             local iconTexture = nil
             
             -- Icon could be a frame containing a texture
