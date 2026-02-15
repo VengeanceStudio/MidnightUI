@@ -462,7 +462,6 @@ function Cooldowns:GetTrackedBarsData()
                 end
                 
                 if shouldShow and iconTexture then
-                if shouldShow and iconTexture then
                     local data = {
                         icon = iconTexture,
                         name = spellName,
