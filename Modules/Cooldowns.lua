@@ -190,9 +190,14 @@ end
 
 function Cooldowns:GetCooldownData(displayName)
     if not C_CooldownManager or not C_CooldownManager.GetTrackedCooldowns then
+        print("MidnightUI: C_CooldownManager API not available")
         return {}
     end
-    return C_CooldownManager.GetTrackedCooldowns(displayName) or {}
+    local data = C_CooldownManager.GetTrackedCooldowns(displayName) or {}
+    if #data > 0 then
+        print("MidnightUI: Got", #data, "cooldowns for", displayName)
+    end
+    return data
 end
 
 function Cooldowns:CreateCustomDisplays()
@@ -200,20 +205,12 @@ function Cooldowns:CreateCustomDisplays()
     
     -- Create Essential Cooldowns (icons)
     if not self.customFrames.essential then
-        local f = CreateFrame("Frame", "MidnightEssentialCooldowns", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        local f = CreateFrame("Frame", "MidnightEssentialCooldowns", UIParent)
         f:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
         
-        if db.showBackground then
-            f:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                edgeSize = 2,
-            })
-            f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
-            f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
-        end
+        -- No container background - icons will have their own backgrounds
         
         f.icons = {}
         f.activeIcons = {}
@@ -225,20 +222,10 @@ function Cooldowns:CreateCustomDisplays()
     
     -- Create Utility Cooldowns (icons)
     if not self.customFrames.utility then
-        local f = CreateFrame("Frame", "MidnightUtilityCooldowns", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        local f = CreateFrame("Frame", "MidnightUtilityCooldowns", UIParent)
         f:SetPoint("CENTER", UIParent, "CENTER", 0, 100)
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
-        
-        if db.showBackground then
-            f:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                edgeSize = 2,
-            })
-            f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
-            f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
-        end
         
         f.icons = {}
         f.activeIcons = {}
@@ -250,20 +237,10 @@ function Cooldowns:CreateCustomDisplays()
     
     -- Create Tracked Buffs (icons)
     if not self.customFrames.buffs then
-        local f = CreateFrame("Frame", "MidnightTrackedBuffs", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        local f = CreateFrame("Frame", "MidnightTrackedBuffs", UIParent)
         f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
-        
-        if db.showBackground then
-            f:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                edgeSize = 2,
-            })
-            f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
-            f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
-        end
         
         f.icons = {}
         f.activeIcons = {}
@@ -275,20 +252,10 @@ function Cooldowns:CreateCustomDisplays()
     
     -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
-        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
         f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
         f:SetSize(400, 200)
         f:SetFrameStrata("HIGH")
-        
-        if db.showBackground then
-            f:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                edgeSize = 2,
-            })
-            f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
-            f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
-        end
         
         f.bars = {}
         f.activeBars = {}
@@ -541,6 +508,8 @@ function Cooldowns:UpdateIconDisplay(frame)
     
     local cooldowns = self:GetCooldownData(frame.displayType)
     local db = self.db.profile
+    
+    print("MidnightUI: UpdateIconDisplay for", frame.displayType, "got", #cooldowns, "cooldowns")
     
     -- Hide all icons first
     for _, icon in ipairs(frame.activeIcons) do
