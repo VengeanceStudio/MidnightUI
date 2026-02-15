@@ -501,9 +501,10 @@ function Cooldowns:GetTrackedBarsData()
                     
                     table.insert(cooldowns, data)
                 end
-            end
-        end
-    end
+                end -- close if matchingBar
+            end -- close if spellInfo
+        end -- close if info and info.isKnown
+    end -- close for trackedIDs
     
     return cooldowns
 end
