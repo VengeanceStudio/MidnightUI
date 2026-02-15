@@ -277,30 +277,30 @@ function Cooldowns:GetCooldownData(displayName)
         local shouldInclude = true
         
         if displayName == "buffs" or displayName == "cooldowns" then
-            -- This is a tracked buff/bar - verify it's active
-            if child.auraSpellID and child.auraDataUnit then
-                local auraData = C_UnitAuras.GetPlayerAuraBySpellID(child.auraSpellID)
-                if not auraData then
-                    shouldInclude = false
-                else
-                    -- Check if aura is active (not expired)
-                    if auraData.expirationTime and auraData.expirationTime > 0 then
-                        if auraData.expirationTime <= GetTime() then
-                            shouldInclude = false
-                        end
+            -- This is a tracked buff/bar - verify it's active by checking if aura exists
+            shouldInclude = false
+            
+            if child.auraInstanceID and child.auraDataUnit then
+                -- Try using instance ID to get current aura data
+                local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(child.auraDataUnit, child.auraInstanceID)
+                if auraData then
+                    -- Aura exists - check if it's not expired
+                    if auraData.expirationTime == 0 then
+                        -- Permanent buff
+                        shouldInclude = true
+                    elseif auraData.expirationTime > GetTime() then
+                        -- Temporary buff that hasn't expired
+                        shouldInclude = true
                     end
                 end
-            elseif child.auraInstanceID and child.auraDataUnit then
-                -- Try using instance ID
-                local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(child.auraDataUnit, child.auraInstanceID)
-                if not auraData then
-                    shouldInclude = false
-                else
-                    -- Check if aura is active (not expired)
-                    if auraData.expirationTime and auraData.expirationTime > 0 then
-                        if auraData.expirationTime <= GetTime() then
-                            shouldInclude = false
-                        end
+            elseif child.auraSpellID and child.auraDataUnit then
+                -- Fallback to spell ID check
+                local auraData = C_UnitAuras.GetPlayerAuraBySpellID(child.auraSpellID)
+                if auraData then
+                    if auraData.expirationTime == 0 then
+                        shouldInclude = true
+                    elseif auraData.expirationTime > GetTime() then
+                        shouldInclude = true
                     end
                 end
             end
