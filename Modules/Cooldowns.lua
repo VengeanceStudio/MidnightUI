@@ -325,9 +325,12 @@ function Cooldowns:ShowIconGlow(spellID)
         local frame = self.customFrames[displayType]
         if frame and frame.icons then
             for _, icon in ipairs(frame.icons) do
-                -- Use pcall to safely compare spellIDs (may be secret values)
+                -- WoW 12.0: Use secret-aware matching API for spellID comparison
                 local matches = false
-                if icon.spellID then
+                if icon.spellID and C_Spell and C_Spell.IsSecretSpellIDMatch then
+                    matches = C_Spell.IsSecretSpellIDMatch(icon.spellID, spellID)
+                elseif icon.spellID then
+                    -- Fallback for older API versions
                     local ok, result = pcall(function() return icon.spellID == spellID end)
                     if ok then matches = result end
                 end
@@ -351,9 +354,12 @@ function Cooldowns:HideIconGlow(spellID)
         local frame = self.customFrames[displayType]
         if frame and frame.icons then
             for _, icon in ipairs(frame.icons) do
-                -- Use pcall to safely compare spellIDs (may be secret values)
+                -- WoW 12.0: Use secret-aware matching API for spellID comparison
                 local matches = false
-                if icon.spellID then
+                if icon.spellID and C_Spell and C_Spell.IsSecretSpellIDMatch then
+                    matches = C_Spell.IsSecretSpellIDMatch(icon.spellID, spellID)
+                elseif icon.spellID then
+                    -- Fallback for older API versions
                     local ok, result = pcall(function() return icon.spellID == spellID end)
                     if ok then matches = result end
                 end
@@ -414,7 +420,22 @@ function Cooldowns:GetCooldownData(displayName)
             -- Blizzard hides/resizes inactive bar frames
             local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
             local isVisible = child:IsShown()
-            shouldInclude = child.Bar ~= nil and hasSize and isVisible
+            local hasBar = child.Bar ~= nil
+            
+            -- DEBUG: Print info about each child
+            if hasBar or isVisible or hasSize then
+                local name = ""
+                if child.Name and child.Name.GetText then
+                    name = child.Name:GetText() or ""
+                elseif child.Bar and child.Bar.Name and child.Bar.Name.GetText then
+                    name = child.Bar.Name:GetText() or ""
+                end
+                print(string.format("TrackedBar child: %s | Bar=%s | Visible=%s | Size=%s (%dx%d)", 
+                    name, tostring(hasBar), tostring(isVisible), tostring(hasSize),
+                    child:GetWidth(), child:GetHeight()))
+            end
+            
+            shouldInclude = hasBar and hasSize and isVisible
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
