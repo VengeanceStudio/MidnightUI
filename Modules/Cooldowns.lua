@@ -381,22 +381,17 @@ end
 
 -- WoW 12.0: Get tracked bars data using C_CooldownViewer API and visibility info
 function Cooldowns:GetTrackedBarsData()
-    print("=== GetTrackedBarsData() CALLED ===")
     local cooldowns = {}
     
     if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
-        print("Missing C_CooldownViewer or Enum")
         return cooldowns
     end
     
     -- Get tracked bar cooldowns (TrackedBar = 3)
     local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
     if not trackedIDs then
-        print("No trackedIDs returned")
         return cooldowns
     end
-    
-    print("Found " .. #trackedIDs .. " tracked IDs")
     
     -- Get the Blizzard frame for duration info
     local blizzFrame = _G["BuffBarCooldownViewer"]
@@ -411,7 +406,8 @@ function Cooldowns:GetTrackedBarsData()
                 -- Bars don't have spellID in WoW 12.0, match by name instead
                 if bar.Name and bar.Name.GetText then
                     local ok, name = pcall(function() return bar.Name:GetText() end)
-                    if ok and name and name ~= "" then
+                    if ok and name then
+                        -- Don't compare name in combat (secret value) - just use it if it exists
                         frameBars[name] = bar
                     end
                 end
@@ -433,24 +429,6 @@ function Cooldowns:GetTrackedBarsData()
                 
                 -- Match bar by name since bars don't have spellID
                 local bar = frameBars[spellName]
-                
-                -- Debug Consecration specifically
-                if spellName == "Consecration" and bar then
-                    print("=== CONSECRATION DEBUG ===")
-                    print("  Bar found:", bar ~= nil)
-                    print("  Bar:IsShown():", tostring(bar:IsShown()))
-                    
-                    local ok, value = pcall(function() return bar:GetValue() end)
-                    print("  Bar:GetValue():", ok and tostring(value) or "ERROR")
-                    
-                    local minOk, minVal, maxVal = pcall(function() return bar:GetMinMaxValues() end)
-                    if minOk then
-                        print("  MinMaxValues:", tostring(minVal), tostring(maxVal))
-                    end
-                    
-                    print("  hasAura from info:", tostring(info.hasAura))
-                    print("==========================")
-                end
                 
                 -- Bar is active if it exists, is shown, and has a value > 0
                 local shouldShow = false
