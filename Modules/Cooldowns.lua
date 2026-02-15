@@ -365,8 +365,16 @@ function Cooldowns:GetCooldownData(displayName)
                     end
                 end
                 
-                -- Try to get duration data for bars
-                if displayName == "cooldowns" and data.name and data.name ~= "" then
+                -- Try to get duration data for bars (protect against secret values)
+                local hasValidName = false
+                if displayName == "cooldowns" and data.name then
+                    local ok, result = pcall(function() return data.name ~= "" end)
+                    if ok and result then
+                        hasValidName = true
+                    end
+                end
+                
+                if hasValidName then
                     -- Try by spellID first if available
                     if spellID then
                         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
@@ -391,7 +399,13 @@ function Cooldowns:GetCooldownData(displayName)
                         for i = 1, 40 do
                             local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
                             if not auraData then break end
-                            if auraData.name == data.name then
+                            -- Safely compare names (both could be secret values)
+                            local namesMatch = false
+                            if auraData.name and data.name then
+                                local ok, result = pcall(function() return auraData.name == data.name end)
+                                if ok then namesMatch = result end
+                            end
+                            if namesMatch then
                                 -- Check for secret values
                                 if type(auraData.duration) == "number" then
                                     data.duration = auraData.duration
@@ -485,12 +499,20 @@ function Cooldowns:GetCooldownData(displayName)
                         spellID = child:GetSpellID()
                     end
                     
-                    -- Try to get spell name and lookup spellID
-                    if not spellID and data.name and data.name ~= "" then
-                        -- Try to find the spell ID from the spell name
-                        local spellInfo = C_Spell.GetSpellInfo(data.name)
-                        if spellInfo and spellInfo.spellID then
-                            spellID = spellInfo.spellID
+                    -- Try to get spell name and lookup spellID (protect against secret values)
+                    if not spellID and data.name then
+                        local hasName = false
+                        local ok, result = pcall(function() return data.name ~= "" end)
+                        if ok and result then
+                            hasName = true
+                        end
+                        
+                        if hasName then
+                            -- Try to find the spell ID from the spell name
+                            local ok2, spellInfo = pcall(function() return C_Spell.GetSpellInfo(data.name) end)
+                            if ok2 and spellInfo and spellInfo.spellID then
+                                spellID = spellInfo.spellID
+                            end
                         end
                     end
                     
@@ -1232,7 +1254,16 @@ function Cooldowns:UpdateBarDisplay(frame)
     for i, bar in ipairs(frame.bars) do
         local data = cooldowns[i]
         
+        -- Safely check if data has a valid name (protect against secret values)
+        local hasValidData = false
         if data and data.name then
+            local ok, result = pcall(function() return data.name ~= "" and data.name ~= nil end)
+            if ok and result then
+                hasValidData = true
+            end
+        end
+        
+        if hasValidData then
             bar:Show()
             
             -- Set bar color with optional class color or fading
@@ -1275,8 +1306,15 @@ function Cooldowns:UpdateBarDisplay(frame)
                 bar.icon:Show()
             end
             
-            -- Name
-            bar.name:SetText(data.name or "")
+            -- Name (safely get name or use empty string)
+            local nameText = ""
+            if data.name then
+                local ok, result = pcall(function() return data.name end)
+                if ok and result then
+                    nameText = result
+                end
+            end
+            bar.name:SetText(nameText)
             
             -- Timer
             if bar.timer then
