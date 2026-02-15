@@ -171,6 +171,9 @@ function Cooldowns:OnInitialize()
     self.hookedLayouts = {}
     self.styledIcons = {}
     
+    -- Create charge color curve for WoW 12.0 secret value handling
+    self:CreateChargeColorCurve()
+    
     -- Throttle flags to prevent memory leaks
     self.updateAttachmentPending = false
     self.editModeUpdatePending = false
@@ -187,6 +190,31 @@ function Cooldowns:OnInitialize()
     self.barPools = {}
 end
 
+function Cooldowns:CreateChargeColorCurve()
+    -- WoW 12.0: Create a color curve to map charge counts to colors
+    -- This works even for secret values since Blizzard handles evaluation internally
+    if not C_CurveUtil or not C_CurveUtil.CreateColorCurve then
+        -- Fallback if API not available
+        self.chargeCurve = nil
+        return
+    end
+    
+    local curve = C_CurveUtil.CreateColorCurve()
+    
+    -- Set to Step mode so it doesn't fade between colors (charges are whole numbers)
+    curve:SetType(Enum.LuaCurveType.Step)
+    
+    -- Add color points: (Value, Color)
+    -- 0 Charges: Red (no charges available)
+    curve:AddPoint(0, CreateColor(1, 0, 0, 1))
+    -- 1 Charge: Yellow (low charges)
+    curve:AddPoint(1, CreateColor(1, 1, 0, 1))
+    -- 2+ Charges: White/Full (good charges)
+    curve:AddPoint(2, CreateColor(1, 1, 1, 1))
+    
+    self.chargeCurve = curve
+end
+
 function Cooldowns:OnDBReady()
     if not MidnightUI.db or not MidnightUI.db.profile or not MidnightUI.db.profile.modules.cooldowns then
         self:Disable()
@@ -199,6 +227,15 @@ function Cooldowns:OnDBReady()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("ADDON_LOADED")
     self:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED")
+    
+    -- WoW 12.0 Charge Event System
+    self:RegisterEvent("SPELL_UPDATE_CHARGES")  -- Fires when charges change (even for secrets)
+    self:RegisterEvent("PLAYER_REGEN_DISABLED") -- Entering combat (data becomes secret)
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")  -- Exiting combat (data becomes readable)
+    
+    -- WoW 12.0 Proc Glow System (Blizzard controls when spells proc)
+    self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") -- Blizzard says spell is ready/proc'd
+    self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") -- Proc ends
     
     -- Check if we're already in world (PLAYER_ENTERING_WORLD may have fired before we registered)
     if IsPlayerInWorld and IsPlayerInWorld() then
@@ -250,6 +287,72 @@ function Cooldowns:EDIT_MODE_LAYOUTS_UPDATED()
         Cooldowns:UpdateFrameGrouping()
         Cooldowns.editModeUpdatePending = false
     end)
+end
+
+function Cooldowns:SPELL_UPDATE_CHARGES()
+    -- WoW 12.0: Event fires when any spell charges change (even for secret values)
+    -- Refresh icon displays to update charge counters
+    self:UpdateAllDisplays()
+end
+
+function Cooldowns:PLAYER_REGEN_DISABLED()
+    -- Entering combat - charge values may become secret
+    -- Refresh displays to switch to pass-through mode
+    self:UpdateAllDisplays()
+end
+
+function Cooldowns:PLAYER_REGEN_ENABLED()
+    -- Exiting combat - charge values become readable again
+    -- Refresh displays to restore full functionality
+    self:UpdateAllDisplays()
+end
+
+function Cooldowns:SPELL_ACTIVATION_OVERLAY_GLOW_SHOW(event, spellID)
+    -- Blizzard says this spell is proc'd/ready - show glow on matching icon
+    self:ShowIconGlow(spellID)
+end
+
+function Cooldowns:SPELL_ACTIVATION_OVERLAY_GLOW_HIDE(event, spellID)
+    -- Proc ended - hide glow on matching icon
+    self:HideIconGlow(spellID)
+end
+
+function Cooldowns:ShowIconGlow(spellID)
+    if not spellID or not self.customFrames then return end
+    
+    -- Find icon with matching spellID in essential and utility frames
+    for _, displayType in ipairs({"essential", "utility"}) do
+        local frame = self.customFrames[displayType]
+        if frame and frame.icons then
+            for _, icon in ipairs(frame.icons) do
+                if icon.spellID == spellID and icon:IsShown() then
+                    -- Show glow using our glow texture or method
+                    if icon.ShowOverlayGlow then
+                        icon:ShowOverlayGlow()
+                    end
+                end
+            end
+        end
+    end
+end
+
+function Cooldowns:HideIconGlow(spellID)
+    if not spellID or not self.customFrames then return end
+    
+    -- Find icon with matching spellID in essential and utility frames
+    for _, displayType in ipairs({"essential", "utility"}) do
+        local frame = self.customFrames[displayType]
+        if frame and frame.icons then
+            for _, icon in ipairs(frame.icons) do
+                if icon.spellID == spellID then
+                    -- Hide glow
+                    if icon.HideOverlayGlow then
+                        icon:HideOverlayGlow()
+                    end
+                end
+            end
+        end
+    end
 end
 
 -- -----------------------------------------------------------------------------
@@ -982,26 +1085,20 @@ function Cooldowns:CreateIcon(parent, displayType)
     icon.stackText:SetPoint("BOTTOMRIGHT", -2, 2)
     icon.stackText:SetTextColor(1, 1, 1)
     
-    -- Add overlay glow support for charge-based effects (WoW 12.0)
-    -- Note: We don't create the glow texture by default to avoid visual artifacts
-    -- The methods are added in case we want to enable glow effects later
-    icon.glowTexture = nil
-    
-    -- Add methods to show/hide glow (currently disabled to avoid rendering issues)
+    -- Add overlay glow support for Blizzard proc events (WoW 12.0)
+    -- Use ActionButton_ShowOverlayGlow API for proper glow effects
     icon.ShowOverlayGlow = function(self)
-        -- Disabled: Glow effects can cause visual artifacts
-        -- if self.glowTexture then
-        --     self.glowTexture:Show()
-        --     self.glowTexture:SetAlpha(0.8)
-        -- end
+        -- Use Blizzard's action button glow API
+        if ActionButton_ShowOverlayGlow then
+            ActionButton_ShowOverlayGlow(self)
+        end
     end
     
     icon.HideOverlayGlow = function(self)
-        -- Disabled: Glow effects can cause visual artifacts
-        -- if self.glowTexture then
-        --     self.glowTexture:Hide()
-        --     self.glowTexture:SetAlpha(0)
-        -- end
+        -- Use Blizzard's action button glow API
+        if ActionButton_HideOverlayGlow then
+            ActionButton_HideOverlayGlow(self)
+        end
     end
     
     icon:Hide()
@@ -1162,6 +1259,9 @@ function Cooldowns:UpdateIconDisplay(frame)
             icon.texture:SetTexture(cooldownData.icon)
         end
         
+        -- Store spellID on icon for future lookups
+        icon.spellID = cooldownData.spellID
+        
         -- Set cooldown text (protect against secret values)
         local hasRemainingTime = false
         local remainingTimeValue = 0
@@ -1187,13 +1287,50 @@ function Cooldowns:UpdateIconDisplay(frame)
             icon.cooldownText:SetText("")
         end
         
-        -- Handle charges (WoW 12.0 pass-through method)
-        -- If charges exist, just pass them directly to SetText - no checks, no comparisons
-        if cooldownData.charges ~= nil then
-            -- Pass directly to FontString - works for both normal and secret values
+        -- Handle charges (WoW 12.0 event-driven pass-through)
+        -- Fetch fresh charge data on every update and pass directly to SetText
+        if icon.spellID and (frame.displayType == "essential" or frame.displayType == "utility") then
+            local chargeInfo = C_Spell.GetSpellCharges(icon.spellID)
+            if chargeInfo and chargeInfo.currentCharges ~= nil then
+                -- Direct pass-through: No type checks, no comparisons, no math
+                -- FontString can render both normal numbers and secret values
+                icon.stackText:SetText(chargeInfo.currentCharges)
+                icon.stackText:Show()
+                
+                -- Use color curve to set color based on charge count (works for secret values)
+                if self.chargeCurve then
+                    local color = self.chargeCurve:Evaluate(chargeInfo.currentCharges)
+                    if color then
+                        icon.stackText:SetTextColor(color:GetRGBA())
+                    else
+                        icon.stackText:SetTextColor(1, 1, 1) -- Fallback to white
+                    end
+                else
+                    icon.stackText:SetTextColor(1, 1, 1) -- No curve, use white
+                end
+                
+                icon.texture:SetDesaturated(false)
+            else
+                -- No charge system
+                icon.stackText:Hide()
+                icon.texture:SetDesaturated(false)
+            end
+        elseif cooldownData.charges ~= nil then
+            -- Fallback to stored charge data (for buffs/other displays)
             icon.stackText:SetText(cooldownData.charges)
             icon.stackText:Show()
-            icon.stackText:SetTextColor(1, 1, 1)
+            
+            -- Apply color curve if available
+            if self.chargeCurve then
+                local color = self.chargeCurve:Evaluate(cooldownData.charges)
+                if color then
+                    icon.stackText:SetTextColor(color:GetRGBA())
+                else
+                    icon.stackText:SetTextColor(1, 1, 1)
+                end
+            else
+                icon.stackText:SetTextColor(1, 1, 1)
+            end
             icon.texture:SetDesaturated(false)
         else
             -- No charge system - hide charge counter
