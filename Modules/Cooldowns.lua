@@ -1994,11 +1994,6 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
                 print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
             end,
         },
-        [displayName .. "AttachHeader"] = {
-            type = "header",
-            name = "Positioning",
-            order = order + 7,
-        },
         [displayName .. "AttachTo"] = {
             name = "Attach To",
             desc = "Which frame to attach this display to.",
