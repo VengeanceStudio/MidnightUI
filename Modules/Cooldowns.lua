@@ -284,11 +284,9 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, check if they have Bar element and non-zero width
-            -- Bars need duration data to display properly
-            local hasBar = child.Bar ~= nil
-            local hasSize = child:GetWidth() > 0
-            shouldInclude = hasBar and hasSize
+            -- For tracked bars, just check if they have a Bar element
+            -- Don't check width as it might cause false negatives
+            shouldInclude = child.Bar ~= nil
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
@@ -296,18 +294,36 @@ function Cooldowns:GetCooldownData(displayName)
         if hasContent and shouldInclude then
             local iconTexture = nil
             
-            -- Icon could be a frame containing a texture
-            if child.Icon.GetTexture then
-                iconTexture = child.Icon:GetTexture()
-            elseif child.Icon.Texture then
-                iconTexture = child.Icon.Texture:GetTexture()
-            else
-                -- Look for texture children
-                local regions = {child.Icon:GetRegions()}
-                for _, region in ipairs(regions) do
-                    if region:GetObjectType() == "Texture" then
-                        iconTexture = region:GetTexture()
-                        if iconTexture then break end
+            -- For tracked bars, get icon from Bar.Icon
+            if displayName == "cooldowns" and child.Bar and child.Bar.Icon then
+                if child.Bar.Icon.GetTexture then
+                    iconTexture = child.Bar.Icon:GetTexture()
+                elseif child.Bar.Icon.Texture then
+                    iconTexture = child.Bar.Icon.Texture:GetTexture()
+                else
+                    -- Look for texture children in Bar.Icon
+                    local regions = {child.Bar.Icon:GetRegions()}
+                    for _, region in ipairs(regions) do
+                        if region:GetObjectType() == "Texture" then
+                            iconTexture = region:GetTexture()
+                            if iconTexture then break end
+                        end
+                    end
+                end
+            elseif child.Icon then
+                -- For tracked buffs/cooldowns, get icon from Icon
+                if child.Icon.GetTexture then
+                    iconTexture = child.Icon:GetTexture()
+                elseif child.Icon.Texture then
+                    iconTexture = child.Icon.Texture:GetTexture()
+                else
+                    -- Look for texture children
+                    local regions = {child.Icon:GetRegions()}
+                    for _, region in ipairs(regions) do
+                        if region:GetObjectType() == "Texture" then
+                            iconTexture = region:GetTexture()
+                            if iconTexture then break end
+                        end
                     end
                 end
             end
