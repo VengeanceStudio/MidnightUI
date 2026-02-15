@@ -383,86 +383,28 @@ end
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
+    if not C_CooldownViewer then
         return cooldowns
     end
     
-    -- Get tracked bar cooldowns (TrackedBar = 3)
-    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
-    if not trackedIDs then
-        return cooldowns
-    end
-    
-    -- Get the Blizzard frame for bar data (duration values)
-    local blizzFrame = _G["BuffBarCooldownViewer"]
-    local bars = {}
-    
-    if blizzFrame then
-        for i = 1, blizzFrame:GetNumChildren() do
-            local child = select(i, blizzFrame:GetChildren())
-            if child and child.Bar then
-                table.insert(bars, child.Bar)
-            end
-        end
-    end
-    
-    -- Process each tracked cooldown and check if it has an active aura
-    for _, cooldownID in ipairs(trackedIDs) do
-        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-        
-        if info and info.isKnown then
-            local spellID = info.overrideSpellID or info.spellID or cooldownID
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
-            
-            if spellInfo and spellInfo.name == "Sentinel" then
-                print("=== Sentinel INFO DUMP ===")
-                for k, v in pairs(info) do
-                    print("  " .. k .. " = " .. tostring(v))
-                end
-                print("==========================")
-            end
-        end
-        
-        -- Only show if hasAura is true (this is the protected boolean from Blizzard)
-        if info and info.isKnown and info.hasAura then
-            local spellID = info.overrideSpellID or info.spellID or cooldownID
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
-            
-            if spellInfo then
-                local iconTexture = C_Spell.GetSpellTexture(spellID)
-                
-                if iconTexture then
-                    local data = {
-                        icon = iconTexture,
-                        name = spellInfo.name,
-                        spellID = spellID,
-                        remainingTime = 0,
-                        charges = 1,
-                    }
-                    
-                    -- Try to get duration from any active bar (just use first active bar we find)
-                    for _, bar in ipairs(bars) do
-                        if bar:IsShown() then
-                            local ok, value = pcall(function() return bar:GetValue() end)
-                            if ok and value then
-                                -- Pass through without comparing
-                                data.remainingTime = value
-                                
-                                local maxOk, maxDuration = pcall(function()
-                                    return select(2, bar:GetMinMaxValues())
-                                end)
-                                if maxOk and maxDuration then
-                                    data.duration = maxDuration
-                                end
-                                
-                                break
-                            end
+    -- Check GetLayoutData() - this might return active bars
+    if C_CooldownViewer.GetLayoutData then
+        local layoutData = C_CooldownViewer.GetLayoutData()
+        if layoutData then
+            print("=== GetLayoutData() ===")
+            print("Type:", type(layoutData))
+            if type(layoutData) == "table" then
+                for k, v in pairs(layoutData) do
+                    print("  " .. tostring(k) .. " = " .. tostring(v))
+                    if type(v) == "table" then
+                        print("    (table contents):")
+                        for k2, v2 in pairs(v) do
+                            print("      " .. tostring(k2) .. " = " .. tostring(v2))
                         end
                     end
-                    
-                    table.insert(cooldowns, data)
                 end
             end
+            print("=======================")
         end
     end
     
