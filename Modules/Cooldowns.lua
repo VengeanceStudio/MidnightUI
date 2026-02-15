@@ -211,8 +211,8 @@ function Cooldowns:CreateCustomDisplays()
             edgeFile = "Interface\\Buttons\\WHITE8X8",
             edgeSize = 2,
         })
-        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
-        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
+        f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
+        f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.icons = {}
         f.displayType = "essential"
@@ -233,8 +233,8 @@ function Cooldowns:CreateCustomDisplays()
             edgeFile = "Interface\\Buttons\\WHITE8X8",
             edgeSize = 2,
         })
-        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
-        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
+        f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
+        f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.icons = {}
         f.displayType = "utility"
@@ -255,8 +255,8 @@ function Cooldowns:CreateCustomDisplays()
             edgeFile = "Interface\\Buttons\\WHITE8X8",
             edgeSize = 2,
         })
-        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
-        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
+        f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
+        f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.icons = {}
         f.displayType = "buffs"
@@ -277,8 +277,8 @@ function Cooldowns:CreateCustomDisplays()
             edgeFile = "Interface\\Buttons\\WHITE8X8",
             edgeSize = 2,
         })
-        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
-        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
+        f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
+        f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
         f.bars = {}
         f.displayType = "cooldowns"
