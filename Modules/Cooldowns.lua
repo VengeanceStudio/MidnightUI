@@ -394,6 +394,7 @@ function Cooldowns:GetTrackedBarsData()
         local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
         local hasBar = child.Bar ~= nil
         
+        -- Trust Blizzard: if frame has Bar and size, it's active
         if hasBar and hasSize then
             -- Get spell name and icon
             local name = ""
@@ -420,23 +421,16 @@ function Cooldowns:GetTrackedBarsData()
                     spellID = spellInfo.spellID
                 end
                 
-                -- Only include if there's an active aura
-                local hasActiveAura = false
-                if spellID then
-                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                    hasActiveAura = (auraData ~= nil)
-                end
+                local data = {
+                    icon = iconTexture,
+                    name = name,
+                    spellID = spellID,
+                    remainingTime = 0,
+                    charges = 1,
+                }
                 
-                if hasActiveAura then
-                    local data = {
-                        icon = iconTexture,
-                        name = name,
-                        spellID = spellID,
-                        remainingTime = 0,
-                        charges = 1,
-                    }
-                    
-                    -- Get duration from aura
+                -- Try to get duration from aura (may not exist for ground effects like Consecration)
+                if spellID then
                     local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
                     if auraData then
                         if auraData.duration and type(auraData.duration) == "number" then
@@ -451,9 +445,9 @@ function Cooldowns:GetTrackedBarsData()
                             end
                         end
                     end
-                    
-                    table.insert(cooldowns, data)
                 end
+                
+                table.insert(cooldowns, data)
             end
         end
     end
