@@ -383,20 +383,42 @@ end
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
+    print("=== GetTrackedBarsData ===")
+    
     -- Check if API exists
-    if not C_CooldownTracker or not C_CooldownTracker.GetTrackedCooldowns then
+    if not C_CooldownTracker then
+        print("C_CooldownTracker does not exist")
         return cooldowns
     end
+    
+    if not C_CooldownTracker.GetTrackedCooldowns then
+        print("C_CooldownTracker.GetTrackedCooldowns does not exist")
+        return cooldowns
+    end
+    
+    print("Calling GetTrackedCooldowns()...")
     
     -- Get all tracked cooldowns
     local trackedIDs = C_CooldownTracker.GetTrackedCooldowns()
     if not trackedIDs then
+        print("GetTrackedCooldowns() returned nil")
         return cooldowns
     end
     
+    print(string.format("GetTrackedCooldowns() returned %d IDs", #trackedIDs))
+    
     -- Process each cooldown
     for _, id in ipairs(trackedIDs) do
+        print(string.format("Processing ID: %s", tostring(id)))
+        
         local info = C_CooldownTracker.GetCooldownInfo(id)
+        
+        if not info then
+            print(string.format("  GetCooldownInfo returned nil"))
+        else
+            print(string.format("  shouldShow=%s isActive=%s isInCombat=%s", 
+                tostring(info.shouldShow), tostring(info.isActive), tostring(info.isInCombat)))
+        end
         
         -- Only show bars that Blizzard says should be shown
         if info and info.shouldShow then
@@ -404,6 +426,11 @@ function Cooldowns:GetTrackedBarsData()
             local spellID = info.spellID or id
             local spellInfo = C_Spell.GetSpellInfo(spellID)
             local iconTexture = C_Spell.GetSpellTexture(spellID)
+            
+            print(string.format("  spellID=%s name=%s icon=%s", 
+                tostring(spellID), 
+                spellInfo and spellInfo.name or "nil", 
+                tostring(iconTexture)))
             
             if spellInfo and iconTexture then
                 local data = {
@@ -423,10 +450,13 @@ function Cooldowns:GetTrackedBarsData()
                     end
                 end
                 
+                print(string.format("  ADDED: %s", data.name))
                 table.insert(cooldowns, data)
             end
         end
     end
+    
+    print(string.format("=== Returning %d bars ===", #cooldowns))
     
     return cooldowns
 end
