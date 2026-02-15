@@ -403,38 +403,20 @@ function Cooldowns:GetTrackedBarsData()
     local frameBars = {}
     
     if blizzFrame then
-        print("=== BuffBarCooldownViewer Children ===")
         for i = 1, blizzFrame:GetNumChildren() do
             local child = select(i, blizzFrame:GetChildren())
             if child and child.Bar then
                 local bar = child.Bar
-                print("Child " .. i .. ":")
-                print("  Bar exists:", bar ~= nil)
-                print("  Bar.spellID:", tostring(bar.spellID))
-                print("  Bar:IsShown():", tostring(bar:IsShown()))
                 
-                -- Try to get spell name
-                if bar.spellID then
-                    local spellInfo = C_Spell.GetSpellInfo(bar.spellID)
-                    if spellInfo then
-                        print("  Spell name:", spellInfo.name)
-                    end
-                    frameBars[bar.spellID] = bar
-                end
-                
-                -- Check for other identifying fields
+                -- Bars don't have spellID in WoW 12.0, match by name instead
                 if bar.Name and bar.Name.GetText then
                     local ok, name = pcall(function() return bar.Name:GetText() end)
-                    if ok and name then
-                        print("  Bar.Name:GetText():", name)
+                    if ok and name and name ~= "" then
+                        frameBars[name] = bar
                     end
                 end
             end
         end
-        print("Total bars in frameBars:", #frameBars)
-        print("======================================")
-    else
-        print("BuffBarCooldownViewer frame not found!")
     end
     
     -- Process each tracked bar cooldown
@@ -444,142 +426,64 @@ function Cooldowns:GetTrackedBarsData()
         if info and info.isKnown then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
             local spellInfo = C_Spell.GetSpellInfo(spellID)
-            local spellName = spellInfo and spellInfo.name or "Unknown"
             
-            -- Debug ALL tracked bars to understand the structure
-            print("=== Tracked Bar: " .. spellName .. " ===")
-            print("  spellID:", spellID)
-            print("  cooldownID:", cooldownID)
-            print("  hasAura:", tostring(info.hasAura))
-            
-            -- Check linkedSpellIDs - this might contain the ground effect spell!
-            if info.linkedSpellIDs and type(info.linkedSpellIDs) == "table" then
-                print("  linkedSpellIDs:")
-                for i, linkedID in ipairs(info.linkedSpellIDs) do
-                    local linkedInfo = C_Spell.GetSpellInfo(linkedID)
-                    local linkedName = linkedInfo and linkedInfo.name or "Unknown"
-                    print("    [" .. i .. "] = " .. linkedID .. " (" .. linkedName .. ")")
-                end
-            end
-            
-            local bar = frameBars[spellID]
-            if bar then
-                print("  Bar found! IsShown:", tostring(bar:IsShown()))
-                local ok, value = pcall(function() return bar:GetValue() end)
-                if ok then print("  Bar value:", tostring(value)) end
-            else
-                print("  Bar NOT found for spellID:", spellID)
-                
-                -- Check if bar exists with linkedSpellID
-                if info.linkedSpellIDs then
-                    for _, linkedID in ipairs(info.linkedSpellIDs) do
-                        local linkedBar = frameBars[linkedID]
-                        if linkedBar then
-                            print("  But found bar with linkedSpellID:", linkedID)
-                            print("    IsShown:", tostring(linkedBar:IsShown()))
-                            local ok, value = pcall(function() return linkedBar:GetValue() end)
-                            if ok then print("    Bar value:", tostring(value)) end
-                        end
-                    end
-                end
-            end
-            
-            local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-            print("  GetPlayerAuraBySpellID:", tostring(auraData ~= nil))
-            print("=============================")
-            
-            -- Check multiple conditions to determine if bar should show
-            local shouldShow = false
-            local auraData = nil
-            
-            -- Method 1: Check the actual Blizzard frame bar
-            local bar = frameBars[spellID]
-            if bar then
-                -- Check if bar is shown AND has a valid value
-                local barShown = bar:IsShown()
-                local barHasValue = false
-                
-                if barShown then
-                    local ok, value = pcall(function() return bar:GetValue() end)
-                    if ok and value and value > 0 then
-                        barHasValue = true
-                    end
-                end
-                
-                if barShown and barHasValue then
-                    shouldShow = true
-                end
-            end
-            
-            -- Method 2: Check for active player aura
-            if not shouldShow then
-                auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                if auraData then
-                    shouldShow = true
-                end
-            end
-            
-            -- Method 3: Check visibility info (for priority spells)
-            if not shouldShow and C_Spell and C_Spell.GetVisibilityInfo then
-                local ok, hasCustom, alwaysShowMine, showForMySpec = pcall(function()
-                    return C_Spell.GetVisibilityInfo(spellID, Enum.SpellAuraVisibilityType.RaidInCombat)
-                end)
-                if ok and showForMySpec then
-                    shouldShow = true
-                end
-            end
-            
-            if shouldShow then
-                local spellInfo = C_Spell.GetSpellInfo(spellID)
+            if spellInfo then
+                local spellName = spellInfo.name
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
-                if spellInfo and iconTexture then
+                -- Match bar by name since bars don't have spellID
+                local bar = frameBars[spellName]
+                
+                -- Debug Consecration specifically
+                if spellName == "Consecration" and bar then
+                    print("=== CONSECRATION DEBUG ===")
+                    print("  Bar found:", bar ~= nil)
+                    print("  Bar:IsShown():", tostring(bar:IsShown()))
+                    
+                    local ok, value = pcall(function() return bar:GetValue() end)
+                    print("  Bar:GetValue():", ok and tostring(value) or "ERROR")
+                    
+                    local minOk, minVal, maxVal = pcall(function() return bar:GetMinMaxValues() end)
+                    if minOk then
+                        print("  MinMaxValues:", tostring(minVal), tostring(maxVal))
+                    end
+                    
+                    print("  hasAura from info:", tostring(info.hasAura))
+                    print("==========================")
+                end
+                
+                -- Bar is active if it exists, is shown, and has a value > 0
+                local shouldShow = false
+                if bar and bar:IsShown() then
+                    local ok, value = pcall(function() return bar:GetValue() end)
+                    if ok and value and value > 0 then
+                        shouldShow = true
+                    end
+                end
+                
+                if shouldShow and iconTexture then
+                if shouldShow and iconTexture then
                     local data = {
                         icon = iconTexture,
-                        name = spellInfo.name or "",
+                        name = spellName,
                         spellID = spellID,
                         remainingTime = 0,
                         charges = 1,
                     }
                     
-                    -- Get duration from auraData if available (pass-through for secret values)
-                    if auraData then
-                        -- Safe pass-through: don't do math, just check if fields exist
-                        if auraData.expirationTime then
-                            local ok, remaining = pcall(function()
-                                return auraData.expirationTime - GetTime()
+                    -- Get duration from the bar (safe pass-through for secret values)
+                    if bar then
+                        local ok, remaining = pcall(function()
+                            return bar:GetValue()
+                        end)
+                        if ok and remaining and remaining > 0 then
+                            data.remainingTime = remaining
+                            
+                            local maxOk, maxDuration = pcall(function()
+                                return select(2, bar:GetMinMaxValues())
                             end)
-                            if ok and remaining and remaining > 0 then
-                                data.remainingTime = remaining
-                            end
-                        end
-                        
-                        if auraData.duration then
-                            local ok, duration = pcall(function()
-                                return auraData.duration
-                            end)
-                            if ok and duration then
-                                data.duration = duration
-                            end
-                        end
-                    end
-                    
-                    -- Fallback: Get duration from the frame bar (safe pass-through)
-                    if not data.duration then
-                        local bar = frameBars[spellID]
-                        if bar then
-                            local ok, remaining = pcall(function()
-                                return bar:GetValue()
-                            end)
-                            if ok and remaining and remaining > 0 then
-                                data.remainingTime = remaining
-                                
-                                local maxOk, maxDuration = pcall(function()
-                                    return select(2, bar:GetMinMaxValues())
-                                end)
-                                if maxOk and maxDuration then
-                                    data.duration = maxDuration
-                                end
+                            if maxOk and maxDuration then
+                                data.duration = maxDuration
                             end
                         end
                     end
