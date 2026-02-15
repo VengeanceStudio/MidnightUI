@@ -1292,21 +1292,23 @@ function Cooldowns:UpdateIconDisplay(frame)
         if icon.spellID and (frame.displayType == "essential" or frame.displayType == "utility") then
             local chargeInfo = C_Spell.GetSpellCharges(icon.spellID)
             if chargeInfo and chargeInfo.currentCharges ~= nil then
-                -- Direct pass-through: No type checks, no comparisons, no math
-                -- FontString can render both normal numbers and secret values
-                icon.stackText:SetText(chargeInfo.currentCharges)
+                local current = chargeInfo.currentCharges
+                
+                -- Pass charge value to FontString (works for both normal and secret values)
+                icon.stackText:SetText(current)
                 icon.stackText:Show()
                 
-                -- Use color curve to set color based on charge count (works for secret values)
+                -- Use curve to get color (returns secret color if current is secret)
+                -- SetTextColor is secret-aware in 12.0 and can accept secret colors
                 if self.chargeCurve then
-                    local color = self.chargeCurve:Evaluate(chargeInfo.currentCharges)
+                    local color = self.chargeCurve:Evaluate(current)
                     if color then
                         icon.stackText:SetTextColor(color:GetRGBA())
                     else
-                        icon.stackText:SetTextColor(1, 1, 1) -- Fallback to white
+                        icon.stackText:SetTextColor(1, 1, 1)
                     end
                 else
-                    icon.stackText:SetTextColor(1, 1, 1) -- No curve, use white
+                    icon.stackText:SetTextColor(1, 1, 1)
                 end
                 
                 icon.texture:SetDesaturated(false)
@@ -1317,12 +1319,14 @@ function Cooldowns:UpdateIconDisplay(frame)
             end
         elseif cooldownData.charges ~= nil then
             -- Fallback to stored charge data (for buffs/other displays)
-            icon.stackText:SetText(cooldownData.charges)
+            local current = cooldownData.charges
+            
+            icon.stackText:SetText(current)
             icon.stackText:Show()
             
-            -- Apply color curve if available
+            -- Apply curve-based color (works for secret values too)
             if self.chargeCurve then
-                local color = self.chargeCurve:Evaluate(cooldownData.charges)
+                local color = self.chargeCurve:Evaluate(current)
                 if color then
                     icon.stackText:SetTextColor(color:GetRGBA())
                 else
