@@ -272,6 +272,10 @@ function Cooldowns:GetCooldownData(displayName)
     local cooldowns = {}
     local children = {blizzFrame:GetChildren()}
     
+    if displayName == "cooldowns" then
+        print("MidnightUI Debug: Starting GetCooldownData for cooldowns, found", #children, "children")
+    end
+    
     for _, child in ipairs(children) do
         -- For tracked buffs, check if frame has valid data
         -- For tracked bars, check if they have bar element and valid auraInstanceID
@@ -289,6 +293,8 @@ function Cooldowns:GetCooldownData(displayName)
             local hasBar = child.Bar ~= nil
             local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
             shouldInclude = hasBar and hasValidAura
+            
+            print("  Child has Bar:", hasBar, "has auraInstanceID:", hasValidAura, "shouldInclude:", shouldInclude)
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
