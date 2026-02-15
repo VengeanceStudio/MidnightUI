@@ -58,6 +58,7 @@ local defaults = {
             fontSize = 12,
             fontFlag = "OUTLINE",
             barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
+            barBorderColor = {0, 0, 0, 1},  -- Bar border color
             useClassColor = false,  -- Use class color instead of custom color
             fadeColor = true,  -- Fade color as time decreases
         },
@@ -118,6 +119,7 @@ local defaults = {
             fontSize = 12,
             fontFlag = "OUTLINE",
             barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
+            barBorderColor = {0, 0, 0, 1},  -- Bar border color
             useClassColor = false,  -- Use class color instead of custom color
             fadeColor = true,  -- Fade color as time decreases
             fontFlag = "OUTLINE",
@@ -707,7 +709,7 @@ function Cooldowns:CreateCustomDisplays()
     
     -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
-        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent, "BackdropTemplate")
+        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
         
         -- Load saved position or use default
         local pos = db.customBuffBars.position
@@ -723,17 +725,6 @@ function Cooldowns:CreateCustomDisplays()
         f:SetSize(frameWidth, 90)
         f:SetFrameStrata("MEDIUM")
         f:EnableMouse(true)
-        
-        -- Add border to parent frame
-        f:SetBackdrop({
-            bgFile = "Interface\\Buttons\\WHITE8X8",
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            tile = false,
-            edgeSize = 1,
-            insets = { left = 0, right = 0, top = 0, bottom = 0 }
-        })
-        f:SetBackdropColor(0, 0, 0, 0)  -- Transparent background
-        f:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)  -- Gray border for visibility
         
         f.bars = {}
         f.activeBars = {}
@@ -941,10 +932,11 @@ function Cooldowns:CreateBar(parent, index)
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
         edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     bar:SetBackdropColor(0, 0, 0, 0)  -- Transparent background (statusbar will show through)
-    bar:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)  -- Gray border for visibility
+    local br, bg, bb, ba = unpack(db.barBorderColor)
+    bar:SetBackdropBorderColor(br, bg, bb, ba)  -- Configurable border color
     
     -- Background
     bar.bg = bar:CreateTexture(nil, "BACKGROUND")
@@ -2310,6 +2302,22 @@ function Cooldowns:GetOptions()
                 set = function(_, r, g, b, a)
                     self.db.profile.customBuffBars.barColor = {r, g, b, a}
                     self:UpdateAllDisplays()
+                end
+            },
+            
+            customBuffBarsBarBorderColor = {
+                name = "Bar Border Color",
+                desc = "Color of the border around each tracked bar.",
+                type = "color",
+                order = 90.91,
+                hasAlpha = true,
+                get = function()
+                    local c = self.db.profile.customBuffBars.barBorderColor
+                    return c[1], c[2], c[3], c[4]
+                end,
+                set = function(_, r, g, b, a)
+                    self.db.profile.customBuffBars.barBorderColor = {r, g, b, a}
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
