@@ -383,23 +383,48 @@ end
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
+    print("=== GetTrackedBarsData DEBUG ===")
+    
     -- Use the official API to get spells configured as tracked bars
-    if not C_CooldownManager or not C_CooldownManager.GetTrackedSpells then
+    if not C_CooldownManager then
+        print("C_CooldownManager does not exist")
         return cooldowns
     end
     
-    if not Enum or not Enum.CooldownManagerCategory or not Enum.CooldownManagerCategory.TrackedBars then
+    if not C_CooldownManager.GetTrackedSpells then
+        print("C_CooldownManager.GetTrackedSpells does not exist")
         return cooldowns
     end
     
+    if not Enum or not Enum.CooldownManagerCategory then
+        print("Enum.CooldownManagerCategory does not exist")
+        return cooldowns
+    end
+    
+    if not Enum.CooldownManagerCategory.TrackedBars then
+        print("Enum.CooldownManagerCategory.TrackedBars does not exist")
+        return cooldowns
+    end
+    
+    print("Calling GetTrackedSpells...")
     local trackedSpells = C_CooldownManager.GetTrackedSpells(Enum.CooldownManagerCategory.TrackedBars)
     if not trackedSpells then
+        print("GetTrackedSpells returned nil")
         return cooldowns
     end
+    
+    print(string.format("GetTrackedSpells returned %d spells", #trackedSpells))
     
     -- For each tracked spell, check if player has active aura
     for _, spellID in ipairs(trackedSpells) do
+        print(string.format("Checking spellID: %s", tostring(spellID)))
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+        
+        if auraData then
+            print(string.format("  SpellID %s has active aura", tostring(spellID)))
+        else
+            print(string.format("  SpellID %s NO active aura", tostring(spellID)))
+        end
         
         -- Only include if aura is active
         if auraData then
@@ -429,10 +454,13 @@ function Cooldowns:GetTrackedBarsData()
                     end
                 end
                 
+                print(string.format("  Added bar: %s", data.name))
                 table.insert(cooldowns, data)
             end
         end
     end
+    
+    print(string.format("=== Returning %d bars ===", #cooldowns))
     
     return cooldowns
 end
