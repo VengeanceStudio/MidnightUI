@@ -416,6 +416,50 @@ function Cooldowns:GetTrackedBarsData()
         
         if info and info.isKnown then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
+            local spellInfo = C_Spell.GetSpellInfo(spellID)
+            local spellName = spellInfo and spellInfo.name or "Unknown"
+            
+            -- Debug ALL tracked bars to understand the structure
+            print("=== Tracked Bar: " .. spellName .. " ===")
+            print("  spellID:", spellID)
+            print("  cooldownID:", cooldownID)
+            print("  hasAura:", tostring(info.hasAura))
+            
+            -- Check linkedSpellIDs - this might contain the ground effect spell!
+            if info.linkedSpellIDs and type(info.linkedSpellIDs) == "table" then
+                print("  linkedSpellIDs:")
+                for i, linkedID in ipairs(info.linkedSpellIDs) do
+                    local linkedInfo = C_Spell.GetSpellInfo(linkedID)
+                    local linkedName = linkedInfo and linkedInfo.name or "Unknown"
+                    print("    [" .. i .. "] = " .. linkedID .. " (" .. linkedName .. ")")
+                end
+            end
+            
+            local bar = frameBars[spellID]
+            if bar then
+                print("  Bar found! IsShown:", tostring(bar:IsShown()))
+                local ok, value = pcall(function() return bar:GetValue() end)
+                if ok then print("  Bar value:", tostring(value)) end
+            else
+                print("  Bar NOT found for spellID:", spellID)
+                
+                -- Check if bar exists with linkedSpellID
+                if info.linkedSpellIDs then
+                    for _, linkedID in ipairs(info.linkedSpellIDs) do
+                        local linkedBar = frameBars[linkedID]
+                        if linkedBar then
+                            print("  But found bar with linkedSpellID:", linkedID)
+                            print("    IsShown:", tostring(linkedBar:IsShown()))
+                            local ok, value = pcall(function() return linkedBar:GetValue() end)
+                            if ok then print("    Bar value:", tostring(value)) end
+                        end
+                    end
+                end
+            end
+            
+            local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+            print("  GetPlayerAuraBySpellID:", tostring(auraData ~= nil))
+            print("=============================")
             
             -- Check multiple conditions to determine if bar should show
             local shouldShow = false
