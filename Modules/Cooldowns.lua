@@ -276,13 +276,13 @@ function Cooldowns:GetCooldownData(displayName)
     if displayName == "cooldowns" then
         print("MidnightUI Debug: Found", #children, "children in BuffBarCooldownViewer")
         for i, child in ipairs(children) do
-            print("  Child", i, "- Has Bar:", child.Bar ~= nil, "Has Icon:", child.Icon ~= nil, "Width:", child:GetWidth())
+            print("  Child", i, "- Has Bar:", child.Bar ~= nil, "Has Icon:", child.Icon ~= nil, "Width:", child:GetWidth(), "auraInstanceID:", child.auraInstanceID or "nil")
         end
     end
     
     for _, child in ipairs(children) do
         -- For tracked buffs, check if frame has valid data
-        -- For tracked bars, check if they have bar element and size
+        -- For tracked bars, check if they have bar element and valid auraInstanceID
         local shouldInclude = true
         
         if displayName == "buffs" then
@@ -292,7 +292,12 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, just check if they have a Bar element
+            -- For tracked bars, check if they have a Bar element AND a valid auraInstanceID
+            -- Pooled frames always have Bar but only active ones have auraInstanceID
+            local hasBar = child.Bar ~= nil
+            local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
+            shouldInclude = hasBar and hasValidAura
+        end
             -- Don't check width as it might cause false negatives
             shouldInclude = child.Bar ~= nil
         end
