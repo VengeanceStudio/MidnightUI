@@ -417,12 +417,48 @@ function Cooldowns:GetTrackedBarsData()
         if info and info.isKnown then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
             
-            -- WoW 12.0: Check if spell has an active aura (works for ground effects like Consecration)
-            -- If GetPlayerAuraBySpellID returns anything, the bar should be shown
-            local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+            -- Check multiple conditions to determine if bar should show
+            local shouldShow = false
+            local auraData = nil
             
-            -- Show bar only if there's an active aura
-            if auraData then
+            -- Method 1: Check the actual Blizzard frame bar
+            local bar = frameBars[spellID]
+            if bar then
+                -- Check if bar is shown AND has a valid value
+                local barShown = bar:IsShown()
+                local barHasValue = false
+                
+                if barShown then
+                    local ok, value = pcall(function() return bar:GetValue() end)
+                    if ok and value and value > 0 then
+                        barHasValue = true
+                    end
+                end
+                
+                if barShown and barHasValue then
+                    shouldShow = true
+                end
+            end
+            
+            -- Method 2: Check for active player aura
+            if not shouldShow then
+                auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                if auraData then
+                    shouldShow = true
+                end
+            end
+            
+            -- Method 3: Check visibility info (for priority spells)
+            if not shouldShow and C_Spell and C_Spell.GetVisibilityInfo then
+                local ok, hasCustom, alwaysShowMine, showForMySpec = pcall(function()
+                    return C_Spell.GetVisibilityInfo(spellID, Enum.SpellAuraVisibilityType.RaidInCombat)
+                end)
+                if ok and showForMySpec then
+                    shouldShow = true
+                end
+            end
+            
+            if shouldShow then
                 local spellInfo = C_Spell.GetSpellInfo(spellID)
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
