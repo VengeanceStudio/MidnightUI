@@ -1118,37 +1118,73 @@ function Cooldowns:UpdateIconDisplay(frame)
             icon.texture:SetTexture(cooldownData.icon)
         end
         
-        -- Set cooldown text
-        if cooldownData.remainingTime and cooldownData.remainingTime > 0 then
-            if cooldownData.remainingTime > 60 then
-                icon.cooldownText:SetFormattedText("%.1fm", cooldownData.remainingTime / 60)
+        -- Set cooldown text (protect against secret values)
+        local hasRemainingTime = false
+        local remainingTimeValue = 0
+        if cooldownData.remainingTime then
+            local ok, result = pcall(function() return cooldownData.remainingTime > 0 end)
+            if ok and result then
+                hasRemainingTime = true
+                -- Safely get the value
+                local ok2, value = pcall(function() return cooldownData.remainingTime end)
+                if ok2 then
+                    remainingTimeValue = value
+                end
+            end
+        end
+        
+        if hasRemainingTime and remainingTimeValue > 0 then
+            if remainingTimeValue > 60 then
+                icon.cooldownText:SetFormattedText("%.1fm", remainingTimeValue / 60)
             else
-                icon.cooldownText:SetFormattedText("%.0f", cooldownData.remainingTime)
+                icon.cooldownText:SetFormattedText("%.0f", remainingTimeValue)
             end
         else
             icon.cooldownText:SetText("")
         end
         
-        -- Handle charges (WoW 12.0 display logic)
+        -- Handle charges (WoW 12.0 display logic) - protect against secret values
         -- Show charges if we have charge data and either maxCharges > 1 OR charges is explicitly set
-        local hasCharges = (cooldownData.maxCharges and cooldownData.maxCharges > 1) or 
-                          (cooldownData.charges and cooldownData.charges ~= 1)
+        local hasCharges = false
+        local currentCharges = 0
+        local maxCharges = 1
+        
+        -- Safely check maxCharges
+        if cooldownData.maxCharges then
+            local ok, result = pcall(function() return cooldownData.maxCharges > 1 end)
+            if ok and result then
+                hasCharges = true
+                local ok2, val = pcall(function() return cooldownData.maxCharges end)
+                if ok2 then maxCharges = val end
+            end
+        end
+        
+        -- Safely check charges
+        if cooldownData.charges and not hasCharges then
+            local ok, result = pcall(function() return cooldownData.charges ~= 1 end)
+            if ok and result then
+                hasCharges = true
+            end
+        end
+        
+        -- Get current charge value safely
+        if cooldownData.charges then
+            local ok, val = pcall(function() return cooldownData.charges end)
+            if ok then currentCharges = val or 0 end
+        end
         
         if hasCharges then
             -- Show charge count
-            local current = cooldownData.charges or 0
-            local max = cooldownData.maxCharges or 1
-            
             -- Display as "current/max" or just "current" if max is unknown
-            if max > 1 then
-                icon.stackText:SetText(string.format("%d", current))
+            if maxCharges > 1 then
+                icon.stackText:SetText(string.format("%d", currentCharges))
             else
-                icon.stackText:SetText(string.format("%d", current))
+                icon.stackText:SetText(string.format("%d", currentCharges))
             end
             icon.stackText:Show()
             
             -- Desaturate and color text if 0 charges
-            if current == 0 then
+            if currentCharges == 0 then
                 icon.texture:SetDesaturated(true)
                 icon.stackText:SetTextColor(1, 0, 0) -- Red for 0 charges
             else
@@ -1157,7 +1193,7 @@ function Cooldowns:UpdateIconDisplay(frame)
             end
             
             -- Show glow effect if charges available (requires ActionButton API)
-            if current > 0 and icon.ShowOverlayGlow then
+            if currentCharges > 0 and icon.ShowOverlayGlow then
                 icon:ShowOverlayGlow()
             elseif icon.HideOverlayGlow then
                 icon:HideOverlayGlow()
