@@ -416,44 +416,38 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, use WoW 12.0 API to check if spell is actually tracked
+            -- For tracked bars, check if there's an active aura with this name
             local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
             local hasBar = child.Bar ~= nil
             
             shouldInclude = false
             
             if hasBar and hasSize then
-                -- Try to get spellID from the child
-                local spellID = child.spellID
-                if not spellID and child.Bar then
-                    spellID = child.Bar.spellID
-                end
-                
-                -- DEBUG: Print what we find
+                -- Get spell name
                 local name = ""
                 if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
                     local ok, result = pcall(function() return child.Bar.Name:GetText() end)
                     if ok then name = result or "" end
                 end
                 
-                if spellID then
-                    -- WoW 12.0: Check if this spell is actually enabled for tracked bars
-                    local isTracked = false
-                    if C_CooldownManager and C_CooldownManager.IsSpellTrackedAsBar then
-                        isTracked = C_CooldownManager.IsSpellTrackedAsBar(spellID)
+                if name and name ~= "" then
+                    -- Try to find the spell by name and get its spellID
+                    local spellID = nil
+                    local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
+                    if ok and spellInfo then
+                        spellID = spellInfo.spellID
                     end
                     
-                    print(string.format("TrackedBar: %s | spellID=%s | IsTrackedAsBar=%s", 
-                        name, tostring(spellID), tostring(isTracked)))
-                    
-                    shouldInclude = isTracked
-                else
-                    if name ~= "" then
-                        print(string.format("TrackedBar: %s | NO SPELLID", name))
+                    if spellID then
+                        -- Check if there's an active aura with this spellID
+                        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                        shouldInclude = (auraData ~= nil)
+                        
+                        print(string.format("TrackedBar: %s | spellID=%s | hasAura=%s", 
+                            name, tostring(spellID), tostring(shouldInclude)))
+                    else
+                        print(string.format("TrackedBar: %s | Could not find spellID", name))
                     end
-                    -- Fallback: if no spellID, check auraInstanceID
-                    local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
-                    shouldInclude = hasValidAura
                 end
             end
         end
