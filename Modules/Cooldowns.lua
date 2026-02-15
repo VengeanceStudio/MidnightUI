@@ -523,13 +523,14 @@ function Cooldowns:GetCooldownData(displayName)
                         if chargeInfo then
                             -- Store charge values even if they're secret (WoW 12.0 pass-through)
                             -- FontString can render secret values even though we can't read them
-                            if chargeInfo.currentCharges then
+                            -- Use rawget to check existence, not truthiness (secrets might be falsy)
+                            if chargeInfo.currentCharges ~= nil then
                                 -- Use Applications charge count if available, otherwise use API
                                 if not data.charges or data.charges == 1 then
                                     data.charges = chargeInfo.currentCharges -- Store even if secret
                                 end
                             end
-                            if chargeInfo.maxCharges then
+                            if chargeInfo.maxCharges ~= nil then
                                 data.maxCharges = chargeInfo.maxCharges -- Store even if secret
                             end
                         end
@@ -1188,7 +1189,8 @@ function Cooldowns:UpdateIconDisplay(frame)
         
         -- Handle charges (WoW 12.0 pass-through method for secret values)
         -- Check if spell has charges and handle both secret and normal values
-        if cooldownData.charges or cooldownData.maxCharges then
+        -- Use ~= nil to check existence, not truthiness (secrets might be falsy)
+        if cooldownData.charges ~= nil or cooldownData.maxCharges ~= nil then
             local current = cooldownData.charges
             local max = cooldownData.maxCharges
             
