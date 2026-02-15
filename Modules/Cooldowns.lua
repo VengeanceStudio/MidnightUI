@@ -2356,9 +2356,6 @@ function Cooldowns:GetOptions()
             },
             
             -- Essential Cooldowns (HIDDEN - now in display settings)
-            -- Essential Cooldowns Display
-            headerEssential = { type = "header", name = "Essential Cooldowns Display", order = 30 },
-            
             essentialAttachTo = {
                 name = "Attach To",
                 desc = "Which frame to attach Essential Cooldowns to.",
@@ -2428,10 +2425,7 @@ function Cooldowns:GetOptions()
                 end
             },
             
-            -- Utility Cooldowns
-            -- Utility Cooldowns Display
-            headerUtility = { type = "header", name = "Utility Cooldowns Display", order = 40 },
-            
+            -- Utility Cooldowns (HIDDEN - now in display settings)
             utilityAttachTo = {
                 name = "Attach To",
                 desc = "Which frame to attach Utility Cooldowns to.",
@@ -2501,10 +2495,7 @@ function Cooldowns:GetOptions()
                 end
             },
             
-            -- Tracked Buffs
-            -- Tracked Buffs Display
-            headerBuffs = { type = "header", name = "Tracked Buffs Display", order = 50 },
-            
+            -- Tracked Buffs (HIDDEN - now in display settings)
             buffsAttachTo = {
                 name = "Attach To",
                 desc = "Which frame to attach Tracked Buffs to.",
@@ -2649,17 +2640,17 @@ function Cooldowns:GetOptions()
     }
     
     -- Add display-specific options
-    local displayOptions = self:GetDisplayOptions("essential", "Essential Cooldowns Display", 200)
+    local displayOptions = self:GetDisplayOptions("essential", "Essential Cooldowns Display", 30)
     for k, v in pairs(displayOptions) do
         options.args[k] = v
     end
     
-    displayOptions = self:GetDisplayOptions("utility", "Utility Cooldowns Display", 250)
+    displayOptions = self:GetDisplayOptions("utility", "Utility Cooldowns Display", 40)
     for k, v in pairs(displayOptions) do
         options.args[k] = v
     end
     
-    displayOptions = self:GetDisplayOptions("buffs", "Tracked Buffs Display", 300)
+    displayOptions = self:GetDisplayOptions("buffs", "Tracked Buffs Display", 50)
     for k, v in pairs(displayOptions) do
         options.args[k] = v
     end
