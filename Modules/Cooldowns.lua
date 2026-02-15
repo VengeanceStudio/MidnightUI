@@ -345,6 +345,7 @@ function Cooldowns:GetCooldownData(displayName)
                     name = "",
                     remainingTime = 0,
                     charges = 1,
+                    spellID = child.spellID, -- Store spellID for charge lookups (WoW 12.0)
                 }
                 
                 -- Try to get name from various possible locations
@@ -468,15 +469,21 @@ function Cooldowns:GetCooldownData(displayName)
                     end
                 end
                 
-                -- For essential and utility cooldowns, also try to get charges from spell charges API
+                -- For essential and utility cooldowns, get charges from spell charges API (WoW 12.0)
                 if displayName == "essential" or displayName == "utility" then
                     -- Try to find spellID from the child frame
                     local spellID = child.spellID
                     if spellID then
                         local chargeInfo = C_Spell.GetSpellCharges(spellID)
                         if chargeInfo and chargeInfo.currentCharges then
-                            if chargeInfo.currentCharges > 1 then
+                            -- Handle Secret Values in restricted combat (12.0 security)
+                            if type(chargeInfo.currentCharges) == "number" then
                                 data.charges = chargeInfo.currentCharges
+                                data.maxCharges = chargeInfo.maxCharges
+                            else
+                                -- Secret Value detected - use last known value or hide
+                                data.charges = nil
+                                data.maxCharges = nil
                             end
                         end
                     end
@@ -907,6 +914,30 @@ function Cooldowns:CreateIcon(parent, displayType)
     icon.stackText:SetPoint("BOTTOMRIGHT", -2, 2)
     icon.stackText:SetTextColor(1, 1, 1)
     
+    -- Add overlay glow support for charge-based effects (WoW 12.0)
+    -- Create a simple glow texture as a fallback since we're not using ActionButton template
+    icon.glowTexture = icon:CreateTexture(nil, "OVERLAY")
+    icon.glowTexture:SetAllPoints(icon)
+    icon.glowTexture:SetTexture("Interface\\SpellActivationOverlay\\IconAlert")
+    icon.glowTexture:SetBlendMode("ADD")
+    icon.glowTexture:SetAlpha(0)
+    icon.glowTexture:Hide()
+    
+    -- Add methods to show/hide glow
+    icon.ShowOverlayGlow = function(self)
+        if self.glowTexture then
+            self.glowTexture:Show()
+            self.glowTexture:SetAlpha(0.8)
+        end
+    end
+    
+    icon.HideOverlayGlow = function(self)
+        if self.glowTexture then
+            self.glowTexture:Hide()
+            self.glowTexture:SetAlpha(0)
+        end
+    end
+    
     icon:Hide()
     return icon
 end
@@ -1076,12 +1107,36 @@ function Cooldowns:UpdateIconDisplay(frame)
             icon.cooldownText:SetText("")
         end
         
-        -- Set stack count
-        if cooldownData.charges and cooldownData.charges > 1 then
-            icon.stackText:SetText(cooldownData.charges)
+        -- Handle charges (WoW 12.0 display logic)
+        if cooldownData.maxCharges and cooldownData.maxCharges > 1 then
+            -- Show charge count
+            local current = cooldownData.charges or 0
+            icon.stackText:SetText(current)
             icon.stackText:Show()
+            
+            -- Desaturate and color text if 0 charges
+            if current == 0 then
+                icon.texture:SetDesaturated(true)
+                icon.stackText:SetTextColor(1, 0, 0) -- Red for 0 charges
+            else
+                icon.texture:SetDesaturated(false)
+                icon.stackText:SetTextColor(1, 1, 1) -- White if available
+            end
+            
+            -- Show glow effect if charges available (requires ActionButton API)
+            if current > 0 and icon.ShowOverlayGlow then
+                icon:ShowOverlayGlow()
+            elseif icon.HideOverlayGlow then
+                icon:HideOverlayGlow()
+            end
         else
+            -- No charge system or only 1 charge - hide charge counter
             icon.stackText:Hide()
+            icon.texture:SetDesaturated(false)
+            icon.stackText:SetTextColor(1, 1, 1)
+            if icon.HideOverlayGlow then
+                icon:HideOverlayGlow()
+            end
         end
         
         icon:Show()
