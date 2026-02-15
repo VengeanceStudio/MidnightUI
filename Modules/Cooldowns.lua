@@ -272,10 +272,6 @@ function Cooldowns:GetCooldownData(displayName)
     local cooldowns = {}
     local children = {blizzFrame:GetChildren()}
     
-    if displayName == "cooldowns" then
-        print("MidnightUI Debug: Starting GetCooldownData for cooldowns, found", #children, "children")
-    end
-    
     for _, child in ipairs(children) do
         -- For tracked buffs, check if frame has valid data
         -- For tracked bars, check if they have bar element and valid auraInstanceID
@@ -292,8 +288,6 @@ function Cooldowns:GetCooldownData(displayName)
             -- Unlike buffs, bars don't use auraInstanceID for filtering
             -- We'll rely on icon extraction to filter valid bars
             shouldInclude = child.Bar ~= nil
-            
-            print("  Child has Bar:", child.Bar ~= nil, "shouldInclude:", shouldInclude)
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
@@ -303,28 +297,16 @@ function Cooldowns:GetCooldownData(displayName)
             
             -- Debug for bars
             if displayName == "cooldowns" then
-                print("MidnightUI Debug: Processing bar - Bar.Icon:", child.Bar and child.Bar.Icon ~= nil, "child.Icon:", child.Icon ~= nil, "Bar:GetRegions():", child.Bar and select("#", child.Bar:GetRegions()) or "none")
-            end
-            
-            -- For tracked bars, get icon from child.Icon (not Bar regions)
-            if displayName == "cooldowns" and child.Icon then
                 if displayName == "cooldowns" then
                     print("  Checking child.Icon.GetTexture:", child.Icon.GetTexture ~= nil)
                 end
                 if child.Icon.GetTexture then
                     iconTexture = child.Icon:GetTexture()
-                    if displayName == "cooldowns" then
-                        print("  Got texture from child.Icon:GetTexture():", iconTexture, "type:", type(iconTexture))
-                    end
+                   child.Icon.GetTexture then
+                    iconTexture = child.Icon:GetTexture()
                 elseif child.Icon.Texture then
                     iconTexture = child.Icon.Texture:GetTexture()
-                    if displayName == "cooldowns" then
-                        print("  Got texture from child.Icon.Texture")
-                    end
                 else
-                    if displayName == "cooldowns" then
-                        print("  Searching regions in child.Icon")
-                    end
                     -- Look for texture children in Icon
                     local regions = {child.Icon:GetRegions()}
                     for _, region in ipairs(regions) do
@@ -333,14 +315,6 @@ function Cooldowns:GetCooldownData(displayName)
                             if iconTexture then break end
                         end
                     end
-                end
-                if displayName == "cooldowns" then
-                    print("  Final iconTexture:", iconTexture)
-                end
-            end
-            
-            -- For other displays with Icon
-            if not iconTexture and child.Icon then
                 -- For tracked buffs/cooldowns, get icon from Icon
                 if child.Icon.GetTexture then
                     iconTexture = child.Icon:GetTexture()
@@ -410,11 +384,17 @@ function Cooldowns:GetCooldownData(displayName)
                     end
                 end
                 
+                if displayName == "cooldowns" then
+                    print("MidnightUI Debug: Adding bar to table -", "Icon:", iconTexture, "Name:", data.name or "none")
+                end
                 table.insert(cooldowns, data)
             end
         end
     end
     
+    if displayName == "cooldowns" then
+        print("MidnightUI Debug: GetCooldownData returning", #cooldowns, "bars")
+    end
     return cooldowns
 end
 
@@ -981,6 +961,8 @@ function Cooldowns:UpdateBarDisplay(frame)
     
     local cooldowns = self:GetCooldownData(frame.displayType)
     local db = self.db.profile.customBuffBars
+    
+    print("MidnightUI Debug: UpdateBarDisplay called -", "cooldowns count:", #cooldowns, "bars count:", #frame.bars)
     
     -- Update bars
     for i, bar in ipairs(frame.bars) do
