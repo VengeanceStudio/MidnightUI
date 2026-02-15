@@ -343,13 +343,142 @@ function Cooldowns:GetCooldownData(displayName)
     return cooldowns
 end
 
+function Cooldowns:SetupMoveMode(displayName, displayTitle)
+    local frame = self.customFrames[displayName]
+    if not frame then return end
+    
+    local frameDB = self.db.profile[displayName]
+    if not frameDB then return end
+    
+    -- Get the Movable module
+    local Movable = MidnightUI:GetModule("Movable")
+    if not Movable then return end
+    
+    -- Clean up any existing highlight frame
+    if frame.movableHighlightFrame then
+        frame.movableHighlightFrame:Hide()
+        frame.movableHighlightFrame:SetParent(nil)
+        frame.movableHighlightFrame = nil
+    end
+    
+    -- Create a dedicated child frame above all content
+    frame.movableHighlightFrame = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+    frame.movableHighlightFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+    frame.movableHighlightFrame:SetFrameLevel(10000)
+    frame.movableHighlightFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    frame.movableHighlightFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+    
+    -- Keep highlight frame in sync with frame position/size
+    frame:HookScript("OnHide", function()
+        if frame.movableHighlightFrame then
+            frame.movableHighlightFrame:Hide()
+        end
+    end)
+    frame:HookScript("OnShow", function()
+        if frame.movableHighlightFrame and MidnightUI.moveMode then
+            frame.movableHighlightFrame:Show()
+        end
+    end)
+    frame:HookScript("OnSizeChanged", function()
+        if frame.movableHighlightFrame then
+            frame.movableHighlightFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+            frame.movableHighlightFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        end
+    end)
+    
+    -- Green highlight (hidden by default)
+    frame.movableHighlightFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 2,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    frame.movableHighlightFrame:SetBackdropColor(0, 0.5, 0, 0.2)  -- Semi-transparent green
+    frame.movableHighlightFrame:SetBackdropBorderColor(0, 1, 0, 1) -- Bright green border
+    
+    -- Add a centered label with the frame name
+    if not frame.movableHighlightLabel then
+        frame.movableHighlightLabel = frame.movableHighlightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+        frame.movableHighlightLabel:SetPoint("CENTER")
+        frame.movableHighlightLabel:SetText(displayTitle)
+        frame.movableHighlightLabel:SetTextColor(1, 1, 1, 1)
+        frame.movableHighlightLabel:SetShadowOffset(2, -2)
+        frame.movableHighlightLabel:SetShadowColor(0, 0, 0, 1)
+    end
+    frame.movableHighlightFrame:Hide() -- Hide by default
+    
+    -- Enable the actual frame to be movable
+    frame:SetMovable(true)
+    frame:SetClampedToScreen(true)
+    
+    -- Make the highlight frame draggable
+    frame.movableHighlightFrame:SetMovable(true)
+    frame.movableHighlightFrame:EnableMouse(true)
+    frame.movableHighlightFrame:RegisterForDrag("LeftButton")
+    frame.movableHighlightFrame:SetClampedToScreen(true)
+    
+    local isDragging = false
+    frame.movableHighlightFrame:SetScript("OnDragStart", function(self)
+        if MidnightUI.moveMode then
+            isDragging = true
+            frame:StartMoving()
+        end
+    end)
+    
+    frame.movableHighlightFrame:SetScript("OnDragStop", function(self)
+        if not isDragging then return end
+        frame:StopMovingOrSizing()
+        isDragging = false
+        
+        -- Save position
+        local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
+        -- Store in custom position table if it doesn't exist
+        if not frameDB.position then
+            frameDB.position = {}
+        end
+        frameDB.position.point = point or "CENTER"
+        frameDB.position.relativePoint = relativePoint or "CENTER"
+        frameDB.position.x = xOfs or 0
+        frameDB.position.y = yOfs or 0
+    end)
+    
+    -- Store reference to parent frame and register the highlight frame
+    frame.movableHighlightFrame.parentFrame = frame
+    frame.movableHighlightFrame.movableHighlight = frame.movableHighlightFrame
+    frame.movableHighlightFrame.movableHighlightLabel = frame.movableHighlightLabel
+    table.insert(Movable.registeredFrames, frame.movableHighlightFrame)
+    
+    -- Add nudge arrows
+    Movable:CreateNudgeArrows(frame, frameDB.position or {}, function()
+        -- Reset callback: center the frame
+        if not frameDB.position then
+            frameDB.position = {}
+        end
+        frameDB.position.point = "CENTER"
+        frameDB.position.relativePoint = "CENTER"
+        frameDB.position.x = 0
+        frameDB.position.y = 0
+        frame:ClearAllPoints()
+        frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    end)
+end
+
 function Cooldowns:CreateCustomDisplays()
     local db = self.db.profile
     
     -- Create Essential Cooldowns (icons)
     if not self.customFrames.essential then
         local f = CreateFrame("Frame", "MidnightEssentialCooldowns", UIParent)
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        
+        -- Load saved position or use default
+        local pos = db.essential.position
+        if pos and pos.point then
+            f:SetPoint(pos.point, UIParent, pos.relativePoint or "CENTER", pos.x or 0, pos.y or 0)
+        else
+            f:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        end
+        
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
         
@@ -366,7 +495,15 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Utility Cooldowns (icons)
     if not self.customFrames.utility then
         local f = CreateFrame("Frame", "MidnightUtilityCooldowns", UIParent)
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, 100)
+        
+        -- Load saved position or use default
+        local pos = db.utility.position
+        if pos and pos.point then
+            f:SetPoint(pos.point, UIParent, pos.relativePoint or "CENTER", pos.x or 0, pos.y or 0)
+        else
+            f:SetPoint("CENTER", UIParent, "CENTER", 0, 100)
+        end
+        
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
         
@@ -381,7 +518,15 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Tracked Buffs (icons)
     if not self.customFrames.buffs then
         local f = CreateFrame("Frame", "MidnightTrackedBuffs", UIParent)
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        
+        -- Load saved position or use default
+        local pos = db.buffs.position
+        if pos and pos.point then
+            f:SetPoint(pos.point, UIParent, pos.relativePoint or "CENTER", pos.x or 0, pos.y or 0)
+        else
+            f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        end
+        
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
         
@@ -396,7 +541,15 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
         local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+        
+        -- Load saved position or use default
+        local pos = db.cooldowns.position
+        if pos and pos.point then
+            f:SetPoint(pos.point, UIParent, pos.relativePoint or "CENTER", pos.x or 0, pos.y or 0)
+        else
+            f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+        end
+        
         f:SetSize(400, 200)
         f:SetFrameStrata("HIGH")
         
@@ -407,6 +560,12 @@ function Cooldowns:CreateCustomDisplays()
         self.customFrames.cooldowns = f
         print("MidnightUI: Created Tracked Bars display")
     end
+    
+    -- Setup move mode for all displays
+    self:SetupMoveMode("essential", "Essential Cooldowns")
+    self:SetupMoveMode("utility", "Utility Cooldowns")
+    self:SetupMoveMode("buffs", "Tracked Buffs")
+    self:SetupMoveMode("cooldowns", "Tracked Bars")
 end
 
 function Cooldowns:CreateIconDisplay(name, displayType)
