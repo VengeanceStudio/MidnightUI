@@ -346,6 +346,7 @@ function Cooldowns:GetCooldownData(displayName)
                     remainingTime = 0,
                     charges = 1,
                     spellID = child.spellID, -- Store spellID for charge lookups (WoW 12.0)
+                    layoutIndex = child.layoutIndex, -- Preserve Blizzard's user-configured order
                 }
                 
                 -- Try to get name from various possible locations
@@ -536,6 +537,26 @@ function Cooldowns:GetCooldownData(displayName)
                 table.insert(cooldowns, data)
             end
         end
+    end
+    
+    -- Sort cooldowns by layoutIndex to preserve Blizzard's user-configured order
+    -- This respects the order users set in Blizzard's Cooldown Manager settings
+    if displayName == "essential" or displayName == "utility" then
+        table.sort(cooldowns, function(a, b)
+            -- Sort by layoutIndex if both have it (Blizzard's intended order)
+            if a.layoutIndex and b.layoutIndex then
+                return a.layoutIndex < b.layoutIndex
+            end
+            -- If only one has layoutIndex, prioritize it
+            if a.layoutIndex then return true end
+            if b.layoutIndex then return false end
+            -- Fallback to spellID for consistency
+            if a.spellID and b.spellID then
+                return a.spellID < b.spellID
+            end
+            -- Final fallback to icon texture ID
+            return (a.icon or 0) < (b.icon or 0)
+        end)
     end
     
     return cooldowns
