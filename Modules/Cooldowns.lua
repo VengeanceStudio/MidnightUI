@@ -364,15 +364,16 @@ function Cooldowns:CreateIcon(parent)
     icon.border:SetBackdropBorderColor(unpack(db.borderColor))
     
     -- Cooldown text
-    local font, _, flag = FontKit:GetFont(db.font, db.fontSize, db.fontFlag)
+    local fontPath = LSM:Fetch("font", db.font)
+    local fontFlag = db.fontFlag or "OUTLINE"
     icon.cooldownText = icon:CreateFontString(nil, "OVERLAY")
-    icon.cooldownText:SetFont(font, db.fontSize, flag)
+    icon.cooldownText:SetFont(fontPath, db.fontSize, fontFlag)
     icon.cooldownText:SetPoint("CENTER")
     icon.cooldownText:SetTextColor(1, 1, 1)
     
     -- Stack count
     icon.stackText = icon:CreateFontString(nil, "OVERLAY")
-    icon.stackText:SetFont(font, db.fontSize + 2, flag)
+    icon.stackText:SetFont(fontPath, db.fontSize + 2, fontFlag)
     icon.stackText:SetPoint("BOTTOMRIGHT", -2, 2)
     icon.stackText:SetTextColor(1, 1, 1)
     
@@ -407,9 +408,10 @@ function Cooldowns:CreateBar(parent, index)
     end
     
     -- Name text
-    local font, _, flag = FontKit:GetFont(db.font, db.fontSize, db.fontFlag)
+    local fontPath = LSM:Fetch("font", db.font)
+    local fontFlag = db.fontFlag or "OUTLINE"
     bar.name = bar:CreateFontString(nil, "OVERLAY")
-    bar.name:SetFont(font, db.fontSize, flag)
+    bar.name:SetFont(fontPath, db.fontSize, fontFlag)
     if db.showIcons then
         bar.name:SetPoint("LEFT", bar.icon, "RIGHT", 4, 0)
     else
@@ -421,7 +423,7 @@ function Cooldowns:CreateBar(parent, index)
     -- Timer text
     if db.showTimers then
         bar.timer = bar:CreateFontString(nil, "OVERLAY")
-        bar.timer:SetFont(font, db.fontSize, flag)
+        bar.timer:SetFont(fontPath, db.fontSize, fontFlag)
         bar.timer:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
         bar.timer:SetJustifyH("RIGHT")
         bar.timer:SetTextColor(1, 1, 1)
@@ -430,7 +432,7 @@ function Cooldowns:CreateBar(parent, index)
     -- Stack count
     if db.showStacks then
         bar.stack = bar:CreateFontString(nil, "OVERLAY")
-        bar.stack:SetFont(font, db.fontSize + 2, flag)
+        bar.stack:SetFont(fontPath, db.fontSize + 2, fontFlag)
         bar.stack:SetPoint("LEFT", bar.icon, "BOTTOMLEFT", 0, 0)
         bar.stack:SetJustifyH("LEFT")
         bar.stack:SetTextColor(1, 1, 1)
