@@ -273,8 +273,41 @@ function Cooldowns:GetCooldownData(displayName)
     local children = {blizzFrame:GetChildren()}
     
     for _, child in ipairs(children) do
-        -- Check if child has an Icon - don't check isActive as it's a secret boolean
-        if child.Icon then
+        -- For tracked buffs, check if the aura is actually active using C_UnitAuras
+        local shouldInclude = true
+        
+        if displayName == "buffs" or displayName == "cooldowns" then
+            -- This is a tracked buff/bar - verify it's active
+            if child.auraSpellID and child.auraDataUnit then
+                local auraData = C_UnitAuras.GetPlayerAuraBySpellID(child.auraSpellID)
+                if not auraData then
+                    shouldInclude = false
+                else
+                    -- Check if aura is active (not expired)
+                    if auraData.expirationTime and auraData.expirationTime > 0 then
+                        if auraData.expirationTime <= GetTime() then
+                            shouldInclude = false
+                        end
+                    end
+                end
+            elseif child.auraInstanceID and child.auraDataUnit then
+                -- Try using instance ID
+                local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(child.auraDataUnit, child.auraInstanceID)
+                if not auraData then
+                    shouldInclude = false
+                else
+                    -- Check if aura is active (not expired)
+                    if auraData.expirationTime and auraData.expirationTime > 0 then
+                        if auraData.expirationTime <= GetTime() then
+                            shouldInclude = false
+                        end
+                    end
+                end
+            end
+        end
+        
+        -- Check if child has an Icon and should be included
+        if child.Icon and shouldInclude then
             local iconTexture = nil
             
             -- Icon could be a frame containing a texture
