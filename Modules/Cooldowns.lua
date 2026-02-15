@@ -237,6 +237,10 @@ function Cooldowns:OnDBReady()
     self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW") -- Blizzard says spell is ready/proc'd
     self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") -- Proc ends
     
+    -- WoW 12.0 Tracked Bars System
+    self:RegisterEvent("COOLDOWN_MANAGER_UPDATE") -- User adds/removes spells from tracked bars
+    self:RegisterUnitEvent("UNIT_AURA", "player") -- Player buffs start/end
+    
     -- Check if we're already in world (PLAYER_ENTERING_WORLD may have fired before we registered)
     if IsPlayerInWorld and IsPlayerInWorld() then
         C_Timer.After(0.5, function()
@@ -375,6 +379,76 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
+-- WoW 12.0: Get tracked bars data using proper API
+function Cooldowns:GetTrackedBarsData()
+    local cooldowns = {}
+    
+    -- Use the official API to get spells configured as tracked bars
+    if not C_CooldownManager or not C_CooldownManager.GetTrackedSpells then
+        return cooldowns
+    end
+    
+    if not Enum or not Enum.CooldownManagerCategory or not Enum.CooldownManagerCategory.TrackedBars then
+        return cooldowns
+    end
+    
+    local trackedSpells = C_CooldownManager.GetTrackedSpells(Enum.CooldownManagerCategory.TrackedBars)
+    if not trackedSpells then
+        return cooldowns
+    end
+    
+    -- For each tracked spell, check if player has active aura
+    for _, spellID in ipairs(trackedSpells) do
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+        
+        -- Only include if aura is active
+        if auraData then
+            -- Get spell info
+            local spellInfo = C_Spell.GetSpellInfo(spellID)
+            local iconTexture = C_Spell.GetSpellTexture(spellID)
+            
+            if spellInfo and iconTexture then
+                local data = {
+                    icon = iconTexture,
+                    name = spellInfo.name or "",
+                    spellID = spellID,
+                    remainingTime = 0,
+                    charges = 1,
+                }
+                
+                -- Try to get duration (may be secret in combat)
+                if auraData.duration and type(auraData.duration) == "number" then
+                    data.duration = auraData.duration
+                end
+                
+                if auraData.expirationTime and type(auraData.expirationTime) == "number" then
+                    if auraData.expirationTime == 0 then
+                        data.remainingTime = 0
+                    else
+                        data.remainingTime = auraData.expirationTime - GetTime()
+                    end
+                end
+                
+                table.insert(cooldowns, data)
+            end
+        end
+    end
+    
+    return cooldowns
+end
+
+function Cooldowns:COOLDOWN_MANAGER_UPDATE()
+    -- User changed tracked bars configuration
+    self:UpdateAllDisplays()
+end
+
+function Cooldowns:UNIT_AURA(event, unitTarget)
+    -- Player auras changed
+    if unitTarget == "player" then
+        self:UpdateAllDisplays()
+    end
+end
+
 -- -----------------------------------------------------------------------------
 -- FIND AND SKIN WOW 12.0 COOLDOWN MANAGER
 -- -----------------------------------------------------------------------------
@@ -384,6 +458,11 @@ end
 -- -----------------------------------------------------------------------------
 
 function Cooldowns:GetCooldownData(displayName)
+    -- WoW 12.0: Use API for tracked bars instead of frame iteration
+    if displayName == "cooldowns" then
+        return self:GetTrackedBarsData()
+    end
+    
     -- Get data from Blizzard's actual frames since C_CooldownManager API doesn't exist
     local blizzardFrameMap = {
         essential = "EssentialCooldownViewer",
@@ -416,46 +495,9 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, check for active aura data
-            local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
-            local hasBar = child.Bar ~= nil
-            
+            -- WoW 12.0: For tracked bars, use proper API instead of frame iteration
+            -- This is handled by GetTrackedBarsData() function instead
             shouldInclude = false
-            
-            if hasBar and hasSize then
-                -- Check multiple indicators of an "active" bar
-                local hasAuraID = child.auraInstanceID and child.auraInstanceID > 0
-                
-                -- Get spell name and spellID
-                local name = ""
-                if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
-                    local ok, result = pcall(function() return child.Bar.Name:GetText() end)
-                    if ok then name = result or "" end
-                end
-                
-                local spellID = nil
-                if name and name ~= "" then
-                    local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
-                    if ok and spellInfo then
-                        spellID = spellInfo.spellID
-                    end
-                end
-                
-                -- Check for active aura
-                local hasActiveAura = false
-                if spellID then
-                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                    hasActiveAura = (auraData ~= nil)
-                end
-                
-                -- Include if either has auraInstanceID OR has active aura
-                shouldInclude = hasAuraID or hasActiveAura
-                
-                if name ~= "" then
-                    print(string.format("Bar: %s | auraID=%s | hasAura=%s | include=%s",
-                        name, tostring(child.auraInstanceID), tostring(hasActiveAura), tostring(shouldInclude)))
-                end
-            end
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
