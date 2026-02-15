@@ -2220,20 +2220,6 @@ function Cooldowns:GetOptions()
             -- Resource Bar Attachment
             headerAttachment = { type = "header", name = "Resource Bar Attachment", order = 110 },
             
-            attachToResourceBar = {
-                name = "Attach to Resource Bar",
-                desc = "Attach the Cooldown Manager to the MidnightUI Resource Bar for a seamless look.",
-                type = "toggle",
-                order = 111,
-                width = "full",
-                
-                get = function() return self.db.profile.attachToResourceBar end,
-                set = function(_, v)
-                    self.db.profile.attachToResourceBar = v
-                    self:UpdateAttachment()
-                end
-            },
-            
             attachPosition = {
                 name = "Attach Position",
                 desc = "Where to attach the Cooldown Manager relative to the resource bar.",
