@@ -290,9 +290,6 @@ function Cooldowns:GetCooldownData(displayName)
             local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
             shouldInclude = hasBar and hasValidAura
         end
-            -- Don't check width as it might cause false negatives
-            shouldInclude = child.Bar ~= nil
-        end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
         local hasContent = child.Icon or (displayName == "cooldowns" and child.Bar)
