@@ -414,8 +414,12 @@ function Cooldowns:GetTrackedBarsData()
             local spellID = info.overrideSpellID or info.spellID or cooldownID
             local spellInfo = C_Spell.GetSpellInfo(spellID)
             
-            if spellInfo then
-                print(spellInfo.name .. ": hasAura = " .. tostring(info.hasAura))
+            if spellInfo and spellInfo.name == "Sentinel" then
+                print("=== Sentinel INFO DUMP ===")
+                for k, v in pairs(info) do
+                    print("  " .. k .. " = " .. tostring(v))
+                end
+                print("==========================")
             end
         end
         
