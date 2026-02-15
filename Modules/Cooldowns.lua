@@ -416,12 +416,30 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, check if they have valid aura data (like buffs)
-            -- Tracked bars also use auraInstanceID to indicate active tracking
-            local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
+            -- For tracked bars, use WoW 12.0 API to check if spell is actually tracked
             local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
             local hasBar = child.Bar ~= nil
-            shouldInclude = hasBar and hasSize and hasValidAura
+            
+            shouldInclude = false
+            
+            if hasBar and hasSize then
+                -- Try to get spellID from the child
+                local spellID = child.spellID
+                if not spellID and child.Bar then
+                    spellID = child.Bar.spellID
+                end
+                
+                if spellID then
+                    -- WoW 12.0: Check if this spell is actually enabled for tracked bars
+                    if C_CooldownManager and C_CooldownManager.IsSpellTrackedAsBar then
+                        shouldInclude = C_CooldownManager.IsSpellTrackedAsBar(spellID)
+                    else
+                        -- Fallback: check for active aura if API not available
+                        local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
+                        shouldInclude = hasValidAura
+                    end
+                end
+            end
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
@@ -480,13 +498,14 @@ function Cooldowns:GetCooldownData(displayName)
                     data.name = child.Bar.Name:GetText() or ""
                 end
                 
-                -- For tracked bars, try to get spellID
+                -- For tracked bars, try to get spellID from multiple sources
                 local spellID = nil
                 if displayName == "cooldowns" then
-                    if child.spellID then
-                        spellID = child.spellID
-                    elseif child.Bar and child.Bar.spellID then
-                        spellID = child.Bar.spellID
+                    spellID = child.spellID or (child.Bar and child.Bar.spellID)
+                    
+                    -- Store spellID in data for later use
+                    if spellID then
+                        data.spellID = spellID
                     end
                 end
                 
