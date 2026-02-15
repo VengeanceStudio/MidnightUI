@@ -696,7 +696,10 @@ function Cooldowns:CreateCustomDisplays()
             f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
         end
         
-        f:SetSize(400, 90)
+        -- Use bar width + padding for frame width, or minimum 400 for visibility in move mode
+        local buffDB = db.customBuffBars
+        local frameWidth = math.max(buffDB.barWidth + 4, 400)
+        f:SetSize(frameWidth, 90)
         f:SetFrameStrata("HIGH")
         f:EnableMouse(true)
         
@@ -890,7 +893,9 @@ function Cooldowns:CreateBar(parent, index)
     
     local bar = CreateFrame("StatusBar", nil, parent)
     bar:SetSize(db.barWidth - 4, db.barHeight)
-    bar:SetPoint("TOPLEFT", parent, "TOPLEFT", 2, -2 - (index - 1) * (db.barHeight + 2))
+    -- Center bars horizontally within parent frame
+    local yOffset = -2 - (index - 1) * (db.barHeight + 2)
+    bar:SetPoint("TOP", parent, "TOP", 0, yOffset)
     bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
     bar:GetStatusBarTexture():SetHorizTile(false)
     bar:SetMinMaxValues(0, 1)
