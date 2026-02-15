@@ -325,7 +325,14 @@ function Cooldowns:ShowIconGlow(spellID)
         local frame = self.customFrames[displayType]
         if frame and frame.icons then
             for _, icon in ipairs(frame.icons) do
-                if icon.spellID == spellID and icon:IsShown() then
+                -- Use pcall to safely compare spellIDs (may be secret values)
+                local matches = false
+                if icon.spellID then
+                    local ok, result = pcall(function() return icon.spellID == spellID end)
+                    if ok then matches = result end
+                end
+                
+                if matches and icon:IsShown() then
                     -- Show glow using our glow texture or method
                     if icon.ShowOverlayGlow then
                         icon:ShowOverlayGlow()
@@ -344,7 +351,14 @@ function Cooldowns:HideIconGlow(spellID)
         local frame = self.customFrames[displayType]
         if frame and frame.icons then
             for _, icon in ipairs(frame.icons) do
-                if icon.spellID == spellID then
+                -- Use pcall to safely compare spellIDs (may be secret values)
+                local matches = false
+                if icon.spellID then
+                    local ok, result = pcall(function() return icon.spellID == spellID end)
+                    if ok then matches = result end
+                end
+                
+                if matches then
                     -- Hide glow
                     if icon.HideOverlayGlow then
                         icon:HideOverlayGlow()
