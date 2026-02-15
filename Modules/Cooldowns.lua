@@ -214,12 +214,17 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
+        -- Debug: Red background
+        local debugBg = f:CreateTexture(nil, "BACKGROUND")
+        debugBg:SetAllPoints()
+        debugBg:SetColorTexture(1, 0, 0, 0.5)
+        
         f.icons = {}
         f.activeIcons = {}
         f.displayType = "essential"
         f:Show()
         self.customFrames.essential = f
-        print("MidnightUI: Created Essential Cooldowns display")
+        print("MidnightUI: Created Essential Cooldowns display (RED)")
     end
     
     -- Create Utility Cooldowns (icons)
@@ -237,12 +242,17 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
+        -- Debug: Green background
+        local debugBg = f:CreateTexture(nil, "BACKGROUND")
+        debugBg:SetAllPoints()
+        debugBg:SetColorTexture(0, 1, 0, 0.5)
+        
         f.icons = {}
         f.activeIcons = {}
         f.displayType = "utility"
         f:Show()
         self.customFrames.utility = f
-        print("MidnightUI: Created Utility Cooldowns display")
+        print("MidnightUI: Created Utility Cooldowns display (GREEN)")
     end
     
     -- Create Tracked Buffs (icons)
@@ -260,12 +270,17 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
+        -- Debug: Blue background
+        local debugBg = f:CreateTexture(nil, "BACKGROUND")
+        debugBg:SetAllPoints()
+        debugBg:SetColorTexture(0, 0, 1, 0.5)
+        
         f.icons = {}
         f.activeIcons = {}
         f.displayType = "buffs"
         f:Show()
         self.customFrames.buffs = f
-        print("MidnightUI: Created Tracked Buffs display")
+        print("MidnightUI: Created Tracked Buffs display (BLUE)")
     end
     
     -- Create Tracked Bars (buff bars)
@@ -283,12 +298,17 @@ function Cooldowns:CreateCustomDisplays()
         f:SetBackdropColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
         f:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
         
+        -- Debug: Yellow background
+        local debugBg = f:CreateTexture(nil, "BACKGROUND")
+        debugBg:SetAllPoints()
+        debugBg:SetColorTexture(1, 1, 0, 0.5)
+        
         f.bars = {}
         f.activeBars = {}
         f.displayType = "cooldowns"
         f:Show()
         self.customFrames.cooldowns = f
-        print("MidnightUI: Created Tracked Bars display")
+        print("MidnightUI: Created Tracked Bars display (YELLOW)")
     end
 end
 
