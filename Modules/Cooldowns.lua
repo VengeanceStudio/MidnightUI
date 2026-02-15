@@ -976,6 +976,7 @@ function Cooldowns:UpdateBarDisplay(frame)
         local data = cooldowns[i]
         
         if data and data.name then
+            print("  Updating bar", i, "- Name:", data.name, "Icon:", data.icon, "Duration:", data.duration, "Remaining:", data.remainingTime)
             bar:Show()
             
             -- Set bar color
@@ -986,15 +987,22 @@ function Cooldowns:UpdateBarDisplay(frame)
             if data.remainingTime and data.remainingTime > 0 and data.duration and data.duration > 0 then
                 bar:SetMinMaxValues(0, data.duration)
                 bar:SetValue(data.remainingTime)
+                print("    Set bar min/max:", 0, data.duration, "value:", data.remainingTime)
             else
                 bar:SetMinMaxValues(0, 1)
                 bar:SetValue(1)
+                print("    Set bar to full (no duration data)")
             end
             
             -- Icon
             if bar.icon and data.icon then
                 bar.icon:SetTexture(data.icon)
                 bar.icon:Show()
+                print("    Set icon texture:", data.icon)
+            elseif not bar.icon then
+                print("    bar.icon is nil!")
+            elseif not data.icon then
+                print("    data.icon is nil!")
             end
             
             -- Name
