@@ -421,6 +421,8 @@ function Cooldowns:GetTrackedBarsData()
                 -- Find matching bar by comparing spell names with IsSecretSpellIDMatch
                 local matchingBar = nil
                 
+                print("Looking for bar for: " .. spellInfo.name)
+                
                 for _, bar in ipairs(bars) do
                     if bar.Name and bar.Name.GetText then
                         local matches = false
@@ -429,19 +431,24 @@ function Cooldowns:GetTrackedBarsData()
                         local ok = pcall(function()
                             local barName = bar.Name:GetText()
                             if barName then
+                                print("  Checking bar: " .. barName)
                                 local barSpellInfo = C_Spell.GetSpellInfo(barName)
                                 if barSpellInfo and C_Spell.IsSecretSpellIDMatch then
                                     matches = C_Spell.IsSecretSpellIDMatch(spellID, barSpellInfo.spellID)
+                                    print("    Match result: " .. tostring(matches))
                                 end
                             end
                         end)
                         
                         if ok and matches then
                             matchingBar = bar
+                            print("  FOUND MATCH!")
                             break
                         end
                     end
                 end
+                
+                print("  matchingBar = " .. tostring(matchingBar ~= nil))
                 
                 if matchingBar then
                     local bar = matchingBar
