@@ -2268,7 +2268,6 @@ function Cooldowns:GetOptions()
             },
             
             -- Resource Bar Width Matching
-            headerWidthMatch = { type = "header", name = "Resource Bar Width Matching", order = 130 },
             
             matchPrimaryBarWidth = {
                 name = "Match Primary Bar Width",
