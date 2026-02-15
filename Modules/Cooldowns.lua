@@ -645,7 +645,7 @@ function Cooldowns:CreateCustomDisplays()
         end
         
         f:SetSize(400, 60)
-        f:SetFrameStrata("HIGH")
+        f:SetFrameStrata("MEDIUM")
         f:EnableMouse(true)
         
         -- No container background - icons will have their own backgrounds
@@ -670,7 +670,7 @@ function Cooldowns:CreateCustomDisplays()
         end
         
         f:SetSize(400, 60)
-        f:SetFrameStrata("HIGH")
+        f:SetFrameStrata("MEDIUM")
         f:EnableMouse(true)
         
         f.icons = {}
@@ -693,7 +693,7 @@ function Cooldowns:CreateCustomDisplays()
         end
         
         f:SetSize(400, 44)
-        f:SetFrameStrata("HIGH")
+        f:SetFrameStrata("MEDIUM")
         f:EnableMouse(true)
         
         f.icons = {}
@@ -719,7 +719,7 @@ function Cooldowns:CreateCustomDisplays()
         local buffDB = db.customBuffBars
         local frameWidth = math.max(buffDB.barWidth + 4, 400)
         f:SetSize(frameWidth, 90)
-        f:SetFrameStrata("HIGH")
+        f:SetFrameStrata("MEDIUM")
         f:EnableMouse(true)
         
         f.bars = {}
@@ -748,8 +748,8 @@ function Cooldowns:CreateIconDisplay(name, displayType)
     
     local frame = CreateFrame("Frame", name, UIParent)
     frame:SetSize(300, 40) -- Will auto-resize based on icons
-    frame:SetFrameStrata("HIGH")  -- Changed from MEDIUM to HIGH
-    frame:SetFrameLevel(100)  -- Very high level to be on top
+    frame:SetFrameStrata("MEDIUM")
+    frame:SetFrameLevel(10)
     frame:SetScale(db.scale)
     frame.displayType = displayType
     
@@ -809,8 +809,8 @@ function Cooldowns:CreateBarDisplay(name, displayType)
     
     local frame = CreateFrame("Frame", name, UIParent)
     frame:SetSize(buffDB.barWidth, buffDB.barHeight * buffDB.maxBars + 2 * (buffDB.maxBars - 1))
-    frame:SetFrameStrata("HIGH")  -- Changed from MEDIUM to HIGH
-    frame:SetFrameLevel(100)  -- Very high level to be on top
+    frame:SetFrameStrata("MEDIUM")
+    frame:SetFrameLevel(10)
     frame:SetScale(db.scale)
     frame.displayType = displayType
     
