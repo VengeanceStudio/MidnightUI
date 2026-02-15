@@ -387,38 +387,24 @@ function Cooldowns:GetTrackedBarsData()
         return cooldowns
     end
     
-    -- Try to get tracked bars category set
-    -- Enum.CooldownViewerCategory might be: BuffBar, Essential, Utility, Buff
-    local categoryTypes = {
-        "BuffBar",
-        "TrackedBars", 
-        4, -- Try numeric IDs
-        5,
-        6,
-    }
-    
-    for _, category in ipairs(categoryTypes) do
-        print(string.format("Trying category: %s", tostring(category)))
-        local ok, result = pcall(function() 
-            return C_CooldownViewer.GetCooldownViewerCategorySet(category) 
-        end)
-        
-        if ok and result then
-            print(string.format("  SUCCESS! Got %d cooldowns", result and #result or 0))
+    -- Check if Enum.CooldownViewerCategory exists
+    if Enum and Enum.CooldownViewerCategory then
+        print("=== Enum.CooldownViewerCategory ===")
+        for k, v in pairs(Enum.CooldownViewerCategory) do
+            print(string.format("  %s = %s", k, tostring(v)))
             
-            for i, cooldownID in ipairs(result) do
-                print(string.format("  Cooldown ID: %s", tostring(cooldownID)))
-                
-                local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-                if info then
-                    print(string.format("    Info: %s", tostring(info)))
-                end
+            -- Try getting cooldowns for this category
+            local ok, result = pcall(function() 
+                return C_CooldownViewer.GetCooldownViewerCategorySet(v) 
+            end)
+            
+            if ok and result and #result > 0 then
+                print(string.format("    SUCCESS! Got %d cooldowns", #result))
             end
-            
-            break
-        else
-            print(string.format("  Failed or nil: %s", tostring(result)))
         end
+        print("===================================")
+    else
+        print("Enum.CooldownViewerCategory does not exist")
     end
     
     local blizzFrame = _G["BuffBarCooldownViewer"]
