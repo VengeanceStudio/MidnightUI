@@ -421,18 +421,8 @@ function Cooldowns:GetTrackedBarsData()
             -- If GetPlayerAuraBySpellID returns anything, the bar should be shown
             local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
             
-            -- Optionally check visibility info for priority
-            local visibility = C_Spell and C_Spell.GetVisibilityInfo and C_Spell.GetVisibilityInfo(spellID)
-            
-            -- Show bar if: 1) Has active aura, OR 2) Is a priority/defensive spell
-            local shouldShow = false
+            -- Show bar only if there's an active aura
             if auraData then
-                shouldShow = true
-            elseif visibility and (visibility.isPriorityAura or visibility.isExternalDefensive) then
-                shouldShow = true
-            end
-            
-            if shouldShow then
                 local spellInfo = C_Spell.GetSpellInfo(spellID)
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
