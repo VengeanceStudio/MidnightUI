@@ -267,7 +267,8 @@ function Cooldowns:CreateIconDisplay(name, displayType)
     
     local frame = CreateFrame("Frame", name, UIParent)
     frame:SetSize(300, 40) -- Will auto-resize based on icons
-    frame:SetFrameStrata("MEDIUM")
+    frame:SetFrameStrata("HIGH")  -- Changed from MEDIUM to HIGH
+    frame:SetFrameLevel(100)  -- Very high level to be on top
     frame:SetScale(db.scale)
     frame.displayType = displayType
     
@@ -327,7 +328,8 @@ function Cooldowns:CreateBarDisplay(name, displayType)
     
     local frame = CreateFrame("Frame", name, UIParent)
     frame:SetSize(buffDB.barWidth, buffDB.barHeight * buffDB.maxBars + 2 * (buffDB.maxBars - 1))
-    frame:SetFrameStrata("MEDIUM")
+    frame:SetFrameStrata("HIGH")  -- Changed from MEDIUM to HIGH
+    frame:SetFrameLevel(100)  -- Very high level to be on top
     frame:SetScale(db.scale)
     frame.displayType = displayType
     
