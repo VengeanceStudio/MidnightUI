@@ -237,8 +237,10 @@ function Cooldowns:GetCooldownData(displayName)
                     charges = 1,
                 }
                 
-                -- Try to get name from Bar if it exists
-                if child.Bar and child.Bar.Name then
+                -- Try to get name from various possible locations
+                if child.Name and child.Name.GetText then
+                    data.name = child.Name:GetText() or ""
+                elseif child.Bar and child.Bar.Name and child.Bar.Name.GetText then
                     data.name = child.Bar.Name:GetText() or ""
                 end
                 
@@ -250,9 +252,21 @@ function Cooldowns:GetCooldownData(displayName)
                     end
                 end
                 
-                -- Try to get charges/stacks
+                -- Try to get charges/stacks - Applications could be Frame or FontString
                 if child.Applications then
-                    local count = child.Applications:GetText()
+                    local count = nil
+                    if child.Applications.GetText then
+                        count = child.Applications:GetText()
+                    elseif child.Applications.GetChildren then
+                        -- Applications is a Frame, look for FontString inside
+                        local regions = {child.Applications:GetRegions()}
+                        for _, region in ipairs(regions) do
+                            if region:GetObjectType() == "FontString" then
+                                count = region:GetText()
+                                break
+                            end
+                        end
+                    end
                     if count and tonumber(count) then
                         data.charges = tonumber(count)
                     end
