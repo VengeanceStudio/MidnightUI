@@ -379,7 +379,7 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data using C_CooldownViewer API
+-- WoW 12.0: Get tracked bars data using C_CooldownViewer API and visibility info
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
@@ -414,42 +414,81 @@ function Cooldowns:GetTrackedBarsData()
     for _, cooldownID in ipairs(trackedIDs) do
         local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
         
-        -- Only show bars that have an active aura (hasAura = true)
-        if info and info.hasAura and info.isKnown then
+        if info and info.isKnown then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
-            local iconTexture = C_Spell.GetSpellTexture(spellID)
             
-            if spellInfo and iconTexture then
-                local data = {
-                    icon = iconTexture,
-                    name = spellInfo.name or "",
-                    spellID = spellID,
-                    remainingTime = 0,
-                    charges = 1,
-                }
+            -- WoW 12.0: Check if spell has an active aura (works for ground effects like Consecration)
+            -- If GetPlayerAuraBySpellID returns anything, the bar should be shown
+            local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+            
+            -- Optionally check visibility info for priority
+            local visibility = C_Spell and C_Spell.GetVisibilityInfo and C_Spell.GetVisibilityInfo(spellID)
+            
+            -- Show bar if: 1) Has active aura, OR 2) Is a priority/defensive spell
+            local shouldShow = false
+            if auraData then
+                shouldShow = true
+            elseif visibility and (visibility.isPriorityAura or visibility.isExternalDefensive) then
+                shouldShow = true
+            end
+            
+            if shouldShow then
+                local spellInfo = C_Spell.GetSpellInfo(spellID)
+                local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
-                -- Get duration from the actual frame bar if available
-                local bar = frameBars[spellID]
-                if bar then
-                    -- Use pass-through to avoid secret value issues in combat
-                    local ok, remaining = pcall(function()
-                        return bar:GetValue()
-                    end)
-                    if ok and remaining and remaining > 0 then
-                        data.remainingTime = remaining
+                if spellInfo and iconTexture then
+                    local data = {
+                        icon = iconTexture,
+                        name = spellInfo.name or "",
+                        spellID = spellID,
+                        remainingTime = 0,
+                        charges = 1,
+                    }
+                    
+                    -- Get duration from auraData if available (pass-through for secret values)
+                    if auraData then
+                        -- Safe pass-through: don't do math, just check if fields exist
+                        if auraData.expirationTime then
+                            local ok, remaining = pcall(function()
+                                return auraData.expirationTime - GetTime()
+                            end)
+                            if ok and remaining and remaining > 0 then
+                                data.remainingTime = remaining
+                            end
+                        end
                         
-                        -- Get max duration
-                        local maxOk, maxDuration = pcall(function()
-                            return select(2, bar:GetMinMaxValues())
-                        end)
-                        if maxOk and maxDuration then
-                            data.duration = maxDuration
+                        if auraData.duration then
+                            local ok, duration = pcall(function()
+                                return auraData.duration
+                            end)
+                            if ok and duration then
+                                data.duration = duration
+                            end
                         end
                     end
+                    
+                    -- Fallback: Get duration from the frame bar (safe pass-through)
+                    if not data.duration then
+                        local bar = frameBars[spellID]
+                        if bar then
+                            local ok, remaining = pcall(function()
+                                return bar:GetValue()
+                            end)
+                            if ok and remaining and remaining > 0 then
+                                data.remainingTime = remaining
+                                
+                                local maxOk, maxDuration = pcall(function()
+                                    return select(2, bar:GetMinMaxValues())
+                                end)
+                                if maxOk and maxDuration then
+                                    data.duration = maxDuration
+                                end
+                            end
+                        end
+                    end
+                    
+                    table.insert(cooldowns, data)
                 end
-                
-                table.insert(cooldowns, data)
             end
         end
     end
