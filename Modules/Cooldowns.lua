@@ -903,7 +903,8 @@ function Cooldowns:CreateBar(parent, index)
     -- Center bars horizontally within parent frame
     local yOffset = -2 - (index - 1) * (db.barHeight + 2)
     bar:SetPoint("TOP", parent, "TOP", 0, yOffset)
-    bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    -- Use solid color texture instead of Blizzard texture
+    bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
     bar:GetStatusBarTexture():SetHorizTile(false)
     bar:SetMinMaxValues(0, 1)
     bar:SetValue(1)
@@ -911,7 +912,7 @@ function Cooldowns:CreateBar(parent, index)
     
     -- Background
     bar.bg = bar:CreateTexture(nil, "BACKGROUND")
-    bar.bg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    bar.bg:SetTexture("Interface\\Buttons\\WHITE8X8")
     bar.bg:SetAllPoints()
     bar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.5)
     
