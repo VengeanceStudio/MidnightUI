@@ -572,13 +572,16 @@ function Cooldowns:UpdateIconDisplay(frame)
         table.insert(frame.activeIcons, icon)
     end
     
-    -- Resize frame to fit icons
-    local rows = math.ceil(numIcons / iconsPerRow)
-    local cols = math.min(numIcons, iconsPerRow)
-    frame:SetSize(
-        4 + cols * iconSize + (cols - 1) * spacing,
-        4 + rows * iconSize + (rows - 1) * spacing
-    )
+    -- Resize frame to fit icons (keep minimum size)
+    if numIcons > 0 then
+        local rows = math.ceil(numIcons / iconsPerRow)
+        local cols = math.min(numIcons, iconsPerRow)
+        frame:SetSize(
+            4 + cols * iconSize + (cols - 1) * spacing,
+            4 + rows * iconSize + (rows - 1) * spacing
+        )
+    end
+    -- Don't resize if no icons - keep original size for visibility
 end
 
 function Cooldowns:UpdateBarDisplay(frame)
