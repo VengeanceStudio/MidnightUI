@@ -396,11 +396,24 @@ function Cooldowns:GetTrackedBarsData()
         local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
         local hasBar = child.Bar ~= nil
         
-        print(string.format("Child: hasBar=%s hasSize=%s (%dx%d)", 
-            tostring(hasBar), tostring(hasSize), child:GetWidth(), child:GetHeight()))
+        -- Check if bar is actually showing progress (active)
+        local isActive = false
+        if child.Bar and child.Bar.GetValue then
+            local ok, result = pcall(function()
+                local value = child.Bar:GetValue()
+                local min, max = child.Bar:GetMinMaxValues()
+                return (value and value > 0) or (min and max and min ~= max)
+            end)
+            if ok then
+                isActive = result
+            end
+        end
         
-        -- Trust Blizzard: if frame has Bar and size, it's active
-        if hasBar and hasSize then
+        print(string.format("Child: hasBar=%s hasSize=%s isActive=%s (%dx%d)", 
+            tostring(hasBar), tostring(hasSize), tostring(isActive), child:GetWidth(), child:GetHeight()))
+        
+        -- Trust Blizzard: if frame has Bar, size, AND is showing progress (active)
+        if hasBar and hasSize and isActive then
             -- Get spell name
             local name = ""
             
