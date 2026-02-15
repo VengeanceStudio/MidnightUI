@@ -2134,19 +2134,19 @@ function Cooldowns:GetOptions()
             },
             
             -- Tracked Bars Display
-            headerCustomBuffBars = { type = "header", name = "Tracked Bars Display", order = 60 },
+            headerCustomBuffBars = { type = "header", name = "Tracked Bars Display", order = 90 },
             
             customBuffBarsDesc = {
                 type = "description",
                 name = "Tracked bars show active buffs/debuffs with progress bars indicating remaining duration.",
-                order = 60.2,
+                order = 90.2,
             },
             
             customBuffBarsMaxBars = {
                 name = "Max Bars",
                 desc = "Maximum number of buff bars to display.",
                 type = "range",
-                order = 60.3,
+                order = 90.3,
                 min = 1, max = 15, step = 1,
                 get = function() return self.db.profile.customBuffBars.maxBars end,
                 set = function(_, v)
@@ -2159,7 +2159,7 @@ function Cooldowns:GetOptions()
                 name = "Bar Height",
                 desc = "Height of each buff bar.",
                 type = "range",
-                order = 60.4,
+                order = 90.4,
                 min = 12, max = 40, step = 1,
                 get = function() return self.db.profile.customBuffBars.barHeight end,
                 set = function(_, v)
@@ -2172,7 +2172,7 @@ function Cooldowns:GetOptions()
                 name = "Bar Width",
                 desc = "Width of each buff bar.",
                 type = "range",
-                order = 60.5,
+                order = 90.5,
                 min = 100, max = 500, step = 10,
                 get = function() return self.db.profile.customBuffBars.barWidth end,
                 set = function(_, v)
@@ -2185,7 +2185,7 @@ function Cooldowns:GetOptions()
                 name = "Show Icons",
                 desc = "Display buff icons on the left side of each bar.",
                 type = "toggle",
-                order = 60.6,
+                order = 90.6,
                 get = function() return self.db.profile.customBuffBars.showIcons end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showIcons = v
@@ -2197,7 +2197,7 @@ function Cooldowns:GetOptions()
                 name = "Show Timers",
                 desc = "Display remaining duration on the right side of each bar.",
                 type = "toggle",
-                order = 60.7,
+                order = 90.7,
                 get = function() return self.db.profile.customBuffBars.showTimers end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showTimers = v
@@ -2209,7 +2209,7 @@ function Cooldowns:GetOptions()
                 name = "Show Stack Count",
                 desc = "Display the stack count for stackable buffs.",
                 type = "toggle",
-                order = 60.8,
+                order = 90.8,
                 get = function() return self.db.profile.customBuffBars.showStacks end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showStacks = v
@@ -2218,7 +2218,7 @@ function Cooldowns:GetOptions()
             },
             
             -- Resource Bar Attachment
-            headerAttachment = { type = "header", name = "Resource Bar Attachment", order = 70 },
+            headerAttachment = { type = "header", name = "Resource Bar Attachment", order = 110 },
             
             attachToResourceBar = {
                 name = "Attach to Resource Bar",
@@ -2282,7 +2282,7 @@ function Cooldowns:GetOptions()
             },
             
             -- Resource Bar Width Matching
-            headerWidthMatch = { type = "header", name = "Resource Bar Width Matching", order = 80 },
+            headerWidthMatch = { type = "header", name = "Resource Bar Width Matching", order = 130 },
             
             matchPrimaryBarWidth = {
                 name = "Match Primary Bar Width",
@@ -2320,12 +2320,12 @@ function Cooldowns:GetOptions()
         options.args[k] = v
     end
     
-    displayOptions = self:GetDisplayOptions("utility", "Utility Cooldowns Display", 40)
+    displayOptions = self:GetDisplayOptions("utility", "Utility Cooldowns Display", 50)
     for k, v in pairs(displayOptions) do
         options.args[k] = v
     end
     
-    displayOptions = self:GetDisplayOptions("buffs", "Tracked Buffs Display", 50)
+    displayOptions = self:GetDisplayOptions("buffs", "Tracked Buffs Display", 70)
     for k, v in pairs(displayOptions) do
         options.args[k] = v
     end
