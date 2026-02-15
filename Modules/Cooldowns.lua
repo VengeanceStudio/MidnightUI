@@ -379,17 +379,46 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data from Blizzard's frame
+-- WoW 12.0: Get tracked bars data using C_CooldownViewer API
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    -- Dump all C_CooldownViewer functions
-    if C_CooldownViewer then
-        print("=== C_CooldownViewer functions ===")
-        for k, v in pairs(C_CooldownViewer) do
-            print(string.format("  %s = %s", k, type(v)))
+    if not C_CooldownViewer or not C_CooldownViewer.GetCooldownViewerCategorySet then
+        return cooldowns
+    end
+    
+    -- Try to get tracked bars category set
+    -- Enum.CooldownViewerCategory might be: BuffBar, Essential, Utility, Buff
+    local categoryTypes = {
+        "BuffBar",
+        "TrackedBars", 
+        4, -- Try numeric IDs
+        5,
+        6,
+    }
+    
+    for _, category in ipairs(categoryTypes) do
+        print(string.format("Trying category: %s", tostring(category)))
+        local ok, result = pcall(function() 
+            return C_CooldownViewer.GetCooldownViewerCategorySet(category) 
+        end)
+        
+        if ok and result then
+            print(string.format("  SUCCESS! Got %d cooldowns", result and #result or 0))
+            
+            for i, cooldownID in ipairs(result) do
+                print(string.format("  Cooldown ID: %s", tostring(cooldownID)))
+                
+                local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
+                if info then
+                    print(string.format("    Info: %s", tostring(info)))
+                end
+            end
+            
+            break
+        else
+            print(string.format("  Failed or nil: %s", tostring(result)))
         end
-        print("===================================")
     end
     
     local blizzFrame = _G["BuffBarCooldownViewer"]
