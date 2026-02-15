@@ -397,8 +397,15 @@ function Cooldowns:GetTrackedBarsData()
         local hasBar = child.Bar ~= nil
         
         -- Check if bar is actually showing progress (active)
+        -- In combat, bar values may be secret, so we trust Blizzard's sizing
         local isActive = false
-        if child.Bar and child.Bar.GetValue then
+        local inCombat = InCombatLockdown()
+        
+        if inCombat then
+            -- In combat: trust Blizzard, if it has bar and size, it's active
+            isActive = true
+        elseif child.Bar and child.Bar.GetValue then
+            -- Out of combat: check if bar has actual progress
             local ok, result = pcall(function()
                 local value = child.Bar:GetValue()
                 local min, max = child.Bar:GetMinMaxValues()
