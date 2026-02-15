@@ -416,8 +416,17 @@ function Cooldowns:GetTrackedBarsData()
             -- Check if spell is on cooldown (if yes, the effect is likely active)
             local cdDuration = C_Spell.GetSpellCooldownDuration and C_Spell.GetSpellCooldownDuration(spellID)
             
-            -- If spell has cooldown > 0, the tracked bar should be active
-            if cdDuration and cdDuration > 0 then
+            -- Protected comparison - if spell has cooldown > 0, the tracked bar should be active
+            local shouldShow = false
+            if cdDuration then
+                local ok = pcall(function()
+                    if cdDuration > 0 then
+                        shouldShow = true
+                    end
+                end)
+            end
+            
+            if shouldShow then
                 local spellInfo = C_Spell.GetSpellInfo(spellID)
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
