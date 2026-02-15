@@ -399,15 +399,27 @@ function Cooldowns:SetupMoveMode(displayName, displayTitle, dbKey)
     frame.movableHighlightFrame:SetBackdropBorderColor(0, 1, 0, 1) -- Bright green border
     
     -- Add a centered label with the frame name
-    if not frame.movableHighlightLabel then
-        frame.movableHighlightLabel = frame.movableHighlightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
-        frame.movableHighlightLabel:SetPoint("CENTER")
-        frame.movableHighlightLabel:SetText(displayTitle)
-        frame.movableHighlightLabel:SetTextColor(1, 1, 1, 1)
-        frame.movableHighlightLabel:SetShadowOffset(2, -2)
-        frame.movableHighlightLabel:SetShadowColor(0, 0, 0, 1)
-    end
+    frame.movableHighlightLabel = frame.movableHighlightFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+    frame.movableHighlightLabel:SetPoint("CENTER")
+    frame.movableHighlightLabel:SetText(displayTitle)
+    frame.movableHighlightLabel:SetTextColor(1, 1, 1, 1)
+    frame.movableHighlightLabel:SetShadowOffset(2, -2)
+    frame.movableHighlightLabel:SetShadowColor(0, 0, 0, 1)
     frame.movableHighlightFrame:Hide() -- Hide by default
+    
+    -- Enable alpha for move mode fading
+    frame.SetAlpha = frame.SetAlpha or function(self, alpha)
+        for _, icon in pairs(self.icons or {}) do
+            if icon:IsShown() then
+                icon:SetAlpha(alpha)
+            end
+        end
+        for _, bar in pairs(self.bars or {}) do
+            if bar:IsShown() then
+                bar:SetAlpha(alpha)
+            end
+        end
+    end
     
     -- Enable the actual frame to be movable
     frame:SetMovable(true)
@@ -527,7 +539,7 @@ function Cooldowns:CreateCustomDisplays()
             f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
         end
         
-        f:SetSize(400, 60)
+        f:SetSize(400, 44)
         f:SetFrameStrata("HIGH")
         
         f.icons = {}
@@ -549,7 +561,7 @@ function Cooldowns:CreateCustomDisplays()
             f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
         end
         
-        f:SetSize(400, 200)
+        f:SetSize(400, 90)
         f:SetFrameStrata("HIGH")
         
         f.bars = {}
