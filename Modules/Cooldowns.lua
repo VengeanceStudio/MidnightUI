@@ -379,45 +379,59 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data - use C_CooldownViewer API with hasAura flag
+-- WoW 12.0: Get tracked bars data - pass through Blizzard's bar frames directly
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
+    -- Get the Blizzard frame and pass through visible bars only
+    local blizzFrame = _G["BuffBarCooldownViewer"]
+    if not blizzFrame then
         return cooldowns
     end
     
-    -- Get tracked bar cooldowns
-    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
-    if not trackedIDs then
-        return cooldowns
-    end
-    
-    -- Check each cooldown for valid alert types
-    for _, cooldownID in ipairs(trackedIDs) do
-        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-        
-        if info and info.isKnown then
-            local spellID = info.overrideSpellID or info.spellID or cooldownID
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
+    -- Iterate through bars - but use the bar's visibility as the filter
+    for i = 1, blizzFrame:GetNumChildren() do
+        local child = select(i, blizzFrame:GetChildren())
+        if child and child.Bar then
+            local bar = child.Bar
             
-            if spellInfo and spellInfo.name == "Sentinel" then
-                print("=== Sentinel ===")
+            -- Check alpha - Blizzard might hide bars by setting alpha to 0
+            local barAlpha = bar:GetAlpha()
+            
+            -- Only include bars that Blizzard is showing (alpha > 0)
+            if barAlpha and barAlpha > 0 then
+                -- Pass through the bar data
+                local data = {
+                    icon = bar.Icon and bar.Icon:GetTexture() or 136243,
+                    name = "",
+                    spellID = nil,
+                    remainingTime = 0,
+                    charges = 1,
+                }
                 
-                -- Check GetValidAlertTypes
-                if C_CooldownViewer.GetValidAlertTypes then
-                    local alertTypes = C_CooldownViewer.GetValidAlertTypes(cooldownID)
-                    if alertTypes then
-                        print("  GetValidAlertTypes returned:")
-                        for i, alertType in ipairs(alertTypes) do
-                            print("    [" .. i .. "] = " .. tostring(alertType))
-                        end
-                    else
-                        print("  GetValidAlertTypes returned nil")
+                -- Pass-through the value (no comparisons)
+                local ok, value = pcall(function() return bar:GetValue() end)
+                if ok and value then
+                    data.remainingTime = value
+                end
+                
+                -- Pass-through the name (no comparisons)
+                if bar.Name and bar.Name.GetText then
+                    local nameOk, name = pcall(function() return bar.Name:GetText() end)
+                    if nameOk and name then
+                        data.name = name
                     end
                 end
                 
-                print("================")
+                -- Pass-through max duration
+                local maxOk, maxDuration = pcall(function()
+                    return select(2, bar:GetMinMaxValues())
+                end)
+                if maxOk and maxDuration then
+                    data.duration = maxDuration
+                end
+                
+                table.insert(cooldowns, data)
             end
         end
     end
