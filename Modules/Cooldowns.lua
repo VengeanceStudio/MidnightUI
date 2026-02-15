@@ -306,22 +306,22 @@ function Cooldowns:GetCooldownData(displayName)
                 print("MidnightUI Debug: Processing bar - Bar.Icon:", child.Bar and child.Bar.Icon ~= nil, "child.Icon:", child.Icon ~= nil, "Bar:GetRegions():", child.Bar and select("#", child.Bar:GetRegions()) or "none")
             end
             
-            -- For tracked bars, get icon from Bar's texture regions
-            if displayName == "cooldowns" and child.Bar then
-                -- Search for texture regions in the Bar frame
-                local regions = {child.Bar:GetRegions()}
-                if displayName == "cooldowns" then
-                    print("  Searching", #regions, "regions in Bar for texture")
-                end
-                for _, region in ipairs(regions) do
-                    if region:GetObjectType() == "Texture" then
-                        local texPath = region:GetTexture()
-                        if texPath and type(texPath) == "number" then
-                            iconTexture = texPath
-                            if displayName == "cooldowns" then
-                                print("  Found texture in Bar region:", iconTexture)
-                            end
-                            break
+            -- For tracked bars, get icon from child.Icon (not Bar regions)
+            if displayName == "cooldowns" and child.Icon then
+                if child.Icon.GetTexture then
+                    iconTexture = child.Icon:GetTexture()
+                    if displayName == "cooldowns" then
+                        print("  Got texture from child.Icon:GetTexture():", iconTexture)
+                    end
+                elseif child.Icon.Texture then
+                    iconTexture = child.Icon.Texture:GetTexture()
+                else
+                    -- Look for texture children in Icon
+                    local regions = {child.Icon:GetRegions()}
+                    for _, region in ipairs(regions) do
+                        if region:GetObjectType() == "Texture" then
+                            iconTexture = region:GetTexture()
+                            if iconTexture then break end
                         end
                     end
                 end
