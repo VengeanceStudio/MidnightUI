@@ -273,7 +273,16 @@ function Cooldowns:GetCooldownData(displayName)
     local children = {blizzFrame:GetChildren()}
     
     for _, child in ipairs(children) do
-        if child.Icon and child.isActive then
+        -- Safely check if child is active using pcall to avoid taint
+        local isActive = false
+        if child.isActive ~= nil then
+            local ok, result = pcall(function() return child.isActive end)
+            if ok and result then
+                isActive = true
+            end
+        end
+        
+        if child.Icon and isActive then
             local iconTexture = nil
             
             -- Icon could be a frame containing a texture
