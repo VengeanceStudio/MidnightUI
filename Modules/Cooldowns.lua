@@ -203,13 +203,12 @@ function Cooldowns:CreateCustomDisplays()
         self.customFrames.essential = self:CreateIconDisplay("MidnightEssentialCooldowns", "essential")
         self.customFrames.essential:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -200)
         self.customFrames.essential:SetSize(400, 60)
-        self.customFrames.essential:SetFrameStrata("DIALOG")  -- Very high
-        self.customFrames.essential:SetFrameLevel(200)
+        self.customFrames.essential:SetFrameStrata("DIALOG")
+        self.customFrames.essential:SetFrameLevel(210)
         
         -- Debug: Add bright red background
         local debugBg = self.customFrames.essential:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-        debugBg:SetAllPoints()
+        debugBg:SetAllPoints(self.customFrames.essential)
         debugBg:SetColorTexture(1, 0, 0, 1)
         
         self.customFrames.essential:Show()
@@ -222,12 +221,11 @@ function Cooldowns:CreateCustomDisplays()
         self.customFrames.utility:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -280)
         self.customFrames.utility:SetSize(400, 60)
         self.customFrames.utility:SetFrameStrata("DIALOG")
-        self.customFrames.utility:SetFrameLevel(200)
+        self.customFrames.utility:SetFrameLevel(220)
         
         -- Debug: Add bright green background
         local debugBg = self.customFrames.utility:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-        debugBg:SetAllPoints()
+        debugBg:SetAllPoints(self.customFrames.utility)
         debugBg:SetColorTexture(0, 1, 0, 1)
         
         self.customFrames.utility:Show()
@@ -240,12 +238,11 @@ function Cooldowns:CreateCustomDisplays()
         self.customFrames.buffs:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -360)
         self.customFrames.buffs:SetSize(400, 60)
         self.customFrames.buffs:SetFrameStrata("DIALOG")
-        self.customFrames.buffs:SetFrameLevel(200)
+        self.customFrames.buffs:SetFrameLevel(230)
         
         -- Debug: Add bright blue background
         local debugBg = self.customFrames.buffs:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-        debugBg:SetAllPoints()
+        debugBg:SetAllPoints(self.customFrames.buffs)
         debugBg:SetColorTexture(0, 0, 1, 1)
         
         self.customFrames.buffs:Show()
@@ -256,13 +253,13 @@ function Cooldowns:CreateCustomDisplays()
     if not self.customFrames.cooldowns then
         self.customFrames.cooldowns = self:CreateBarDisplay("MidnightTrackedBars", "cooldowns")
         self.customFrames.cooldowns:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -440)
+        self.customFrames.cooldowns:SetSize(400, 200)
         self.customFrames.cooldowns:SetFrameStrata("DIALOG")
-        self.customFrames.cooldowns:SetFrameLevel(200)
+        self.customFrames.cooldowns:SetFrameLevel(240)
         
         -- Debug: Add bright yellow background
         local debugBg = self.customFrames.cooldowns:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetTexture("Interface\\Buttons\\WHITE8X8")
-        debugBg:SetAllPoints()
+        debugBg:SetAllPoints(self.customFrames.cooldowns)
         debugBg:SetColorTexture(1, 1, 0, 1)
         
         self.customFrames.cooldowns:Show()
