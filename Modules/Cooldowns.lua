@@ -420,6 +420,8 @@ function Cooldowns:GetTrackedBarsData()
                 end
             end
             
+            print(string.format("  iconTexture: %s", tostring(iconTexture)))
+            
             if iconTexture and name and name ~= "" then
                 -- Get spellID from name
                 local spellID = nil
