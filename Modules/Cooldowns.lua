@@ -2157,14 +2157,14 @@ function Cooldowns:GetOptions()
             customBuffBarsDesc = {
                 type = "description",
                 name = "Tracked bars show active buffs/debuffs with progress bars indicating remaining duration.",
-                order = 48.2,
+                order = 60.2,
             },
             
             customBuffBarsMaxBars = {
                 name = "Max Bars",
                 desc = "Maximum number of buff bars to display.",
                 type = "range",
-                order = 48.3,
+                order = 60.3,
                 min = 1, max = 15, step = 1,
                 get = function() return self.db.profile.customBuffBars.maxBars end,
                 set = function(_, v)
@@ -2177,7 +2177,7 @@ function Cooldowns:GetOptions()
                 name = "Bar Height",
                 desc = "Height of each buff bar.",
                 type = "range",
-                order = 48.4,
+                order = 60.4,
                 min = 12, max = 40, step = 1,
                 get = function() return self.db.profile.customBuffBars.barHeight end,
                 set = function(_, v)
@@ -2190,7 +2190,7 @@ function Cooldowns:GetOptions()
                 name = "Bar Width",
                 desc = "Width of each buff bar.",
                 type = "range",
-                order = 48.5,
+                order = 60.5,
                 min = 100, max = 500, step = 10,
                 get = function() return self.db.profile.customBuffBars.barWidth end,
                 set = function(_, v)
@@ -2203,7 +2203,7 @@ function Cooldowns:GetOptions()
                 name = "Show Icons",
                 desc = "Display buff icons on the left side of each bar.",
                 type = "toggle",
-                order = 48.6,
+                order = 60.6,
                 get = function() return self.db.profile.customBuffBars.showIcons end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showIcons = v
@@ -2215,7 +2215,7 @@ function Cooldowns:GetOptions()
                 name = "Show Timers",
                 desc = "Display remaining duration on the right side of each bar.",
                 type = "toggle",
-                order = 48.7,
+                order = 60.7,
                 get = function() return self.db.profile.customBuffBars.showTimers end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showTimers = v
@@ -2227,7 +2227,7 @@ function Cooldowns:GetOptions()
                 name = "Show Stack Count",
                 desc = "Display the stack count for stackable buffs.",
                 type = "toggle",
-                order = 48.8,
+                order = 60.8,
                 get = function() return self.db.profile.customBuffBars.showStacks end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showStacks = v
