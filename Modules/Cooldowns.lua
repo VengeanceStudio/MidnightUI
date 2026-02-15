@@ -350,38 +350,58 @@ function Cooldowns:GetCooldownData(displayName)
                 if displayName == "cooldowns" then
                     if child.spellID then
                         spellID = child.spellID
-                        print("  Found child.spellID:", spellID)
                     elseif child.Bar and child.Bar.spellID then
                         spellID = child.Bar.spellID
-                        print("  Found child.Bar.spellID:", spellID)
-                    else
-                        print("  No spellID found - checking for other ID fields")
-                        -- Debug: Check what fields exist
-                        if child.auraInstanceID then print("  child.auraInstanceID:", child.auraInstanceID) end
-                        if child.Bar then
-                            for k, v in pairs(child.Bar) do
-                                if type(k) == "string" and (k:lower():find("spell") or k:lower():find("id")) then
-                                    print("  child.Bar." .. k .. ":", v)
+                    end
+                end
+                
+                -- Try to get duration data for bars
+                if displayName == "cooldowns" and data.name and data.name ~= "" then
+                    -- Try by spellID first if available
+                    if spellID then
+                        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                        if auraData then
+                            -- Check for secret values (12.0 API protection)
+                            if type(auraData.duration) == "number" then
+                                data.duration = auraData.duration
+                            end
+                            if type(auraData.expirationTime) == "number" then
+                                if auraData.expirationTime == 0 then
+                                    -- Permanent aura (e.g., Paladin Auras)
+                                    data.remainingTime = data.duration or 1
+                                elseif auraData.expirationTime > 0 then
+                                    data.remainingTime = math.max(0, auraData.expirationTime - GetTime())
                                 end
+                            end
+                        end
+                    end
+                    
+                    -- If no spellID or no data, scan all auras by name
+                    if not data.duration then
+                        for i = 1, 40 do
+                            local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
+                            if not auraData then break end
+                            if auraData.name == data.name then
+                                -- Check for secret values
+                                if type(auraData.duration) == "number" then
+                                    data.duration = auraData.duration
+                                end
+                                if type(auraData.expirationTime) == "number" then
+                                    if auraData.expirationTime == 0 then
+                                        -- Permanent aura
+                                        data.remainingTime = data.duration or 1
+                                    elseif auraData.expirationTime > 0 then
+                                        data.remainingTime = math.max(0, auraData.expirationTime - GetTime())
+                                    end
+                                end
+                                break
                             end
                         end
                     end
                 end
                 
-                -- Try to get cooldown info
-                if spellID then
-                    -- For tracked bars, use C_UnitAuras to get duration data
-                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                    if auraData then
-                        data.duration = auraData.duration
-                        if auraData.expirationTime and auraData.expirationTime > 0 then
-                            data.remainingTime = math.max(0, auraData.expirationTime - GetTime())
-                        end
-                        print("  Got auraData - duration:", data.duration, "remaining:", data.remainingTime)
-                    else
-                        print("  C_UnitAuras.GetPlayerAuraBySpellID returned nil for", spellID)
-                    end
-                elseif child.Cooldown then
+                -- Try to get cooldown info (for non-bar displays)
+                if displayName ~= "cooldowns" and child.Cooldown then
                     local start, duration = child.Cooldown:GetCooldownTimes()
                     if displayName == "cooldowns" then
                         print("  Found child.Cooldown - start:", start, "duration:", duration)
@@ -397,9 +417,6 @@ function Cooldowns:GetCooldownData(displayName)
                                 data.remainingTime = remaining
                                 -- Convert duration from milliseconds to seconds
                                 data.duration = duration / 1000
-                                if displayName == "cooldowns" then
-                                    print("  Set duration:", data.duration, "remaining:", data.remainingTime)
-                                end
                             end
                         end
                     end
@@ -407,7 +424,6 @@ function Cooldowns:GetCooldownData(displayName)
                     -- Try to get cooldown from Bar element
                     if child.Bar.Cooldown then
                         local start, duration = child.Bar.Cooldown:GetCooldownTimes()
-                        print("  Found child.Bar.Cooldown - start:", start, "duration:", duration)
                         if start and duration then
                             local ok, isValid = pcall(function() return duration > 0 end)
                             if ok and isValid then
@@ -417,12 +433,9 @@ function Cooldowns:GetCooldownData(displayName)
                                 if ok2 and remaining then
                                     data.remainingTime = remaining
                                     data.duration = duration / 1000
-                                    print("  Set duration from Bar:", data.duration, "remaining:", data.remainingTime)
                                 end
                             end
                         end
-                    else
-                        print("  child.Cooldown and child.Bar.Cooldown both nil")
                     end
                 end
                 
@@ -446,17 +459,11 @@ function Cooldowns:GetCooldownData(displayName)
                     end
                 end
                 
-                if displayName == "cooldowns" then
-                    print("MidnightUI Debug: Adding bar to table -", "Icon:", iconTexture, "Name:", data.name or "none")
-                end
                 table.insert(cooldowns, data)
             end
         end
     end
     
-    if displayName == "cooldowns" then
-        print("MidnightUI Debug: GetCooldownData returning", #cooldowns, "bars")
-    end
     return cooldowns
 end
 
@@ -1031,14 +1038,11 @@ function Cooldowns:UpdateBarDisplay(frame)
     local cooldowns = self:GetCooldownData(frame.displayType)
     local db = self.db.profile.customBuffBars
     
-    print("MidnightUI Debug: UpdateBarDisplay called -", "cooldowns count:", #cooldowns, "bars count:", #frame.bars)
-    
     -- Update bars
     for i, bar in ipairs(frame.bars) do
         local data = cooldowns[i]
         
         if data and data.name then
-            print("  Updating bar", i, "- Name:", data.name, "Icon:", data.icon, "Duration:", data.duration, "Remaining:", data.remainingTime)
             bar:Show()
             
             -- Set bar color
@@ -1049,22 +1053,15 @@ function Cooldowns:UpdateBarDisplay(frame)
             if data.remainingTime and data.remainingTime > 0 and data.duration and data.duration > 0 then
                 bar:SetMinMaxValues(0, data.duration)
                 bar:SetValue(data.remainingTime)
-                print("    Set bar min/max:", 0, data.duration, "value:", data.remainingTime)
             else
                 bar:SetMinMaxValues(0, 1)
                 bar:SetValue(1)
-                print("    Set bar to full (no duration data)")
             end
             
             -- Icon
             if bar.icon and data.icon then
                 bar.icon:SetTexture(data.icon)
                 bar.icon:Show()
-                print("    Set icon texture:", data.icon)
-            elseif not bar.icon then
-                print("    bar.icon is nil!")
-            elseif not data.icon then
-                print("    data.icon is nil!")
             end
             
             -- Name
