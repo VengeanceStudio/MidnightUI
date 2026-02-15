@@ -379,68 +379,72 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data - iterate through active Blizzard bars directly
+-- WoW 12.0: Get tracked bars data - use C_CooldownViewer API with hasAura flag
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    -- Get the Blizzard frame and iterate through active bars directly
-    local blizzFrame = _G["BuffBarCooldownViewer"]
-    if not blizzFrame then
+    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
         return cooldowns
     end
     
-    for i = 1, blizzFrame:GetNumChildren() do
-        local child = select(i, blizzFrame:GetChildren())
-        if child and child.Bar then
-            local bar = child.Bar
+    -- Get tracked bar cooldowns (TrackedBar = 3)
+    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
+    if not trackedIDs then
+        return cooldowns
+    end
+    
+    -- Get the Blizzard frame for bar data (duration values)
+    local blizzFrame = _G["BuffBarCooldownViewer"]
+    local bars = {}
+    
+    if blizzFrame then
+        for i = 1, blizzFrame:GetNumChildren() do
+            local child = select(i, blizzFrame:GetChildren())
+            if child and child.Bar then
+                table.insert(bars, child.Bar)
+            end
+        end
+    end
+    
+    -- Process each tracked cooldown and check if it has an active aura
+    for _, cooldownID in ipairs(trackedIDs) do
+        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
+        
+        -- Only show if hasAura is true (this is the protected boolean from Blizzard)
+        if info and info.isKnown and info.hasAura then
+            local spellID = info.overrideSpellID or info.spellID or cooldownID
+            local spellInfo = C_Spell.GetSpellInfo(spellID)
             
-            -- Check if bar is shown
-            if bar:IsShown() then
-                local isActive = false
+            if spellInfo then
+                local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
-                -- Out of combat: check value > 0 to filter inactive bars
-                -- In combat: trust Blizzard's IsShown() since we can't compare secret values
-                if InCombatLockdown() then
-                    -- In combat: if bar is shown, assume it's active (can't check value)
-                    isActive = true
-                else
-                    -- Out of combat: check if value > 0
-                    local ok, value = pcall(function() return bar:GetValue() end)
-                    if ok and value and value > 0 then
-                        isActive = true
-                    end
-                end
-                
-                if isActive then
-                    -- Bar is active - get its data
+                if iconTexture then
                     local data = {
-                        icon = bar.Icon and bar.Icon:GetTexture() or 136243, -- Default icon
-                        name = "", -- Will be set by pass-through
-                        spellID = nil,
+                        icon = iconTexture,
+                        name = spellInfo.name,
+                        spellID = spellID,
                         remainingTime = 0,
                         charges = 1,
                     }
                     
-                    -- Pass-through the value
-                    local ok, value = pcall(function() return bar:GetValue() end)
-                    if ok and value then
-                        data.remainingTime = value
-                    end
-                    
-                    -- Pass-through the name
-                    if bar.Name and bar.Name.GetText then
-                        local nameOk, name = pcall(function() return bar.Name:GetText() end)
-                        if nameOk then
-                            data.name = name
+                    -- Try to get duration from any active bar (just use first active bar we find)
+                    for _, bar in ipairs(bars) do
+                        if bar:IsShown() then
+                            local ok, value = pcall(function() return bar:GetValue() end)
+                            if ok and value then
+                                -- Pass through without comparing
+                                data.remainingTime = value
+                                
+                                local maxOk, maxDuration = pcall(function()
+                                    return select(2, bar:GetMinMaxValues())
+                                end)
+                                if maxOk and maxDuration then
+                                    data.duration = maxDuration
+                                end
+                                
+                                break
+                            end
                         end
-                    end
-                    
-                    -- Get max duration
-                    local maxOk, maxVal = pcall(function()
-                        return select(2, bar:GetMinMaxValues())
-                    end)
-                    if maxOk and maxVal then
-                        data.duration = maxVal
                     end
                     
                     table.insert(cooldowns, data)
