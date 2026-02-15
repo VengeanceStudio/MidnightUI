@@ -410,6 +410,15 @@ function Cooldowns:GetTrackedBarsData()
     for _, cooldownID in ipairs(trackedIDs) do
         local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
         
+        if info and info.isKnown then
+            local spellID = info.overrideSpellID or info.spellID or cooldownID
+            local spellInfo = C_Spell.GetSpellInfo(spellID)
+            
+            if spellInfo then
+                print(spellInfo.name .. ": hasAura = " .. tostring(info.hasAura))
+            end
+        end
+        
         -- Only show if hasAura is true (this is the protected boolean from Blizzard)
         if info and info.isKnown and info.hasAura then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
