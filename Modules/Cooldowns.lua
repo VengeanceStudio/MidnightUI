@@ -379,97 +379,50 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data using C_CooldownViewer API and visibility info
+-- WoW 12.0: Get tracked bars data - iterate through active Blizzard bars directly
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
-        return cooldowns
-    end
-    
-    -- Get tracked bar cooldowns (TrackedBar = 3)
-    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
-    if not trackedIDs then
-        return cooldowns
-    end
-    
-    -- Get the Blizzard frame for duration info
+    -- Get the Blizzard frame and iterate through active bars directly
     local blizzFrame = _G["BuffBarCooldownViewer"]
+    if not blizzFrame then
+        return cooldowns
+    end
     
-    -- Process each tracked bar cooldown
-    for _, cooldownID in ipairs(trackedIDs) do
-        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-        
-        if info and info.isKnown then
-            local spellID = info.overrideSpellID or info.spellID or cooldownID
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
+    for i = 1, blizzFrame:GetNumChildren() do
+        local child = select(i, blizzFrame:GetChildren())
+        if child and child.Bar then
+            local bar = child.Bar
             
-            if spellInfo then
-                local spellName = spellInfo.name
-                local iconTexture = C_Spell.GetSpellTexture(spellID)
+            -- Check if bar is shown and has a value > 0 (active)
+            if bar:IsShown() then
+                local ok, value = pcall(function() return bar:GetValue() end)
                 
-                -- Find matching bar by comparing names with C_Spell.IsSecretSpellNameMatch
-                local matchingBar = nil
-                if blizzFrame then
-                    for i = 1, blizzFrame:GetNumChildren() do
-                        local child = select(i, blizzFrame:GetChildren())
-                        if child and child.Bar and child.Bar.Name and child.Bar.Name.GetText then
-                            local bar = child.Bar
-                            
-                            -- Use secret-safe name comparison
-                            local matches = false
-                            if C_Spell and C_Spell.IsSecretSpellNameMatch then
-                                -- Try to match using the safe API
-                                local ok, result = pcall(function()
-                                    local barName = bar.Name:GetText()
-                                    return C_Spell.IsSecretSpellNameMatch(spellName, barName)
-                                end)
-                                if ok then
-                                    matches = result
-                                end
-                            end
-                            
-                            if matches then
-                                matchingBar = bar
-                                break
-                            end
-                        end
-                    end
-                end
-                
-                -- Bar is active if it exists, is shown, and has a value > 0
-                local shouldShow = false
-                if matchingBar and matchingBar:IsShown() then
-                    local ok, value = pcall(function() return matchingBar:GetValue() end)
-                    if ok and value and value > 0 then
-                        shouldShow = true
-                    end
-                end
-                
-                if shouldShow and iconTexture then
+                if ok and value and value > 0 then
+                    -- Bar is active - get its data
+                    -- Use bar's own data without comparing secret values
                     local data = {
-                        icon = iconTexture,
-                        name = spellName,
-                        spellID = spellID,
-                        remainingTime = 0,
+                        icon = bar.Icon and bar.Icon:GetTexture() or 136243, -- Default icon
+                        name = "", -- Will be set by pass-through
+                        spellID = nil,
+                        remainingTime = value,
                         charges = 1,
                     }
                     
-                    -- Get duration from the bar (safe pass-through for secret values)
-                    if matchingBar then
-                        local ok, remaining = pcall(function()
-                            return matchingBar:GetValue()
-                        end)
-                        if ok and remaining and remaining > 0 then
-                            data.remainingTime = remaining
-                            
-                            local maxOk, maxDuration = pcall(function()
-                                return select(2, matchingBar:GetMinMaxValues())
-                            end)
-                            if maxOk and maxDuration then
-                                data.duration = maxDuration
-                            end
+                    -- Pass-through the name (don't compare it)
+                    if bar.Name and bar.Name.GetText then
+                        local nameOk, name = pcall(function() return bar.Name:GetText() end)
+                        if nameOk then
+                            data.name = name
                         end
+                    end
+                    
+                    -- Get max duration
+                    local maxOk, maxDuration = pcall(function()
+                        return select(2, bar:GetMinMaxValues())
+                    end)
+                    if maxOk and maxDuration then
+                        data.duration = maxDuration
                     end
                     
                     table.insert(cooldowns, data)
