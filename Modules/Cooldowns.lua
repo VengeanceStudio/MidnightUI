@@ -1187,75 +1187,14 @@ function Cooldowns:UpdateIconDisplay(frame)
             icon.cooldownText:SetText("")
         end
         
-        -- Handle charges (WoW 12.0 pass-through method for secret values)
-        -- Check if spell has charges and handle both secret and normal values
-        -- Use ~= nil to check existence, not truthiness (secrets might be falsy)
-        if cooldownData.charges ~= nil or cooldownData.maxCharges ~= nil then
-            local current = cooldownData.charges
-            local max = cooldownData.maxCharges
-            
-            -- Check if values are Secret (type is table/userdata in combat)
-            local currentType = type(current)
-            local maxType = type(max)
-            local isCurrentSecret = (currentType == "table" or currentType == "userdata")
-            local isMaxSecret = (maxType == "table" or maxType == "userdata")
-            
-            if isCurrentSecret or isMaxSecret then
-                -- WoW 12.0 Secret Value: Pass directly to FontString without comparisons
-                -- Blizzard UI elements can handle secret values natively
-                icon.stackText:SetText(current or "") -- Pass-through: no math or comparisons
-                icon.stackText:Show()
-                icon.stackText:SetTextColor(1, 1, 1) -- White (can't check if 0)
-                icon.texture:SetDesaturated(false) -- Can't check value, assume available
-                
-            elseif currentType == "number" then
-                -- Normal number (out of combat or whitelisted spell)
-                -- Only show if max > 1 or if we know it's a charge-based spell
-                local showCharges = false
-                
-                -- Even if type is "number", need pcall for comparison (WoW 12.0 secret protection)
-                if maxType == "number" and max then
-                    local ok, result = pcall(function() return max > 1 end)
-                    if ok and result then
-                        showCharges = true
-                    end
-                end
-                
-                if not showCharges and current then
-                    local ok, result = pcall(function() return current ~= 1 end)
-                    if ok and result then
-                        showCharges = true
-                    end
-                end
-                
-                if showCharges then
-                    icon.stackText:SetText(string.format("%d", current))
-                    icon.stackText:Show()
-                    
-                    -- Visual feedback based on charge availability (with pcall)
-                    local isZero = false
-                    if current then
-                        local ok, result = pcall(function() return current == 0 end)
-                        if ok then isZero = result end
-                    end
-                    
-                    if isZero then
-                        icon.texture:SetDesaturated(true)
-                        icon.stackText:SetTextColor(1, 0, 0) -- Red for 0 charges
-                    else
-                        icon.texture:SetDesaturated(false)
-                        icon.stackText:SetTextColor(1, 1, 1) -- White if available
-                    end
-                else
-                    -- Single charge or not charge-based
-                    icon.stackText:Hide()
-                    icon.texture:SetDesaturated(false)
-                end
-            else
-                -- No valid charge data
-                icon.stackText:Hide()
-                icon.texture:SetDesaturated(false)
-            end
+        -- Handle charges (WoW 12.0 pass-through method)
+        -- If charges exist, just pass them directly to SetText - no checks, no comparisons
+        if cooldownData.charges ~= nil then
+            -- Pass directly to FontString - works for both normal and secret values
+            icon.stackText:SetText(cooldownData.charges)
+            icon.stackText:Show()
+            icon.stackText:SetTextColor(1, 1, 1)
+            icon.texture:SetDesaturated(false)
         else
             -- No charge system - hide charge counter
             icon.stackText:Hide()
