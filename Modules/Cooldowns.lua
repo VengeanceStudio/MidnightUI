@@ -343,11 +343,12 @@ function Cooldowns:GetCooldownData(displayName)
     return cooldowns
 end
 
-function Cooldowns:SetupMoveMode(displayName, displayTitle)
+function Cooldowns:SetupMoveMode(displayName, displayTitle, dbKey)
     local frame = self.customFrames[displayName]
     if not frame then return end
     
-    local frameDB = self.db.profile[displayName]
+    -- Use dbKey if provided, otherwise use displayName
+    local frameDB = self.db.profile[dbKey or displayName]
     if not frameDB then return end
     
     -- Get the Movable module
@@ -490,7 +491,6 @@ function Cooldowns:CreateCustomDisplays()
         f.displayType = "essential"
         f:Show()
         self.customFrames.essential = f
-        print("MidnightUI: Created Essential Cooldowns display")
     end
     
     -- Create Utility Cooldowns (icons)
@@ -513,7 +513,6 @@ function Cooldowns:CreateCustomDisplays()
         f.displayType = "utility"
         f:Show()
         self.customFrames.utility = f
-        print("MidnightUI: Created Utility Cooldowns display")
     end
     
     -- Create Tracked Buffs (icons)
@@ -536,7 +535,6 @@ function Cooldowns:CreateCustomDisplays()
         f.displayType = "buffs"
         f:Show()
         self.customFrames.buffs = f
-        print("MidnightUI: Created Tracked Buffs display")
     end
     
     -- Create Tracked Bars (buff bars)
@@ -544,7 +542,7 @@ function Cooldowns:CreateCustomDisplays()
         local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
         
         -- Load saved position or use default
-        local pos = db.cooldowns.position
+        local pos = db.customBuffBars.position
         if pos and pos.point then
             f:SetPoint(pos.point, UIParent, pos.relativePoint or "CENTER", pos.x or 0, pos.y or 0)
         else
@@ -559,14 +557,13 @@ function Cooldowns:CreateCustomDisplays()
         f.displayType = "cooldowns"
         f:Show()
         self.customFrames.cooldowns = f
-        print("MidnightUI: Created Tracked Bars display")
     end
     
     -- Setup move mode for all displays
     self:SetupMoveMode("essential", "Essential Cooldowns")
     self:SetupMoveMode("utility", "Utility Cooldowns")
     self:SetupMoveMode("buffs", "Tracked Buffs")
-    self:SetupMoveMode("cooldowns", "Tracked Bars")
+    self:SetupMoveMode("cooldowns", "Tracked Bars", "customBuffBars")
 end
 
 function Cooldowns:CreateIconDisplay(name, displayType)
@@ -965,8 +962,6 @@ function Cooldowns:FindAndSkinCooldownManager()
             -- Move it off-screen
             frame:ClearAllPoints()
             frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10000, -10000)
-            
-            print("MidnightUI: Redirected", frameName, "offscreen")
         end
     end
     
