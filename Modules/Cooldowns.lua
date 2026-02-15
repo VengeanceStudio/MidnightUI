@@ -1184,69 +1184,61 @@ function Cooldowns:UpdateIconDisplay(frame)
             icon.cooldownText:SetText("")
         end
         
-        -- Handle charges (WoW 12.0 display logic) - protect against secret values
-        -- Show charges if we have charge data and either maxCharges > 1 OR charges is explicitly set
-        local hasCharges = false
-        local currentCharges = 0
-        local maxCharges = 1
-        
-        -- Safely check maxCharges
-        if cooldownData.maxCharges then
-            local ok, result = pcall(function() return cooldownData.maxCharges > 1 end)
-            if ok and result then
-                hasCharges = true
-                local ok2, val = pcall(function() return cooldownData.maxCharges end)
-                if ok2 then maxCharges = val end
-            end
-        end
-        
-        -- Safely check charges
-        if cooldownData.charges and not hasCharges then
-            local ok, result = pcall(function() return cooldownData.charges ~= 1 end)
-            if ok and result then
-                hasCharges = true
-            end
-        end
-        
-        -- Get current charge value safely
-        if cooldownData.charges then
-            local ok, val = pcall(function() return cooldownData.charges end)
-            if ok then currentCharges = val or 0 end
-        end
-        
-        if hasCharges then
-            -- Show charge count
-            -- Display as "current/max" or just "current" if max is unknown
-            if maxCharges > 1 then
-                icon.stackText:SetText(string.format("%d", currentCharges))
-            else
-                icon.stackText:SetText(string.format("%d", currentCharges))
-            end
-            icon.stackText:Show()
+        -- Handle charges (WoW 12.0 pass-through method for secret values)
+        -- Check if spell has charges and handle both secret and normal values
+        if cooldownData.charges or cooldownData.maxCharges then
+            local current = cooldownData.charges
+            local max = cooldownData.maxCharges
             
-            -- Desaturate and color text if 0 charges
-            if currentCharges == 0 then
-                icon.texture:SetDesaturated(true)
-                icon.stackText:SetTextColor(1, 0, 0) -- Red for 0 charges
+            -- Check if current is a Secret Value (type is table/userdata in combat)
+            local currentType = type(current)
+            local isSecret = (currentType == "table" or currentType == "userdata")
+            
+            if isSecret then
+                -- WoW 12.0 Secret Value: Pass directly to FontString without comparisons
+                -- Blizzard UI elements can handle secret values natively
+                icon.stackText:SetText(current) -- Pass-through: no math or comparisons
+                icon.stackText:Show()
+                icon.stackText:SetTextColor(1, 1, 1) -- White (can't check if 0)
+                icon.texture:SetDesaturated(false) -- Can't check value, assume available
+                
+            elseif currentType == "number" then
+                -- Normal number (out of combat or whitelisted spell)
+                -- Only show if max > 1 or if we know it's a charge-based spell
+                local showCharges = false
+                if type(max) == "number" and max > 1 then
+                    showCharges = true
+                elseif current ~= 1 then
+                    showCharges = true
+                end
+                
+                if showCharges then
+                    icon.stackText:SetText(string.format("%d", current))
+                    icon.stackText:Show()
+                    
+                    -- Visual feedback based on charge availability
+                    if current == 0 then
+                        icon.texture:SetDesaturated(true)
+                        icon.stackText:SetTextColor(1, 0, 0) -- Red for 0 charges
+                    else
+                        icon.texture:SetDesaturated(false)
+                        icon.stackText:SetTextColor(1, 1, 1) -- White if available
+                    end
+                else
+                    -- Single charge or not charge-based
+                    icon.stackText:Hide()
+                    icon.texture:SetDesaturated(false)
+                end
             else
+                -- No valid charge data
+                icon.stackText:Hide()
                 icon.texture:SetDesaturated(false)
-                icon.stackText:SetTextColor(1, 1, 1) -- White if available
-            end
-            
-            -- Show glow effect if charges available (requires ActionButton API)
-            if currentCharges > 0 and icon.ShowOverlayGlow then
-                icon:ShowOverlayGlow()
-            elseif icon.HideOverlayGlow then
-                icon:HideOverlayGlow()
             end
         else
             -- No charge system - hide charge counter
             icon.stackText:Hide()
             icon.texture:SetDesaturated(false)
             icon.stackText:SetTextColor(1, 1, 1)
-            if icon.HideOverlayGlow then
-                icon:HideOverlayGlow()
-            end
         end
         
         icon:Show()
