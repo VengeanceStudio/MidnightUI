@@ -59,11 +59,74 @@ local defaults = {
             fontFlag = "OUTLINE",
         },
         
-        -- Individual frame settings (default order: Buffs, Primary Bar, Secondary Bar, Essential, Utility, Tracked Bars)
+        -- Individual display settings
+        essential = {
+            enabled = true,
+            iconsPerRow = 10,
+            iconWidth = 40,
+            iconHeight = 40,
+            iconSpacing = 2,
+            borderThickness = 2,
+            borderColor = {0.2, 0.8, 1.0, 1.0},
+            attachTo = "none",  -- "none", "primaryBar", "secondaryBar", etc.
+            attachPosition = "BOTTOM",
+            offsetX = 0,
+            offsetY = -2,
+        },
+        utility = {
+            enabled = true,
+            iconsPerRow = 10,
+            iconWidth = 40,
+            iconHeight = 40,
+            iconSpacing = 2,
+            borderThickness = 2,
+            borderColor = {0.2, 0.8, 1.0, 1.0},
+            attachTo = "essential",
+            attachPosition = "BOTTOM",
+            offsetX = 0,
+            offsetY = -2,
+        },
+        buffs = {
+            enabled = true,
+            iconsPerRow = 10,
+            iconWidth = 40,
+            iconHeight = 40,
+            iconSpacing = 2,
+            borderThickness = 2,
+            borderColor = {0.2, 0.8, 1.0, 1.0},
+            attachTo = "utility",
+            attachPosition = "BOTTOM",
+            offsetX = 0,
+            offsetY = -2,
+        },
+        
+        -- Custom Buff Bars (Tracked Bars)
+        customBuffBars = {
+            enabled = true,
+            maxBars = 8,
+            barHeight = 20,
+            barWidth = 300,
+            spacing = 2,
+            showIcons = true,
+            showTimers = true,
+            showStacks = true,
+            iconSize = 20,
+            font = "Friz Quadrata TT",
+            fontSize = 12,
+            fontFlag = "OUTLINE",
+            borderThickness = 2,
+            borderColor = {0.2, 0.8, 1.0, 1.0},
+            attachTo = "buffs",
+            attachPosition = "BOTTOM",
+            offsetX = 0,
+            offsetY = -2,
+        },
+        
+        -- Individual frame settings (DEPRECATED - kept for compatibility)
         frames = {
             essential = {
                 enabled = true,
-                isAnchor = true,  -- Essential is the main anchor
+                isAnchor = true,
             },
             buffs = {
                 enabled = true,
@@ -469,38 +532,40 @@ function Cooldowns:CreateBarDisplay(name, displayType)
     return frame
 end
 
-function Cooldowns:CreateIcon(parent)
-    local db = self.db.profile
+function Cooldowns:CreateIcon(parent, displayType)
+    local db = self.db.profile[displayType] or self.db.profile.essential
     
-    local icon = CreateFrame("Frame", nil, parent)
-    icon:SetSize(40, 40)
+    local icon = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    icon:SetSize(db.iconWidth, db.iconHeight)
+    
+    -- Background
+    icon:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        edgeSize = db.borderThickness,
+    })
+    icon:SetBackdropColor(0, 0, 0, 0.8)
+    icon:SetBackdropBorderColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
     
     -- Icon texture
     icon.texture = icon:CreateTexture(nil, "ARTWORK")
-    icon.texture:SetAllPoints()
+    icon.texture:SetPoint("TOPLEFT", db.borderThickness, -db.borderThickness)
+    icon.texture:SetPoint("BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     icon.texture:SetTexCoord(0.1, 0.9, 0.1, 0.9) -- Crop rounded corners
     
-    -- Border
-    icon.border = CreateFrame("Frame", nil, icon, "BackdropTemplate")
-    icon.border:SetPoint("TOPLEFT", icon, "TOPLEFT", 1, -1)
-    icon.border:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -1, 1)
-    icon.border:SetBackdrop({
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        edgeSize = 2,
-    })
-    icon.border:SetBackdropBorderColor(unpack(db.borderColor))
-    
     -- Cooldown text
-    local fontPath = LSM:Fetch("font", db.font)
-    local fontFlag = db.fontFlag or "OUTLINE"
+    local fontPath = LSM:Fetch("font", db.font or self.db.profile.font)
+    local fontFlag = db.fontFlag or self.db.profile.fontFlag or "OUTLINE"
+    local fontSize = db.fontSize or self.db.profile.fontSize or 14
+    
     icon.cooldownText = icon:CreateFontString(nil, "OVERLAY")
-    icon.cooldownText:SetFont(fontPath, db.fontSize, fontFlag)
+    icon.cooldownText:SetFont(fontPath, fontSize, fontFlag)
     icon.cooldownText:SetPoint("CENTER")
     icon.cooldownText:SetTextColor(1, 1, 1)
     
     -- Stack count
     icon.stackText = icon:CreateFontString(nil, "OVERLAY")
-    icon.stackText:SetFont(fontPath, db.fontSize + 2, fontFlag)
+    icon.stackText:SetFont(fontPath, fontSize + 2, fontFlag)
     icon.stackText:SetPoint("BOTTOMRIGHT", -2, 2)
     icon.stackText:SetTextColor(1, 1, 1)
     
@@ -587,9 +652,7 @@ function Cooldowns:UpdateIconDisplay(frame)
     if not frame then return end
     
     local cooldowns = self:GetCooldownData(frame.displayType)
-    local db = self.db.profile
-    
-    print("MidnightUI: UpdateIconDisplay for", frame.displayType, "got", #cooldowns, "cooldowns")
+    local db = self.db.profile[frame.displayType] or self.db.profile.essential
     
     -- Hide all icons first
     for _, icon in ipairs(frame.activeIcons) do
@@ -598,16 +661,16 @@ function Cooldowns:UpdateIconDisplay(frame)
     wipe(frame.activeIcons)
     
     -- Calculate layout
-    local iconSize = 40
-    local spacing = 2
-    local iconsPerRow = 10
+    local iconSize = db.iconWidth
+    local spacing = db.iconSpacing
+    local iconsPerRow = db.iconsPerRow
     local numIcons = #cooldowns
     
     for i, cooldownData in ipairs(cooldowns) do
         -- Get or create icon
         local icon = frame.icons[i]
         if not icon then
-            icon = self:CreateIcon(frame)
+            icon = self:CreateIcon(frame, frame.displayType)
             frame.icons[i] = icon
         end
         
@@ -1510,8 +1573,122 @@ end
 -- -----------------------------------------------------------------------------
 -- OPTIONS
 -- -----------------------------------------------------------------------------
-function Cooldowns:GetOptions()
+-- -----------------------------------------------------------------------------
+-- OPTIONS
+-- -----------------------------------------------------------------------------
+
+function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
+    local db = function() return self.db.profile[displayName] end
+    
     return {
+        [displayName .. "Header"] = {
+            type = "header",
+            name = displayTitle,
+            order = order,
+        },
+        [displayName .. "Enabled"] = {
+            name = "Enable " .. displayTitle,
+            desc = "Show or hide " .. displayTitle .. ".",
+            type = "toggle",
+            order = order + 0.1,
+            width = "full",
+            disabled = function() return not self.db.profile.skinCooldownManager end,
+            get = function() return db().enabled end,
+            set = function(_, v)
+                db().enabled = v
+                ReloadUI()
+            end,
+        },
+        [displayName .. "IconsPerRow"] = {
+            name = "Icons Per Row",
+            desc = "Number of icons to display per row.",
+            type = "range",
+            order = order + 1,
+            min = 2, max = 12, step = 1,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().iconsPerRow end,
+            set = function(_, v)
+                db().iconsPerRow = v
+                if self.customFrames[displayName] then
+                    self:UpdateIconDisplay(self.customFrames[displayName])
+                end
+            end,
+        },
+        [displayName .. "IconWidth"] = {
+            name = "Icon Width",
+            desc = "Width of each cooldown icon.",
+            type = "range",
+            order = order + 2,
+            min = 20, max = 80, step = 1,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().iconWidth end,
+            set = function(_, v)
+                db().iconWidth = v
+                ReloadUI()
+            end,
+        },
+        [displayName .. "IconHeight"] = {
+            name = "Icon Height",
+            desc = "Height of each cooldown icon.",
+            type = "range",
+            order = order + 3,
+            min = 20, max = 80, step = 1,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().iconHeight end,
+            set = function(_, v)
+                db().iconHeight = v
+                ReloadUI()
+            end,
+        },
+        [displayName .. "IconSpacing"] = {
+            name = "Icon Spacing",
+            desc = "Space between cooldown icons.",
+            type = "range",
+            order = order + 4,
+            min = 0, max = 10, step = 1,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().iconSpacing end,
+            set = function(_, v)
+                db().iconSpacing = v
+                if self.customFrames[displayName] then
+                    self:UpdateIconDisplay(self.customFrames[displayName])
+                end
+            end,
+        },
+        [displayName .. "BorderThickness"] = {
+            name = "Border Thickness",
+            desc = "Thickness of the border around each icon.",
+            type = "range",
+            order = order + 5,
+            min = 1, max = 5, step = 1,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().borderThickness end,
+            set = function(_, v)
+                db().borderThickness = v
+                ReloadUI()
+            end,
+        },
+        [displayName .. "BorderColor"] = {
+            name = "Border Color",
+            desc = "Color of the border around each icon.",
+            type = "color",
+            order = order + 6,
+            hasAlpha = true,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function()
+                local c = db().borderColor
+                return c[1], c[2], c[3], c[4]
+            end,
+            set = function(_, r, g, b, a)
+                db().borderColor = {r, g, b, a}
+                ReloadUI()
+            end,
+        },
+    }
+end
+
+function Cooldowns:GetOptions()
+    local options = {
         type = "group",
         name = "Cooldown Manager",
         order = 10,
@@ -2238,5 +2415,23 @@ function Cooldowns:GetOptions()
             },
         }
     }
+    
+    -- Add display-specific options
+    local displayOptions = self:GetDisplayOptions("essential", "Essential Cooldowns Display", 200)
+    for k, v in pairs(displayOptions) do
+        options.args[k] = v
+    end
+    
+    displayOptions = self:GetDisplayOptions("utility", "Utility Cooldowns Display", 250)
+    for k, v in pairs(displayOptions) do
+        options.args[k] = v
+    end
+    
+    displayOptions = self:GetDisplayOptions("buffs", "Tracked Buffs Display", 300)
+    for k, v in pairs(displayOptions) do
+        options.args[k] = v
+    end
+    
+    return options
 end
 
