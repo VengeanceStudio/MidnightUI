@@ -201,7 +201,7 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Essential Cooldowns (icons)
     if not self.customFrames.essential then
         local f = CreateFrame("Frame", "MidnightEssentialCooldowns", UIParent, BackdropTemplateMixin and "BackdropTemplate")
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 50, -50)
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
         
@@ -225,7 +225,7 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Utility Cooldowns (icons)
     if not self.customFrames.utility then
         local f = CreateFrame("Frame", "MidnightUtilityCooldowns", UIParent, BackdropTemplateMixin and "BackdropTemplate")
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, 100)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 50, -130)
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
         
@@ -248,7 +248,7 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Tracked Buffs (icons)
     if not self.customFrames.buffs then
         local f = CreateFrame("Frame", "MidnightTrackedBuffs", UIParent, BackdropTemplateMixin and "BackdropTemplate")
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 50, -210)
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
         
@@ -271,7 +271,7 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
         local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent, BackdropTemplateMixin and "BackdropTemplate")
-        f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 50, -290)
         f:SetSize(400, 200)
         f:SetFrameStrata("HIGH")
         
