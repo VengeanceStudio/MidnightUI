@@ -202,7 +202,6 @@ function Cooldowns:GetCooldownData(displayName)
     
     local blizzFrame = _G[frameName]
     if not blizzFrame then 
-        print("MidnightUI: Blizzard frame", frameName, "not found")
         return {}
     end
     
@@ -210,39 +209,58 @@ function Cooldowns:GetCooldownData(displayName)
     local cooldowns = {}
     local children = {blizzFrame:GetChildren()}
     
-    print("MidnightUI: Checking", frameName, "with", #children, "children")
-    
     for _, child in ipairs(children) do
-        if child.Icon and child:IsShown() then
-            local data = {
-                icon = child.Icon:GetTexture(),
-                name = child.Name and child.Name:GetText() or "",
-                remainingTime = 0,
-                charges = 1,
-            }
+        if child.Icon and child.isActive then
+            local iconTexture = nil
             
-            -- Try to get cooldown info
-            if child.Cooldown then
-                local start, duration = child.Cooldown:GetCooldownTimes()
-                if start and duration and duration > 0 then
-                    data.remainingTime = (start + duration - GetTime() * 1000) / 1000
+            -- Icon could be a frame containing a texture
+            if child.Icon.GetTexture then
+                iconTexture = child.Icon:GetTexture()
+            elseif child.Icon.Texture then
+                iconTexture = child.Icon.Texture:GetTexture()
+            else
+                -- Look for texture children
+                local regions = {child.Icon:GetRegions()}
+                for _, region in ipairs(regions) do
+                    if region:GetObjectType() == "Texture" then
+                        iconTexture = region:GetTexture()
+                        if iconTexture then break end
+                    end
                 end
             end
             
-            -- Try to get charges
-            if child.Count then
-                local count = child.Count:GetText()
-                if count and tonumber(count) then
-                    data.charges = tonumber(count)
+            if iconTexture then
+                local data = {
+                    icon = iconTexture,
+                    name = "",
+                    remainingTime = 0,
+                    charges = 1,
+                }
+                
+                -- Try to get name from Bar if it exists
+                if child.Bar and child.Bar.Name then
+                    data.name = child.Bar.Name:GetText() or ""
                 end
+                
+                -- Try to get cooldown info
+                if child.Cooldown then
+                    local start, duration = child.Cooldown:GetCooldownTimes()
+                    if start and duration and duration > 0 then
+                        data.remainingTime = (start + duration - GetTime() * 1000) / 1000
+                    end
+                end
+                
+                -- Try to get charges/stacks
+                if child.Applications then
+                    local count = child.Applications:GetText()
+                    if count and tonumber(count) then
+                        data.charges = tonumber(count)
+                    end
+                end
+                
+                table.insert(cooldowns, data)
             end
-            
-            table.insert(cooldowns, data)
         end
-    end
-    
-    if #cooldowns > 0 then
-        print("MidnightUI: Found", #cooldowns, "cooldowns in", frameName)
     end
     
     return cooldowns
