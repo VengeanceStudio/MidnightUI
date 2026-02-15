@@ -898,7 +898,7 @@ end
 function Cooldowns:CreateBar(parent, index)
     local db = self.db.profile.customBuffBars
     
-    local bar = CreateFrame("StatusBar", nil, parent)
+    local bar = CreateFrame("StatusBar", nil, parent, "BackdropTemplate")
     bar:SetSize(db.barWidth - 4, db.barHeight)
     -- Center bars horizontally within parent frame
     local yOffset = -2 - (index - 1) * (db.barHeight + 2)
@@ -909,6 +909,17 @@ function Cooldowns:CreateBar(parent, index)
     bar:SetMinMaxValues(0, 1)
     bar:SetValue(1)
     bar:Hide()
+    
+    -- Add border
+    bar:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    bar:SetBackdropColor(0, 0, 0, 0)  -- Transparent background (statusbar will show through)
+    bar:SetBackdropBorderColor(0, 0, 0, 1)  -- Black border
     
     -- Background
     bar.bg = bar:CreateTexture(nil, "BACKGROUND")
@@ -937,22 +948,26 @@ function Cooldowns:CreateBar(parent, index)
     bar.name:SetJustifyH("LEFT")
     bar.name:SetTextColor(1, 1, 1)
     
-    -- Timer text
-    if db.showTimers then
-        bar.timer = bar:CreateFontString(nil, "OVERLAY")
-        bar.timer:SetFont(fontPath, db.fontSize, fontFlag)
-        bar.timer:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
-        bar.timer:SetJustifyH("RIGHT")
-        bar.timer:SetTextColor(1, 1, 1)
+    -- Timer text (always create it, just hide if not needed)
+    bar.timer = bar:CreateFontString(nil, "OVERLAY")
+    bar.timer:SetFont(fontPath, db.fontSize, fontFlag)
+    bar.timer:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
+    bar.timer:SetJustifyH("RIGHT")
+    bar.timer:SetTextColor(1, 1, 1)
+    if not db.showTimers then
+        bar.timer:Hide()
     end
     
     -- Stack count
-    if db.showStacks then
+    if db.showIcons then
         bar.stack = bar:CreateFontString(nil, "OVERLAY")
         bar.stack:SetFont(fontPath, db.fontSize + 2, fontFlag)
         bar.stack:SetPoint("LEFT", bar.icon, "BOTTOMLEFT", 0, 0)
         bar.stack:SetJustifyH("LEFT")
         bar.stack:SetTextColor(1, 1, 1)
+        if not db.showStacks then
+            bar.stack:Hide()
+        end
     end
     
     return bar
@@ -1103,14 +1118,19 @@ function Cooldowns:UpdateBarDisplay(frame)
             
             -- Timer
             if bar.timer then
-                if data.remainingTime and data.remainingTime > 0 then
-                    if data.remainingTime > 60 then
-                        bar.timer:SetFormattedText("%.1fm", data.remainingTime / 60)
+                if db.showTimers then
+                    bar.timer:Show()
+                    if data.remainingTime and data.remainingTime > 0 then
+                        if data.remainingTime > 60 then
+                            bar.timer:SetFormattedText("%.1fm", data.remainingTime / 60)
+                        else
+                            bar.timer:SetFormattedText("%.0f", data.remainingTime)
+                        end
                     else
-                        bar.timer:SetFormattedText("%.0f", data.remainingTime)
+                        bar.timer:SetText("")
                     end
                 else
-                    bar.timer:SetText("")
+                    bar.timer:Hide()
                 end
             end
             
