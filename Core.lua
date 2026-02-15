@@ -2144,7 +2144,23 @@ function MidnightUI:SkinConfigFrame(frame)
             frame.logoTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -18)
         end
         
-        -- Add custom title text next to logo
+        -- Create draggable area over the top portion of the frame
+        if not frame.dragArea then
+            frame.dragArea = CreateFrame("Frame", nil, frame)
+            frame.dragArea:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+            frame.dragArea:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+            frame.dragArea:SetHeight(100)
+            frame.dragArea:EnableMouse(true)
+            frame.dragArea:RegisterForDrag("LeftButton")
+            frame.dragArea:SetScript("OnDragStart", function()
+                frame:StartMoving()
+            end)
+            frame.dragArea:SetScript("OnDragStop", function()
+                frame:StopMovingOrSizing()
+            end)
+        end
+        
+        -- Add custom title text next to logo (no need for it to be draggable, the dragArea handles it)
         if not frame.customTitle then
             frame.customTitle = frame:CreateFontString(nil, "OVERLAY")
             frame.customTitle:SetFont("Fonts\\FRIZQT__.TTF", 32, "OUTLINE")
