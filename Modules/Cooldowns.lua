@@ -357,6 +357,8 @@ function Cooldowns:GetCooldownData(displayName)
                             end)
                             if ok2 and remaining then
                                 data.remainingTime = remaining
+                                -- Convert duration from milliseconds to seconds
+                                data.duration = duration / 1000
                             end
                         end
                     end
