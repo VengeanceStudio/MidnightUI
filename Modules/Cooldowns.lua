@@ -310,8 +310,17 @@ function Cooldowns:GetCooldownData(displayName)
                 -- Try to get cooldown info
                 if child.Cooldown then
                     local start, duration = child.Cooldown:GetCooldownTimes()
-                    if start and duration and duration > 0 then
-                        data.remainingTime = (start + duration - GetTime() * 1000) / 1000
+                    if start and duration then
+                        -- Safely check duration using pcall to avoid taint
+                        local ok, isValid = pcall(function() return duration > 0 end)
+                        if ok and isValid then
+                            local ok2, remaining = pcall(function() 
+                                return (start + duration - GetTime() * 1000) / 1000 
+                            end)
+                            if ok2 and remaining then
+                                data.remainingTime = remaining
+                            end
+                        end
                     end
                 end
                 
