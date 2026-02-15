@@ -443,11 +443,12 @@ function Cooldowns:SetupMoveMode(displayName, displayTitle)
         frameDB.position.y = yOfs or 0
     end)
     
-    -- Store reference to parent frame and register the highlight frame
+    -- Store reference to highlight frame on parent frame for Movable module
+    frame.movableHighlight = frame.movableHighlightFrame
     frame.movableHighlightFrame.parentFrame = frame
-    frame.movableHighlightFrame.movableHighlight = frame.movableHighlightFrame
-    frame.movableHighlightFrame.movableHighlightLabel = frame.movableHighlightLabel
-    table.insert(Movable.registeredFrames, frame.movableHighlightFrame)
+    
+    -- Register the frame (not the highlight) with Movable
+    table.insert(Movable.registeredFrames, frame)
     
     -- Add nudge arrows
     Movable:CreateNudgeArrows(frame, frameDB.position or {}, function()
