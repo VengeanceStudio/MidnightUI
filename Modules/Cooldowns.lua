@@ -394,25 +394,19 @@ function Cooldowns:GetTrackedBarsData()
         if child and child.Bar then
             local bar = child.Bar
             
-            -- If Blizzard's bar is shown, check if it's active by looking at max duration
+            -- Check if bar is shown
             if bar:IsShown() then
-                -- Get max duration - if it's 0, bar is not active
                 local isActive = false
-                local maxOk, minVal, maxVal = pcall(function()
-                    return bar:GetMinMaxValues()
-                end)
                 
-                -- Bar is active if max > 0 (don't compare value directly in combat)
-                if maxOk and maxVal then
-                    -- Try to check if maxVal > 0 inside pcall to avoid comparison error
-                    local compareOk = pcall(function()
-                        if maxVal > 0 then
-                            isActive = true
-                        end
-                    end)
-                    
-                    -- If comparison failed (secret value), fall back to just checking if maxVal exists
-                    if not compareOk and maxVal then
+                -- Out of combat: check value > 0 to filter inactive bars
+                -- In combat: trust Blizzard's IsShown() since we can't compare secret values
+                if InCombatLockdown() then
+                    -- In combat: if bar is shown, assume it's active (can't check value)
+                    isActive = true
+                else
+                    -- Out of combat: check if value > 0
+                    local ok, value = pcall(function() return bar:GetValue() end)
+                    if ok and value and value > 0 then
                         isActive = true
                     end
                 end
@@ -427,13 +421,13 @@ function Cooldowns:GetTrackedBarsData()
                         charges = 1,
                     }
                     
-                    -- Pass-through the value (don't compare it)
+                    -- Pass-through the value
                     local ok, value = pcall(function() return bar:GetValue() end)
                     if ok and value then
                         data.remainingTime = value
                     end
                     
-                    -- Pass-through the name (don't compare it)
+                    -- Pass-through the name
                     if bar.Name and bar.Name.GetText then
                         local nameOk, name = pcall(function() return bar.Name:GetText() end)
                         if nameOk then
@@ -441,8 +435,11 @@ function Cooldowns:GetTrackedBarsData()
                         end
                     end
                     
-                    -- Set max duration
-                    if maxVal then
+                    -- Get max duration
+                    local maxOk, maxVal = pcall(function()
+                        return select(2, bar:GetMinMaxValues())
+                    end)
+                    if maxOk and maxVal then
                         data.duration = maxVal
                     end
                     
