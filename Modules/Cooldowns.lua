@@ -395,25 +395,6 @@ function Cooldowns:GetTrackedBarsData()
     
     -- Get the Blizzard frame for duration info
     local blizzFrame = _G["BuffBarCooldownViewer"]
-    local frameBars = {}
-    
-    if blizzFrame then
-        for i = 1, blizzFrame:GetNumChildren() do
-            local child = select(i, blizzFrame:GetChildren())
-            if child and child.Bar then
-                local bar = child.Bar
-                
-                -- Bars don't have spellID in WoW 12.0, match by name instead
-                if bar.Name and bar.Name.GetText then
-                    local ok, name = pcall(function() return bar.Name:GetText() end)
-                    if ok and name then
-                        -- Don't compare name in combat (secret value) - just use it if it exists
-                        frameBars[name] = bar
-                    end
-                end
-            end
-        end
-    end
     
     -- Process each tracked bar cooldown
     for _, cooldownID in ipairs(trackedIDs) do
@@ -427,13 +408,39 @@ function Cooldowns:GetTrackedBarsData()
                 local spellName = spellInfo.name
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
-                -- Match bar by name since bars don't have spellID
-                local bar = frameBars[spellName]
+                -- Find matching bar by comparing names with C_Spell.IsSecretSpellNameMatch
+                local matchingBar = nil
+                if blizzFrame then
+                    for i = 1, blizzFrame:GetNumChildren() do
+                        local child = select(i, blizzFrame:GetChildren())
+                        if child and child.Bar and child.Bar.Name and child.Bar.Name.GetText then
+                            local bar = child.Bar
+                            
+                            -- Use secret-safe name comparison
+                            local matches = false
+                            if C_Spell and C_Spell.IsSecretSpellNameMatch then
+                                -- Try to match using the safe API
+                                local ok, result = pcall(function()
+                                    local barName = bar.Name:GetText()
+                                    return C_Spell.IsSecretSpellNameMatch(spellName, barName)
+                                end)
+                                if ok then
+                                    matches = result
+                                end
+                            end
+                            
+                            if matches then
+                                matchingBar = bar
+                                break
+                            end
+                        end
+                    end
+                end
                 
                 -- Bar is active if it exists, is shown, and has a value > 0
                 local shouldShow = false
-                if bar and bar:IsShown() then
-                    local ok, value = pcall(function() return bar:GetValue() end)
+                if matchingBar and matchingBar:IsShown() then
+                    local ok, value = pcall(function() return matchingBar:GetValue() end)
                     if ok and value and value > 0 then
                         shouldShow = true
                     end
@@ -449,15 +456,15 @@ function Cooldowns:GetTrackedBarsData()
                     }
                     
                     -- Get duration from the bar (safe pass-through for secret values)
-                    if bar then
+                    if matchingBar then
                         local ok, remaining = pcall(function()
-                            return bar:GetValue()
+                            return matchingBar:GetValue()
                         end)
                         if ok and remaining and remaining > 0 then
                             data.remainingTime = remaining
                             
                             local maxOk, maxDuration = pcall(function()
-                                return select(2, bar:GetMinMaxValues())
+                                return select(2, matchingBar:GetMinMaxValues())
                             end)
                             if maxOk and maxDuration then
                                 data.duration = maxDuration
