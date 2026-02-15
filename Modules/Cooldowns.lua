@@ -1298,13 +1298,15 @@ function Cooldowns:UpdateIconDisplay(frame)
                 icon.stackText:SetText(current)
                 icon.stackText:Show()
                 
-                -- Use curve to get color (returns secret color if current is secret)
-                -- SetTextColor is secret-aware in 12.0 and can accept secret colors
+                -- Try to use curve for color (may fail if module is tainted)
+                -- Taint comes from hooksecurefunc on NineSlice
                 if self.chargeCurve then
-                    local color = self.chargeCurve:Evaluate(current)
-                    if color then
-                        icon.stackText:SetTextColor(color:GetRGBA())
+                    local ok, color = pcall(function() return self.chargeCurve:Evaluate(current) end)
+                    if ok and color then
+                        local r, g, b, a = color:GetRGBA()
+                        icon.stackText:SetTextColor(r, g, b, a)
                     else
+                        -- Fallback to white if tainted or secret value not allowed
                         icon.stackText:SetTextColor(1, 1, 1)
                     end
                 else
@@ -1324,11 +1326,12 @@ function Cooldowns:UpdateIconDisplay(frame)
             icon.stackText:SetText(current)
             icon.stackText:Show()
             
-            -- Apply curve-based color (works for secret values too)
+            -- Try curve-based color (with taint protection)
             if self.chargeCurve then
-                local color = self.chargeCurve:Evaluate(current)
-                if color then
-                    icon.stackText:SetTextColor(color:GetRGBA())
+                local ok, color = pcall(function() return self.chargeCurve:Evaluate(current) end)
+                if ok and color then
+                    local r, g, b, a = color:GetRGBA()
+                    icon.stackText:SetTextColor(r, g, b, a)
                 else
                     icon.stackText:SetTextColor(1, 1, 1)
                 end
@@ -1558,12 +1561,13 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         frame.NineSlice:Hide()
         frame.NineSlice:SetAlpha(0)
         -- Hook to prevent it from showing again
-        if not frame.midnightNineSliceHooked then
-            hooksecurefunc(frame.NineSlice, "Show", function()
-                frame.NineSlice:Hide()
-            end)
-            frame.midnightNineSliceHooked = true
-        end
+        -- COMMENTED OUT: This hook causes taint which prevents curve evaluation with secret values
+        -- if not frame.midnightNineSliceHooked then
+        --     hooksecurefunc(frame.NineSlice, "Show", function()
+        --         frame.NineSlice:Hide()
+        --     end)
+        --     frame.midnightNineSliceHooked = true
+        -- end
     end
     
     -- Create a background frame that is parented to the viewer's parent
