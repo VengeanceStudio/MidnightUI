@@ -295,14 +295,9 @@ function Cooldowns:GetCooldownData(displayName)
         if hasContent and shouldInclude then
             local iconTexture = nil
             
-            -- Debug for bars
-            if displayName == "cooldowns" then
-                if displayName == "cooldowns" then
-                    print("  Checking child.Icon.GetTexture:", child.Icon.GetTexture ~= nil)
-                end
+            -- For tracked bars, get icon from child.Icon (not Bar regions)
+            if displayName == "cooldowns" and child.Icon then
                 if child.Icon.GetTexture then
-                    iconTexture = child.Icon:GetTexture()
-                   child.Icon.GetTexture then
                     iconTexture = child.Icon:GetTexture()
                 elseif child.Icon.Texture then
                     iconTexture = child.Icon.Texture:GetTexture()
@@ -315,7 +310,9 @@ function Cooldowns:GetCooldownData(displayName)
                             if iconTexture then break end
                         end
                     end
-                -- For tracked buffs/cooldowns, get icon from Icon
+                end
+            -- For tracked buffs, get icon from Icon
+            elseif child.Icon then
                 if child.Icon.GetTexture then
                     iconTexture = child.Icon:GetTexture()
                 elseif child.Icon.Texture then
