@@ -416,11 +416,46 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, trust Blizzard's filtering
-            -- If the frame has a Bar element and non-zero size, Blizzard considers it active
+            -- For tracked bars, check for active aura data
             local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
             local hasBar = child.Bar ~= nil
-            shouldInclude = hasBar and hasSize
+            
+            shouldInclude = false
+            
+            if hasBar and hasSize then
+                -- Check multiple indicators of an "active" bar
+                local hasAuraID = child.auraInstanceID and child.auraInstanceID > 0
+                
+                -- Get spell name and spellID
+                local name = ""
+                if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
+                    local ok, result = pcall(function() return child.Bar.Name:GetText() end)
+                    if ok then name = result or "" end
+                end
+                
+                local spellID = nil
+                if name and name ~= "" then
+                    local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
+                    if ok and spellInfo then
+                        spellID = spellInfo.spellID
+                    end
+                end
+                
+                -- Check for active aura
+                local hasActiveAura = false
+                if spellID then
+                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                    hasActiveAura = (auraData ~= nil)
+                end
+                
+                -- Include if either has auraInstanceID OR has active aura
+                shouldInclude = hasAuraID or hasActiveAura
+                
+                if name ~= "" then
+                    print(string.format("Bar: %s | auraID=%s | hasAura=%s | include=%s",
+                        name, tostring(child.auraInstanceID), tostring(hasActiveAura), tostring(shouldInclude)))
+                end
+            end
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
