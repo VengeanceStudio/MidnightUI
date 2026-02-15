@@ -379,113 +379,55 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data from Blizzard's frame
+-- WoW 12.0: Get tracked bars data using C_Cooldown API
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    local blizzFrame = _G["BuffBarCooldownViewer"]
-    if not blizzFrame then
-        print("BuffBarCooldownViewer not found")
+    -- Check if API exists
+    if not C_Cooldown or not C_Cooldown.GetTrackedCooldowns then
+        print("C_Cooldown.GetTrackedCooldowns not available")
         return cooldowns
     end
     
-    local children = {blizzFrame:GetChildren()}
-    print(string.format("BuffBarCooldownViewer has %d children", #children))
+    -- Get all tracked cooldowns
+    local trackedIDs = C_Cooldown.GetTrackedCooldowns()
+    if not trackedIDs then
+        print("GetTrackedCooldowns returned nil")
+        return cooldowns
+    end
     
-    for _, child in ipairs(children) do
-        local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
-        local hasBar = child.Bar ~= nil
+    print(string.format("Found %d tracked cooldowns", #trackedIDs))
+    
+    -- Process each cooldown
+    for _, cooldownID in ipairs(trackedIDs) do
+        local info = C_Cooldown.GetTrackedCooldownInfo(cooldownID)
         
-        -- Check if bar is actually showing progress (active)
-        -- In combat, bar values may be secret, so we trust Blizzard's sizing
-        local isActive = false
-        local inCombat = InCombatLockdown()
-        
-        if inCombat then
-            -- In combat: trust Blizzard, if it has bar and size, it's active
-            isActive = true
-        elseif child.Bar and child.Bar.GetValue then
-            -- Out of combat: check if bar has actual progress
-            local ok, result = pcall(function()
-                local value = child.Bar:GetValue()
-                local min, max = child.Bar:GetMinMaxValues()
-                return (value and value > 0) or (min and max and min ~= max)
-            end)
-            if ok then
-                isActive = result
-            end
-        end
-        
-        print(string.format("Child: hasBar=%s hasSize=%s isActive=%s (%dx%d)", 
-            tostring(hasBar), tostring(hasSize), tostring(isActive), child:GetWidth(), child:GetHeight()))
-        
-        -- Trust Blizzard: if frame has Bar, size, AND is showing progress (active)
-        if hasBar and hasSize and isActive then
-            -- Get spell name
-            local name = ""
+        if info and info.shouldShow then
+            -- Get spell info
+            local spellID = info.spellID or cooldownID
+            local spellInfo = C_Spell.GetSpellInfo(spellID)
+            local iconTexture = C_Spell.GetSpellTexture(spellID)
             
-            if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
-                local ok, result = pcall(function() return child.Bar.Name:GetText() end)
-                if ok then name = result or "" end
-            end
-            
-            -- Check if name is valid (not empty) - protect against secret strings
-            local hasValidName = false
-            if name then
-                local ok, result = pcall(function() return name ~= "" end)
-                if ok and result then
-                    hasValidName = true
-                end
-            end
-            
-            print(string.format("  Name: %s, hasValidName: %s", tostring(name), tostring(hasValidName)))
-            
-            if hasValidName then
-                -- Get spellID and icon from name
-                local spellID = nil
-                local iconTexture = nil
+            if spellInfo and iconTexture then
+                local data = {
+                    icon = iconTexture,
+                    name = spellInfo.name or "",
+                    spellID = spellID,
+                    remainingTime = 0,
+                    charges = 1,
+                }
                 
-                local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
-                if ok and spellInfo then
-                    spellID = spellInfo.spellID
-                end
-                
-                if spellID then
-                    iconTexture = C_Spell.GetSpellTexture(spellID)
-                end
-                
-                print(string.format("  spellID: %s, iconTexture: %s", tostring(spellID), tostring(iconTexture)))
-                
-                if iconTexture then
-                    local data = {
-                        icon = iconTexture,
-                        name = name,
-                        spellID = spellID,
-                        remainingTime = 0,
-                        charges = 1,
-                    }
-                    
-                    -- Try to get duration from aura (may not exist for ground effects like Consecration)
-                    if spellID then
-                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                    if auraData then
-                        if auraData.duration and type(auraData.duration) == "number" then
-                            data.duration = auraData.duration
-                        end
-                        
-                        if auraData.expirationTime and type(auraData.expirationTime) == "number" then
-                            if auraData.expirationTime == 0 then
-                                data.remainingTime = 0
-                            else
-                                data.remainingTime = auraData.expirationTime - GetTime()
-                            end
-                        end
+                -- Get duration from info
+                if info.startTime and info.duration then
+                    local remaining = (info.startTime + info.duration) - GetTime()
+                    if remaining > 0 then
+                        data.remainingTime = remaining
+                        data.duration = info.duration
                     end
                 end
                 
-                    print(string.format("  ADDED: %s", name))
-                    table.insert(cooldowns, data)
-                end
+                print(string.format("Added: %s (shouldShow=%s)", data.name, tostring(info.shouldShow)))
+                table.insert(cooldowns, data)
             end
         end
     end
