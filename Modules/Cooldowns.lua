@@ -429,15 +429,31 @@ function Cooldowns:GetCooldownData(displayName)
                     spellID = child.Bar.spellID
                 end
                 
+                -- DEBUG: Print what we find
+                local name = ""
+                if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
+                    local ok, result = pcall(function() return child.Bar.Name:GetText() end)
+                    if ok then name = result or "" end
+                end
+                
                 if spellID then
                     -- WoW 12.0: Check if this spell is actually enabled for tracked bars
+                    local isTracked = false
                     if C_CooldownManager and C_CooldownManager.IsSpellTrackedAsBar then
-                        shouldInclude = C_CooldownManager.IsSpellTrackedAsBar(spellID)
-                    else
-                        -- Fallback: check for active aura if API not available
-                        local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
-                        shouldInclude = hasValidAura
+                        isTracked = C_CooldownManager.IsSpellTrackedAsBar(spellID)
                     end
+                    
+                    print(string.format("TrackedBar: %s | spellID=%s | IsTrackedAsBar=%s", 
+                        name, tostring(spellID), tostring(isTracked)))
+                    
+                    shouldInclude = isTracked
+                else
+                    if name ~= "" then
+                        print(string.format("TrackedBar: %s | NO SPELLID", name))
+                    end
+                    -- Fallback: if no spellID, check auraInstanceID
+                    local hasValidAura = child.auraInstanceID and child.auraInstanceID > 0
+                    shouldInclude = hasValidAura
                 end
             end
         end
