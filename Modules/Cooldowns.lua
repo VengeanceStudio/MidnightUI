@@ -201,7 +201,7 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Essential Cooldowns (icons)
     if not self.customFrames.essential then
         self.customFrames.essential = self:CreateIconDisplay("MidnightEssentialCooldowns", "essential")
-        self.customFrames.essential:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        self.customFrames.essential:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -200)
         self.customFrames.essential:SetSize(400, 60)
         
         -- Debug: Add bright red background
@@ -211,13 +211,13 @@ function Cooldowns:CreateCustomDisplays()
         debugBg:SetColorTexture(1, 0, 0, 1)
         
         self.customFrames.essential:Show()
-        print("MidnightUI: Created Essential Cooldowns display at", self.customFrames.essential:GetPoint())
+        print("MidnightUI: Created Essential Cooldowns display (RED) at", self.customFrames.essential:GetPoint())
     end
     
     -- Create Utility Cooldowns (icons)
     if not self.customFrames.utility then
         self.customFrames.utility = self:CreateIconDisplay("MidnightUtilityCooldowns", "utility")
-        self.customFrames.utility:SetPoint("CENTER", UIParent, "CENTER", 0, 100)
+        self.customFrames.utility:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -280)
         self.customFrames.utility:SetSize(400, 60)
         
         -- Debug: Add bright green background
@@ -227,13 +227,13 @@ function Cooldowns:CreateCustomDisplays()
         debugBg:SetColorTexture(0, 1, 0, 1)
         
         self.customFrames.utility:Show()
-        print("MidnightUI: Created Utility Cooldowns display at", self.customFrames.utility:GetPoint())
+        print("MidnightUI: Created Utility Cooldowns display (GREEN) at", self.customFrames.utility:GetPoint())
     end
     
     -- Create Tracked Buffs (icons)
     if not self.customFrames.buffs then
         self.customFrames.buffs = self:CreateIconDisplay("MidnightTrackedBuffs", "buffs")
-        self.customFrames.buffs:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        self.customFrames.buffs:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -360)
         self.customFrames.buffs:SetSize(400, 60)
         
         -- Debug: Add bright blue background
@@ -243,13 +243,13 @@ function Cooldowns:CreateCustomDisplays()
         debugBg:SetColorTexture(0, 0, 1, 1)
         
         self.customFrames.buffs:Show()
-        print("MidnightUI: Created Tracked Buffs display at", self.customFrames.buffs:GetPoint())
+        print("MidnightUI: Created Tracked Buffs display (BLUE) at", self.customFrames.buffs:GetPoint())
     end
     
     -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
         self.customFrames.cooldowns = self:CreateBarDisplay("MidnightTrackedBars", "cooldowns")
-        self.customFrames.cooldowns:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+        self.customFrames.cooldowns:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -440)
         
         -- Debug: Add bright yellow background
         local debugBg = self.customFrames.cooldowns:CreateTexture(nil, "BACKGROUND")
@@ -258,7 +258,7 @@ function Cooldowns:CreateCustomDisplays()
         debugBg:SetColorTexture(1, 1, 0, 1)
         
         self.customFrames.cooldowns:Show()
-        print("MidnightUI: Created Tracked Bars display at", self.customFrames.cooldowns:GetPoint())
+        print("MidnightUI: Created Tracked Bars display (YELLOW) at", self.customFrames.cooldowns:GetPoint())
     end
 end
 
