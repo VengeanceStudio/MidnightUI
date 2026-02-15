@@ -58,6 +58,7 @@ local defaults = {
             fontSize = 12,
             fontFlag = "OUTLINE",
             barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
+            useClassColor = false,  -- Use class color instead of custom color
             fadeColor = true,  -- Fade color as time decreases
         },
         
@@ -117,6 +118,7 @@ local defaults = {
             fontSize = 12,
             fontFlag = "OUTLINE",
             barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
+            useClassColor = false,  -- Use class color instead of custom color
             fadeColor = true,  -- Fade color as time decreases
             fontFlag = "OUTLINE",
             borderThickness = 2,
@@ -1055,8 +1057,21 @@ function Cooldowns:UpdateBarDisplay(frame)
         if data and data.name then
             bar:Show()
             
-            -- Set bar color with optional fading
-            local r, g, b, a = unpack(db.barColor)
+            -- Set bar color with optional class color or fading
+            local r, g, b, a
+            if db.useClassColor then
+                -- Get class color
+                local _, class = UnitClass("player")
+                local classColor = RAID_CLASS_COLORS[class]
+                if classColor then
+                    r, g, b, a = classColor.r, classColor.g, classColor.b, 1
+                else
+                    r, g, b, a = unpack(db.barColor)
+                end
+            else
+                r, g, b, a = unpack(db.barColor)
+            end
+            
             if db.fadeColor and data.remainingTime and data.duration and data.duration > 0 then
                 -- Calculate fade factor (0 to 1) based on remaining time percentage
                 local fadeFactor = data.remainingTime / data.duration
@@ -2241,12 +2256,25 @@ function Cooldowns:GetOptions()
                 type = "color",
                 order = 90.9,
                 hasAlpha = true,
+                disabled = function() return self.db.profile.customBuffBars.useClassColor end,
                 get = function()
                     local c = self.db.profile.customBuffBars.barColor
                     return c[1], c[2], c[3], c[4]
                 end,
                 set = function(_, r, g, b, a)
                     self.db.profile.customBuffBars.barColor = {r, g, b, a}
+                    self:UpdateAllDisplays()
+                end
+            },
+            
+            customBuffBarsUseClassColor = {
+                name = "Use Class Color",
+                desc = "Use your class color for the tracked bars instead of the custom color.",
+                type = "toggle",
+                order = 90.95,
+                get = function() return self.db.profile.customBuffBars.useClassColor end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.useClassColor = v
                     self:UpdateAllDisplays()
                 end
             },
