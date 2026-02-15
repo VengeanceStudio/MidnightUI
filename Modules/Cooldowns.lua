@@ -1896,19 +1896,6 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             name = displayTitle,
             order = order,
         },
-        [displayName .. "Enabled"] = {
-            name = "Enable " .. displayTitle,
-            desc = "Show or hide " .. displayTitle .. ". |cffFF6B6BRequires /reload|r",
-            type = "toggle",
-            order = order + 0.1,
-            width = "full",
-            
-            get = function() return db().enabled end,
-            set = function(_, v)
-                db().enabled = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
-            end,
-        },
         [displayName .. "IconsPerRow"] = {
             name = "Icons Per Row",
             desc = "Number of icons to display per row.",
