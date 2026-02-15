@@ -57,6 +57,8 @@ local defaults = {
             font = "Friz Quadrata TT",
             fontSize = 12,
             fontFlag = "OUTLINE",
+            barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
+            fadeColor = true,  -- Fade color as time decreases
         },
         
         -- Individual display settings
@@ -113,6 +115,9 @@ local defaults = {
             iconSize = 20,
             font = "Friz Quadrata TT",
             fontSize = 12,
+            fontFlag = "OUTLINE",
+            barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
+            fadeColor = true,  -- Fade color as time decreases
             fontFlag = "OUTLINE",
             borderThickness = 2,
             borderColor = {0.2, 0.8, 1.0, 1.0},
@@ -1050,9 +1055,17 @@ function Cooldowns:UpdateBarDisplay(frame)
         if data and data.name then
             bar:Show()
             
-            -- Set bar color
-            local r, g, b = 0.3, 0.7, 1.0
-            bar:SetStatusBarColor(r, g, b, 1)
+            -- Set bar color with optional fading
+            local r, g, b, a = unpack(db.barColor)
+            if db.fadeColor and data.remainingTime and data.duration and data.duration > 0 then
+                -- Calculate fade factor (0 to 1) based on remaining time percentage
+                local fadeFactor = data.remainingTime / data.duration
+                -- Darken the color as time decreases
+                r = r * fadeFactor
+                g = g * fadeFactor
+                b = b * fadeFactor
+            end
+            bar:SetStatusBarColor(r, g, b, a or 1)
             
             -- Set duration
             if data.remainingTime and data.remainingTime > 0 and data.duration and data.duration > 0 then
@@ -2219,6 +2232,34 @@ function Cooldowns:GetOptions()
                 set = function(_, v)
                     self.db.profile.customBuffBars.showStacks = v
                     print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                end
+            },
+            
+            customBuffBarsBarColor = {
+                name = "Bar Color",
+                desc = "Color of the tracked bar fill.",
+                type = "color",
+                order = 90.9,
+                hasAlpha = true,
+                get = function()
+                    local c = self.db.profile.customBuffBars.barColor
+                    return c[1], c[2], c[3], c[4]
+                end,
+                set = function(_, r, g, b, a)
+                    self.db.profile.customBuffBars.barColor = {r, g, b, a}
+                    self:UpdateAllDisplays()
+                end
+            },
+            
+            customBuffBarsFadeColor = {
+                name = "Fade Color Over Time",
+                desc = "Darken the bar color as the timer decreases, similar to Blizzard's tracked bars.",
+                type = "toggle",
+                order = 91.0,
+                get = function() return self.db.profile.customBuffBars.fadeColor end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.fadeColor = v
+                    self:UpdateAllDisplays()
                 end
             },
             
