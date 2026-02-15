@@ -613,16 +613,37 @@ function Cooldowns:FindAndSkinCooldownManager()
     -- Create our custom displays
     self:CreateCustomDisplays()
     
-    -- Register for updates
+    -- Register for updates using WoW 12.0 CDM events
     if not self.updateFrame then
         self.updateFrame = CreateFrame("Frame")
-        self.updateFrame:RegisterEvent("COOLDOWN_MANAGER_UPDATE")
-        self.updateFrame:RegisterEvent("COOLDOWN_MANAGER_DISPLAY_UPDATE")
-        self.updateFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-        self.updateFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
-        self.updateFrame:RegisterEvent("UNIT_AURA")
         
-        self.updateFrame:SetScript("OnEvent", function(self, event, ...)
+        -- Primary CDM events (12.0)
+        pcall(function()
+            self.updateFrame:RegisterEvent("COOLDOWN_MANAGER_UPDATE")         -- Spells added/removed/reordered
+            self.updateFrame:RegisterEvent("COOLDOWN_MANAGER_DISPLAY_UPDATE") -- Layout changes (Edit Mode)
+        end)
+        
+        -- Performance-heavy tracking (Essential/Utility)
+        self.updateFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")   -- Standard cooldown updates
+        self.updateFrame:RegisterEvent("SPELL_UPDATE_USABLE")     -- Proc highlights and usable status
+        
+        -- Inventory & Power
+        self.updateFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED") -- Trinket CD changes
+        self.updateFrame:RegisterEvent("UNIT_POWER_UPDATE")        -- Resource tracking
+        
+        -- Target & Aura Tracking (12.0 optimized)
+        -- Use RegisterUnitEvent for performance - only player and target, not all nameplates
+        pcall(function()
+            self.updateFrame:RegisterUnitEvent("UNIT_AURA", "player", "target")
+        end)
+        self.updateFrame:RegisterEvent("PLAYER_TARGET_CHANGED")    -- Target debuff tracking
+        
+        self.updateFrame:SetScript("OnEvent", function(frame, event, ...)
+            Cooldowns:UpdateAllDisplays()
+        end)
+        
+        -- Fallback ticker for systems without CDM events (0.5s polling)
+        self.updateTicker = C_Timer.NewTicker(0.5, function()
             Cooldowns:UpdateAllDisplays()
         end)
     end
