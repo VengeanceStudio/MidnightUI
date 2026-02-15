@@ -189,15 +189,63 @@ end
 -- -----------------------------------------------------------------------------
 
 function Cooldowns:GetCooldownData(displayName)
-    if not C_CooldownManager or not C_CooldownManager.GetTrackedCooldowns then
-        print("MidnightUI: C_CooldownManager API not available")
+    -- Get data from Blizzard's actual frames since C_CooldownManager API doesn't exist
+    local blizzardFrameMap = {
+        essential = "EssentialCooldownViewer",
+        utility = "UtilityCooldownViewer",
+        buffs = "BuffIconCooldownViewer",
+        cooldowns = "BuffBarCooldownViewer",
+    }
+    
+    local frameName = blizzardFrameMap[displayName]
+    if not frameName then return {} end
+    
+    local blizzFrame = _G[frameName]
+    if not blizzFrame then 
+        print("MidnightUI: Blizzard frame", frameName, "not found")
         return {}
     end
-    local data = C_CooldownManager.GetTrackedCooldowns(displayName) or {}
-    if #data > 0 then
-        print("MidnightUI: Got", #data, "cooldowns for", displayName)
+    
+    -- Try to get cooldowns from the frame's children
+    local cooldowns = {}
+    local children = {blizzFrame:GetChildren()}
+    
+    print("MidnightUI: Checking", frameName, "with", #children, "children")
+    
+    for _, child in ipairs(children) do
+        if child.Icon and child:IsShown() then
+            local data = {
+                icon = child.Icon:GetTexture(),
+                name = child.Name and child.Name:GetText() or "",
+                remainingTime = 0,
+                charges = 1,
+            }
+            
+            -- Try to get cooldown info
+            if child.Cooldown then
+                local start, duration = child.Cooldown:GetCooldownTimes()
+                if start and duration and duration > 0 then
+                    data.remainingTime = (start + duration - GetTime() * 1000) / 1000
+                end
+            end
+            
+            -- Try to get charges
+            if child.Count then
+                local count = child.Count:GetText()
+                if count and tonumber(count) then
+                    data.charges = tonumber(count)
+                end
+            end
+            
+            table.insert(cooldowns, data)
+        end
     end
-    return data
+    
+    if #cooldowns > 0 then
+        print("MidnightUI: Found", #cooldowns, "cooldowns in", frameName)
+    end
+    
+    return cooldowns
 end
 
 function Cooldowns:CreateCustomDisplays()
@@ -654,16 +702,16 @@ function Cooldowns:FindAndSkinCooldownManager()
     for _, frameName in ipairs(blizzardFrames) do
         local frame = _G[frameName]
         if frame then
-            -- Hard hide
-            frame:Hide()
+            -- Make frame invisible but keep it functional so we can read data from it
             frame:SetAlpha(0)
             frame:EnableMouse(false)
+            frame:SetFrameStrata("BACKGROUND")
             
-            -- Prevent Blizzard from re-showing it
-            frame:SetScript("OnShow", function(self)
-                self:Hide()
-                self:SetAlpha(0)
-            end)
+            -- Move it off-screen
+            frame:ClearAllPoints()
+            frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10000, -10000)
+            
+            print("MidnightUI: Redirected", frameName, "offscreen")
         end
     end
     
