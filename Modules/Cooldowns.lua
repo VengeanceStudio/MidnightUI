@@ -238,8 +238,8 @@ function Cooldowns:OnDBReady()
     self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") -- Proc ends
     
     -- WoW 12.0 Tracked Bars System
-    -- UNIT_AURA fires when player buffs start/end, which updates tracked bars
-    self:RegisterUnitEvent("UNIT_AURA", "player")
+    -- UNIT_AURA fires when buffs start/end, filter for player in handler
+    self:RegisterEvent("UNIT_AURA")
     
     -- Check if we're already in world (PLAYER_ENTERING_WORLD may have fired before we registered)
     if IsPlayerInWorld and IsPlayerInWorld() then
