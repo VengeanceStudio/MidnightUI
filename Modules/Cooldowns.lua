@@ -1902,7 +1902,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "toggle",
             order = order + 0.1,
             width = "full",
-            disabled = function() return not self.db.profile.skinCooldownManager end,
+            
             get = function() return db().enabled end,
             set = function(_, v)
                 db().enabled = v
@@ -1915,7 +1915,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "range",
             order = order + 1,
             min = 2, max = 12, step = 1,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().iconsPerRow end,
             set = function(_, v)
                 db().iconsPerRow = v
@@ -1930,7 +1930,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "range",
             order = order + 2,
             min = 20, max = 80, step = 1,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().iconWidth end,
             set = function(_, v)
                 db().iconWidth = v
@@ -1943,7 +1943,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "range",
             order = order + 3,
             min = 20, max = 80, step = 1,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().iconHeight end,
             set = function(_, v)
                 db().iconHeight = v
@@ -1956,7 +1956,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "range",
             order = order + 4,
             min = 0, max = 10, step = 1,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().iconSpacing end,
             set = function(_, v)
                 db().iconSpacing = v
@@ -1971,7 +1971,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "range",
             order = order + 5,
             min = 1, max = 5, step = 1,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().borderThickness end,
             set = function(_, v)
                 db().borderThickness = v
@@ -1984,7 +1984,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "color",
             order = order + 6,
             hasAlpha = true,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function()
                 local c = db().borderColor
                 return c[1], c[2], c[3], c[4]
@@ -2013,7 +2013,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
                 ["primaryBar"] = "Primary Resource Bar",
                 ["secondaryBar"] = "Secondary Resource Bar",
             },
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().attachTo end,
             set = function(_, v)
                 db().attachTo = v
@@ -2031,7 +2031,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
                 ["LEFT"] = "Left",
                 ["RIGHT"] = "Right",
             },
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().attachPosition end,
             set = function(_, v)
                 db().attachPosition = v
@@ -2044,7 +2044,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "range",
             order = order + 10,
             min = -200, max = 200, step = 1,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().offsetX end,
             set = function(_, v)
                 db().offsetX = v
@@ -2057,7 +2057,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             type = "range",
             order = order + 11,
             min = -200, max = 200, step = 1,
-            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            disabled = function() return not db().enabled end,
             get = function() return db().offsetY end,
             set = function(_, v)
                 db().offsetY = v
@@ -2080,32 +2080,14 @@ function Cooldowns:GetOptions()
             },
             desc = {
                 type = "description",
-                name = "Applies MidnightUI styling to the WoW 12.0 Cooldown Manager resource display.\n\n" ..
-                      "|cffFFFF00Note:|r The Cooldown Manager is a separate frame from action bars that shows spell cooldowns.\n\n" ..
-                      "|cffFF6B6BDebug:|r Check your chat for messages about which frames were found.",
+                name = "Custom cooldown tracking displays for Essential Cooldowns, Utility Cooldowns, Tracked Buffs, and Tracked Bars.\n\n" ..
+                      "|cffFFFF00Note:|r All displays are movable and fully customizable.",
                 order = 2
-            },
-            
-            skinCooldownManager = {
-                name = "Enable Cooldown Manager Skinning",
-                desc = "Apply MidnightUI styling to the Cooldown Manager frame. |cffFF6B6BDisabling requires /reload|r",
-                type = "toggle",
-                order = 10,
-                width = "full",
-                get = function() return self.db.profile.skinCooldownManager end,
-                set = function(_, v)
-                    self.db.profile.skinCooldownManager = v
-                    if v then
-                        self:FindAndSkinCooldownManager()
-                    else
-                        print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
-                    end
-                end
             },
             
             rescan = {
                 name = "Rescan for Cooldown Manager",
-                desc = "Try to find and skin the Cooldown Manager frame again.",
+                desc = "Try to find and update the Cooldown Manager frame.",
                 type = "execute",
                 order = 11,
                 func = function()
@@ -2122,7 +2104,6 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 21,
                 min = 0.5, max = 2.0, step = 0.05,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.scale end,
                 set = function(_, v)
                     self.db.profile.scale = v
@@ -2143,7 +2124,7 @@ function Cooldowns:GetOptions()
                 type = "toggle",
                 order = 30.5,
                 width = "full",
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.showBackground end,
                 set = function(_, v)
                     self.db.profile.showBackground = v
@@ -2156,7 +2137,7 @@ function Cooldowns:GetOptions()
                 type = "toggle",
                 order = 30.6,
                 width = "full",
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.showFrameBorder end,
                 set = function(_, v)
                     self.db.profile.showFrameBorder = v
@@ -2169,7 +2150,7 @@ function Cooldowns:GetOptions()
                 type = "toggle",
                 order = 30.6,
                 width = "full",
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.showFrameBorder end,
                 set = function(_, v)
                     self.db.profile.showFrameBorder = v
@@ -2183,7 +2164,7 @@ function Cooldowns:GetOptions()
                 type = "color",
                 order = 31,
                 hasAlpha = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function()
                     local c = self.db.profile.backgroundColor
                     return c[1], c[2], c[3], c[4]
@@ -2200,7 +2181,7 @@ function Cooldowns:GetOptions()
                 type = "color",
                 order = 32,
                 hasAlpha = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function()
                     local c = self.db.profile.borderColor
                     return c[1], c[2], c[3], c[4]
@@ -2225,7 +2206,7 @@ function Cooldowns:GetOptions()
                     for _, font in ipairs(fonts) do out[font] = font end
                     return out
                 end,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.font or "Friz Quadrata TT" end,
                 set = function(_, v)
                     self.db.profile.font = v
@@ -2239,7 +2220,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 42,
                 min = 8, max = 32, step = 1,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.fontSize end,
                 set = function(_, v)
                     self.db.profile.fontSize = v
@@ -2257,35 +2238,20 @@ function Cooldowns:GetOptions()
                     ["THICKOUTLINE"] = "Thick Outline",
                     ["MONOCHROME"] = "Monochrome"
                 },
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.fontFlag end,
                 set = function(_, v)
                     self.db.profile.fontFlag = v
                 end
             },
             
-            -- Custom Buff Bars
-            headerCustomBuffBars = { type = "header", name = "Custom Tracked Bars", order = 48 },
-            
-            customBuffBarsEnabled = {
-                name = "Use Custom Tracked Bars",
-                desc = "Replace Blizzard's Tracked Bars with MidnightUI's custom buff tracker. |cffFF6B6BRequires /reload|r",
-                type = "toggle",
-                order = 48.1,
-                width = "full",
-                disabled = function() return not self.db.profile.skinCooldownManager end,
-                get = function() return self.db.profile.customBuffBars.enabled end,
-                set = function(_, v)
-                    self.db.profile.customBuffBars.enabled = v
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
-                end
-            },
+            -- Tracked Bars Settings
+            headerCustomBuffBars = { type = "header", name = "Tracked Bars", order = 48 },
             
             customBuffBarsDesc = {
                 type = "description",
-                name = "Custom buff bars track the same buffs as Blizzard's system but with clean MidnightUI styling.|n|nRequires /reload to take effect.",
+                name = "Tracked bars show active buffs/debuffs with progress bars indicating remaining duration.",
                 order = 48.2,
-                hidden = function() return not self.db.profile.customBuffBars.enabled end,
             },
             
             customBuffBarsMaxBars = {
@@ -2294,8 +2260,6 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 48.3,
                 min = 1, max = 15, step = 1,
-                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
-                hidden = function() return not self.db.profile.customBuffBars.enabled end,
                 get = function() return self.db.profile.customBuffBars.maxBars end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.maxBars = v
@@ -2309,8 +2273,6 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 48.4,
                 min = 12, max = 40, step = 1,
-                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
-                hidden = function() return not self.db.profile.customBuffBars.enabled end,
                 get = function() return self.db.profile.customBuffBars.barHeight end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.barHeight = v
@@ -2324,8 +2286,6 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 48.5,
                 min = 100, max = 500, step = 10,
-                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
-                hidden = function() return not self.db.profile.customBuffBars.enabled end,
                 get = function() return self.db.profile.customBuffBars.barWidth end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.barWidth = v
@@ -2338,8 +2298,6 @@ function Cooldowns:GetOptions()
                 desc = "Display buff icons on the left side of each bar.",
                 type = "toggle",
                 order = 48.6,
-                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
-                hidden = function() return not self.db.profile.customBuffBars.enabled end,
                 get = function() return self.db.profile.customBuffBars.showIcons end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showIcons = v
@@ -2352,8 +2310,6 @@ function Cooldowns:GetOptions()
                 desc = "Display remaining duration on the right side of each bar.",
                 type = "toggle",
                 order = 48.7,
-                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
-                hidden = function() return not self.db.profile.customBuffBars.enabled end,
                 get = function() return self.db.profile.customBuffBars.showTimers end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showTimers = v
@@ -2366,8 +2322,6 @@ function Cooldowns:GetOptions()
                 desc = "Display the stack count for stackable buffs.",
                 type = "toggle",
                 order = 48.8,
-                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
-                hidden = function() return not self.db.profile.customBuffBars.enabled end,
                 get = function() return self.db.profile.customBuffBars.showStacks end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showStacks = v
@@ -2384,7 +2338,7 @@ function Cooldowns:GetOptions()
                 type = "toggle",
                 order = 51,
                 width = "full",
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.attachToResourceBar end,
                 set = function(_, v)
                     self.db.profile.attachToResourceBar = v
@@ -2448,7 +2402,7 @@ function Cooldowns:GetOptions()
                 type = "toggle",
                 order = 56,
                 width = "full",
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.matchPrimaryBarWidth end,
                 set = function(_, v)
                     self.db.profile.matchPrimaryBarWidth = v
@@ -2462,7 +2416,7 @@ function Cooldowns:GetOptions()
                 type = "toggle",
                 order = 57,
                 width = "full",
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.matchSecondaryBarWidth end,
                 set = function(_, v)
                     self.db.profile.matchSecondaryBarWidth = v
@@ -2480,7 +2434,7 @@ function Cooldowns:GetOptions()
                 order = 61,
                 width = "full",
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.groupFrames end,
                 set = function(_, v)
                     self.db.profile.groupFrames = v
@@ -2511,7 +2465,7 @@ function Cooldowns:GetOptions()
                     ["bars"] = "Tracked Bars",
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.essential.attachTo end,
                 set = function(_, v)
                     self.db.profile.frames.essential.attachTo = v
@@ -2531,7 +2485,7 @@ function Cooldowns:GetOptions()
                     ["RIGHT"] = "Right"
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.essential.attachPosition end,
                 set = function(_, v)
                     self.db.profile.frames.essential.attachPosition = v
@@ -2545,7 +2499,7 @@ function Cooldowns:GetOptions()
                 order = 78,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.essential.offsetX end,
                 set = function(_, v)
                     self.db.profile.frames.essential.offsetX = v
@@ -2559,7 +2513,7 @@ function Cooldowns:GetOptions()
                 order = 79,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.essential.offsetY end,
                 set = function(_, v)
                     self.db.profile.frames.essential.offsetY = v
@@ -2583,7 +2537,7 @@ function Cooldowns:GetOptions()
                     ["bars"] = "Tracked Bars",
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.utility.attachTo end,
                 set = function(_, v)
                     self.db.profile.frames.utility.attachTo = v
@@ -2603,7 +2557,7 @@ function Cooldowns:GetOptions()
                     ["RIGHT"] = "Right"
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.utility.attachPosition end,
                 set = function(_, v)
                     self.db.profile.frames.utility.attachPosition = v
@@ -2617,7 +2571,7 @@ function Cooldowns:GetOptions()
                 order = 83,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.utility.offsetX end,
                 set = function(_, v)
                     self.db.profile.frames.utility.offsetX = v
@@ -2631,7 +2585,7 @@ function Cooldowns:GetOptions()
                 order = 84,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.utility.offsetY end,
                 set = function(_, v)
                     self.db.profile.frames.utility.offsetY = v
@@ -2655,7 +2609,7 @@ function Cooldowns:GetOptions()
                     ["bars"] = "Tracked Bars",
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.buffs.attachTo end,
                 set = function(_, v)
                     self.db.profile.frames.buffs.attachTo = v
@@ -2675,7 +2629,7 @@ function Cooldowns:GetOptions()
                     ["RIGHT"] = "Right"
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.buffs.attachPosition end,
                 set = function(_, v)
                     self.db.profile.frames.buffs.attachPosition = v
@@ -2689,7 +2643,7 @@ function Cooldowns:GetOptions()
                 order = 93,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.buffs.offsetX end,
                 set = function(_, v)
                     self.db.profile.frames.buffs.offsetX = v
@@ -2703,7 +2657,7 @@ function Cooldowns:GetOptions()
                 order = 94,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.buffs.offsetY end,
                 set = function(_, v)
                     self.db.profile.frames.buffs.offsetY = v
@@ -2727,7 +2681,7 @@ function Cooldowns:GetOptions()
                     ["utility"] = "Utility Cooldowns",
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.bars.attachTo end,
                 set = function(_, v)
                     self.db.profile.frames.bars.attachTo = v
@@ -2747,7 +2701,7 @@ function Cooldowns:GetOptions()
                     ["RIGHT"] = "Right"
                 },
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.bars.attachPosition end,
                 set = function(_, v)
                     self.db.profile.frames.bars.attachPosition = v
@@ -2761,7 +2715,7 @@ function Cooldowns:GetOptions()
                 order = 93,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.bars.offsetX end,
                 set = function(_, v)
                     self.db.profile.frames.bars.offsetX = v
@@ -2775,7 +2729,7 @@ function Cooldowns:GetOptions()
                 order = 94,
                 min = -200, max = 200, step = 1,
                 hidden = true,
-                disabled = function() return not self.db.profile.skinCooldownManager end,
+                
                 get = function() return self.db.profile.frames.bars.offsetY end,
                 set = function(_, v)
                     self.db.profile.frames.bars.offsetY = v
