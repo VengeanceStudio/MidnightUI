@@ -403,7 +403,16 @@ function Cooldowns:GetTrackedBarsData()
     for i = 1, blizzFrame:GetNumChildren() do
         local child = select(i, blizzFrame:GetChildren())
         if child and child.Bar then
-            table.insert(bars, child.Bar)
+            local bar = child.Bar
+            local barName = ""
+            if bar.Name and bar.Name.GetText then
+                local ok, name = pcall(function() return bar.Name:GetText() end)
+                if ok and name then
+                    barName = name
+                end
+            end
+            print("Bar " .. i .. ": " .. barName)
+            table.insert(bars, {bar = bar, name = barName})
         end
     end
     
@@ -412,11 +421,15 @@ function Cooldowns:GetTrackedBarsData()
     -- Match each cooldown info to its bar by index
     for i, cooldownID in ipairs(trackedIDs) do
         local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-        local bar = bars[i]
+        local barData = bars[i]
         
-        if info and info.isKnown and bar then
+        if info and info.isKnown and barData then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
             local spellInfo = C_Spell.GetSpellInfo(spellID)
+            
+            if spellInfo then
+                print("Cooldown " .. i .. ": " .. spellInfo.name .. " -> Bar: " .. barData.name)
+                local bar = barData.bar
             
             if spellInfo then
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
