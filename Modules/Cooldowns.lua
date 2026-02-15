@@ -416,26 +416,12 @@ function Cooldowns:GetCooldownData(displayName)
             local hasSize = child:GetWidth() > 0
             shouldInclude = hasValidAura and hasSize
         elseif displayName == "cooldowns" then
-            -- For tracked bars, check if bar is visible and has size
-            -- Blizzard hides/resizes inactive bar frames
+            -- For tracked bars, check if bar element exists and has size
+            -- Note: Blizzard doesn't always mark frames as "shown" even when active,
+            -- so we only check for Bar element and non-zero size
             local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
-            local isVisible = child:IsShown()
             local hasBar = child.Bar ~= nil
-            
-            -- DEBUG: Print info about each child
-            if hasBar or isVisible or hasSize then
-                local name = ""
-                if child.Name and child.Name.GetText then
-                    name = child.Name:GetText() or ""
-                elseif child.Bar and child.Bar.Name and child.Bar.Name.GetText then
-                    name = child.Bar.Name:GetText() or ""
-                end
-                print(string.format("TrackedBar child: %s | Bar=%s | Visible=%s | Size=%s (%dx%d)", 
-                    name, tostring(hasBar), tostring(isVisible), tostring(hasSize),
-                    child:GetWidth(), child:GetHeight()))
-            end
-            
-            shouldInclude = hasBar and hasSize and isVisible
+            shouldInclude = hasBar and hasSize
         end
         
         -- Check if child has an Icon (or Bar for tracked bars) and should be included
