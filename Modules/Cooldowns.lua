@@ -428,17 +428,29 @@ function Cooldowns:GetTrackedBarsData()
                         local matches = false
                         
                         -- Try to match using GetSpellInfo on the bar name
-                        local ok = pcall(function()
+                        local ok, err = pcall(function()
                             local barName = bar.Name:GetText()
+                            print("  Checking bar: " .. tostring(barName))
                             if barName then
-                                print("  Checking bar: " .. barName)
                                 local barSpellInfo = C_Spell.GetSpellInfo(barName)
+                                print("    barSpellInfo: " .. tostring(barSpellInfo ~= nil))
+                                print("    IsSecretSpellIDMatch exists: " .. tostring(C_Spell.IsSecretSpellIDMatch ~= nil))
+                                
                                 if barSpellInfo and C_Spell.IsSecretSpellIDMatch then
                                     matches = C_Spell.IsSecretSpellIDMatch(spellID, barSpellInfo.spellID)
                                     print("    Match result: " .. tostring(matches))
+                                elseif barSpellInfo then
+                                    -- Fallback: direct comparison if IsSecretSpellIDMatch doesn't exist
+                                    print("    Fallback: comparing " .. spellID .. " vs " .. tostring(barSpellInfo.spellID))
+                                    matches = (spellID == barSpellInfo.spellID)
+                                    print("    Fallback Match result: " .. tostring(matches))
                                 end
                             end
                         end)
+                        
+                        if not ok then
+                            print("    ERROR: " .. tostring(err))
+                        end
                         
                         if ok and matches then
                             matchingBar = bar
