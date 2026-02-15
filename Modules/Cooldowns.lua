@@ -2224,7 +2224,7 @@ function Cooldowns:GetOptions()
                 name = "Attach to Resource Bar",
                 desc = "Attach the Cooldown Manager to the MidnightUI Resource Bar for a seamless look.",
                 type = "toggle",
-                order = 51,
+                order = 111,
                 width = "full",
                 
                 get = function() return self.db.profile.attachToResourceBar end,
@@ -2238,7 +2238,7 @@ function Cooldowns:GetOptions()
                 name = "Attach Position",
                 desc = "Where to attach the Cooldown Manager relative to the resource bar.",
                 type = "select",
-                order = 52,
+                order = 112,
                 values = {
                     ["BOTTOM"] = "Below",
                     ["TOP"] = "Above",
@@ -2257,7 +2257,7 @@ function Cooldowns:GetOptions()
                 name = "Horizontal Offset",
                 desc = "Horizontal offset from the resource bar.",
                 type = "range",
-                order = 53,
+                order = 113,
                 min = -200, max = 200, step = 1,
                 disabled = function() return not self.db.profile.attachToResourceBar or not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.attachOffsetX end,
@@ -2271,7 +2271,7 @@ function Cooldowns:GetOptions()
                 name = "Vertical Offset",
                 desc = "Vertical offset from the resource bar.",
                 type = "range",
-                order = 54,
+                order = 114,
                 min = -200, max = 200, step = 1,
                 disabled = function() return not self.db.profile.attachToResourceBar or not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.attachOffsetY end,
@@ -2288,7 +2288,7 @@ function Cooldowns:GetOptions()
                 name = "Match Primary Bar Width",
                 desc = "Make the Primary Resource Bar width match the Essential Cooldowns bar width.",
                 type = "toggle",
-                order = 56,
+                order = 131,
                 width = "full",
                 
                 get = function() return self.db.profile.matchPrimaryBarWidth end,
@@ -2302,7 +2302,7 @@ function Cooldowns:GetOptions()
                 name = "Match Secondary Bar Width",
                 desc = "Make the Secondary Resource Bar width match the Essential Cooldowns bar width.",
                 type = "toggle",
-                order = 57,
+                order = 132,
                 width = "full",
                 
                 get = function() return self.db.profile.matchSecondaryBarWidth end,
