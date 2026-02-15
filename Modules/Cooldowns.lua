@@ -418,81 +418,45 @@ function Cooldowns:GetTrackedBarsData()
             local spellInfo = C_Spell.GetSpellInfo(spellID)
             
             if spellInfo then
-                -- Find matching bar by comparing spell names with IsSecretSpellIDMatch
+                -- Find matching bar by comparing spell names
                 local matchingBar = nil
-                
-                print("Looking for bar for: " .. spellInfo.name)
                 
                 for _, bar in ipairs(bars) do
                     if bar.Name and bar.Name.GetText then
                         local matches = false
                         
-                        -- Try to match using GetSpellInfo on the bar name
-                        local ok, err = pcall(function()
+                        local ok = pcall(function()
                             local barName = bar.Name:GetText()
-                            print("  Checking bar: " .. tostring(barName))
                             if barName then
                                 local barSpellInfo = C_Spell.GetSpellInfo(barName)
-                                print("    barSpellInfo: " .. tostring(barSpellInfo ~= nil))
-                                print("    IsSecretSpellIDMatch exists: " .. tostring(C_Spell.IsSecretSpellIDMatch ~= nil))
                                 
-                                if barSpellInfo and C_Spell.IsSecretSpellIDMatch then
-                                    matches = C_Spell.IsSecretSpellIDMatch(spellID, barSpellInfo.spellID)
-                                    print("    Match result: " .. tostring(matches))
-                                elseif barSpellInfo then
-                                    -- Fallback: direct comparison if IsSecretSpellIDMatch doesn't exist
-                                    print("    Fallback: comparing " .. spellID .. " vs " .. tostring(barSpellInfo.spellID))
+                                if barSpellInfo then
+                                    -- Direct spell ID comparison
                                     matches = (spellID == barSpellInfo.spellID)
-                                    print("    Fallback Match result: " .. tostring(matches))
                                 end
                             end
                         end)
                         
-                        if not ok then
-                            print("    ERROR: " .. tostring(err))
-                        end
-                        
                         if ok and matches then
                             matchingBar = bar
-                            print("  FOUND MATCH!")
                             break
                         end
                     end
                 end
                 
-                print("  matchingBar = " .. tostring(matchingBar ~= nil))
-                
                 if matchingBar then
                     local bar = matchingBar
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
-                -- Determine if this bar is active
+                -- Determine if this bar is active by checking if player has the aura
                 local isActive = false
                 
-                if inCombat then
-                    -- In combat: check if bar's alpha > 0 (Blizzard's protected visibility)
-                    local alpha = bar:GetAlpha()
-                    if alpha and alpha > 0 then
+                -- Use C_UnitAuras to check if the player has this aura
+                -- This works in and out of combat without taint
+                if C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID then
+                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                    if auraData then
                         isActive = true
-                    end
-                else
-                    -- Out of combat: check if bar value > 0 AND max > 0
-                    local ok, value = pcall(function() return bar:GetValue() end)
-                    local maxOk, maxVal = pcall(function() return select(2, bar:GetMinMaxValues()) end)
-                    
-                    if ok and value and maxOk and maxVal then
-                        -- Both value and max must be > 0
-                        local valueActive = false
-                        local maxActive = false
-                        
-                        pcall(function()
-                            if value > 0 then valueActive = true end
-                            if maxVal > 0 then maxActive = true end
-                        end)
-                        
-                        if valueActive and maxActive then
-                            isActive = true
-                        end
                     end
                 end
                 
