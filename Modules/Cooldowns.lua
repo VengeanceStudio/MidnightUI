@@ -198,68 +198,93 @@ end
 function Cooldowns:CreateCustomDisplays()
     local db = self.db.profile
     
-    -- Create Essential Cooldowns - SIMPLE TEST FRAME
+    -- Create Essential Cooldowns (icons)
     if not self.customFrames.essential then
-        local f = CreateFrame("Frame", "MidnightEssentialCooldowns", UIParent)
-        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
-        f:SetSize(200, 50)
-        f:SetFrameStrata("TOOLTIP")
+        local f = CreateFrame("Frame", "MidnightEssentialCooldowns", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        f:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        f:SetSize(400, 60)
+        f:SetFrameStrata("HIGH")
         
-        local bg = f:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        bg:SetColorTexture(1, 0, 0, 1)
+        -- Apply backdrop
+        f:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 2,
+        })
+        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
+        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
         
+        f.icons = {}
+        f.displayType = "essential"
         f:Show()
         self.customFrames.essential = f
-        print("MidnightUI: RED frame created at 100,-100")
+        print("MidnightUI: Created Essential Cooldowns display")
     end
     
-    -- Create Utility Cooldowns - SIMPLE TEST FRAME
+    -- Create Utility Cooldowns (icons)
     if not self.customFrames.utility then
-        local f = CreateFrame("Frame", "MidnightUtilityCooldowns", UIParent)
-        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -200)
-        f:SetSize(200, 50)
-        f:SetFrameStrata("TOOLTIP")
+        local f = CreateFrame("Frame", "MidnightUtilityCooldowns", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        f:SetPoint("CENTER", UIParent, "CENTER", 0, 100)
+        f:SetSize(400, 60)
+        f:SetFrameStrata("HIGH")
         
-        local bg = f:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        bg:SetColorTexture(0, 1, 0, 1)
+        f:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 2,
+        })
+        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
+        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
         
+        f.icons = {}
+        f.displayType = "utility"
         f:Show()
         self.customFrames.utility = f
-        print("MidnightUI: GREEN frame created at 100,-200")
+        print("MidnightUI: Created Utility Cooldowns display")
     end
     
-    -- Create Tracked Buffs - SIMPLE TEST FRAME
+    -- Create Tracked Buffs (icons)
     if not self.customFrames.buffs then
-        local f = CreateFrame("Frame", "MidnightTrackedBuffs", UIParent)
-        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -300)
-        f:SetSize(200, 50)
-        f:SetFrameStrata("TOOLTIP")
+        local f = CreateFrame("Frame", "MidnightTrackedBuffs", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        f:SetSize(400, 60)
+        f:SetFrameStrata("HIGH")
         
-        local bg = f:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        bg:SetColorTexture(0, 0, 1, 1)
+        f:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 2,
+        })
+        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
+        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
         
+        f.icons = {}
+        f.displayType = "buffs"
         f:Show()
         self.customFrames.buffs = f
-        print("MidnightUI: BLUE frame created at 100,-300")
+        print("MidnightUI: Created Tracked Buffs display")
     end
     
-    -- Create Tracked Bars - SIMPLE TEST FRAME
+    -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
-        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
-        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -400)
-        f:SetSize(200, 50)
-        f:SetFrameStrata("TOOLTIP")
+        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+        f:SetSize(400, 200)
+        f:SetFrameStrata("HIGH")
         
-        local bg = f:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        bg:SetColorTexture(1, 1, 0, 1)
+        f:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 2,
+        })
+        f:SetBackdropColor(db.backgroundColor.r, db.backgroundColor.g, db.backgroundColor.b, db.backgroundColor.a)
+        f:SetBackdropBorderColor(db.borderColor.r, db.borderColor.g, db.borderColor.b, db.borderColor.a)
         
+        f.bars = {}
+        f.displayType = "cooldowns"
         f:Show()
         self.customFrames.cooldowns = f
-        print("MidnightUI: YELLOW frame created at 100,-400")
+        print("MidnightUI: Created Tracked Bars display")
     end
 end
 
