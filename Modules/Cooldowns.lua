@@ -394,41 +394,60 @@ function Cooldowns:GetTrackedBarsData()
         if child and child.Bar then
             local bar = child.Bar
             
-            -- If Blizzard's bar is shown, it's active (don't compare secret values)
+            -- If Blizzard's bar is shown, check if it's active by looking at max duration
             if bar:IsShown() then
-                -- Bar is active - get its data
-                -- Use bar's own data without comparing secret values
-                local data = {
-                    icon = bar.Icon and bar.Icon:GetTexture() or 136243, -- Default icon
-                    name = "", -- Will be set by pass-through
-                    spellID = nil,
-                    remainingTime = 0,
-                    charges = 1,
-                }
+                -- Get max duration - if it's 0, bar is not active
+                local isActive = false
+                local maxOk, minVal, maxVal = pcall(function()
+                    return bar:GetMinMaxValues()
+                end)
                 
-                -- Pass-through the value (don't compare it)
-                local ok, value = pcall(function() return bar:GetValue() end)
-                if ok and value then
-                    data.remainingTime = value
-                end
-                
-                -- Pass-through the name (don't compare it)
-                if bar.Name and bar.Name.GetText then
-                    local nameOk, name = pcall(function() return bar.Name:GetText() end)
-                    if nameOk then
-                        data.name = name
+                -- Bar is active if max > 0 (don't compare value directly in combat)
+                if maxOk and maxVal then
+                    -- Try to check if maxVal > 0 inside pcall to avoid comparison error
+                    local compareOk = pcall(function()
+                        if maxVal > 0 then
+                            isActive = true
+                        end
+                    end)
+                    
+                    -- If comparison failed (secret value), fall back to just checking if maxVal exists
+                    if not compareOk and maxVal then
+                        isActive = true
                     end
                 end
                 
-                -- Get max duration
-                local maxOk, maxDuration = pcall(function()
-                    return select(2, bar:GetMinMaxValues())
-                end)
-                if maxOk and maxDuration then
-                    data.duration = maxDuration
+                if isActive then
+                    -- Bar is active - get its data
+                    local data = {
+                        icon = bar.Icon and bar.Icon:GetTexture() or 136243, -- Default icon
+                        name = "", -- Will be set by pass-through
+                        spellID = nil,
+                        remainingTime = 0,
+                        charges = 1,
+                    }
+                    
+                    -- Pass-through the value (don't compare it)
+                    local ok, value = pcall(function() return bar:GetValue() end)
+                    if ok and value then
+                        data.remainingTime = value
+                    end
+                    
+                    -- Pass-through the name (don't compare it)
+                    if bar.Name and bar.Name.GetText then
+                        local nameOk, name = pcall(function() return bar.Name:GetText() end)
+                        if nameOk then
+                            data.name = name
+                        end
+                    end
+                    
+                    -- Set max duration
+                    if maxVal then
+                        data.duration = maxVal
+                    end
+                    
+                    table.insert(cooldowns, data)
                 end
-                
-                table.insert(cooldowns, data)
             end
         end
     end
