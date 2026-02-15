@@ -403,33 +403,48 @@ function Cooldowns:GetTrackedBarsData()
     for i = 1, blizzFrame:GetNumChildren() do
         local child = select(i, blizzFrame:GetChildren())
         if child and child.Bar then
-            local bar = child.Bar
-            local barName = ""
-            if bar.Name and bar.Name.GetText then
-                local ok, name = pcall(function() return bar.Name:GetText() end)
-                if ok and name then
-                    barName = name
-                end
-            end
-            print("Bar " .. i .. ": " .. barName)
-            table.insert(bars, {bar = bar, name = barName})
+            table.insert(bars, child.Bar)
         end
     end
     
     local inCombat = InCombatLockdown()
     
-    -- Match each cooldown info to its bar by index
-    for i, cooldownID in ipairs(trackedIDs) do
+    -- Match each cooldown to its bar by spell name comparison
+    for _, cooldownID in ipairs(trackedIDs) do
         local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-        local barData = bars[i]
         
-        if info and info.isKnown and barData then
+        if info and info.isKnown then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
             local spellInfo = C_Spell.GetSpellInfo(spellID)
             
             if spellInfo then
-                print("Cooldown " .. i .. ": " .. spellInfo.name .. " -> Bar: " .. barData.name)
-                local bar = barData.bar
+                -- Find matching bar by comparing spell names with IsSecretSpellIDMatch
+                local matchingBar = nil
+                
+                for _, bar in ipairs(bars) do
+                    if bar.Name and bar.Name.GetText then
+                        local matches = false
+                        
+                        -- Try to match using GetSpellInfo on the bar name
+                        local ok = pcall(function()
+                            local barName = bar.Name:GetText()
+                            if barName then
+                                local barSpellInfo = C_Spell.GetSpellInfo(barName)
+                                if barSpellInfo and C_Spell.IsSecretSpellIDMatch then
+                                    matches = C_Spell.IsSecretSpellIDMatch(spellID, barSpellInfo.spellID)
+                                end
+                            end
+                        end)
+                        
+                        if ok and matches then
+                            matchingBar = bar
+                            break
+                        end
+                    end
+                end
+                
+                if matchingBar then
+                    local bar = matchingBar
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
                 -- Determine if this bar is active
