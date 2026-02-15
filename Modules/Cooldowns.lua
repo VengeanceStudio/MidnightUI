@@ -379,32 +379,29 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data using C_Cooldown API
+-- WoW 12.0: Get tracked bars data using C_CooldownTracker API
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
     -- Check if API exists
-    if not C_Cooldown or not C_Cooldown.GetTrackedCooldowns then
-        print("C_Cooldown.GetTrackedCooldowns not available")
+    if not C_CooldownTracker or not C_CooldownTracker.GetTrackedCooldowns then
         return cooldowns
     end
     
     -- Get all tracked cooldowns
-    local trackedIDs = C_Cooldown.GetTrackedCooldowns()
+    local trackedIDs = C_CooldownTracker.GetTrackedCooldowns()
     if not trackedIDs then
-        print("GetTrackedCooldowns returned nil")
         return cooldowns
     end
     
-    print(string.format("Found %d tracked cooldowns", #trackedIDs))
-    
     -- Process each cooldown
-    for _, cooldownID in ipairs(trackedIDs) do
-        local info = C_Cooldown.GetTrackedCooldownInfo(cooldownID)
+    for _, id in ipairs(trackedIDs) do
+        local info = C_CooldownTracker.GetCooldownInfo(id)
         
+        -- Only show bars that Blizzard says should be shown
         if info and info.shouldShow then
             -- Get spell info
-            local spellID = info.spellID or cooldownID
+            local spellID = info.spellID or id
             local spellInfo = C_Spell.GetSpellInfo(spellID)
             local iconTexture = C_Spell.GetSpellTexture(spellID)
             
@@ -426,13 +423,10 @@ function Cooldowns:GetTrackedBarsData()
                     end
                 end
                 
-                print(string.format("Added: %s (shouldShow=%s)", data.name, tostring(info.shouldShow)))
                 table.insert(cooldowns, data)
             end
         end
     end
-    
-    print(string.format("Returning %d bars", #cooldowns))
     
     return cooldowns
 end
