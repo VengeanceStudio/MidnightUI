@@ -1190,14 +1190,16 @@ function Cooldowns:UpdateIconDisplay(frame)
             local current = cooldownData.charges
             local max = cooldownData.maxCharges
             
-            -- Check if current is a Secret Value (type is table/userdata in combat)
+            -- Check if values are Secret (type is table/userdata in combat)
             local currentType = type(current)
-            local isSecret = (currentType == "table" or currentType == "userdata")
+            local maxType = type(max)
+            local isCurrentSecret = (currentType == "table" or currentType == "userdata")
+            local isMaxSecret = (maxType == "table" or maxType == "userdata")
             
-            if isSecret then
+            if isCurrentSecret or isMaxSecret then
                 -- WoW 12.0 Secret Value: Pass directly to FontString without comparisons
                 -- Blizzard UI elements can handle secret values natively
-                icon.stackText:SetText(current) -- Pass-through: no math or comparisons
+                icon.stackText:SetText(current or "") -- Pass-through: no math or comparisons
                 icon.stackText:Show()
                 icon.stackText:SetTextColor(1, 1, 1) -- White (can't check if 0)
                 icon.texture:SetDesaturated(false) -- Can't check value, assume available
@@ -1206,7 +1208,7 @@ function Cooldowns:UpdateIconDisplay(frame)
                 -- Normal number (out of combat or whitelisted spell)
                 -- Only show if max > 1 or if we know it's a charge-based spell
                 local showCharges = false
-                if type(max) == "number" and max > 1 then
+                if maxType == "number" and max > 1 then
                     showCharges = true
                 elseif current ~= 1 then
                     showCharges = true
