@@ -379,88 +379,84 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data using proper API
+-- WoW 12.0: Get tracked bars data from Blizzard's frame
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    print("=== GetTrackedBarsData DEBUG ===")
-    
-    -- Use the official API to get spells configured as tracked bars
-    if not C_CooldownManager then
-        print("C_CooldownManager does not exist")
+    local blizzFrame = _G["BuffBarCooldownViewer"]
+    if not blizzFrame then
         return cooldowns
     end
     
-    if not C_CooldownManager.GetTrackedSpells then
-        print("C_CooldownManager.GetTrackedSpells does not exist")
-        return cooldowns
-    end
+    local children = {blizzFrame:GetChildren()}
     
-    if not Enum or not Enum.CooldownManagerCategory then
-        print("Enum.CooldownManagerCategory does not exist")
-        return cooldowns
-    end
-    
-    if not Enum.CooldownManagerCategory.TrackedBars then
-        print("Enum.CooldownManagerCategory.TrackedBars does not exist")
-        return cooldowns
-    end
-    
-    print("Calling GetTrackedSpells...")
-    local trackedSpells = C_CooldownManager.GetTrackedSpells(Enum.CooldownManagerCategory.TrackedBars)
-    if not trackedSpells then
-        print("GetTrackedSpells returned nil")
-        return cooldowns
-    end
-    
-    print(string.format("GetTrackedSpells returned %d spells", #trackedSpells))
-    
-    -- For each tracked spell, check if player has active aura
-    for _, spellID in ipairs(trackedSpells) do
-        print(string.format("Checking spellID: %s", tostring(spellID)))
-        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+    for _, child in ipairs(children) do
+        local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
+        local hasBar = child.Bar ~= nil
         
-        if auraData then
-            print(string.format("  SpellID %s has active aura", tostring(spellID)))
-        else
-            print(string.format("  SpellID %s NO active aura", tostring(spellID)))
-        end
-        
-        -- Only include if aura is active
-        if auraData then
-            -- Get spell info
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
-            local iconTexture = C_Spell.GetSpellTexture(spellID)
+        if hasBar and hasSize then
+            -- Get spell name and icon
+            local name = ""
+            local iconTexture = nil
             
-            if spellInfo and iconTexture then
-                local data = {
-                    icon = iconTexture,
-                    name = spellInfo.name or "",
-                    spellID = spellID,
-                    remainingTime = 0,
-                    charges = 1,
-                }
-                
-                -- Try to get duration (may be secret in combat)
-                if auraData.duration and type(auraData.duration) == "number" then
-                    data.duration = auraData.duration
+            if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
+                local ok, result = pcall(function() return child.Bar.Name:GetText() end)
+                if ok then name = result or "" end
+            end
+            
+            if child.Icon then
+                if child.Icon.GetTexture then
+                    iconTexture = child.Icon:GetTexture()
+                elseif child.Icon.Texture then
+                    iconTexture = child.Icon.Texture:GetTexture()
+                end
+            end
+            
+            if iconTexture and name and name ~= "" then
+                -- Get spellID from name
+                local spellID = nil
+                local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
+                if ok and spellInfo then
+                    spellID = spellInfo.spellID
                 end
                 
-                if auraData.expirationTime and type(auraData.expirationTime) == "number" then
-                    if auraData.expirationTime == 0 then
-                        data.remainingTime = 0
-                    else
-                        data.remainingTime = auraData.expirationTime - GetTime()
+                -- Only include if there's an active aura
+                local hasActiveAura = false
+                if spellID then
+                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                    hasActiveAura = (auraData ~= nil)
+                end
+                
+                if hasActiveAura then
+                    local data = {
+                        icon = iconTexture,
+                        name = name,
+                        spellID = spellID,
+                        remainingTime = 0,
+                        charges = 1,
+                    }
+                    
+                    -- Get duration from aura
+                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                    if auraData then
+                        if auraData.duration and type(auraData.duration) == "number" then
+                            data.duration = auraData.duration
+                        end
+                        
+                        if auraData.expirationTime and type(auraData.expirationTime) == "number" then
+                            if auraData.expirationTime == 0 then
+                                data.remainingTime = 0
+                            else
+                                data.remainingTime = auraData.expirationTime - GetTime()
+                            end
+                        end
                     end
+                    
+                    table.insert(cooldowns, data)
                 end
-                
-                print(string.format("  Added bar: %s", data.name))
-                table.insert(cooldowns, data)
             end
         end
     end
-    
-    print(string.format("=== Returning %d bars ===", #cooldowns))
     
     return cooldowns
 end
