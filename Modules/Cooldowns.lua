@@ -926,8 +926,8 @@ function Cooldowns:CreateBar(parent, index)
     bar:SetValue(1)
     bar:Hide()
     
-    -- Create border using textures (2px)
-    local borderSize = 2
+    -- Create border using textures (1px)
+    local borderSize = 1
     local br, bg, bb, ba = unpack(db.barBorderColor)
     
     bar.borderTop = bar:CreateTexture(nil, "OVERLAY", nil, 7)
@@ -2015,7 +2015,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().iconWidth end,
             set = function(_, v)
                 db().iconWidth = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                print("|cffFFFF00MidnightUI:|r Icon width changed. Type |cff00FF00/reload|r to apply.")
             end,
         },
         [displayName .. "IconHeight"] = {
@@ -2028,7 +2028,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().iconHeight end,
             set = function(_, v)
                 db().iconHeight = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                print("|cffFFFF00MidnightUI:|r Icon height changed. Type |cff00FF00/reload|r to apply.")
             end,
         },
         [displayName .. "IconSpacing"] = {
@@ -2056,12 +2056,12 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().borderThickness end,
             set = function(_, v)
                 db().borderThickness = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                print("|cffFFFF00MidnightUI:|r Border thickness changed. Type |cff00FF00/reload|r to apply.")
             end,
         },
         [displayName .. "BorderColor"] = {
             name = "Border Color",
-            desc = "Color of the border around each icon. |cffFF6B6BRequires /reload|r",
+            desc = "Color of the border around each icon. ",
             type = "color",
             order = order + 6,
             hasAlpha = true,
@@ -2072,7 +2072,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             end,
             set = function(_, r, g, b, a)
                 db().borderColor = {r, g, b, a}
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                
             end,
         },
         [displayName .. "AttachTo"] = {
@@ -2093,7 +2093,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().attachTo end,
             set = function(_, v)
                 db().attachTo = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                
             end,
         },
         [displayName .. "AttachPosition"] = {
@@ -2111,7 +2111,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().attachPosition end,
             set = function(_, v)
                 db().attachPosition = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                
             end,
         },
         [displayName .. "OffsetX"] = {
@@ -2124,7 +2124,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().offsetX end,
             set = function(_, v)
                 db().offsetX = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                
             end,
         },
         [displayName .. "OffsetY"] = {
@@ -2137,7 +2137,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().offsetY end,
             set = function(_, v)
                 db().offsetY = v
-                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                
             end,
         },
     }
@@ -2238,40 +2238,40 @@ function Cooldowns:GetOptions()
             
             customBuffBarsMaxBars = {
                 name = "Max Bars",
-                desc = "Maximum number of buff bars to display.",
+                desc = "Maximum number of buff bars to display. |cffFF6B6BRequires /reload|r",
                 type = "range",
                 order = 90.3,
                 min = 1, max = 15, step = 1,
                 get = function() return self.db.profile.customBuffBars.maxBars end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.maxBars = v
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                    print("|cffFFFF00MidnightUI:|r Max bars changed. Type |cff00FF00/reload|r to apply.")
                 end
             },
             
             customBuffBarsHeight = {
                 name = "Bar Height",
-                desc = "Height of each buff bar.",
+                desc = "Height of each buff bar. |cffFF6B6BRequires /reload|r",
                 type = "range",
                 order = 90.4,
                 min = 12, max = 40, step = 1,
                 get = function() return self.db.profile.customBuffBars.barHeight end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.barHeight = v
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                    print("|cffFFFF00MidnightUI:|r Bar height changed. Type |cff00FF00/reload|r to apply.")
                 end
             },
             
             customBuffBarsWidth = {
                 name = "Bar Width",
-                desc = "Width of each buff bar.",
+                desc = "Width of each buff bar. |cffFF6B6BRequires /reload|r",
                 type = "range",
                 order = 90.5,
                 min = 100, max = 500, step = 10,
                 get = function() return self.db.profile.customBuffBars.barWidth end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.barWidth = v
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                    print("|cffFFFF00MidnightUI:|r Bar width changed. Type |cff00FF00/reload|r to apply.")
                 end
             },
             
@@ -2283,7 +2283,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.showIcons end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showIcons = v
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                    
                 end
             },
             
@@ -2295,7 +2295,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.showTimers end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showTimers = v
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                    
                 end
             },
             
@@ -2307,7 +2307,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.showStacks end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showStacks = v
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                    
                 end
             },
             
@@ -2340,7 +2340,17 @@ function Cooldowns:GetOptions()
                 end,
                 set = function(_, r, g, b, a)
                     self.db.profile.customBuffBars.barBorderColor = {r, g, b, a}
-                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+                    -- Update existing bar borders
+                    if self.customFrames.cooldowns and self.customFrames.cooldowns.bars then
+                        for _, bar in ipairs(self.customFrames.cooldowns.bars) do
+                            if bar.borderTop then
+                                bar.borderTop:SetColorTexture(r, g, b, a)
+                                bar.borderBottom:SetColorTexture(r, g, b, a)
+                                bar.borderLeft:SetColorTexture(r, g, b, a)
+                                bar.borderRight:SetColorTexture(r, g, b, a)
+                            end
+                        end
+                    end
                 end
             },
             
