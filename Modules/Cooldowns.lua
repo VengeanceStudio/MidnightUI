@@ -466,6 +466,18 @@ function Cooldowns:GetCooldownData(displayName)
                     end
                 end
                 
+                -- For essential and utility cooldowns, also try to get charges from spell charges API
+                if displayName == "essential" or displayName == "utility" then
+                    -- Try to find spellID from the child frame
+                    local spellID = child.spellID
+                    if spellID then
+                        local chargeInfo = C_Spell.GetSpellCharges(spellID)
+                        if chargeInfo and chargeInfo.currentCharges and chargeInfo.currentCharges > 1 then
+                            data.charges = chargeInfo.currentCharges
+                        end
+                    end
+                end
+                
                 table.insert(cooldowns, data)
             end
         end
