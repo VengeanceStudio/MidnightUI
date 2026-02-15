@@ -2085,22 +2085,12 @@ function Cooldowns:GetOptions()
                 order = 2
             },
             
-            rescan = {
-                name = "Rescan for Cooldown Manager",
-                desc = "Try to find and update the Cooldown Manager frame.",
-                type = "execute",
-                order = 11,
-                func = function()
-                    self:FindAndSkinCooldownManager()
-                end
-            },
-            
-            -- Frame Settings
-            headerFrame = { type = "header", name = "Frame Settings", order = 20 },
+            -- Settings
+            headerFrame = { type = "header", name = "Settings", order = 20 },
             
             scale = {
                 name = "Scale",
-                desc = "Scale of the Cooldown Manager frame.",
+                desc = "Scale of all cooldown display frames.",
                 type = "range",
                 order = 21,
                 min = 0.5, max = 2.0, step = 0.05,
@@ -2115,102 +2105,20 @@ function Cooldowns:GetOptions()
                 end
             },
             
-            -- Colors
-            headerColors = { type = "header", name = "Colors", order = 30 },
-            
-            showBackground = {
-                name = "Show Background",
-                desc = "Show or hide the background behind the Cooldown Manager.",
-                type = "toggle",
-                order = 30.5,
-                width = "full",
-                
-                get = function() return self.db.profile.showBackground end,
-                set = function(_, v)
-                    self.db.profile.showBackground = v
-                    self:UpdateColors()
-                end
-            },
-                        showFrameBorder = {
-                name = "Show Frame Border",
-                desc = "Show or hide the border around the entire Cooldown Manager frame. Individual icon borders are controlled separately.",
-                type = "toggle",
-                order = 30.6,
-                width = "full",
-                
-                get = function() return self.db.profile.showFrameBorder end,
-                set = function(_, v)
-                    self.db.profile.showFrameBorder = v
-                    self:UpdateColors()
-                end
-            },
-                        showFrameBorder = {
-                name = "Show Frame Border",
-                desc = "Show or hide the border around the entire Cooldown Manager frame. Individual icon borders are controlled separately.",
-                type = "toggle",
-                order = 30.6,
-                width = "full",
-                
-                get = function() return self.db.profile.showFrameBorder end,
-                set = function(_, v)
-                    self.db.profile.showFrameBorder = v
-                    self:UpdateColors()
-                end
-            },
-            
-            backgroundColor = {
-                name = "Background Color",
-                desc = "Background color for the Cooldown Manager frame.",
-                type = "color",
-                order = 31,
-                hasAlpha = true,
-                
-                get = function()
-                    local c = self.db.profile.backgroundColor
-                    return c[1], c[2], c[3], c[4]
-                end,
-                set = function(_, r, g, b, a)
-                    self.db.profile.backgroundColor = {r, g, b, a}
-                    self:UpdateColors()
-                end
-            },
-            
-            borderColor = {
-                name = "Border Color",
-                desc = "Border color for cooldown icons.",
-                type = "color",
-                order = 32,
-                hasAlpha = true,
-                
-                get = function()
-                    local c = self.db.profile.borderColor
-                    return c[1], c[2], c[3], c[4]
-                end,
-                set = function(_, r, g, b, a)
-                    self.db.profile.borderColor = {r, g, b, a}
-                    self:UpdateColors()
-                end
-            },
-            
-            -- Font Settings
-            headerFont = { type = "header", name = "Font", order = 40 },
-            
             font = {
                 name = "Font",
                 desc = "Font for cooldown text.",
                 type = "select",
-                order = 41,
+                order = 22,
                 values = function()
                     local fonts = LSM:List("font")
                     local out = {}
                     for _, font in ipairs(fonts) do out[font] = font end
                     return out
                 end,
-                
                 get = function() return self.db.profile.font or "Friz Quadrata TT" end,
                 set = function(_, v)
                     self.db.profile.font = v
-                    -- Font changes would require frame recreation
                 end
             },
             
@@ -2218,9 +2126,8 @@ function Cooldowns:GetOptions()
                 name = "Font Size",
                 desc = "Size of cooldown text.",
                 type = "range",
-                order = 42,
+                order = 23,
                 min = 8, max = 32, step = 1,
-                
                 get = function() return self.db.profile.fontSize end,
                 set = function(_, v)
                     self.db.profile.fontSize = v
@@ -2231,22 +2138,21 @@ function Cooldowns:GetOptions()
                 name = "Font Outline",
                 desc = "Outline style for cooldown text.",
                 type = "select",
-                order = 43,
+                order = 24,
                 values = {
                     ["NONE"] = "None",
                     ["OUTLINE"] = "Outline",
                     ["THICKOUTLINE"] = "Thick Outline",
                     ["MONOCHROME"] = "Monochrome"
                 },
-                
                 get = function() return self.db.profile.fontFlag end,
                 set = function(_, v)
                     self.db.profile.fontFlag = v
                 end
             },
             
-            -- Tracked Bars Settings
-            headerCustomBuffBars = { type = "header", name = "Tracked Bars", order = 48 },
+            -- Tracked Bars Display
+            headerCustomBuffBars = { type = "header", name = "Tracked Bars Display", order = 60 },
             
             customBuffBarsDesc = {
                 type = "description",
@@ -2330,7 +2236,7 @@ function Cooldowns:GetOptions()
             },
             
             -- Resource Bar Attachment
-            headerAttachment = { type = "header", name = "Resource Bar Attachment", order = 50 },
+            headerAttachment = { type = "header", name = "Resource Bar Attachment", order = 70 },
             
             attachToResourceBar = {
                 name = "Attach to Resource Bar",
@@ -2393,8 +2299,8 @@ function Cooldowns:GetOptions()
                 end
             },
             
-            -- Width Matching
-            headerWidthMatch = { type = "header", name = "Resource Bar Width Matching", order = 55 },
+            -- Resource Bar Width Matching
+            headerWidthMatch = { type = "header", name = "Resource Bar Width Matching", order = 80 },
             
             matchPrimaryBarWidth = {
                 name = "Match Primary Bar Width",
@@ -2450,7 +2356,8 @@ function Cooldowns:GetOptions()
             },
             
             -- Essential Cooldowns (HIDDEN - now in display settings)
-            headerEssential = { type = "header", name = "Essential Cooldowns", order = 75, hidden = true },
+            -- Essential Cooldowns Display
+            headerEssential = { type = "header", name = "Essential Cooldowns Display", order = 30 },
             
             essentialAttachTo = {
                 name = "Attach To",
@@ -2522,7 +2429,8 @@ function Cooldowns:GetOptions()
             },
             
             -- Utility Cooldowns
-            headerUtility = { type = "header", name = "Utility Cooldowns", order = 80, hidden = true },
+            -- Utility Cooldowns Display
+            headerUtility = { type = "header", name = "Utility Cooldowns Display", order = 40 },
             
             utilityAttachTo = {
                 name = "Attach To",
@@ -2594,7 +2502,8 @@ function Cooldowns:GetOptions()
             },
             
             -- Tracked Buffs
-            headerBuffs = { type = "header", name = "Tracked Buffs", order = 90, hidden = true },
+            -- Tracked Buffs Display
+            headerBuffs = { type = "header", name = "Tracked Buffs Display", order = 50 },
             
             buffsAttachTo = {
                 name = "Attach To",
