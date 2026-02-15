@@ -503,6 +503,7 @@ function Cooldowns:CreateCustomDisplays()
         
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
+        f:EnableMouse(true)
         
         -- No container background - icons will have their own backgrounds
         
@@ -527,6 +528,7 @@ function Cooldowns:CreateCustomDisplays()
         
         f:SetSize(400, 60)
         f:SetFrameStrata("HIGH")
+        f:EnableMouse(true)
         
         f.icons = {}
         f.activeIcons = {}
@@ -549,6 +551,7 @@ function Cooldowns:CreateCustomDisplays()
         
         f:SetSize(400, 44)
         f:SetFrameStrata("HIGH")
+        f:EnableMouse(true)
         
         f.icons = {}
         f.activeIcons = {}
@@ -571,6 +574,7 @@ function Cooldowns:CreateCustomDisplays()
         
         f:SetSize(400, 90)
         f:SetFrameStrata("HIGH")
+        f:EnableMouse(true)
         
         f.bars = {}
         f.activeBars = {}
