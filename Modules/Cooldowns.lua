@@ -591,19 +591,24 @@ end
 function Cooldowns:FindAndSkinCooldownManager()
     if not self.db.profile.skinCooldownManager then return end
     
-    -- Hide all Blizzard cooldown displays
-    local displaysToHide = {"buffs", "essential", "utility", "cooldowns"}
+    -- Hide all Blizzard cooldown viewer frames
+    local blizzardFrames = {
+        "EssentialCooldownViewer",
+        "UtilityCooldownViewer", 
+        "BuffIconCooldownViewer",
+        "BuffBarCooldownViewer",
+    }
     
-    for _, name in ipairs(displaysToHide) do
-        local display = C_CooldownManager and C_CooldownManager.GetDisplay and C_CooldownManager.GetDisplay(name)
-        if display then
+    for _, frameName in ipairs(blizzardFrames) do
+        local frame = _G[frameName]
+        if frame then
             -- Hard hide
-            display:Hide()
-            display:SetAlpha(0)
-            display:EnableMouse(false)
+            frame:Hide()
+            frame:SetAlpha(0)
+            frame:EnableMouse(false)
             
             -- Prevent Blizzard from re-showing it
-            display:SetScript("OnShow", function(self)
+            frame:SetScript("OnShow", function(self)
                 self:Hide()
                 self:SetAlpha(0)
             end)
