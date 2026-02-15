@@ -379,84 +379,96 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data using C_CooldownTracker API
+-- WoW 12.0: Get tracked bars data from Blizzard's frame
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    print("=== GetTrackedBarsData ===")
-    
-    -- Check if API exists
-    if not C_CooldownTracker then
-        print("C_CooldownTracker does not exist")
-        return cooldowns
-    end
-    
-    if not C_CooldownTracker.GetTrackedCooldowns then
-        print("C_CooldownTracker.GetTrackedCooldowns does not exist")
-        return cooldowns
-    end
-    
-    print("Calling GetTrackedCooldowns()...")
-    
-    -- Get all tracked cooldowns
-    local trackedIDs = C_CooldownTracker.GetTrackedCooldowns()
-    if not trackedIDs then
-        print("GetTrackedCooldowns() returned nil")
-        return cooldowns
-    end
-    
-    print(string.format("GetTrackedCooldowns() returned %d IDs", #trackedIDs))
-    
-    -- Process each cooldown
-    for _, id in ipairs(trackedIDs) do
-        print(string.format("Processing ID: %s", tostring(id)))
-        
-        local info = C_CooldownTracker.GetCooldownInfo(id)
-        
-        if not info then
-            print(string.format("  GetCooldownInfo returned nil"))
-        else
-            print(string.format("  shouldShow=%s isActive=%s isInCombat=%s", 
-                tostring(info.shouldShow), tostring(info.isActive), tostring(info.isInCombat)))
+    -- Check if C_CooldownViewer exists
+    if C_CooldownViewer then
+        print("C_CooldownViewer EXISTS!")
+        if C_CooldownViewer.GetValidAlertTypes then
+            print("  GetValidAlertTypes exists")
         end
-        
-        -- Only show bars that Blizzard says should be shown
-        if info and info.shouldShow then
-            -- Get spell info
-            local spellID = info.spellID or id
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
-            local iconTexture = C_Spell.GetSpellTexture(spellID)
+        if C_CooldownViewer.GetTrackedCooldowns then
+            print("  GetTrackedCooldowns exists")
+        end
+        if C_CooldownViewer.GetCooldownInfo then
+            print("  GetCooldownInfo exists")
+        end
+    end
+    
+    local blizzFrame = _G["BuffBarCooldownViewer"]
+    if not blizzFrame then
+        return cooldowns
+    end
+    
+    local children = {blizzFrame:GetChildren()}
+    
+    for _, child in ipairs(children) do
+        -- Check if child has a Bar and if that Bar is shown
+        if child.Bar and child.Bar:IsShown() then
+            -- Get spell name
+            local name = ""
+            if child.Bar.Name and child.Bar.Name.GetText then
+                local ok, result = pcall(function() return child.Bar.Name:GetText() end)
+                if ok then name = result or "" end
+            end
             
-            print(string.format("  spellID=%s name=%s icon=%s", 
-                tostring(spellID), 
-                spellInfo and spellInfo.name or "nil", 
-                tostring(iconTexture)))
+            -- Check if name is valid
+            local hasValidName = false
+            if name then
+                local ok, result = pcall(function() return name ~= "" end)
+                if ok and result then
+                    hasValidName = true
+                end
+            end
             
-            if spellInfo and iconTexture then
-                local data = {
-                    icon = iconTexture,
-                    name = spellInfo.name or "",
-                    spellID = spellID,
-                    remainingTime = 0,
-                    charges = 1,
-                }
+            if hasValidName then
+                -- Get spellID and icon
+                local spellID = nil
+                local iconTexture = nil
                 
-                -- Get duration from info
-                if info.startTime and info.duration then
-                    local remaining = (info.startTime + info.duration) - GetTime()
-                    if remaining > 0 then
-                        data.remainingTime = remaining
-                        data.duration = info.duration
-                    end
+                local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
+                if ok and spellInfo then
+                    spellID = spellInfo.spellID
                 end
                 
-                print(string.format("  ADDED: %s", data.name))
-                table.insert(cooldowns, data)
+                if spellID then
+                    iconTexture = C_Spell.GetSpellTexture(spellID)
+                end
+                
+                if iconTexture then
+                    local data = {
+                        icon = iconTexture,
+                        name = name,
+                        spellID = spellID,
+                        remainingTime = 0,
+                        charges = 1,
+                    }
+                    
+                    -- Try to get duration from aura
+                    if spellID then
+                        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                        if auraData then
+                            if auraData.duration and type(auraData.duration) == "number" then
+                                data.duration = auraData.duration
+                            end
+                            
+                            if auraData.expirationTime and type(auraData.expirationTime) == "number" then
+                                if auraData.expirationTime == 0 then
+                                    data.remainingTime = 0
+                                else
+                                    data.remainingTime = auraData.expirationTime - GetTime()
+                                end
+                            end
+                        end
+                    end
+                    
+                    table.insert(cooldowns, data)
+                end
             end
         end
     end
-    
-    print(string.format("=== Returning %d bars ===", #cooldowns))
     
     return cooldowns
 end
