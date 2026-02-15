@@ -58,7 +58,7 @@ local defaults = {
             fontSize = 12,
             fontFlag = "OUTLINE",
             barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
-            barBorderColor = {0, 0, 0, 1},  -- Bar border color
+            barBorderColor = {1, 1, 1, 1},  -- Bar border color (white for visibility)
             useClassColor = false,  -- Use class color instead of custom color
             fadeColor = true,  -- Fade color as time decreases
         },
@@ -119,7 +119,7 @@ local defaults = {
             fontSize = 12,
             fontFlag = "OUTLINE",
             barColor = {0.2, 0.8, 1.0, 1.0},  -- Bar color (R, G, B, A)
-            barBorderColor = {0, 0, 0, 1},  -- Bar border color
+            barBorderColor = {1, 1, 1, 1},  -- Bar border color (white for visibility)
             useClassColor = false,  -- Use class color instead of custom color
             fadeColor = true,  -- Fade color as time decreases
             fontFlag = "OUTLINE",
@@ -926,11 +926,11 @@ function Cooldowns:CreateBar(parent, index)
     bar:SetValue(1)
     bar:Hide()
     
-    -- Add border (1px outside the bar)
+    -- Add border (2px outside the bar for better visibility)
     bar:SetBackdrop({
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         tile = false,
-        edgeSize = 1,
+        edgeSize = 2,
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
     })
     local br, bg, bb, ba = unpack(db.barBorderColor)
@@ -1137,13 +1137,13 @@ function Cooldowns:UpdateBarDisplay(frame)
             -- Timer
             if bar.timer then
                 if db.showTimers then
-                    bar.timer:Show()
                     if data.remainingTime and data.remainingTime > 0 then
                         if data.remainingTime > 60 then
                             bar.timer:SetFormattedText("%.1fm", data.remainingTime / 60)
                         else
                             bar.timer:SetFormattedText("%.0f", data.remainingTime)
                         end
+                        bar.timer:Show()
                     else
                         bar.timer:SetText("")
                     end
