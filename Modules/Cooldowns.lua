@@ -403,16 +403,38 @@ function Cooldowns:GetTrackedBarsData()
     local frameBars = {}
     
     if blizzFrame then
+        print("=== BuffBarCooldownViewer Children ===")
         for i = 1, blizzFrame:GetNumChildren() do
             local child = select(i, blizzFrame:GetChildren())
             if child and child.Bar then
                 local bar = child.Bar
-                -- Match by spell ID
+                print("Child " .. i .. ":")
+                print("  Bar exists:", bar ~= nil)
+                print("  Bar.spellID:", tostring(bar.spellID))
+                print("  Bar:IsShown():", tostring(bar:IsShown()))
+                
+                -- Try to get spell name
                 if bar.spellID then
+                    local spellInfo = C_Spell.GetSpellInfo(bar.spellID)
+                    if spellInfo then
+                        print("  Spell name:", spellInfo.name)
+                    end
                     frameBars[bar.spellID] = bar
+                end
+                
+                -- Check for other identifying fields
+                if bar.Name and bar.Name.GetText then
+                    local ok, name = pcall(function() return bar.Name:GetText() end)
+                    if ok and name then
+                        print("  Bar.Name:GetText():", name)
+                    end
                 end
             end
         end
+        print("Total bars in frameBars:", #frameBars)
+        print("======================================")
+    else
+        print("BuffBarCooldownViewer frame not found!")
     end
     
     -- Process each tracked bar cooldown
