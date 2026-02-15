@@ -43,6 +43,22 @@ local defaults = {
         -- Frame Grouping (attach frames to each other)
         groupFrames = false,
         
+        -- Custom Buff Bars (replace Blizzard's Tracked Bars)
+        customBuffBars = {
+            enabled = true,
+            maxBars = 8,
+            barHeight = 20,
+            barWidth = 300,
+            spacing = 2,
+            showIcons = true,
+            showTimers = true,
+            showStacks = true,
+            iconSize = 20,
+            font = "Friz Quadrata TT",
+            fontSize = 12,
+            fontFlag = "OUTLINE",
+        },
+        
         -- Individual frame settings (default order: Buffs, Primary Bar, Secondary Bar, Essential, Utility, Tracked Bars)
         frames = {
             essential = {
@@ -87,6 +103,16 @@ function Cooldowns:OnInitialize()
     self.updateAttachmentPending = false
     self.editModeUpdatePending = false
     self.lastStyleUpdate = 0
+    
+    -- Custom display frames
+    self.customFrames = {
+        essential = nil,
+        utility = nil,
+        buffs = nil,
+        cooldowns = nil, -- Tracked bars
+    }
+    self.iconPools = {}
+    self.barPools = {}
 end
 
 function Cooldowns:OnDBReady()
@@ -158,7 +184,407 @@ end
 -- FIND AND SKIN WOW 12.0 COOLDOWN MANAGER
 -- -----------------------------------------------------------------------------
 
-function Cooldowns:StripBlizzardBorders(frame)
+-- -----------------------------------------------------------------------------
+-- CUSTOM COOLDOWN DISPLAYS
+-- -----------------------------------------------------------------------------
+
+function Cooldowns:GetCooldownData(displayName)
+    if not C_CooldownManager or not C_CooldownManager.GetTrackedCooldowns then
+        return {}
+    end
+    return C_CooldownManager.GetTrackedCooldowns(displayName) or {}
+end
+
+function Cooldowns:CreateCustomDisplays()
+    local db = self.db.profile
+    
+    -- Create Essential Cooldowns (icons)
+    if not self.customFrames.essential then
+        self.customFrames.essential = self:CreateIconDisplay("MidnightEssentialCooldowns", "essential")
+    end
+    
+    -- Create Utility Cooldowns (icons)
+    if not self.customFrames.utility then
+        self.customFrames.utility = self:CreateIconDisplay("MidnightUtilityCooldowns", "utility")
+    end
+    
+    -- Create Tracked Buffs (icons)
+    if not self.customFrames.buffs then
+        self.customFrames.buffs = self:CreateIconDisplay("MidnightTrackedBuffs", "buffs")
+    end
+    
+    -- Create Tracked Bars (buff bars)
+    if not self.customFrames.cooldowns then
+        self.customFrames.cooldowns = self:CreateBarDisplay("MidnightTrackedBars", "cooldowns")
+    end
+end
+
+function Cooldowns:CreateIconDisplay(name, displayType)
+    local db = self.db.profile
+    
+    local frame = CreateFrame("Frame", name, UIParent)
+    frame:SetSize(300, 40) -- Will auto-resize based on icons
+    frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    frame:SetFrameStrata("MEDIUM")
+    frame:SetScale(db.scale)
+    frame.displayType = displayType
+    
+    -- Background
+    frame.bg = frame:CreateTexture(nil, "BACKGROUND")
+    frame.bg:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.bg:SetAllPoints()
+    frame.bg:SetColorTexture(unpack(db.backgroundColor))
+    frame.bg:SetShown(db.showBackground)
+    
+    -- Borders
+    local borderSize = 2
+    local r, g, b, a = unpack(db.borderColor)
+    
+    frame.borderTop = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderTop:SetColorTexture(r, g, b, a)
+    frame.borderTop:SetPoint("TOPLEFT", 0, 0)
+    frame.borderTop:SetPoint("TOPRIGHT", 0, 0)
+    frame.borderTop:SetHeight(borderSize)
+    frame.borderTop:SetShown(db.showFrameBorder)
+    
+    frame.borderBottom = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderBottom:SetColorTexture(r, g, b, a)
+    frame.borderBottom:SetPoint("BOTTOMLEFT", 0, 0)
+    frame.borderBottom:SetPoint("BOTTOMRIGHT", 0, 0)
+    frame.borderBottom:SetHeight(borderSize)
+    frame.borderBottom:SetShown(db.showFrameBorder)
+    
+    frame.borderLeft = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderLeft:SetColorTexture(r, g, b, a)
+    frame.borderLeft:SetPoint("TOPLEFT", 0, 0)
+    frame.borderLeft:SetPoint("BOTTOMLEFT", 0, 0)
+    frame.borderLeft:SetWidth(borderSize)
+    frame.borderLeft:SetShown(db.showFrameBorder)
+    
+    frame.borderRight = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderRight:SetColorTexture(r, g, b, a)
+    frame.borderRight:SetPoint("TOPRIGHT", 0, 0)
+    frame.borderRight:SetPoint("BOTTOMRIGHT", 0, 0)
+    frame.borderRight:SetWidth(borderSize)
+    frame.borderRight:SetShown(db.showFrameBorder)
+    
+    -- Icon pool
+    frame.icons = {}
+    frame.activeIcons = {}
+    
+    return frame
+end
+
+function Cooldowns:CreateBarDisplay(name, displayType)
+    local db = self.db.profile
+    local buffDB = db.customBuffBars
+    
+    local frame = CreateFrame("Frame", name, UIParent)
+    frame:SetSize(buffDB.barWidth, buffDB.barHeight * buffDB.maxBars + 2 * (buffDB.maxBars - 1))
+    frame:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+    frame:SetFrameStrata("MEDIUM")
+    frame:SetScale(db.scale)
+    frame.displayType = displayType
+    
+    -- Background
+    frame.bg = frame:CreateTexture(nil, "BACKGROUND")
+    frame.bg:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.bg:SetAllPoints()
+    frame.bg:SetColorTexture(unpack(db.backgroundColor))
+    frame.bg:SetShown(db.showBackground)
+    
+    -- Borders
+    local borderSize = 2
+    local r, g, b, a = unpack(db.borderColor)
+    
+    frame.borderTop = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderTop:SetColorTexture(r, g, b, a)
+    frame.borderTop:SetPoint("TOPLEFT", 0, 0)
+    frame.borderTop:SetPoint("TOPRIGHT", 0, 0)
+    frame.borderTop:SetHeight(borderSize)
+    frame.borderTop:SetShown(db.showFrameBorder)
+    
+    frame.borderBottom = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderBottom:SetColorTexture(r, g, b, a)
+    frame.borderBottom:SetPoint("BOTTOMLEFT", 0, 0)
+    frame.borderBottom:SetPoint("BOTTOMRIGHT", 0, 0)
+    frame.borderBottom:SetHeight(borderSize)
+    frame.borderBottom:SetShown(db.showFrameBorder)
+    
+    frame.borderLeft = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderLeft:SetColorTexture(r, g, b, a)
+    frame.borderLeft:SetPoint("TOPLEFT", 0, 0)
+    frame.borderLeft:SetPoint("BOTTOMLEFT", 0, 0)
+    frame.borderLeft:SetWidth(borderSize)
+    frame.borderLeft:SetShown(db.showFrameBorder)
+    
+    frame.borderRight = frame:CreateTexture(nil, "OVERLAY")
+    frame.borderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
+    frame.borderRight:SetColorTexture(r, g, b, a)
+    frame.borderRight:SetPoint("TOPRIGHT", 0, 0)
+    frame.borderRight:SetPoint("BOTTOMRIGHT", 0, 0)
+    frame.borderRight:SetWidth(borderSize)
+    frame.borderRight:SetShown(db.showFrameBorder)
+    
+    -- Bar pool
+    frame.bars = {}
+    for i = 1, buffDB.maxBars do
+        frame.bars[i] = self:CreateBar(frame, i)
+    end
+    
+    return frame
+end
+
+function Cooldowns:CreateIcon(parent)
+    local db = self.db.profile
+    
+    local icon = CreateFrame("Frame", nil, parent)
+    icon:SetSize(40, 40)
+    
+    -- Icon texture
+    icon.texture = icon:CreateTexture(nil, "ARTWORK")
+    icon.texture:SetAllPoints()
+    icon.texture:SetTexCoord(0.1, 0.9, 0.1, 0.9) -- Crop rounded corners
+    
+    -- Border
+    icon.border = CreateFrame("Frame", nil, icon, "BackdropTemplate")
+    icon.border:SetPoint("TOPLEFT", icon, "TOPLEFT", 1, -1)
+    icon.border:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -1, 1)
+    icon.border:SetBackdrop({
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        edgeSize = 2,
+    })
+    icon.border:SetBackdropBorderColor(unpack(db.borderColor))
+    
+    -- Cooldown text
+    local font, _, flag = FontKit:GetFont(db.font, db.fontSize, db.fontFlag)
+    icon.cooldownText = icon:CreateFontString(nil, "OVERLAY")
+    icon.cooldownText:SetFont(font, db.fontSize, flag)
+    icon.cooldownText:SetPoint("CENTER")
+    icon.cooldownText:SetTextColor(1, 1, 1)
+    
+    -- Stack count
+    icon.stackText = icon:CreateFontString(nil, "OVERLAY")
+    icon.stackText:SetFont(font, db.fontSize + 2, flag)
+    icon.stackText:SetPoint("BOTTOMRIGHT", -2, 2)
+    icon.stackText:SetTextColor(1, 1, 1)
+    
+    icon:Hide()
+    return icon
+end
+
+function Cooldowns:CreateBar(parent, index)
+    local db = self.db.profile.customBuffBars
+    
+    local bar = CreateFrame("StatusBar", nil, parent)
+    bar:SetSize(db.barWidth - 4, db.barHeight)
+    bar:SetPoint("TOPLEFT", parent, "TOPLEFT", 2, -2 - (index - 1) * (db.barHeight + 2))
+    bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    bar:GetStatusBarTexture():SetHorizTile(false)
+    bar:SetMinMaxValues(0, 1)
+    bar:SetValue(1)
+    bar:Hide()
+    
+    -- Background
+    bar.bg = bar:CreateTexture(nil, "BACKGROUND")
+    bar.bg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    bar.bg:SetAllPoints()
+    bar.bg:SetVertexColor(0.2, 0.2, 0.2, 0.5)
+    
+    -- Icon
+    if db.showIcons then
+        bar.icon = bar:CreateTexture(nil, "ARTWORK")
+        bar.icon:SetSize(db.iconSize, db.iconSize)
+        bar.icon:SetPoint("LEFT", bar, "LEFT", 2, 0)
+        bar.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    end
+    
+    -- Name text
+    local font, _, flag = FontKit:GetFont(db.font, db.fontSize, db.fontFlag)
+    bar.name = bar:CreateFontString(nil, "OVERLAY")
+    bar.name:SetFont(font, db.fontSize, flag)
+    if db.showIcons then
+        bar.name:SetPoint("LEFT", bar.icon, "RIGHT", 4, 0)
+    else
+        bar.name:SetPoint("LEFT", bar, "LEFT", 4, 0)
+    end
+    bar.name:SetJustifyH("LEFT")
+    bar.name:SetTextColor(1, 1, 1)
+    
+    -- Timer text
+    if db.showTimers then
+        bar.timer = bar:CreateFontString(nil, "OVERLAY")
+        bar.timer:SetFont(font, db.fontSize, flag)
+        bar.timer:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
+        bar.timer:SetJustifyH("RIGHT")
+        bar.timer:SetTextColor(1, 1, 1)
+    end
+    
+    -- Stack count
+    if db.showStacks then
+        bar.stack = bar:CreateFontString(nil, "OVERLAY")
+        bar.stack:SetFont(font, db.fontSize + 2, flag)
+        bar.stack:SetPoint("LEFT", bar.icon, "BOTTOMLEFT", 0, 0)
+        bar.stack:SetJustifyH("LEFT")
+        bar.stack:SetTextColor(1, 1, 1)
+    end
+    
+    return bar
+end
+
+function Cooldowns:UpdateAllDisplays()
+    if not self.customFrames then return end
+    
+    -- Update each display type
+    for displayType, frame in pairs(self.customFrames) do
+        if frame and frame.displayType then
+            if displayType == "cooldowns" then
+                self:UpdateBarDisplay(frame)
+            else
+                self:UpdateIconDisplay(frame)
+            end
+        end
+    end
+end
+
+function Cooldowns:UpdateIconDisplay(frame)
+    if not frame then return end
+    
+    local cooldowns = self:GetCooldownData(frame.displayType)
+    local db = self.db.profile
+    
+    -- Hide all icons first
+    for _, icon in ipairs(frame.activeIcons) do
+        icon:Hide()
+    end
+    wipe(frame.activeIcons)
+    
+    -- Calculate layout
+    local iconSize = 40
+    local spacing = 2
+    local iconsPerRow = 10
+    local numIcons = #cooldowns
+    
+    for i, cooldownData in ipairs(cooldowns) do
+        -- Get or create icon
+        local icon = frame.icons[i]
+        if not icon then
+            icon = self:CreateIcon(frame)
+            frame.icons[i] = icon
+        end
+        
+        -- Position icon
+        local row = math.floor((i - 1) / iconsPerRow)
+        local col = (i - 1) % iconsPerRow
+        icon:ClearAllPoints()
+        icon:SetPoint("TOPLEFT", frame, "TOPLEFT", 2 + col * (iconSize + spacing), -2 - row * (iconSize + spacing))
+        
+        -- Set icon texture
+        if cooldownData.icon then
+            icon.texture:SetTexture(cooldownData.icon)
+        end
+        
+        -- Set cooldown text
+        if cooldownData.remainingTime and cooldownData.remainingTime > 0 then
+            if cooldownData.remainingTime > 60 then
+                icon.cooldownText:SetFormattedText("%.1fm", cooldownData.remainingTime / 60)
+            else
+                icon.cooldownText:SetFormattedText("%.0f", cooldownData.remainingTime)
+            end
+        else
+            icon.cooldownText:SetText("")
+        end
+        
+        -- Set stack count
+        if cooldownData.charges and cooldownData.charges > 1 then
+            icon.stackText:SetText(cooldownData.charges)
+            icon.stackText:Show()
+        else
+            icon.stackText:Hide()
+        end
+        
+        icon:Show()
+        table.insert(frame.activeIcons, icon)
+    end
+    
+    -- Resize frame to fit icons
+    local rows = math.ceil(numIcons / iconsPerRow)
+    local cols = math.min(numIcons, iconsPerRow)
+    frame:SetSize(
+        4 + cols * iconSize + (cols - 1) * spacing,
+        4 + rows * iconSize + (rows - 1) * spacing
+    )
+end
+
+function Cooldowns:UpdateBarDisplay(frame)
+    if not frame or not frame.bars then return end
+    
+    local cooldowns = self:GetCooldownData(frame.displayType)
+    local db = self.db.profile.customBuffBars
+    
+    -- Update bars
+    for i, bar in ipairs(frame.bars) do
+        local data = cooldowns[i]
+        
+        if data and data.name then
+            bar:Show()
+            
+            -- Set bar color
+            local r, g, b = 0.3, 0.7, 1.0
+            bar:SetStatusBarColor(r, g, b, 1)
+            
+            -- Set duration
+            if data.remainingTime and data.remainingTime > 0 and data.duration and data.duration > 0 then
+                bar:SetMinMaxValues(0, data.duration)
+                bar:SetValue(data.remainingTime)
+            else
+                bar:SetMinMaxValues(0, 1)
+                bar:SetValue(1)
+            end
+            
+            -- Icon
+            if bar.icon and data.icon then
+                bar.icon:SetTexture(data.icon)
+                bar.icon:Show()
+            end
+            
+            -- Name
+            bar.name:SetText(data.name or "")
+            
+            -- Timer
+            if bar.timer then
+                if data.remainingTime and data.remainingTime > 0 then
+                    if data.remainingTime > 60 then
+                        bar.timer:SetFormattedText("%.1fm", data.remainingTime / 60)
+                    else
+                        bar.timer:SetFormattedText("%.0f", data.remainingTime)
+                    end
+                else
+                    bar.timer:SetText("")
+                end
+            end
+            
+            -- Stacks
+            if bar.stack then
+                if data.charges and data.charges > 1 then
+                    bar.stack:SetText(data.charges)
+                    bar.stack:Show()
+                else
+                    bar.stack:Hide()
+                end
+            end
+        else
+            bar:Hide()
+        end
+    end
+end
     -- Recursively strip Blizzard border/background textures while preserving buff bar fills
     local function StripAllBorders(f)
         if not f then return end
@@ -257,67 +683,44 @@ end
 function Cooldowns:FindAndSkinCooldownManager()
     if not self.db.profile.skinCooldownManager then return end
     
-    local foundFrames = {}
+    -- Hide all Blizzard cooldown displays
+    local displaysToHide = {"buffs", "essential", "utility", "cooldowns"}
     
-    -- Find and skin the viewer frames
-    local viewerFrames = {
-        ["EssentialCooldownViewer"] = "Essential Cooldowns",
-        ["UtilityCooldownViewer"] = "Utility Cooldowns",
-        ["BuffIconCooldownViewer"] = "Buff Icon Cooldowns",
-        ["BuffBarCooldownViewer"] = "Buff Bar Cooldowns",
-    }
-    
-    for frameName, displayName in pairs(viewerFrames) do
-        local frame = _G[frameName]
-        if frame then
-            self:ApplyCooldownManagerSkin(frame)
-            foundFrames[frameName] = true
-        end
-    end
-    
-    -- Hook UpdateLayout on each viewer if it exists
-    for frameName in pairs(viewerFrames) do
-        local frame = _G[frameName]
-        if frame and not self.hookedLayouts[frameName] then
-            if frame.UpdateLayout then
-                hooksecurefunc(frame, "UpdateLayout", function()
-                    Cooldowns:StyleCooldownIcons(frame)
-                    -- Re-strip Blizzard textures for BuffBar after layout updates
-                    if frameName == "BuffBarCooldownViewer" then
-                        Cooldowns:StripBlizzardBorders(frame)
-                    end
-                    -- Update resource bar widths when Essential layout changes
-                    if frameName == "EssentialCooldownViewer" then
-                        Cooldowns:UpdateResourceBarWidths()
-                    end
-                    -- Reapply positioning directly instead of creating timer
-                    if not Cooldowns.updateAttachmentPending then
-                        Cooldowns.updateAttachmentPending = true
-                        C_Timer.After(0.1, function()
-                            Cooldowns:UpdateAttachment()
-                            Cooldowns.updateAttachmentPending = false
-                        end)
-                    end
-                end)
-                self.hookedLayouts[frameName] = true
-            end
+    for _, name in ipairs(displaysToHide) do
+        local display = C_CooldownManager and C_CooldownManager.GetDisplay and C_CooldownManager.GetDisplay(name)
+        if display then
+            -- Hard hide
+            display:Hide()
+            display:SetAlpha(0)
+            display:EnableMouse(false)
             
-            -- Also hook Update if it exists (throttled to 0.5s)
-            if frame.Update then
-                hooksecurefunc(frame, "Update", function()
-                    local now = GetTime()
-                    if now - Cooldowns.lastStyleUpdate > 0.5 then
-                        Cooldowns:StyleCooldownIcons(frame)
-                        Cooldowns.lastStyleUpdate = now
-                    end
-                end)
-            end
+            -- Prevent Blizzard from re-showing it
+            display:SetScript("OnShow", function(self)
+                self:Hide()
+                self:SetAlpha(0)
+            end)
         end
     end
     
-    if next(foundFrames) then
-        self:UpdateAttachment()
+    -- Create our custom displays
+    self:CreateCustomDisplays()
+    
+    -- Register for updates
+    if not self.updateFrame then
+        self.updateFrame = CreateFrame("Frame")
+        self.updateFrame:RegisterEvent("COOLDOWN_MANAGER_UPDATE")
+        self.updateFrame:RegisterEvent("COOLDOWN_MANAGER_DISPLAY_UPDATE")
+        self.updateFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+        self.updateFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+        self.updateFrame:RegisterEvent("UNIT_AURA")
+        
+        self.updateFrame:SetScript("OnEvent", function(self, event, ...)
+            Cooldowns:UpdateAllDisplays()
+        end)
     end
+    
+    -- Initial update
+    self:UpdateAllDisplays()
 end
 
 function Cooldowns:ApplyCooldownManagerSkin(frame)
@@ -802,6 +1205,243 @@ function Cooldowns:UpdateAttachment()
 end
 
 -- -----------------------------------------------------------------------------
+-- CUSTOM BUFF BAR TRACKER
+-- -----------------------------------------------------------------------------
+function Cooldowns:CreateCustomBuffBarFrame()
+    if self.buffBarFrame then
+        self:UpdateCustomBuffBars()
+        return
+    end
+    
+    local db = self.db.profile
+    local buffDB = db.customBuffBars
+    
+    -- Create main container frame
+    self.buffBarFrame = CreateFrame("Frame", "MidnightBuffBarViewer", UIParent)
+    self.buffBarFrame:SetSize(buffDB.barWidth, buffDB.barHeight * buffDB.maxBars + buffDB.spacing * (buffDB.maxBars - 1))
+    self.buffBarFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    self.buffBarFrame:SetFrameStrata("MEDIUM")
+    self.buffBarFrame:SetScale(db.scale)
+    
+    -- Background
+    local bg = self.buffBarFrame:CreateTexture(nil, "BACKGROUND")
+    bg:SetTexture("Interface\\Buttons\\WHITE8X8")
+    bg:SetAllPoints()
+    bg:SetColorTexture(unpack(db.backgroundColor))
+    self.buffBarFrame.bg = bg
+    
+    if db.showBackground then
+        bg:Show()
+    else
+        bg:Hide()
+    end
+    
+    -- Borders
+    local borderSize = 2
+    local r, g, b, a = unpack(db.borderColor)
+    
+    local borderTop = self.buffBarFrame:CreateTexture(nil, "OVERLAY")
+    borderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
+    borderTop:SetColorTexture(r, g, b, a)
+    borderTop:SetPoint("TOPLEFT", 0, 0)
+    borderTop:SetPoint("TOPRIGHT", 0, 0)
+    borderTop:SetHeight(borderSize)
+    self.buffBarFrame.borderTop = borderTop
+    
+    local borderBottom = self.buffBarFrame:CreateTexture(nil, "OVERLAY")
+    borderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
+    borderBottom:SetColorTexture(r, g, b, a)
+    borderBottom:SetPoint("BOTTOMLEFT", 0, 0)
+    borderBottom:SetPoint("BOTTOMRIGHT", 0, 0)
+    borderBottom:SetHeight(borderSize)
+    self.buffBarFrame.borderBottom = borderBottom
+    
+    local borderLeft = self.buffBarFrame:CreateTexture(nil, "OVERLAY")
+    borderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
+    borderLeft:SetColorTexture(r, g, b, a)
+    borderLeft:SetPoint("TOPLEFT", 0, 0)
+    borderLeft:SetPoint("BOTTOMLEFT", 0, 0)
+    borderLeft:SetWidth(borderSize)
+    self.buffBarFrame.borderLeft = borderLeft
+    
+    local borderRight = self.buffBarFrame:CreateTexture(nil, "OVERLAY")
+    borderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
+    borderRight:SetColorTexture(r, g, b, a)
+    borderRight:SetPoint("TOPRIGHT", 0, 0)
+    borderRight:SetPoint("BOTTOMRIGHT", 0, 0)
+    borderRight:SetWidth(borderSize)
+    self.buffBarFrame.borderRight = borderRight
+    
+    if db.showFrameBorder then
+        borderTop:Show()
+        borderBottom:Show()
+        borderLeft:Show()
+        borderRight:Show()
+    else
+        borderTop:Hide()
+        borderBottom:Hide()
+        borderLeft:Hide()
+        borderRight:Hide()
+    end
+    
+    -- Create individual buff bars
+    self.customBuffBars = {}
+    for i = 1, buffDB.maxBars do
+        local bar = self:CreateBuffBar(i)
+        self.customBuffBars[i] = bar
+    end
+    
+    -- Register events
+    self:RegisterEvent("UNIT_AURA", "UpdateCustomBuffBars")
+    
+    -- Initial update
+    self:UpdateCustomBuffBars()
+end
+
+function Cooldowns:CreateBuffBar(index)
+    local db = self.db.profile.customBuffBars
+    
+    local bar = CreateFrame("StatusBar", nil, self.buffBarFrame)
+    bar:SetSize(db.barWidth - 4, db.barHeight)
+    bar:SetPoint("TOPLEFT", self.buffBarFrame, "TOPLEFT", 2, -2 - (index - 1) * (db.barHeight + db.spacing))
+    bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    bar:GetStatusBarTexture():SetHorizTile(false)
+    bar:SetMinMaxValues(0, 1)
+    bar:SetValue(1)
+    bar:Hide()
+    
+    -- Background
+    local bg = bar:CreateTexture(nil, "BACKGROUND")
+    bg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    bg:SetAllPoints()
+    bg:SetVertexColor(0.2, 0.2, 0.2, 0.5)
+    bar.bg = bg
+    
+    -- Icon
+    if db.showIcons then
+        bar.icon = bar:CreateTexture(nil, "ARTWORK")
+        bar.icon:SetSize(db.iconSize, db.iconSize)
+        bar.icon:SetPoint("LEFT", bar, "LEFT", 2, 0)
+        bar.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+    end
+    
+    -- Name text
+    bar.name = bar:CreateFontString(nil, "OVERLAY")
+    local font, _, fontFlag = FontKit:GetFont(db.font, db.fontSize, db.fontFlag)
+    bar.name:SetFont(font, db.fontSize, fontFlag)
+    if db.showIcons then
+        bar.name:SetPoint("LEFT", bar.icon, "RIGHT", 4, 0)
+    else
+        bar.name:SetPoint("LEFT", bar, "LEFT", 4, 0)
+    end
+    bar.name:SetJustifyH("LEFT")
+    bar.name:SetTextColor(1, 1, 1)
+    
+    -- Timer text
+    if db.showTimers then
+        bar.timer = bar:CreateFontString(nil, "OVERLAY")
+        bar.timer:SetFont(font, db.fontSize, fontFlag)
+        bar.timer:SetPoint("RIGHT", bar, "RIGHT", -4, 0)
+        bar.timer:SetJustifyH("RIGHT")
+        bar.timer:SetTextColor(1, 1, 1)
+    end
+    
+    -- Stack count
+    if db.showStacks then
+        bar.stack = bar:CreateFontString(nil, "OVERLAY")
+        bar.stack:SetFont(font, db.fontSize + 2, fontFlag)
+        bar.stack:SetPoint("LEFT", bar.icon, "BOTTOMLEFT", 0, 0)
+        bar.stack:SetJustifyH("LEFT")
+        bar.stack:SetTextColor(1, 1, 1)
+    end
+    
+    return bar
+end
+
+function Cooldowns:UpdateCustomBuffBars()
+    if not self.buffBarFrame or not self.db.profile.customBuffBars.enabled then return end
+    
+    local trackedAuras = {}
+    
+    -- Get tracked buffs from Blizzard's system
+    if C_Auras and C_Auras.GetTrackedAuras then
+        local auras = C_Auras.GetTrackedAuras("player")
+        if auras then
+            for _, auraInfo in ipairs(auras) do
+                if auraInfo then
+                    table.insert(trackedAuras, auraInfo)
+                end
+            end
+        end
+    end
+    
+    -- Update bars
+    for i, bar in ipairs(self.customBuffBars) do
+        local aura = trackedAuras[i]
+        
+        if aura and aura.name then
+            bar:Show()
+            
+            -- Set bar color
+            local r, g, b = 0.3, 0.7, 1.0
+            if aura.dispelName then
+                -- Color by dispel type if available
+                r, g, b = 0.8, 0.5, 0.2
+            end
+            bar:SetStatusBarColor(r, g, b, 1)
+            
+            -- Set duration
+            if aura.expirationTime and aura.expirationTime > 0 then
+                local duration = aura.expirationTime - GetTime()
+                local maxDuration = aura.duration or 1
+                if maxDuration > 0 then
+                    bar:SetMinMaxValues(0, maxDuration)
+                    bar:SetValue(duration)
+                end
+            else
+                bar:SetMinMaxValues(0, 1)
+                bar:SetValue(1)
+            end
+            
+            -- Icon
+            if bar.icon and aura.icon then
+                bar.icon:SetTexture(aura.icon)
+                bar.icon:Show()
+            end
+            
+            -- Name
+            bar.name:SetText(aura.name)
+            
+            -- Timer
+            if bar.timer then
+                if aura.expirationTime and aura.expirationTime > 0 then
+                    local duration = aura.expirationTime - GetTime()
+                    if duration > 60 then
+                        bar.timer:SetFormattedText("%.1fm", duration / 60)
+                    else
+                        bar.timer:SetFormattedText("%.0f", duration)
+                    end
+                else
+                    bar.timer:SetText("")
+                end
+            end
+            
+            -- Stacks
+            if bar.stack then
+                if aura.applications and aura.applications > 1 then
+                    bar.stack:SetText(aura.applications)
+                    bar.stack:Show()
+                else
+                    bar.stack:Hide()
+                end
+            end
+        else
+            bar:Hide()
+        end
+    end
+end
+
+-- -----------------------------------------------------------------------------
 -- OPTIONS
 -- -----------------------------------------------------------------------------
 function Cooldowns:GetOptions()
@@ -998,6 +1638,129 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.fontFlag end,
                 set = function(_, v)
                     self.db.profile.fontFlag = v
+                end
+            },
+            
+            -- Custom Buff Bars
+            headerCustomBuffBars = { type = "header", name = "Custom Tracked Bars", order = 48 },
+            
+            customBuffBarsEnabled = {
+                name = "Use Custom Tracked Bars",
+                desc = "Replace Blizzard's Tracked Bars with MidnightUI's custom buff tracker. Gives full control over styling and fixes border issues.",
+                type = "toggle",
+                order = 48.1,
+                width = "full",
+                disabled = function() return not self.db.profile.skinCooldownManager end,
+                get = function() return self.db.profile.customBuffBars.enabled end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.enabled = v
+                    ReloadUI()
+                end
+            },
+            
+            customBuffBarsDesc = {
+                type = "description",
+                name = "Custom buff bars track the same buffs as Blizzard's system but with clean MidnightUI styling.|n|nRequires /reload to take effect.",
+                order = 48.2,
+                hidden = function() return not self.db.profile.customBuffBars.enabled end,
+            },
+            
+            customBuffBarsMaxBars = {
+                name = "Max Bars",
+                desc = "Maximum number of buff bars to display.",
+                type = "range",
+                order = 48.3,
+                min = 1, max = 15, step = 1,
+                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
+                hidden = function() return not self.db.profile.customBuffBars.enabled end,
+                get = function() return self.db.profile.customBuffBars.maxBars end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.maxBars = v
+                    if self.buffBarFrame then
+                        ReloadUI()
+                    end
+                end
+            },
+            
+            customBuffBarsHeight = {
+                name = "Bar Height",
+                desc = "Height of each buff bar.",
+                type = "range",
+                order = 48.4,
+                min = 12, max = 40, step = 1,
+                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
+                hidden = function() return not self.db.profile.customBuffBars.enabled end,
+                get = function() return self.db.profile.customBuffBars.barHeight end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.barHeight = v
+                    if self.buffBarFrame then
+                        ReloadUI()
+                    end
+                end
+            },
+            
+            customBuffBarsWidth = {
+                name = "Bar Width",
+                desc = "Width of each buff bar.",
+                type = "range",
+                order = 48.5,
+                min = 100, max = 500, step = 10,
+                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
+                hidden = function() return not self.db.profile.customBuffBars.enabled end,
+                get = function() return self.db.profile.customBuffBars.barWidth end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.barWidth = v
+                    if self.buffBarFrame then
+                        ReloadUI()
+                    end
+                end
+            },
+            
+            customBuffBarsShowIcons = {
+                name = "Show Icons",
+                desc = "Display buff icons on the left side of each bar.",
+                type = "toggle",
+                order = 48.6,
+                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
+                hidden = function() return not self.db.profile.customBuffBars.enabled end,
+                get = function() return self.db.profile.customBuffBars.showIcons end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.showIcons = v
+                    if self.buffBarFrame then
+                        ReloadUI()
+                    end
+                end
+            },
+            
+            customBuffBarsShowTimers = {
+                name = "Show Timers",
+                desc = "Display remaining duration on the right side of each bar.",
+                type = "toggle",
+                order = 48.7,
+                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
+                hidden = function() return not self.db.profile.customBuffBars.enabled end,
+                get = function() return self.db.profile.customBuffBars.showTimers end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.showTimers = v
+                    if self.buffBarFrame then
+                        ReloadUI()
+                    end
+                end
+            },
+            
+            customBuffBarsShowStacks = {
+                name = "Show Stack Count",
+                desc = "Display the stack count for stackable buffs.",
+                type = "toggle",
+                order = 48.8,
+                disabled = function() return not self.db.profile.skinCooldownManager or not self.db.profile.customBuffBars.enabled end,
+                hidden = function() return not self.db.profile.customBuffBars.enabled end,
+                get = function() return self.db.profile.customBuffBars.showStacks end,
+                set = function(_, v)
+                    self.db.profile.customBuffBars.showStacks = v
+                    if self.buffBarFrame then
+                        ReloadUI()
+                    end
                 end
             },
             
