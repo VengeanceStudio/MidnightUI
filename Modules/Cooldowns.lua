@@ -429,9 +429,18 @@ function Cooldowns:GetTrackedBarsData()
                 if ok then name = result or "" end
             end
             
-            print(string.format("  Name: %s", name))
+            -- Check if name is valid (not empty) - protect against secret strings
+            local hasValidName = false
+            if name then
+                local ok, result = pcall(function() return name ~= "" end)
+                if ok and result then
+                    hasValidName = true
+                end
+            end
             
-            if name and name ~= "" then
+            print(string.format("  Name: %s, hasValidName: %s", tostring(name), tostring(hasValidName)))
+            
+            if hasValidName then
                 -- Get spellID and icon from name
                 local spellID = nil
                 local iconTexture = nil
