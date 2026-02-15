@@ -1684,6 +1684,76 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
                 print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
             end,
         },
+        [displayName .. "AttachHeader"] = {
+            type = "header",
+            name = "Positioning",
+            order = order + 7,
+        },
+        [displayName .. "AttachTo"] = {
+            name = "Attach To",
+            desc = "Which frame to attach this display to.",
+            type = "select",
+            order = order + 8,
+            values = {
+                ["none"] = "None (Independent)",
+                ["essential"] = "Essential Cooldowns",
+                ["utility"] = "Utility Cooldowns",
+                ["buffs"] = "Tracked Buffs",
+                ["bars"] = "Tracked Bars",
+                ["primaryBar"] = "Primary Resource Bar",
+                ["secondaryBar"] = "Secondary Resource Bar",
+            },
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().attachTo end,
+            set = function(_, v)
+                db().attachTo = v
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+            end,
+        },
+        [displayName .. "AttachPosition"] = {
+            name = "Attach Position",
+            desc = "Where to attach relative to the anchor frame.",
+            type = "select",
+            order = order + 9,
+            values = {
+                ["BOTTOM"] = "Below",
+                ["TOP"] = "Above",
+                ["LEFT"] = "Left",
+                ["RIGHT"] = "Right",
+            },
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().attachPosition end,
+            set = function(_, v)
+                db().attachPosition = v
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+            end,
+        },
+        [displayName .. "OffsetX"] = {
+            name = "Horizontal Offset",
+            desc = "Horizontal offset from the anchor point.",
+            type = "range",
+            order = order + 10,
+            min = -200, max = 200, step = 1,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().offsetX end,
+            set = function(_, v)
+                db().offsetX = v
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+            end,
+        },
+        [displayName .. "OffsetY"] = {
+            name = "Vertical Offset",
+            desc = "Vertical offset from the anchor point.",
+            type = "range",
+            order = order + 11,
+            min = -200, max = 200, step = 1,
+            disabled = function() return not self.db.profile.skinCooldownManager or not db().enabled end,
+            get = function() return db().offsetY end,
+            set = function(_, v)
+                db().offsetY = v
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
+            end,
+        },
     }
 end
 
@@ -2090,8 +2160,8 @@ function Cooldowns:GetOptions()
                 end
             },
             
-            -- Frame Grouping
-            headerGrouping = { type = "header", name = "Frame Grouping", order = 60 },
+            -- Frame Grouping (HIDDEN - now integrated into individual display settings)
+            headerGrouping = { type = "header", name = "Frame Grouping", order = 60, hidden = true },
             
             groupFrames = {
                 name = "Enable Frame Grouping",
@@ -2099,6 +2169,7 @@ function Cooldowns:GetOptions()
                 type = "toggle",
                 order = 61,
                 width = "full",
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.groupFrames end,
                 set = function(_, v)
@@ -2111,11 +2182,11 @@ function Cooldowns:GetOptions()
                 type = "description",
                 name = "Configure how each cooldown frame attaches to others. Essential Cooldowns is the main anchor frame.",
                 order = 62,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
             },
             
-            -- Essential Cooldowns
-            headerEssential = { type = "header", name = "Essential Cooldowns", order = 75, hidden = function() return not self.db.profile.groupFrames end },
+            -- Essential Cooldowns (HIDDEN - now in display settings)
+            headerEssential = { type = "header", name = "Essential Cooldowns", order = 75, hidden = true },
             
             essentialAttachTo = {
                 name = "Attach To",
@@ -2129,7 +2200,7 @@ function Cooldowns:GetOptions()
                     ["utility"] = "Utility Cooldowns",
                     ["bars"] = "Tracked Bars",
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.essential.attachTo end,
                 set = function(_, v)
@@ -2149,7 +2220,7 @@ function Cooldowns:GetOptions()
                     ["LEFT"] = "Left",
                     ["RIGHT"] = "Right"
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.essential.attachPosition end,
                 set = function(_, v)
@@ -2163,7 +2234,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 78,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.essential.offsetX end,
                 set = function(_, v)
@@ -2177,7 +2248,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 79,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.essential.offsetY end,
                 set = function(_, v)
@@ -2187,7 +2258,7 @@ function Cooldowns:GetOptions()
             },
             
             -- Utility Cooldowns
-            headerUtility = { type = "header", name = "Utility Cooldowns", order = 80, hidden = function() return not self.db.profile.groupFrames end },
+            headerUtility = { type = "header", name = "Utility Cooldowns", order = 80, hidden = true },
             
             utilityAttachTo = {
                 name = "Attach To",
@@ -2201,7 +2272,7 @@ function Cooldowns:GetOptions()
                     ["essential"] = "Essential Cooldowns",
                     ["bars"] = "Tracked Bars",
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.utility.attachTo end,
                 set = function(_, v)
@@ -2221,7 +2292,7 @@ function Cooldowns:GetOptions()
                     ["LEFT"] = "Left",
                     ["RIGHT"] = "Right"
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.utility.attachPosition end,
                 set = function(_, v)
@@ -2235,7 +2306,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 83,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.utility.offsetX end,
                 set = function(_, v)
@@ -2249,7 +2320,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 84,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.utility.offsetY end,
                 set = function(_, v)
@@ -2259,7 +2330,7 @@ function Cooldowns:GetOptions()
             },
             
             -- Tracked Buffs
-            headerBuffs = { type = "header", name = "Tracked Buffs", order = 90, hidden = function() return not self.db.profile.groupFrames end },
+            headerBuffs = { type = "header", name = "Tracked Buffs", order = 90, hidden = true },
             
             buffsAttachTo = {
                 name = "Attach To",
@@ -2273,7 +2344,7 @@ function Cooldowns:GetOptions()
                     ["utility"] = "Utility Cooldowns",
                     ["bars"] = "Tracked Bars",
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.buffs.attachTo end,
                 set = function(_, v)
@@ -2293,7 +2364,7 @@ function Cooldowns:GetOptions()
                     ["LEFT"] = "Left",
                     ["RIGHT"] = "Right"
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.buffs.attachPosition end,
                 set = function(_, v)
@@ -2307,7 +2378,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 93,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.buffs.offsetX end,
                 set = function(_, v)
@@ -2321,7 +2392,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 94,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.buffs.offsetY end,
                 set = function(_, v)
@@ -2331,7 +2402,7 @@ function Cooldowns:GetOptions()
             },
             
             -- Tracked Bars
-            headerBars = { type = "header", name = "Tracked Bars", order = 100, hidden = function() return not self.db.profile.groupFrames end },
+            headerBars = { type = "header", name = "Tracked Bars", order = 100, hidden = true },
             
             barsAttachTo = {
                 name = "Attach To",
@@ -2345,7 +2416,7 @@ function Cooldowns:GetOptions()
                     ["essential"] = "Essential Cooldowns",
                     ["utility"] = "Utility Cooldowns",
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.bars.attachTo end,
                 set = function(_, v)
@@ -2365,7 +2436,7 @@ function Cooldowns:GetOptions()
                     ["LEFT"] = "Left",
                     ["RIGHT"] = "Right"
                 },
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.bars.attachPosition end,
                 set = function(_, v)
@@ -2379,7 +2450,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 93,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.bars.offsetX end,
                 set = function(_, v)
@@ -2393,7 +2464,7 @@ function Cooldowns:GetOptions()
                 type = "range",
                 order = 94,
                 min = -200, max = 200, step = 1,
-                hidden = function() return not self.db.profile.groupFrames end,
+                hidden = true,
                 disabled = function() return not self.db.profile.skinCooldownManager end,
                 get = function() return self.db.profile.frames.bars.offsetY end,
                 set = function(_, v)
