@@ -273,37 +273,14 @@ function Cooldowns:GetCooldownData(displayName)
     local children = {blizzFrame:GetChildren()}
     
     for _, child in ipairs(children) do
-        -- For tracked buffs, check if the aura is actually active using C_UnitAuras
+        -- For tracked buffs/bars, we can't check aura data directly due to secret values
+        -- Instead, trust Blizzard's frame visibility - they already filter inactive auras
+        -- Check if child is shown (visible frames = active auras)
         local shouldInclude = true
         
         if displayName == "buffs" or displayName == "cooldowns" then
-            -- This is a tracked buff/bar - verify it's active by checking if aura exists
-            shouldInclude = false
-            
-            if child.auraInstanceID and child.auraDataUnit then
-                -- Try using instance ID to get current aura data
-                local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(child.auraDataUnit, child.auraInstanceID)
-                if auraData then
-                    -- Aura exists - check if it's not expired
-                    if auraData.expirationTime == 0 then
-                        -- Permanent buff
-                        shouldInclude = true
-                    elseif auraData.expirationTime > GetTime() then
-                        -- Temporary buff that hasn't expired
-                        shouldInclude = true
-                    end
-                end
-            elseif child.auraSpellID and child.auraDataUnit then
-                -- Fallback to spell ID check
-                local auraData = C_UnitAuras.GetPlayerAuraBySpellID(child.auraSpellID)
-                if auraData then
-                    if auraData.expirationTime == 0 then
-                        shouldInclude = true
-                    elseif auraData.expirationTime > GetTime() then
-                        shouldInclude = true
-                    end
-                end
-            end
+            -- Only include if the child frame is shown (Blizzard hides inactive ones)
+            shouldInclude = child:IsShown()
         end
         
         -- Check if child has an Icon and should be included
