@@ -332,7 +332,10 @@ function Cooldowns:GetCooldownData(displayName)
                         end
                     end
                 end
-            elseif child.Icon then
+            end
+            
+            -- For other displays with Icon
+            if not iconTexture and child.Icon then
                 -- For tracked buffs/cooldowns, get icon from Icon
                 if child.Icon.GetTexture then
                     iconTexture = child.Icon:GetTexture()
