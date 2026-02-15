@@ -201,21 +201,33 @@ function Cooldowns:CreateCustomDisplays()
     -- Create Essential Cooldowns (icons)
     if not self.customFrames.essential then
         self.customFrames.essential = self:CreateIconDisplay("MidnightEssentialCooldowns", "essential")
+        self.customFrames.essential:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        self.customFrames.essential:Show()
+        print("MidnightUI: Created Essential Cooldowns display")
     end
     
     -- Create Utility Cooldowns (icons)
     if not self.customFrames.utility then
         self.customFrames.utility = self:CreateIconDisplay("MidnightUtilityCooldowns", "utility")
+        self.customFrames.utility:SetPoint("CENTER", UIParent, "CENTER", 0, 100)
+        self.customFrames.utility:Show()
+        print("MidnightUI: Created Utility Cooldowns display")
     end
     
     -- Create Tracked Buffs (icons)
     if not self.customFrames.buffs then
         self.customFrames.buffs = self:CreateIconDisplay("MidnightTrackedBuffs", "buffs")
+        self.customFrames.buffs:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        self.customFrames.buffs:Show()
+        print("MidnightUI: Created Tracked Buffs display")
     end
     
     -- Create Tracked Bars (buff bars)
     if not self.customFrames.cooldowns then
         self.customFrames.cooldowns = self:CreateBarDisplay("MidnightTrackedBars", "cooldowns")
+        self.customFrames.cooldowns:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
+        self.customFrames.cooldowns:Show()
+        print("MidnightUI: Created Tracked Bars display")
     end
 end
 
@@ -224,7 +236,6 @@ function Cooldowns:CreateIconDisplay(name, displayType)
     
     local frame = CreateFrame("Frame", name, UIParent)
     frame:SetSize(300, 40) -- Will auto-resize based on icons
-    frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     frame:SetFrameStrata("MEDIUM")
     frame:SetScale(db.scale)
     frame.displayType = displayType
@@ -285,7 +296,6 @@ function Cooldowns:CreateBarDisplay(name, displayType)
     
     local frame = CreateFrame("Frame", name, UIParent)
     frame:SetSize(buffDB.barWidth, buffDB.barHeight * buffDB.maxBars + 2 * (buffDB.maxBars - 1))
-    frame:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
     frame:SetFrameStrata("MEDIUM")
     frame:SetScale(db.scale)
     frame.displayType = displayType
