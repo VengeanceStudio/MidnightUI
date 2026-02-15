@@ -914,7 +914,7 @@ end
 function Cooldowns:CreateBar(parent, index)
     local db = self.db.profile.customBuffBars
     
-    local bar = CreateFrame("StatusBar", nil, parent, "BackdropTemplate")
+    local bar = CreateFrame("StatusBar", nil, parent)
     bar:SetSize(db.barWidth - 4, db.barHeight)
     -- Center bars horizontally within parent frame
     local yOffset = -2 - (index - 1) * (db.barHeight + 2)
@@ -926,15 +926,37 @@ function Cooldowns:CreateBar(parent, index)
     bar:SetValue(1)
     bar:Hide()
     
-    -- Add border (2px outside the bar for better visibility)
-    bar:SetBackdrop({
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false,
-        edgeSize = 2,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 }
-    })
+    -- Create border using textures (2px)
+    local borderSize = 2
     local br, bg, bb, ba = unpack(db.barBorderColor)
-    bar:SetBackdropBorderColor(br, bg, bb, ba)  -- Configurable border color
+    
+    bar.borderTop = bar:CreateTexture(nil, "BORDER")
+    bar.borderTop:SetTexture("Interface\\Buttons\\WHITE8X8")
+    bar.borderTop:SetColorTexture(br, bg, bb, ba)
+    bar.borderTop:SetPoint("TOPLEFT", bar, "TOPLEFT", 0, 0)
+    bar.borderTop:SetPoint("TOPRIGHT", bar, "TOPRIGHT", 0, 0)
+    bar.borderTop:SetHeight(borderSize)
+    
+    bar.borderBottom = bar:CreateTexture(nil, "BORDER")
+    bar.borderBottom:SetTexture("Interface\\Buttons\\WHITE8X8")
+    bar.borderBottom:SetColorTexture(br, bg, bb, ba)
+    bar.borderBottom:SetPoint("BOTTOMLEFT", bar, "BOTTOMLEFT", 0, 0)
+    bar.borderBottom:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 0, 0)
+    bar.borderBottom:SetHeight(borderSize)
+    
+    bar.borderLeft = bar:CreateTexture(nil, "BORDER")
+    bar.borderLeft:SetTexture("Interface\\Buttons\\WHITE8X8")
+    bar.borderLeft:SetColorTexture(br, bg, bb, ba)
+    bar.borderLeft:SetPoint("TOPLEFT", bar, "TOPLEFT", 0, 0)
+    bar.borderLeft:SetPoint("BOTTOMLEFT", bar, "BOTTOMLEFT", 0, 0)
+    bar.borderLeft:SetWidth(borderSize)
+    
+    bar.borderRight = bar:CreateTexture(nil, "BORDER")
+    bar.borderRight:SetTexture("Interface\\Buttons\\WHITE8X8")
+    bar.borderRight:SetColorTexture(br, bg, bb, ba)
+    bar.borderRight:SetPoint("TOPRIGHT", bar, "TOPRIGHT", 0, 0)
+    bar.borderRight:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 0, 0)
+    bar.borderRight:SetWidth(borderSize)
     
     -- Background behind the status bar (darker color for empty portion)
     bar.bg = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
