@@ -272,6 +272,14 @@ function Cooldowns:GetCooldownData(displayName)
     local cooldowns = {}
     local children = {blizzFrame:GetChildren()}
     
+    -- Debug output for tracked bars
+    if displayName == "cooldowns" then
+        print("MidnightUI Debug: Found", #children, "children in BuffBarCooldownViewer")
+        for i, child in ipairs(children) do
+            print("  Child", i, "- Has Bar:", child.Bar ~= nil, "Has Icon:", child.Icon ~= nil, "Width:", child:GetWidth())
+        end
+    end
+    
     for _, child in ipairs(children) do
         -- For tracked buffs, check if frame has valid data
         -- For tracked bars, check if they have bar element and size
