@@ -1588,7 +1588,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
         },
         [displayName .. "Enabled"] = {
             name = "Enable " .. displayTitle,
-            desc = "Show or hide " .. displayTitle .. ".",
+            desc = "Show or hide " .. displayTitle .. ". |cffFF6B6BRequires /reload|r",
             type = "toggle",
             order = order + 0.1,
             width = "full",
@@ -1596,7 +1596,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().enabled end,
             set = function(_, v)
                 db().enabled = v
-                ReloadUI()
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
             end,
         },
         [displayName .. "IconsPerRow"] = {
@@ -1616,7 +1616,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
         },
         [displayName .. "IconWidth"] = {
             name = "Icon Width",
-            desc = "Width of each cooldown icon.",
+            desc = "Width of each cooldown icon. |cffFF6B6BRequires /reload|r",
             type = "range",
             order = order + 2,
             min = 20, max = 80, step = 1,
@@ -1624,12 +1624,12 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().iconWidth end,
             set = function(_, v)
                 db().iconWidth = v
-                ReloadUI()
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
             end,
         },
         [displayName .. "IconHeight"] = {
             name = "Icon Height",
-            desc = "Height of each cooldown icon.",
+            desc = "Height of each cooldown icon. |cffFF6B6BRequires /reload|r",
             type = "range",
             order = order + 3,
             min = 20, max = 80, step = 1,
@@ -1637,7 +1637,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().iconHeight end,
             set = function(_, v)
                 db().iconHeight = v
-                ReloadUI()
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
             end,
         },
         [displayName .. "IconSpacing"] = {
@@ -1657,7 +1657,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
         },
         [displayName .. "BorderThickness"] = {
             name = "Border Thickness",
-            desc = "Thickness of the border around each icon.",
+            desc = "Thickness of the border around each icon. |cffFF6B6BRequires /reload|r",
             type = "range",
             order = order + 5,
             min = 1, max = 5, step = 1,
@@ -1665,12 +1665,12 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             get = function() return db().borderThickness end,
             set = function(_, v)
                 db().borderThickness = v
-                ReloadUI()
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
             end,
         },
         [displayName .. "BorderColor"] = {
             name = "Border Color",
-            desc = "Color of the border around each icon.",
+            desc = "Color of the border around each icon. |cffFF6B6BRequires /reload|r",
             type = "color",
             order = order + 6,
             hasAlpha = true,
@@ -1681,7 +1681,7 @@ function Cooldowns:GetDisplayOptions(displayName, displayTitle, order)
             end,
             set = function(_, r, g, b, a)
                 db().borderColor = {r, g, b, a}
-                ReloadUI()
+                print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
             end,
         },
     }
@@ -1708,7 +1708,7 @@ function Cooldowns:GetOptions()
             
             skinCooldownManager = {
                 name = "Enable Cooldown Manager Skinning",
-                desc = "Apply MidnightUI styling to the Cooldown Manager frame.",
+                desc = "Apply MidnightUI styling to the Cooldown Manager frame. |cffFF6B6BDisabling requires /reload|r",
                 type = "toggle",
                 order = 10,
                 width = "full",
@@ -1718,7 +1718,7 @@ function Cooldowns:GetOptions()
                     if v then
                         self:FindAndSkinCooldownManager()
                     else
-                        ReloadUI()
+                        print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                     end
                 end
             },
@@ -1889,7 +1889,7 @@ function Cooldowns:GetOptions()
             
             customBuffBarsEnabled = {
                 name = "Use Custom Tracked Bars",
-                desc = "Replace Blizzard's Tracked Bars with MidnightUI's custom buff tracker. Gives full control over styling and fixes border issues.",
+                desc = "Replace Blizzard's Tracked Bars with MidnightUI's custom buff tracker. |cffFF6B6BRequires /reload|r",
                 type = "toggle",
                 order = 48.1,
                 width = "full",
@@ -1897,7 +1897,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.enabled end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.enabled = v
-                    ReloadUI()
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
@@ -1919,9 +1919,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.maxBars end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.maxBars = v
-                    if self.buffBarFrame then
-                        ReloadUI()
-                    end
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
@@ -1936,9 +1934,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.barHeight end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.barHeight = v
-                    if self.buffBarFrame then
-                        ReloadUI()
-                    end
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
@@ -1953,9 +1949,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.barWidth end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.barWidth = v
-                    if self.buffBarFrame then
-                        ReloadUI()
-                    end
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
@@ -1969,9 +1963,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.showIcons end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showIcons = v
-                    if self.buffBarFrame then
-                        ReloadUI()
-                    end
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
@@ -1985,9 +1977,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.showTimers end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showTimers = v
-                    if self.buffBarFrame then
-                        ReloadUI()
-                    end
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
@@ -2001,9 +1991,7 @@ function Cooldowns:GetOptions()
                 get = function() return self.db.profile.customBuffBars.showStacks end,
                 set = function(_, v)
                     self.db.profile.customBuffBars.showStacks = v
-                    if self.buffBarFrame then
-                        ReloadUI()
-                    end
+                    print("|cffFFFF00MidnightUI:|r Settings saved. Type |cff00FF00/reload|r to apply changes.")
                 end
             },
             
