@@ -385,14 +385,19 @@ function Cooldowns:GetTrackedBarsData()
     
     local blizzFrame = _G["BuffBarCooldownViewer"]
     if not blizzFrame then
+        print("BuffBarCooldownViewer not found")
         return cooldowns
     end
     
     local children = {blizzFrame:GetChildren()}
+    print(string.format("BuffBarCooldownViewer has %d children", #children))
     
     for _, child in ipairs(children) do
         local hasSize = child:GetWidth() > 0 and child:GetHeight() > 0
         local hasBar = child.Bar ~= nil
+        
+        print(string.format("Child: hasBar=%s hasSize=%s (%dx%d)", 
+            tostring(hasBar), tostring(hasSize), child:GetWidth(), child:GetHeight()))
         
         -- Trust Blizzard: if frame has Bar and size, it's active
         if hasBar and hasSize then
@@ -404,6 +409,8 @@ function Cooldowns:GetTrackedBarsData()
                 local ok, result = pcall(function() return child.Bar.Name:GetText() end)
                 if ok then name = result or "" end
             end
+            
+            print(string.format("  Name: %s", name))
             
             if child.Icon then
                 if child.Icon.GetTexture then
@@ -447,10 +454,13 @@ function Cooldowns:GetTrackedBarsData()
                     end
                 end
                 
+                print(string.format("  ADDED: %s", name))
                 table.insert(cooldowns, data)
             end
         end
     end
+    
+    print(string.format("Returning %d bars", #cooldowns))
     
     return cooldowns
 end
