@@ -345,9 +345,47 @@ function Cooldowns:GetCooldownData(displayName)
                     data.name = child.Bar.Name:GetText() or ""
                 end
                 
+                -- For tracked bars, try to get spellID
+                local spellID = nil
+                if displayName == "cooldowns" then
+                    if child.spellID then
+                        spellID = child.spellID
+                        print("  Found child.spellID:", spellID)
+                    elseif child.Bar and child.Bar.spellID then
+                        spellID = child.Bar.spellID
+                        print("  Found child.Bar.spellID:", spellID)
+                    else
+                        print("  No spellID found - checking for other ID fields")
+                        -- Debug: Check what fields exist
+                        if child.auraInstanceID then print("  child.auraInstanceID:", child.auraInstanceID) end
+                        if child.Bar then
+                            for k, v in pairs(child.Bar) do
+                                if type(k) == "string" and (k:lower():find("spell") or k:lower():find("id")) then
+                                    print("  child.Bar." .. k .. ":", v)
+                                end
+                            end
+                        end
+                    end
+                end
+                
                 -- Try to get cooldown info
-                if child.Cooldown then
+                if spellID then
+                    -- For tracked bars, use C_UnitAuras to get duration data
+                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+                    if auraData then
+                        data.duration = auraData.duration
+                        if auraData.expirationTime and auraData.expirationTime > 0 then
+                            data.remainingTime = math.max(0, auraData.expirationTime - GetTime())
+                        end
+                        print("  Got auraData - duration:", data.duration, "remaining:", data.remainingTime)
+                    else
+                        print("  C_UnitAuras.GetPlayerAuraBySpellID returned nil for", spellID)
+                    end
+                elseif child.Cooldown then
                     local start, duration = child.Cooldown:GetCooldownTimes()
+                    if displayName == "cooldowns" then
+                        print("  Found child.Cooldown - start:", start, "duration:", duration)
+                    end
                     if start and duration then
                         -- Safely check duration using pcall to avoid taint
                         local ok, isValid = pcall(function() return duration > 0 end)
@@ -359,8 +397,32 @@ function Cooldowns:GetCooldownData(displayName)
                                 data.remainingTime = remaining
                                 -- Convert duration from milliseconds to seconds
                                 data.duration = duration / 1000
+                                if displayName == "cooldowns" then
+                                    print("  Set duration:", data.duration, "remaining:", data.remainingTime)
+                                end
                             end
                         end
+                    end
+                elseif displayName == "cooldowns" and child.Bar then
+                    -- Try to get cooldown from Bar element
+                    if child.Bar.Cooldown then
+                        local start, duration = child.Bar.Cooldown:GetCooldownTimes()
+                        print("  Found child.Bar.Cooldown - start:", start, "duration:", duration)
+                        if start and duration then
+                            local ok, isValid = pcall(function() return duration > 0 end)
+                            if ok and isValid then
+                                local ok2, remaining = pcall(function() 
+                                    return (start + duration - GetTime() * 1000) / 1000 
+                                end)
+                                if ok2 and remaining then
+                                    data.remainingTime = remaining
+                                    data.duration = duration / 1000
+                                    print("  Set duration from Bar:", data.duration, "remaining:", data.remainingTime)
+                                end
+                            end
+                        end
+                    else
+                        print("  child.Cooldown and child.Bar.Cooldown both nil")
                     end
                 end
                 
