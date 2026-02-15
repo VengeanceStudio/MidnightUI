@@ -308,14 +308,23 @@ function Cooldowns:GetCooldownData(displayName)
             
             -- For tracked bars, get icon from child.Icon (not Bar regions)
             if displayName == "cooldowns" and child.Icon then
+                if displayName == "cooldowns" then
+                    print("  Checking child.Icon.GetTexture:", child.Icon.GetTexture ~= nil)
+                end
                 if child.Icon.GetTexture then
                     iconTexture = child.Icon:GetTexture()
                     if displayName == "cooldowns" then
-                        print("  Got texture from child.Icon:GetTexture():", iconTexture)
+                        print("  Got texture from child.Icon:GetTexture():", iconTexture, "type:", type(iconTexture))
                     end
                 elseif child.Icon.Texture then
                     iconTexture = child.Icon.Texture:GetTexture()
+                    if displayName == "cooldowns" then
+                        print("  Got texture from child.Icon.Texture")
+                    end
                 else
+                    if displayName == "cooldowns" then
+                        print("  Searching regions in child.Icon")
+                    end
                     -- Look for texture children in Icon
                     local regions = {child.Icon:GetRegions()}
                     for _, region in ipairs(regions) do
@@ -324,6 +333,9 @@ function Cooldowns:GetCooldownData(displayName)
                             if iconTexture then break end
                         end
                     end
+                end
+                if displayName == "cooldowns" then
+                    print("  Final iconTexture:", iconTexture)
                 end
             end
             
