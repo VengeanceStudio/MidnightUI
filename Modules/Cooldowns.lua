@@ -631,6 +631,13 @@ function Cooldowns:CreateCustomDisplays()
         f.bars = {}
         f.activeBars = {}
         f.displayType = "cooldowns"
+        
+        -- Create the bar frames
+        local buffDB = db.customBuffBars
+        for i = 1, buffDB.maxBars do
+            f.bars[i] = self:CreateBar(f, i)
+        end
+        
         f:Show()
         self.customFrames.cooldowns = f
     end
