@@ -238,7 +238,9 @@ function Cooldowns:OnDBReady()
     self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE") -- Proc ends
     
     -- WoW 12.0 Tracked Bars System
-    self:RegisterEvent("COOLDOWN_SETTINGS_UPDATED") -- List changes, user adds/removes spells
+    self:RegisterEvent("COOLDOWN_MANAGER_DATA_READY") -- Initial load of spell track list
+    self:RegisterEvent("COOLDOWN_MANAGER_LAYOUT_CHANGED") -- Icons reordered or categories shift
+    self:RegisterEvent("COOLDOWN_MANAGER_SETTINGS_CHANGED") -- Global toggles changed
     self:RegisterUnitEvent("UNIT_AURA", "player") -- Player buffs start/end
     
     -- Check if we're already in world (PLAYER_ENTERING_WORLD may have fired before we registered)
@@ -437,8 +439,18 @@ function Cooldowns:GetTrackedBarsData()
     return cooldowns
 end
 
-function Cooldowns:COOLDOWN_SETTINGS_UPDATED()
-    -- List changes, user adds/removes spells from tracked bars
+function Cooldowns:COOLDOWN_MANAGER_DATA_READY()
+    -- Initial load of spell track list
+    self:UpdateAllDisplays()
+end
+
+function Cooldowns:COOLDOWN_MANAGER_LAYOUT_CHANGED()
+    -- Icons reordered or categories shift
+    self:UpdateAllDisplays()
+end
+
+function Cooldowns:COOLDOWN_MANAGER_SETTINGS_CHANGED()
+    -- Global toggles like "Combat Only" changed
     self:UpdateAllDisplays()
 end
 
