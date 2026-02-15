@@ -198,72 +198,68 @@ end
 function Cooldowns:CreateCustomDisplays()
     local db = self.db.profile
     
-    -- Create Essential Cooldowns (icons)
+    -- Create Essential Cooldowns - SIMPLE TEST FRAME
     if not self.customFrames.essential then
-        self.customFrames.essential = self:CreateIconDisplay("MidnightEssentialCooldowns", "essential")
-        self.customFrames.essential:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -200)
-        self.customFrames.essential:SetSize(400, 60)
-        self.customFrames.essential:SetFrameStrata("DIALOG")
-        self.customFrames.essential:SetFrameLevel(210)
+        local f = CreateFrame("Frame", "MidnightEssentialCooldowns", UIParent)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        f:SetSize(200, 50)
+        f:SetFrameStrata("TOOLTIP")
         
-        -- Debug: Add bright red background
-        local debugBg = self.customFrames.essential:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetAllPoints(self.customFrames.essential)
-        debugBg:SetColorTexture(1, 0, 0, 1)
+        local bg = f:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(1, 0, 0, 1)
         
-        self.customFrames.essential:Show()
-        print("MidnightUI: Created Essential Cooldowns display (RED) - IsShown:", self.customFrames.essential:IsShown())
+        f:Show()
+        self.customFrames.essential = f
+        print("MidnightUI: RED frame created at 100,-100")
     end
     
-    -- Create Utility Cooldowns (icons)
+    -- Create Utility Cooldowns - SIMPLE TEST FRAME
     if not self.customFrames.utility then
-        self.customFrames.utility = self:CreateIconDisplay("MidnightUtilityCooldowns", "utility")
-        self.customFrames.utility:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -280)
-        self.customFrames.utility:SetSize(400, 60)
-        self.customFrames.utility:SetFrameStrata("DIALOG")
-        self.customFrames.utility:SetFrameLevel(220)
+        local f = CreateFrame("Frame", "MidnightUtilityCooldowns", UIParent)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -200)
+        f:SetSize(200, 50)
+        f:SetFrameStrata("TOOLTIP")
         
-        -- Debug: Add bright green background
-        local debugBg = self.customFrames.utility:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetAllPoints(self.customFrames.utility)
-        debugBg:SetColorTexture(0, 1, 0, 1)
+        local bg = f:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(0, 1, 0, 1)
         
-        self.customFrames.utility:Show()
-        print("MidnightUI: Created Utility Cooldowns display (GREEN) - IsShown:", self.customFrames.utility:IsShown())
+        f:Show()
+        self.customFrames.utility = f
+        print("MidnightUI: GREEN frame created at 100,-200")
     end
     
-    -- Create Tracked Buffs (icons)
+    -- Create Tracked Buffs - SIMPLE TEST FRAME
     if not self.customFrames.buffs then
-        self.customFrames.buffs = self:CreateIconDisplay("MidnightTrackedBuffs", "buffs")
-        self.customFrames.buffs:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -360)
-        self.customFrames.buffs:SetSize(400, 60)
-        self.customFrames.buffs:SetFrameStrata("DIALOG")
-        self.customFrames.buffs:SetFrameLevel(230)
+        local f = CreateFrame("Frame", "MidnightTrackedBuffs", UIParent)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -300)
+        f:SetSize(200, 50)
+        f:SetFrameStrata("TOOLTIP")
         
-        -- Debug: Add bright blue background
-        local debugBg = self.customFrames.buffs:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetAllPoints(self.customFrames.buffs)
-        debugBg:SetColorTexture(0, 0, 1, 1)
+        local bg = f:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(0, 0, 1, 1)
         
-        self.customFrames.buffs:Show()
-        print("MidnightUI: Created Tracked Buffs display (BLUE) - IsShown:", self.customFrames.buffs:IsShown())
+        f:Show()
+        self.customFrames.buffs = f
+        print("MidnightUI: BLUE frame created at 100,-300")
     end
     
-    -- Create Tracked Bars (buff bars)
+    -- Create Tracked Bars - SIMPLE TEST FRAME
     if not self.customFrames.cooldowns then
-        self.customFrames.cooldowns = self:CreateBarDisplay("MidnightTrackedBars", "cooldowns")
-        self.customFrames.cooldowns:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -440)
-        self.customFrames.cooldowns:SetSize(400, 200)
-        self.customFrames.cooldowns:SetFrameStrata("DIALOG")
-        self.customFrames.cooldowns:SetFrameLevel(240)
+        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -400)
+        f:SetSize(200, 50)
+        f:SetFrameStrata("TOOLTIP")
         
-        -- Debug: Add bright yellow background
-        local debugBg = self.customFrames.cooldowns:CreateTexture(nil, "OVERLAY", nil, 7)
-        debugBg:SetAllPoints(self.customFrames.cooldowns)
-        debugBg:SetColorTexture(1, 1, 0, 1)
+        local bg = f:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(1, 1, 0, 1)
         
-        self.customFrames.cooldowns:Show()
-        print("MidnightUI: Created Tracked Bars display (YELLOW) - IsShown:", self.customFrames.cooldowns:IsShown())
+        f:Show()
+        self.customFrames.cooldowns = f
+        print("MidnightUI: YELLOW frame created at 100,-400")
     end
 end
 
