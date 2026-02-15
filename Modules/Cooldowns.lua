@@ -383,28 +383,42 @@ end
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
-    if not C_CooldownViewer then
+    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
         return cooldowns
     end
     
-    -- Check GetLayoutData() - this might return active bars
-    if C_CooldownViewer.GetLayoutData then
-        local layoutData = C_CooldownViewer.GetLayoutData()
-        if layoutData then
-            print("=== GetLayoutData() ===")
-            print("Type:", type(layoutData))
-            if type(layoutData) == "table" then
-                for k, v in pairs(layoutData) do
-                    print("  " .. tostring(k) .. " = " .. tostring(v))
-                    if type(v) == "table" then
-                        print("    (table contents):")
-                        for k2, v2 in pairs(v) do
-                            print("      " .. tostring(k2) .. " = " .. tostring(v2))
+    -- Get tracked bar cooldowns
+    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
+    if not trackedIDs then
+        return cooldowns
+    end
+    
+    -- Check each cooldown for valid alert types
+    for _, cooldownID in ipairs(trackedIDs) do
+        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
+        
+        if info and info.isKnown then
+            local spellID = info.overrideSpellID or info.spellID or cooldownID
+            local spellInfo = C_Spell.GetSpellInfo(spellID)
+            
+            if spellInfo and spellInfo.name == "Sentinel" then
+                print("=== Sentinel ===")
+                
+                -- Check GetValidAlertTypes
+                if C_CooldownViewer.GetValidAlertTypes then
+                    local alertTypes = C_CooldownViewer.GetValidAlertTypes(cooldownID)
+                    if alertTypes then
+                        print("  GetValidAlertTypes returned:")
+                        for i, alertType in ipairs(alertTypes) do
+                            print("    [" .. i .. "] = " .. tostring(alertType))
                         end
+                    else
+                        print("  GetValidAlertTypes returned nil")
                     end
                 end
+                
+                print("================")
             end
-            print("=======================")
         end
     end
     
