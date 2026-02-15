@@ -401,9 +401,8 @@ function Cooldowns:GetTrackedBarsData()
         
         -- Trust Blizzard: if frame has Bar and size, it's active
         if hasBar and hasSize then
-            -- Get spell name and icon
+            -- Get spell name
             local name = ""
-            local iconTexture = nil
             
             if child.Bar and child.Bar.Name and child.Bar.Name.GetText then
                 local ok, result = pcall(function() return child.Bar.Name:GetText() end)
@@ -412,34 +411,33 @@ function Cooldowns:GetTrackedBarsData()
             
             print(string.format("  Name: %s", name))
             
-            if child.Icon then
-                if child.Icon.GetTexture then
-                    iconTexture = child.Icon:GetTexture()
-                elseif child.Icon.Texture then
-                    iconTexture = child.Icon.Texture:GetTexture()
-                end
-            end
-            
-            print(string.format("  iconTexture: %s", tostring(iconTexture)))
-            
-            if iconTexture and name and name ~= "" then
-                -- Get spellID from name
+            if name and name ~= "" then
+                -- Get spellID and icon from name
                 local spellID = nil
+                local iconTexture = nil
+                
                 local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(name) end)
                 if ok and spellInfo then
                     spellID = spellInfo.spellID
                 end
                 
-                local data = {
-                    icon = iconTexture,
-                    name = name,
-                    spellID = spellID,
-                    remainingTime = 0,
-                    charges = 1,
-                }
-                
-                -- Try to get duration from aura (may not exist for ground effects like Consecration)
                 if spellID then
+                    iconTexture = C_Spell.GetSpellTexture(spellID)
+                end
+                
+                print(string.format("  spellID: %s, iconTexture: %s", tostring(spellID), tostring(iconTexture)))
+                
+                if iconTexture then
+                    local data = {
+                        icon = iconTexture,
+                        name = name,
+                        spellID = spellID,
+                        remainingTime = 0,
+                        charges = 1,
+                    }
+                    
+                    -- Try to get duration from aura (may not exist for ground effects like Consecration)
+                    if spellID then
                     local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
                     if auraData then
                         if auraData.duration and type(auraData.duration) == "number" then
@@ -456,8 +454,9 @@ function Cooldowns:GetTrackedBarsData()
                     end
                 end
                 
-                print(string.format("  ADDED: %s", name))
-                table.insert(cooldowns, data)
+                    print(string.format("  ADDED: %s", name))
+                    table.insert(cooldowns, data)
+                end
             end
         end
     end
