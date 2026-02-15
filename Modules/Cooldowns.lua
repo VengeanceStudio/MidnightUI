@@ -937,27 +937,25 @@ function Cooldowns:CreateIcon(parent, displayType)
     icon.stackText:SetTextColor(1, 1, 1)
     
     -- Add overlay glow support for charge-based effects (WoW 12.0)
-    -- Create a simple glow texture as a fallback since we're not using ActionButton template
-    icon.glowTexture = icon:CreateTexture(nil, "OVERLAY")
-    icon.glowTexture:SetAllPoints(icon)
-    icon.glowTexture:SetTexture("Interface\\SpellActivationOverlay\\IconAlert")
-    icon.glowTexture:SetBlendMode("ADD")
-    icon.glowTexture:SetAlpha(0)
-    icon.glowTexture:Hide()
+    -- Note: We don't create the glow texture by default to avoid visual artifacts
+    -- The methods are added in case we want to enable glow effects later
+    icon.glowTexture = nil
     
-    -- Add methods to show/hide glow
+    -- Add methods to show/hide glow (currently disabled to avoid rendering issues)
     icon.ShowOverlayGlow = function(self)
-        if self.glowTexture then
-            self.glowTexture:Show()
-            self.glowTexture:SetAlpha(0.8)
-        end
+        -- Disabled: Glow effects can cause visual artifacts
+        -- if self.glowTexture then
+        --     self.glowTexture:Show()
+        --     self.glowTexture:SetAlpha(0.8)
+        -- end
     end
     
     icon.HideOverlayGlow = function(self)
-        if self.glowTexture then
-            self.glowTexture:Hide()
-            self.glowTexture:SetAlpha(0)
-        end
+        -- Disabled: Glow effects can cause visual artifacts
+        -- if self.glowTexture then
+        --     self.glowTexture:Hide()
+        --     self.glowTexture:SetAlpha(0)
+        -- end
     end
     
     icon:Hide()
