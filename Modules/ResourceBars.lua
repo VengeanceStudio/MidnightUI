@@ -194,9 +194,10 @@ function ResourceBars:SetupPrimaryResourceBar()
         return 
     end
     
+    -- Always recreate the bar to ensure proper sizing
     if self.primaryBar then
-        self:UpdatePrimaryResourceBar()
-        return
+        self.primaryBar:Hide()
+        self.primaryBar = nil
     end
     
     local db = self.db.profile.primary
@@ -645,7 +646,18 @@ function ResourceBars:CreateSecondarySegments()
     
     if maxPower == 0 then maxPower = 6 end -- Default fallback
     
-    local segmentWidth = (db.width - (db.segmentSpacing * (maxPower - 1))) / maxPower
+    -- Clear existing segments
+    if frame.segments then
+        for _, segment in ipairs(frame.segments) do
+            segment:Hide()
+            segment:SetParent(nil)
+        end
+    end
+    frame.segments = {}
+    
+    -- Use actual frame width, not db.width (important for attached bars)
+    local frameWidth = frame:GetWidth()
+    local segmentWidth = (frameWidth - (db.segmentSpacing * (maxPower - 1)) - 2) / maxPower
     
     for i = 1, maxPower do
         local segment = CreateFrame("Frame", nil, frame, "BackdropTemplate")
