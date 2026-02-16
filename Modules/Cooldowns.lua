@@ -916,8 +916,8 @@ function Cooldowns:SetupMoveMode(displayName, displayTitle, dbKey)
     -- Register the frame (not the highlight) with Movable
     table.insert(Movable.registeredFrames, frame)
     
-    -- Add nudge arrows
-    Movable:CreateNudgeArrows(frame, frameDB.position or {}, function()
+    -- Add nudge arrows - attach to the highlight frame since that's what's visible in move mode
+    frame.movableHighlightFrame.arrows = Movable:CreateNudgeArrows(frame.movableHighlightFrame, frameDB.position or {}, function()
         -- Reset callback: center the frame
         if not frameDB.position then
             frameDB.position = {}
@@ -929,6 +929,8 @@ function Cooldowns:SetupMoveMode(displayName, displayTitle, dbKey)
         frame:ClearAllPoints()
         frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     end)
+    -- Also store arrow reference on main frame for Movable's toggleMoveMode to find
+    frame.arrows = frame.movableHighlightFrame.arrows
 end
 
 function Cooldowns:CreateCustomDisplays()

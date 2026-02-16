@@ -874,13 +874,9 @@ function Movable:CreateNudgeArrows(container, db, resetCallback, updateCallback)
     resetBtn:Hide()
     container.arrows.RESET = resetBtn
     
-    -- Determine which frame to hook for mouse events
-    -- For frames with a movableHighlightFrame (like cooldowns), hook that instead
-    local hoverFrame = container.movableHighlightFrame or container
-    
     -- Setup mouseover for container arrows
     if not container.movableArrowsHooked then
-        hoverFrame:HookScript("OnEnter", function()
+        container:HookScript("OnEnter", function()
             if MidnightUI.moveMode and container.arrows then
                 -- Cancel any pending hide timer
                 if container.arrowHideTimer then
@@ -891,13 +887,13 @@ function Movable:CreateNudgeArrows(container, db, resetCallback, updateCallback)
             end
         end)
         
-        hoverFrame:HookScript("OnLeave", function()
+        container:HookScript("OnLeave", function()
             -- Delay hiding to allow mouse to move to arrows
             if container.arrowHideTimer then
                 container.arrowHideTimer:Cancel()
             end
             container.arrowHideTimer = C_Timer.NewTimer(0.3, function()
-                if not MouseIsOver(hoverFrame) and container.arrows then
+                if not MouseIsOver(container) and container.arrows then
                     -- Check if mouse is over any arrow button
                     local overArrow = false
                     for _, arrow in pairs(container.arrows) do
