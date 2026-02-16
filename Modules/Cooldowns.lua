@@ -387,7 +387,8 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Get tracked bars data - match cooldowns to bars and check Blizzard's visibility
+-- WoW 12.0: Get tracked bars data using C_CooldownViewer API
+-- Only shows bars when the buff is actually active (has remaining time)
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
@@ -395,53 +396,61 @@ function Cooldowns:GetTrackedBarsData()
         return cooldowns
     end
     
-    -- Get the Blizzard frame
-    local blizzFrame = _G["BuffBarCooldownViewer"]
-    if not blizzFrame then
+    -- Get all cooldowns in the Tracked Bar category
+    local trackedBarSet = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
+    if not trackedBarSet then
         return cooldowns
     end
     
-    -- Get all bar children - if Blizzard shows the Bar, we show it
-    for i = 1, blizzFrame:GetNumChildren() do
-        local child = select(i, blizzFrame:GetChildren())
-        if child and child.Bar then
-            local bar = child.Bar
+    -- For each cooldown ID, check if the buff/aura is active
+    for _, cooldownID in ipairs(trackedBarSet) do
+        local cooldownInfo = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
+        if cooldownInfo and cooldownInfo.linkedSpellIDs and #cooldownInfo.linkedSpellIDs > 0 then
+            -- Tracked bars need to check ALL linkedSpellIDs for active auras
+            -- Example: Demon Spikes has cast spell 203720 but aura spell 203819
+            local foundAura = nil
             
-            -- Check if the Bar itself is shown (not the parent child frame)
-            if bar:IsShown() and bar.Name then
-                local ok, barName = pcall(function() return bar.Name:GetText() end)
-                if ok and barName then
-                    -- Get spell info from the bar name
-                    local ok2, spellInfo = pcall(function() return C_Spell.GetSpellInfo(barName) end)
-                    if ok2 and spellInfo then
-                        local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
-                        
-                        if iconTexture then
-                            local value = 0
-                            local maxValue = 0
-                            
-                            local ok1, val = pcall(function() return bar:GetValue() end)
-                            if ok1 and val then
-                                value = val
+            for _, spellID in ipairs(cooldownInfo.linkedSpellIDs) do
+                -- Try to find an active aura with this spell ID
+                local ok, auraData = pcall(C_UnitAuras.GetPlayerAuraBySpellID, spellID)
+                if ok and auraData then
+                    foundAura = auraData
+                    break
+                end
+            end
+            
+            -- Only show the bar if we found an active aura
+            if foundAura then
+                local spellID = foundAura.spellId
+                local ok, spellInfo = pcall(function() return C_Spell.GetSpellInfo(spellID) end)
+                if ok and spellInfo then
+                    local iconTexture = C_Spell.GetSpellTexture(spellID)
+                    if iconTexture then
+                        -- Calculate remaining time from aura
+                        local remainingTime = 0
+                        if foundAura.expirationTime and foundAura.expirationTime > 0 then
+                            remainingTime = foundAura.expirationTime - GetTime()
+                            if remainingTime < 0 then
+                                remainingTime = 0
                             end
-                            
-                            local ok2, max = pcall(function() return select(2, bar:GetMinMaxValues()) end)
-                            if ok2 and max then
-                                maxValue = max
-                            end
-                            
-                            local data = {
-                                icon = iconTexture,
-                                name = spellInfo.name,
-                                spellID = spellInfo.spellID,
-                                remainingTime = value,
-                                duration = maxValue,
-                                charges = 1,
-                            }
-                            
-                            table.insert(cooldowns, data)
                         end
-                    end
+                        
+                        -- Get duration
+                        local duration = foundAura.duration or 0
+                        
+                        -- Get charges if applicable
+                        local charges = foundAura.charges or 1
+                        
+                        local data = {
+                            icon = iconTexture,
+                            name = spellInfo.name,
+                            spellID = spellID,
+                            remainingTime = remainingTime,
+                            duration = duration,
+                            charges = charges,
+                        }
+                        
+                        table.insert(cooldowns, data)
                 end
             end
         end
