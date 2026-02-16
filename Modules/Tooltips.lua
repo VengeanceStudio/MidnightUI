@@ -650,11 +650,13 @@ function Tooltips:GetUnitMountID(unit)
         local auraData = C_UnitAuras.GetBuffDataByIndex(unit, i)
         if not auraData then break end
         
-        -- Check if this buff is a mount
+        -- Check if this buff is a mount (WoW 12.0: protect against secret spellId)
         if auraData.spellId and C_MountJournal then
             for _, mountID in ipairs(C_MountJournal.GetMountIDs()) do
                 local mountName, mountSpellID = C_MountJournal.GetMountInfoByID(mountID)
-                if mountSpellID == auraData.spellId then
+                -- Use pcall to safely compare secret spell IDs
+                local ok, matches = pcall(function() return mountSpellID == auraData.spellId end)
+                if ok and matches then
                     return mountID
                 end
             end

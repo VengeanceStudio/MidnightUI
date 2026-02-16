@@ -422,39 +422,42 @@ function Cooldowns:UpdateTrackedBarCache()
     
     -- Scan all player auras and cache matching spell IDs
     print("DEBUG CACHE - Scanning player auras:")
-    for i = 1, 40 do
-        local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
-        if not auraData then 
-            print("  No more auras at index", i)
-            break 
-        end
-        
-        -- Print what we found
-        if auraData.spellId and auraData.name then
-            print("  Found aura:", auraData.name, "spellID:", auraData.spellId)
-        end
-        
-        -- WoW 12.0: Protect against secret spellId being used as table index
-        if auraData.spellId then
-            local ok, isTracked = pcall(function() 
-                return spellIDsToCheck[auraData.spellId] 
-            end)
+    
+    -- Try scanning with both filters since some buffs might be classified differently in combat
+    local filtersToTry = {"HELPFUL", "HARMFUL", nil}
+    for _, filter in ipairs(filtersToTry) do
+        print("  Trying filter:", filter or "none")
+        for i = 1, 40 do
+            local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, filter)
+            if not auraData then 
+                print("    No more auras at index", i, "with filter", filter or "none")
+                break 
+            end
             
-            print("    pcall result: ok=", ok, "isTracked=", isTracked)
-            
-            if ok and isTracked then
-                local ok2 = pcall(function() 
-                    self.activeTrackedBarSpells[auraData.spellId] = true 
+            -- Print what we found
+            if auraData.spellId and auraData.name then
+                print("    Found aura:", auraData.name, "spellID:", auraData.spellId)
+                
+                -- WoW 12.0: Protect against secret spellId being used as table index
+                local ok, isTracked = pcall(function() 
+                    return spellIDsToCheck[auraData.spellId] 
                 end)
                 
-                if ok2 then
-                    print("    ✓ CACHED active aura:", auraData.name, "spellID", auraData.spellId)
-                else
-                    print("    ✗ Failed to cache (pcall2 failed)")
+                if ok and isTracked then
+                    local ok2 = pcall(function() 
+                        self.activeTrackedBarSpells[auraData.spellId] = true 
+                    end)
+                    
+                    if ok2 then
+                        print("      ✓ CACHED active aura:", auraData.name, "spellID", auraData.spellId)
+                    else
+                        print("      ✗ Failed to cache (pcall2 failed)")
+                    end
                 end
             end
         end
     end
+    
     print("DEBUG CACHE - Scan complete. Cached count:", #self.activeTrackedBarSpells)
 end
 
