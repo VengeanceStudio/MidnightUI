@@ -402,18 +402,29 @@ function Cooldowns:GetTrackedBarsData()
     end
     
     -- Get all bar children - if Blizzard shows it, we show it
+    local inCombat = InCombatLockdown()
+    print("DEBUG GetTrackedBarsData - Combat:", inCombat, "NumChildren:", blizzFrame:GetNumChildren())
+    
     for i = 1, blizzFrame:GetNumChildren() do
         local child = select(i, blizzFrame:GetChildren())
-        if child and child.Bar and child:IsShown() then
-            local bar = child.Bar
+        print("  Child", i, "exists:", child ~= nil)
+        if child and child.Bar then
+            local shown = child:IsShown()
+            local barShown = child.Bar:IsShown()
+            print("    child:IsShown():", shown, "Bar:IsShown():", barShown)
             
-            if bar.Name then
-                local ok, barName = pcall(function() return bar.Name:GetText() end)
-                if ok and barName then
-                    -- Get spell info from the bar name
-                    local ok2, spellInfo = pcall(function() return C_Spell.GetSpellInfo(barName) end)
-                    if ok2 and spellInfo then
-                        local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
+            if child:IsShown() then
+                local bar = child.Bar
+                
+                if bar.Name then
+                    local ok, barName = pcall(function() return bar.Name:GetText() end)
+                    print("    GetText ok:", ok, "name:", barName)
+                    if ok and barName then
+                        -- Get spell info from the bar name
+                        local ok2, spellInfo = pcall(function() return C_Spell.GetSpellInfo(barName) end)
+                        print("    GetSpellInfo ok:", ok2)
+                        if ok2 and spellInfo then
+                            local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
                         
                         if iconTexture then
                             local value = 0
