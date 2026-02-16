@@ -1377,24 +1377,11 @@ function Cooldowns:UpdateIconDisplay(frame)
         
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation
-            if icon.cooldown then
-                -- Try calculation with stored duration (wrap in pcall to handle secret values)
-                if cooldownData.duration then
-                    local ok = pcall(function()
-                        local startTime = GetTime() - (cooldownData.duration - remainingTimeValue)
-                        icon.cooldown:SetCooldown(startTime, cooldownData.duration)
-                    end)
-                    
-                    -- If that failed and we have spellID, try API approach
-                    if not ok and icon.spellID then
-                        local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
-                        pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
-                    end
-                elseif icon.spellID then
-                    -- No stored duration, use API
-                    local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
-                    pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
-                end
+            if icon.cooldown and icon.spellID then
+                -- Get fresh cooldown data from API and pass directly to SetCooldown
+                -- Works in combat because secret values pass through without any operations
+                local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
+                icon.cooldown:SetCooldown(startTime, duration)
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
