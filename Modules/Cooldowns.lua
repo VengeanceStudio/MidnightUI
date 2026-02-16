@@ -1381,8 +1381,9 @@ function Cooldowns:UpdateIconDisplay(frame)
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation using stored start/duration from Blizzard frame
             if icon.cooldown and cooldownData.startTime and cooldownData.duration then
-                -- Pass values directly (secret values pass through without calculation)
-                pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownData.startTime, cooldownData.duration * 1000)
+                -- Convert from milliseconds to seconds for SetCooldown
+                -- cooldownData.startTime is in ms, cooldownData.duration is already in seconds
+                pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownData.startTime / 1000, cooldownData.duration)
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
