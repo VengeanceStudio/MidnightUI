@@ -1383,8 +1383,8 @@ function Cooldowns:UpdateIconDisplay(frame)
                 -- If we don't have duration but have spellID, try to get it from the API
                 if (not duration or duration == 0) and icon.spellID then
                     local ok, cooldownInfo = pcall(C_Spell.GetSpellCooldown, icon.spellID)
-                    if ok and cooldownInfo and cooldownInfo.startTime and cooldownInfo.duration then
-                        -- Pass secret values directly to SetCooldown (WoW 12.0 pass-through)
+                    if ok and cooldownInfo then
+                        -- Pass values directly to SetCooldown without checking them (WoW 12.0 secret value pass-through)
                         pcall(function()
                             icon.cooldown:SetCooldown(cooldownInfo.startTime, cooldownInfo.duration)
                         end)
