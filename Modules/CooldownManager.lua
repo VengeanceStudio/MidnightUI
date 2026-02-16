@@ -1,7 +1,7 @@
 -- CooldownManager.lua
 -- Skins and positions Blizzard's cooldown manager frames with MidnightUI styling
 
-local AddonName, MidnightUI = ...
+local MidnightUI = LibStub("AceAddon-3.0"):GetAddon("MidnightUI")
 local LSM = LibStub("LibSharedMedia-3.0")
 
 -- Create the module
