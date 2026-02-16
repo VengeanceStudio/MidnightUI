@@ -2003,55 +2003,55 @@ function MidnightUI:HookConfigDialogFrames()
         end)
     end
     
-    -- Hook AceConfigDialog:Open to enable custom widgets only for MidnightUI
+    -- Hook AceGUI.Create once to check for MidnightUI context
+    if not AceGUI.MidnightUICreateHooked then
+        local originalCreate = AceGUI.Create
+        AceGUI.Create = function(aceGUI, widgetType, ...)
+            -- Only replace widgets when MidnightUI config is active
+            if AceGUI.MidnightUICreateActive then
+                if widgetType == "Slider" then
+                    widgetType = "MidnightSlider"
+                elseif widgetType == "CheckBox" then
+                    widgetType = "MidnightCheckBox"
+                elseif widgetType == "EditBox" then
+                    widgetType = "MidnightEditBox"
+                elseif widgetType == "MultiLineEditBox" then
+                    widgetType = "MidnightMultiLineEditBox"
+                elseif widgetType == "ColorPicker" then
+                    widgetType = "MidnightColorPicker"
+                elseif widgetType == "InlineGroup" then
+                    widgetType = "MidnightInlineGroup"
+                elseif widgetType == "Button" then
+                    widgetType = "MidnightButton"
+                elseif widgetType == "Dropdown" then
+                    widgetType = "MidnightDropdown"
+                elseif widgetType == "Dropdown-Pullout" then
+                    widgetType = "MidnightDropdown-Pullout"
+                elseif widgetType == "Heading" then
+                    widgetType = "MidnightHeading"
+                elseif widgetType == "TabGroup" then
+                    widgetType = "MidnightTabGroup"
+                end
+            end
+            
+            local widget = originalCreate(aceGUI, widgetType, ...)
+            
+            -- Apply additional styling for MidnightUI
+            if widget and AceGUI.MidnightUICreateActive then
+                C_Timer.After(0, function()
+                    MidnightUI:SkinAceGUIWidget(widget, widgetType)
+                end)
+            end
+            
+            return widget
+        end
+        AceGUI.MidnightUICreateHooked = true
+    end
+    
+    -- Hook AceConfigDialog:Open to set flag for MidnightUI
     if AceConfigDialog and not AceConfigDialog.MidnightUIHooked then
         local originalOpen = AceConfigDialog.Open
         AceConfigDialog.Open = function(self, appName, ...)
-            -- Enable custom widgets when opening MidnightUI config
-            if appName == "MidnightUI" and not AceGUI.MidnightUICreateActive then
-                local originalCreate = AceGUI.Create
-                AceGUI.Create = function(aceGUI, widgetType, ...)
-                    -- Only replace if we're actively in MidnightUI config
-                    if AceGUI.MidnightUICreateActive then
-                        if widgetType == "Slider" then
-                            widgetType = "MidnightSlider"
-                        elseif widgetType == "CheckBox" then
-                            widgetType = "MidnightCheckBox"
-                        elseif widgetType == "EditBox" then
-                            widgetType = "MidnightEditBox"
-                        elseif widgetType == "MultiLineEditBox" then
-                            widgetType = "MidnightMultiLineEditBox"
-                        elseif widgetType == "ColorPicker" then
-                            widgetType = "MidnightColorPicker"
-                        elseif widgetType == "InlineGroup" then
-                            widgetType = "MidnightInlineGroup"
-                        elseif widgetType == "Button" then
-                            widgetType = "MidnightButton"
-                        elseif widgetType == "Dropdown" then
-                            widgetType = "MidnightDropdown"
-                        elseif widgetType == "Dropdown-Pullout" then
-                            widgetType = "MidnightDropdown-Pullout"
-                        elseif widgetType == "Heading" then
-                            widgetType = "MidnightHeading"
-                        elseif widgetType == "TabGroup" then
-                            widgetType = "MidnightTabGroup"
-                        end
-                    end
-                    
-                    local widget = originalCreate(aceGUI, widgetType, ...)
-                    
-                    -- Apply additional styling for MidnightUI
-                    if widget and AceGUI.MidnightUICreateActive then
-                        C_Timer.After(0, function()
-                            MidnightUI:SkinAceGUIWidget(widget, widgetType)
-                        end)
-                    end
-                    
-                    return widget
-                end
-                AceGUI.MidnightUIOriginalCreate = originalCreate
-            end
-            
             -- Set flag when opening MidnightUI
             if appName == "MidnightUI" then
                 AceGUI.MidnightUICreateActive = true
