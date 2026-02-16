@@ -1491,6 +1491,12 @@ end
         -- Re-register state drivers when leaving combat to fix any visibility issues
         if not self.db or not self.db.profile then return end
         
+        -- Update player frame to hide combat icon
+        local playerFrame = _G["MidnightUI_PlayerFrame"]
+        if playerFrame then
+            self:UpdateFrame(playerFrame, "player")
+        end
+        
         local targetFrame = _G["MidnightUI_TargetFrame"]
         if targetFrame and self.db.profile.showTarget then
             UnregisterStateDriver(targetFrame, "visibility")
@@ -1524,6 +1530,16 @@ end
                     RegisterStateDriver(bossFrame, "visibility", "[@boss" .. i .. ",exists] show; hide")
                 end
             end
+        end
+    end
+
+    function UnitFrames:PLAYER_REGEN_DISABLED()
+        -- Update player frame to show combat icon when entering combat
+        if not self.db or not self.db.profile then return end
+        
+        local playerFrame = _G["MidnightUI_PlayerFrame"]
+        if playerFrame then
+            self:UpdateFrame(playerFrame, "player")
         end
     end
 
