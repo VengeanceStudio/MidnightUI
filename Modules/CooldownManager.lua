@@ -170,17 +170,40 @@ function CooldownManager:SkinBlizzardFrame(childFrame, displayType)
     -- Resize the frame
     childFrame:SetSize(db.iconWidth, db.iconHeight)
     
-    -- Style the icon - just crop edges
+    -- Style the icon
     if childFrame.Icon then
         childFrame.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        childFrame.Icon:ClearAllPoints()
+        childFrame.Icon:SetPoint("TOPLEFT", childFrame, "TOPLEFT", db.borderThickness, -db.borderThickness)
+        childFrame.Icon:SetPoint("BOTTOMRIGHT", childFrame, "BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     end
     
-    -- Reset cooldown swipe to Blizzard defaults
+    -- Style the cooldown swipe
     if childFrame.Cooldown then
-        childFrame.Cooldown:SetDrawEdge(true)
+        childFrame.Cooldown:SetSwipeColor(0, 0, 0, 0.8)
+        childFrame.Cooldown:SetDrawEdge(false)
         childFrame.Cooldown:SetDrawSwipe(true)
-        childFrame.Cooldown:SetHideCountdownNumbers(false)
-        -- Don't modify swipe color or positioning - let Blizzard handle it
+        childFrame.Cooldown:SetHideCountdownNumbers(true)
+        childFrame.Cooldown:ClearAllPoints()
+        childFrame.Cooldown:SetPoint("TOPLEFT", childFrame, "TOPLEFT", db.borderThickness, -db.borderThickness)
+        childFrame.Cooldown:SetPoint("BOTTOMRIGHT", childFrame, "BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
+    end
+    
+    -- Add custom border if it doesn't exist
+    if not childFrame.customBorder then
+        childFrame.customBorder = childFrame:CreateTexture(nil, "BORDER")
+        childFrame.customBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
+        childFrame.customBorder:SetAllPoints(childFrame)
+        childFrame.customBorder:SetVertexColor(db.borderColor[1], db.borderColor[2], db.borderColor[3], db.borderColor[4])
+    end
+    
+    -- Add custom background
+    if not childFrame.customBackground then
+        childFrame.customBackground = childFrame:CreateTexture(nil, "BACKGROUND")
+        childFrame.customBackground:SetTexture("Interface\\Buttons\\WHITE8X8")
+        childFrame.customBackground:SetPoint("TOPLEFT", childFrame, "TOPLEFT", db.borderThickness, -db.borderThickness)
+        childFrame.customBackground:SetPoint("BOTTOMRIGHT", childFrame, "BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
+        childFrame.customBackground:SetVertexColor(db.backgroundColor[1], db.backgroundColor[2], db.backgroundColor[3], db.backgroundColor[4])
     end
     
     -- Style charge count text
@@ -195,6 +218,14 @@ function CooldownManager:SkinBlizzardFrame(childFrame, displayType)
         local fontPath = LSM:Fetch("font", db.font)
         childFrame.Applications.Applications:SetFont(fontPath, db.fontSize, db.fontFlag)
         childFrame.Applications.Applications:SetTextColor(1, 1, 1, 1)
+    end
+    
+    -- Hide elements we don't want
+    if childFrame.CooldownFlash then
+        childFrame.CooldownFlash:SetAlpha(0)
+    end
+    if childFrame.DebuffBorder then
+        childFrame.DebuffBorder:SetAlpha(0)
     end
     
     -- Make sure the frame is visible
