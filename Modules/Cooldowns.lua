@@ -387,81 +387,7 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
--- WoW 12.0: Update cache of active tracked bar spell IDs from player auras
--- This works in combat when GetPlayerAuraBySpellID() doesn't
-function Cooldowns:UpdateTrackedBarCache()
-    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
-        return
-    end
-    
-    -- Clear cache
-    wipe(self.activeTrackedBarSpells)
-    
-    -- Get all tracked bar cooldowns and their linked spell IDs
-    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
-    if not trackedIDs then return end
-    
-    local spellIDsToCheck = {}
-    print("DEBUG CACHE - Building spellIDsToCheck table:")
-    for _, cooldownID in ipairs(trackedIDs) do
-        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-        if info and info.isKnown then
-            local spellID = info.overrideSpellID or info.spellID or cooldownID
-            spellIDsToCheck[spellID] = true
-            print("  Added main spellID:", spellID)
-            
-            -- Also track linked spell IDs
-            if info.linkedSpellIDs then
-                for _, linkedID in ipairs(info.linkedSpellIDs) do
-                    spellIDsToCheck[linkedID] = true
-                    print("  Added linked spellID:", linkedID)
-                end
-            end
-        end
-    end
-    
-    -- Scan all player auras and cache matching spell IDs
-    print("DEBUG CACHE - Scanning player auras:")
-    
-    -- Try scanning with both filters since some buffs might be classified differently in combat
-    local filtersToTry = {"HELPFUL", "HARMFUL", nil}
-    for _, filter in ipairs(filtersToTry) do
-        print("  Trying filter:", filter or "none")
-        for i = 1, 40 do
-            local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, filter)
-            if not auraData then 
-                print("    No more auras at index", i, "with filter", filter or "none")
-                break 
-            end
-            
-            -- Print what we found
-            if auraData.spellId and auraData.name then
-                print("    Found aura:", auraData.name, "spellID:", auraData.spellId)
-                
-                -- WoW 12.0: Protect against secret spellId being used as table index
-                local ok, isTracked = pcall(function() 
-                    return spellIDsToCheck[auraData.spellId] 
-                end)
-                
-                if ok and isTracked then
-                    local ok2 = pcall(function() 
-                        self.activeTrackedBarSpells[auraData.spellId] = true 
-                    end)
-                    
-                    if ok2 then
-                        print("      ✓ CACHED active aura:", auraData.name, "spellID", auraData.spellId)
-                    else
-                        print("      ✗ Failed to cache (pcall2 failed)")
-                    end
-                end
-            end
-        end
-    end
-    
-    print("DEBUG CACHE - Scan complete. Cached count:", #self.activeTrackedBarSpells)
-end
-
--- WoW 12.0: Get tracked bars data - match cooldowns to bars by index
+-- WoW 12.0: Get tracked bars data - match cooldowns to bars and check Blizzard's visibility
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
     
@@ -469,139 +395,65 @@ function Cooldowns:GetTrackedBarsData()
         return cooldowns
     end
     
-    -- Get tracked bar cooldowns
-    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
-    if not trackedIDs then
-        return cooldowns
-    end
-    
-    -- Get the Blizzard frame and bars
+    -- Get the Blizzard frame
     local blizzFrame = _G["BuffBarCooldownViewer"]
     if not blizzFrame then
         return cooldowns
     end
     
-    local bars = {}
+    -- Get all bar children - Blizzard already shows/hides these correctly
     for i = 1, blizzFrame:GetNumChildren() do
         local child = select(i, blizzFrame:GetChildren())
         if child and child.Bar then
-            table.insert(bars, child.Bar)
+            local bar = child.Bar
+            
+            -- Check if Blizzard is showing this bar
+            local isVisible = bar:IsShown() and bar:GetAlpha() > 0
+            
+            if isVisible and bar.Name then
+                local barName = bar.Name:GetText()
+                if barName then
+                    -- Get spell info from the bar name
+                    local spellInfo = C_Spell.GetSpellInfo(barName)
+                    if spellInfo then
+                        local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
+                        
+                        if iconTexture then
+                            local data = {
+                                icon = iconTexture,
+                                name = spellInfo.name,
+                                spellID = spellInfo.spellID,
+                                remainingTime = 0,
+                                charges = 1,
+                            }
+                            
+                            -- Get bar values
+                            local ok, value = pcall(function() return bar:GetValue() end)
+                            if ok and value then
+                                data.remainingTime = value
+                            end
+                            
+                            local maxOk, maxDuration = pcall(function()
+                                return select(2, bar:GetMinMaxValues())
+                            end)
+                            if maxOk and maxDuration then
+                                data.duration = maxDuration
+                            end
+                            
+                            table.insert(cooldowns, data)
+                        end
+                    end
+                end
+            end
         end
     end
-    
-    local inCombat = InCombatLockdown()
-    
-    -- Match each cooldown to its bar by spell name comparison
-    for _, cooldownID in ipairs(trackedIDs) do
-        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
-        
-        if info and info.isKnown then
-            local spellID = info.overrideSpellID or info.spellID or cooldownID
-            local spellInfo = C_Spell.GetSpellInfo(spellID)
-            
-            -- DEBUG: Print linkedSpellIDs
-            if info.linkedSpellIDs and #info.linkedSpellIDs > 0 then
-                print("DEBUG - linkedSpellIDs for", spellInfo and spellInfo.name or spellID, ":", unpack(info.linkedSpellIDs))
-            end
-            
-            if spellInfo then
-                -- Find matching bar by comparing spell names
-                local matchingBar = nil
-                
-                for _, bar in ipairs(bars) do
-                    if bar.Name and bar.Name.GetText then
-                        local matches = false
-                        
-                        local ok = pcall(function()
-                            local barName = bar.Name:GetText()
-                            if barName then
-                                local barSpellInfo = C_Spell.GetSpellInfo(barName)
-                                
-                                if barSpellInfo then
-                                    -- Direct spell ID comparison
-                                    matches = (spellID == barSpellInfo.spellID)
-                                end
-                            end
-                        end)
-                        
-                        if ok and matches then
-                            matchingBar = bar
-                            break
-                        end
-                    end
-                end
-                
-                if matchingBar then
-                    local bar = matchingBar
-                    
-                    -- DEBUG: Print bar.auraInstanceID
-                    local auraInstanceID = bar.auraInstanceID or "nil"
-                    print("DEBUG - bar.auraInstanceID for", spellInfo.name, ":", auraInstanceID)
-                    
-                local iconTexture = C_Spell.GetSpellTexture(spellID)
-                
-                -- Determine if this bar is active by checking cache
-                -- WoW 12.0: Use cached spell IDs instead of API (works in combat)
-                local isActive = false
-                local foundSpellID = nil
-                
-                -- Check main spell ID in cache
-                if self.activeTrackedBarSpells[spellID] then
-                    isActive = true
-                    foundSpellID = spellID
-                    print("DEBUG - Found cached aura for", spellInfo.name, "with MAIN spellID", spellID)
-                else
-                    -- Try linkedSpellIDs
-                    if info.linkedSpellIDs and #info.linkedSpellIDs > 0 then
-                        for _, linkedID in ipairs(info.linkedSpellIDs) do
-                            if self.activeTrackedBarSpells[linkedID] then
-                                isActive = true
-                                foundSpellID = linkedID
-                                print("DEBUG - Found cached aura for", spellInfo.name, "with LINKED spellID", linkedID)
-                                break
-                            end
-                        end
-                    end
-                    
-                    if not isActive then
-                        print("DEBUG - No cached aura for", spellInfo.name, "(tried main:", spellID, "and", info.linkedSpellIDs and #info.linkedSpellIDs or 0, "linked IDs)")
-                    end
-                end
-                
-                if isActive and iconTexture then
-                    local data = {
-                        icon = iconTexture,
-                        name = spellInfo.name,
-                        spellID = spellID,
-                        remainingTime = 0,
-                        charges = 1,
-                    }
-                    
-                    -- Get bar values
-                    local ok, value = pcall(function() return bar:GetValue() end)
-                    if ok and value then
-                        data.remainingTime = value
-                    end
-                    
-                    local maxOk, maxDuration = pcall(function()
-                        return select(2, bar:GetMinMaxValues())
-                    end)
-                    if maxOk and maxDuration then
-                        data.duration = maxDuration
-                    end
-                    
-                    table.insert(cooldowns, data)
-                end
-                end -- close if matchingBar
-            end -- close if spellInfo
-        end -- close if info and info.isKnown
-    end -- close for trackedIDs
     
     return cooldowns
 end
 
 function Cooldowns:UNIT_AURA(event, unitTarget, updateInfo)
-    -- Player auras changed
+    -- Player auras changed - just refresh display
+    -- Blizzard's bars already handle show/hide correctly
     if unitTarget == "player" then
         -- Throttle updates to prevent taint cascade to UnitFrames
         local now = GetTime()
@@ -610,9 +462,6 @@ function Cooldowns:UNIT_AURA(event, unitTarget, updateInfo)
         end
         self.lastAuraUpdate = now
         
-        -- WoW 12.0: Update cache of active tracked bar spell IDs
-        -- This works in combat when GetPlayerAuraBySpellID doesn't
-        self:UpdateTrackedBarCache()
         self:UpdateAllDisplays()
     end
 end
