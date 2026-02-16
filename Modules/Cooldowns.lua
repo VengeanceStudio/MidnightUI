@@ -402,25 +402,37 @@ function Cooldowns:UpdateTrackedBarCache()
     if not trackedIDs then return end
     
     local spellIDsToCheck = {}
+    print("DEBUG CACHE - Building spellIDsToCheck table:")
     for _, cooldownID in ipairs(trackedIDs) do
         local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
         if info and info.isKnown then
             local spellID = info.overrideSpellID or info.spellID or cooldownID
             spellIDsToCheck[spellID] = true
+            print("  Added main spellID:", spellID)
             
             -- Also track linked spell IDs
             if info.linkedSpellIDs then
                 for _, linkedID in ipairs(info.linkedSpellIDs) do
                     spellIDsToCheck[linkedID] = true
+                    print("  Added linked spellID:", linkedID)
                 end
             end
         end
     end
     
     -- Scan all player auras and cache matching spell IDs
+    print("DEBUG CACHE - Scanning player auras:")
     for i = 1, 40 do
         local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
-        if not auraData then break end
+        if not auraData then 
+            print("  No more auras at index", i)
+            break 
+        end
+        
+        -- Print what we found
+        if auraData.spellId and auraData.name then
+            print("  Found aura:", auraData.name, "spellID:", auraData.spellId)
+        end
         
         -- WoW 12.0: Protect against secret spellId being used as table index
         if auraData.spellId then
@@ -428,17 +440,22 @@ function Cooldowns:UpdateTrackedBarCache()
                 return spellIDsToCheck[auraData.spellId] 
             end)
             
+            print("    pcall result: ok=", ok, "isTracked=", isTracked)
+            
             if ok and isTracked then
                 local ok2 = pcall(function() 
                     self.activeTrackedBarSpells[auraData.spellId] = true 
                 end)
                 
                 if ok2 then
-                    print("DEBUG - Cached active aura:", auraData.name, "spellID", auraData.spellId)
+                    print("    ✓ CACHED active aura:", auraData.name, "spellID", auraData.spellId)
+                else
+                    print("    ✗ Failed to cache (pcall2 failed)")
                 end
             end
         end
     end
+    print("DEBUG CACHE - Scan complete. Cached count:", #self.activeTrackedBarSpells)
 end
 
 -- WoW 12.0: Get tracked bars data - match cooldowns to bars by index
