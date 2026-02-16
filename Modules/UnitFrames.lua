@@ -1494,7 +1494,7 @@ end
         -- Update player frame to hide combat icon
         local playerFrame = _G["MidnightUI_PlayerFrame"]
         if playerFrame then
-            self:UpdateFrame(playerFrame, "player")
+            self:UpdateUnitFrame("PlayerFrame", "player")
         end
         
         local targetFrame = _G["MidnightUI_TargetFrame"]
@@ -1539,7 +1539,7 @@ end
         
         local playerFrame = _G["MidnightUI_PlayerFrame"]
         if playerFrame then
-            self:UpdateFrame(playerFrame, "player")
+            self:UpdateUnitFrame("PlayerFrame", "player")
         end
     end
 

@@ -312,31 +312,123 @@ function ResourceBars:SetupSecondaryResourceBar()
         return 
     end
     
-    -- Auto-detect secondary resource by checking which power types have a max value > 0
-    local useSecondary = false
-    local resourceType = nil
-    
-    local powerTypesToCheck = {
-        Enum.PowerType.ComboPoints,      -- Rogue, Feral/Guardian Druid
-        Enum.PowerType.HolyPower,        -- Paladin
-        Enum.PowerType.Chi,              -- Monk
-        Enum.PowerType.ArcaneCharges,    -- Arcane Mage, some Frost abilities
-        Enum.PowerType.SoulShards,       -- Warlock
-        Enum.PowerType.Runes,            -- Death Knight
-        Enum.PowerType.Essence,          -- Evoker
+    -- Complete resource table for all classes and specs
+    local Resources = {
+        DEATHKNIGHT = {
+            Blood      = { primary = "RUNIC_POWER", secondary = "RUNES" },
+            Frost      = { primary = "RUNIC_POWER", secondary = "RUNES" },
+            Unholy     = { primary = "RUNIC_POWER", secondary = "RUNES" },
+        },
+        DEMONHUNTER = {
+            Havoc      = { primary = "FURY",        secondary = nil },
+            Vengeance  = { primary = "PAIN",        secondary = nil },
+            Devourer   = { primary = "FURY",        secondary = nil },
+        },
+        DRUID = {
+            Balance    = { primary = "MANA",        secondary = "LUNAR_POWER" },
+            Feral      = { primary = "ENERGY",      secondary = "COMBO_POINTS" },
+            Guardian   = { primary = "RAGE",        secondary = nil },
+            Restoration= { primary = "MANA",        secondary = nil },
+        },
+        EVOKER = {
+            Devastation  = { primary = "MANA",      secondary = "ESSENCE" },
+            Preservation = { primary = "MANA",      secondary = "ESSENCE" },
+            Augmentation = { primary = "MANA",      secondary = "ESSENCE" },
+        },
+        HUNTER = {
+            BeastMastery = { primary = "FOCUS",     secondary = nil },
+            Marksmanship = { primary = "FOCUS",     secondary = nil },
+            Survival     = { primary = "FOCUS",     secondary = nil },
+        },
+        MAGE = {
+            Arcane     = { primary = "MANA",        secondary = "ARCANE_CHARGES" },
+            Fire       = { primary = "MANA",        secondary = nil },
+            Frost      = { primary = "MANA",        secondary = nil },
+        },
+        MONK = {
+            Brewmaster = { primary = "ENERGY",      secondary = "STAGGER" },
+            Mistweaver = { primary = "MANA",        secondary = nil },
+            Windwalker = { primary = "ENERGY",      secondary = "CHI" },
+        },
+        PALADIN = {
+            Holy       = { primary = "MANA",        secondary = "HOLY_POWER" },
+            Protection = { primary = "MANA",        secondary = "HOLY_POWER" },
+            Retribution= { primary = "MANA",        secondary = "HOLY_POWER" },
+        },
+        PRIEST = {
+            Discipline = { primary = "MANA",        secondary = nil },
+            Holy       = { primary = "MANA",        secondary = nil },
+            Shadow     = { primary = "INSANITY",    secondary = nil },
+        },
+        ROGUE = {
+            Assassination = { primary = "ENERGY",   secondary = "COMBO_POINTS" },
+            Outlaw        = { primary = "ENERGY",   secondary = "COMBO_POINTS" },
+            Subtlety      = { primary = "ENERGY",   secondary = "COMBO_POINTS" },
+        },
+        SHAMAN = {
+            Elemental   = { primary = "MANA",       secondary = "MAELSTROM" },
+            Enhancement = { primary = "MANA",       secondary = "MAELSTROM" },
+            Restoration = { primary = "MANA",       secondary = nil },
+        },
+        WARLOCK = {
+            Affliction  = { primary = "MANA",       secondary = "SOUL_SHARDS" },
+            Demonology  = { primary = "MANA",       secondary = "SOUL_SHARDS" },
+            Destruction = { primary = "MANA",       secondary = "SOUL_SHARDS" },
+        },
+        WARRIOR = {
+            Arms       = { primary = "RAGE",        secondary = nil },
+            Fury       = { primary = "RAGE",        secondary = nil },
+            Protection = { primary = "RAGE",        secondary = nil },
+        },
     }
     
-    for _, powerType in ipairs(powerTypesToCheck) do
-        local maxPower = UnitPowerMax("player", powerType)
-        if maxPower and maxPower > 0 then
-            resourceType = powerType
-            useSecondary = true
-            break
+    -- Map resource string names to Enum.PowerType values
+    local powerTypeMap = {
+        ARCANE_CHARGES = Enum.PowerType.ArcaneCharges,
+        CHI = Enum.PowerType.Chi,
+        COMBO_POINTS = Enum.PowerType.ComboPoints,
+        ESSENCE = Enum.PowerType.Essence,
+        HOLY_POWER = Enum.PowerType.HolyPower,
+        LUNAR_POWER = Enum.PowerType.LunarPower,
+        MAELSTROM = Enum.PowerType.Maelstrom,
+        RUNES = Enum.PowerType.Runes,
+        SOUL_SHARDS = Enum.PowerType.SoulShards,
+        STAGGER = 20, -- Stagger is a special case, may need different handling
+    }
+    
+    -- Get current class and spec
+    local _, class = UnitClass("player")
+    local specIndex = GetSpecialization()
+    if not specIndex then
+        if self.secondaryBar then
+            self.secondaryBar:Hide()
+        end
+        return
+    end
+    
+    -- Get spec name
+    local specID, specName = GetSpecializationInfo(specIndex)
+    if not specName then
+        if self.secondaryBar then
+            self.secondaryBar:Hide()
+        end
+        return
+    end
+    
+    -- Remove spaces from spec name to match table keys
+    specName = specName:gsub("%s+", "")
+    
+    -- Look up the secondary resource for this class/spec
+    local resourceType = nil
+    if Resources[class] and Resources[class][specName] then
+        local secondaryName = Resources[class][specName].secondary
+        if secondaryName and powerTypeMap[secondaryName] then
+            resourceType = powerTypeMap[secondaryName]
         end
     end
     
-    -- If no secondary resource found, hide the bar if it exists and exit
-    if not useSecondary then
+    -- If no secondary resource for this spec, hide the bar if it exists and exit
+    if not resourceType then
         if self.secondaryBar then
             self.secondaryBar:Hide()
         end
