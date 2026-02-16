@@ -2040,20 +2040,24 @@ function Cooldowns:UpdateResourceBarWidths()
     local essentialWidth = essentialFrame:GetWidth()
     if not essentialWidth or essentialWidth == 0 then return end
     
+    -- Resource bars have 1px border + 1px inset on each side (4px total)
+    -- So we need to subtract 4px to make the inner content match the essential width
+    local resourceBarWidth = essentialWidth - 4
+    
     -- Get ResourceBars module
     local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
     if not ResourceBars then return end
     
     -- Match primary bar width if enabled
     if db.matchPrimaryBarWidth and ResourceBars.primaryBar then
-        ResourceBars.primaryBar:SetWidth(essentialWidth)
-        ResourceBars.db.profile.primary.width = essentialWidth
+        ResourceBars.primaryBar:SetWidth(resourceBarWidth)
+        ResourceBars.db.profile.primary.width = resourceBarWidth
     end
     
     -- Match secondary bar width if enabled
     if db.matchSecondaryBarWidth and ResourceBars.secondaryBar then
-        ResourceBars.secondaryBar:SetWidth(essentialWidth)
-        ResourceBars.db.profile.secondary.width = essentialWidth
+        ResourceBars.secondaryBar:SetWidth(resourceBarWidth)
+        ResourceBars.db.profile.secondary.width = resourceBarWidth
         
         -- Recreate segments to redistribute them across the new width
         if ResourceBars.secondaryBar.segments then
