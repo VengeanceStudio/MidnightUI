@@ -1646,7 +1646,6 @@ function Cooldowns:FindAndSkinCooldownManager()
     end
     
     -- Initial update
-    self:UpdateTrackedBarCache()  -- WoW 12.0: Build initial cache
     self:UpdateAllDisplays()
 end
 
