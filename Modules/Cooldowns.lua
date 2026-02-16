@@ -192,6 +192,10 @@ function Cooldowns:OnInitialize()
     -- WoW 12.0: Cache of active tracked bar spell IDs (works in combat)
     -- Maps spellID -> true for active auras
     self.activeTrackedBarSpells = {}
+    
+    -- Throttle for UNIT_AURA updates to prevent taint cascade
+    self.lastAuraUpdate = 0
+    self.auraUpdateThrottle = 0.2 -- Update at most once per 0.2 seconds
 end
 
 function Cooldowns:CreateChargeColorCurve()
@@ -579,6 +583,13 @@ end
 function Cooldowns:UNIT_AURA(event, unitTarget, updateInfo)
     -- Player auras changed
     if unitTarget == "player" then
+        -- Throttle updates to prevent taint cascade to UnitFrames
+        local now = GetTime()
+        if now - self.lastAuraUpdate < self.auraUpdateThrottle then
+            return
+        end
+        self.lastAuraUpdate = now
+        
         -- WoW 12.0: Update cache of active tracked bar spell IDs
         -- This works in combat when GetPlayerAuraBySpellID doesn't
         self:UpdateTrackedBarCache()
