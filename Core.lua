@@ -2003,6 +2003,9 @@ function MidnightUI:HookConfigDialogFrames()
         end)
     end
     
+    -- Initialize flag to false at startup
+    AceGUI.MidnightUICreateActive = false
+    
     -- Hook AceGUI.Create once to check for MidnightUI context
     if not AceGUI.MidnightUICreateHooked then
         local originalCreate = AceGUI.Create
@@ -2055,8 +2058,10 @@ function MidnightUI:HookConfigDialogFrames()
             -- Set flag when opening MidnightUI
             if appName == "MidnightUI" then
                 AceGUI.MidnightUICreateActive = true
+                print("[MidnightUI] Opening MidnightUI config - custom widgets ENABLED")
             else
                 AceGUI.MidnightUICreateActive = false
+                print("[MidnightUI] Opening " .. tostring(appName) .. " config - custom widgets DISABLED")
             end
             
             return originalOpen(self, appName, ...)
