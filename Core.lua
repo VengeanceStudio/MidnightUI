@@ -104,84 +104,86 @@ function MidnightUI:OnEnable()
             AceConfigDialog.MidnightOpenHooked = true
         end
         
-        -- Hook AceGUI:Create to use our custom widgets (only for MidnightUI)
+        -- Hook AceConfigDialog to apply custom widgets only for MidnightUI
         local AceGUI = LibStub("AceGUI-3.0")
-        if AceGUI and not AceGUI.MidnightCreateHooked then
-            local originalCreate = AceGUI.Create
-            AceGUI.Create = function(self, type, ...)
-                -- Check if this is being called by MidnightUI or one of its widgets
-                local calledByMidnight = false
-                local stack = debugstack(2, 1, 0)
-                if stack and (stack:match("MidnightUI") or stack:match("Midnight")) then
-                    calledByMidnight = true
-                end
-                
-                -- Only replace widgets if called by MidnightUI
-                if calledByMidnight then
-                    -- Replace standard widgets with Midnight versions
-                    if type == "Slider" then
-                        type = "MidnightSlider"
-                    elseif type == "CheckBox" then
-                        type = "MidnightCheckBox"
-                    elseif type == "EditBox" then
-                        type = "MidnightEditBox"
-                    elseif type == "MultiLineEditBox" then
-                        type = "MidnightMultiLineEditBox"
-                    elseif type == "ColorPicker" then
-                        type = "MidnightColorPicker"
-                    elseif type == "InlineGroup" then
-                        type = "MidnightInlineGroup"
-                    elseif type == "Button" then
-                        type = "MidnightButton"
-                    elseif type == "Dropdown" then
-                        type = "MidnightDropdown"
-                    elseif type == "Dropdown-Pullout" then
-                        type = "MidnightDropdown-Pullout"
-                    elseif type == "Heading" then
-                        type = "MidnightHeading"
-                    elseif type == "TabGroup" then
-                        type = "MidnightTabGroup"
+        if AceGUI and AceConfigDialog and not AceConfigDialog.MidnightWidgetHooked then
+            local originalOpen = AceConfigDialog.Open
+            AceConfigDialog.Open = function(self, appName, ...)
+                -- Enable Midnight widgets only when opening MidnightUI config
+                if appName == "MidnightUI" and not AceGUI.MidnightCreateHooked then
+                    local originalCreate = AceGUI.Create
+                    AceGUI.Create = function(aceGUI, type, ...)
+                        -- Replace standard widgets with Midnight versions
+                        if type == "Slider" then
+                            type = "MidnightSlider"
+                        elseif type == "CheckBox" then
+                            type = "MidnightCheckBox"
+                        elseif type == "EditBox" then
+                            type = "MidnightEditBox"
+                        elseif type == "MultiLineEditBox" then
+                            type = "MidnightMultiLineEditBox"
+                        elseif type == "ColorPicker" then
+                            type = "MidnightColorPicker"
+                        elseif type == "InlineGroup" then
+                            type = "MidnightInlineGroup"
+                        elseif type == "Button" then
+                            type = "MidnightButton"
+                        elseif type == "Dropdown" then
+                            type = "MidnightDropdown"
+                        elseif type == "Dropdown-Pullout" then
+                            type = "MidnightDropdown-Pullout"
+                        elseif type == "Heading" then
+                            type = "MidnightHeading"
+                        elseif type == "TabGroup" then
+                            type = "MidnightTabGroup"
+                        end
+                        
+                        local widget = originalCreate(aceGUI, type, ...)
+                        
+                        -- Ensure type is preserved
+                        if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox" or type == "MidnightMultiLineEditBox" or type == "MidnightColorPicker" or type == "MidnightInlineGroup" or type == "MidnightButton" or type == "MidnightDropdown" or type == "MidnightDropdown-Pullout" or type == "MidnightHeading" or type == "MidnightTabGroup") then
+                            widget.type = type
+                        end
+                        
+                        -- Style LSM widgets after creation
+                        if widget and type and (type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound") then
+                            MidnightUI:StyleLSMWidget(widget)
+                        end
+                        
+                        -- Style ScrollFrame widgets
+                        if widget and type == "ScrollFrame" then
+                            MidnightUI:StyleScrollFrame(widget)
+                        end
+                        
+                        -- Style scrollbar in MultiLineEditBox
+                        if widget and type == "MidnightMultiLineEditBox" and widget.scrollBar then
+                            local scrollBar = widget.scrollBar
+                            local scrollBarName = scrollBar:GetName()
+                            local upButton = _G[scrollBarName .. "ScrollUpButton"]
+                            local downButton = _G[scrollBarName .. "ScrollDownButton"]
+                            
+                            scrollBar.ScrollUpButton = upButton
+                            scrollBar.ScrollDownButton = downButton
+                            
+                            local scrollFrameWidget = {
+                                scrollbar = scrollBar
+                            }
+                            MidnightUI:StyleScrollFrame(scrollFrameWidget)
+                        end
+                        
+                        return widget
                     end
+                    AceGUI.MidnightCreateHooked = true
+                    AceGUI.MidnightOriginalCreate = originalCreate
+                elseif appName ~= "MidnightUI" and AceGUI.MidnightCreateHooked and AceGUI.MidnightOriginalCreate then
+                    -- Restore original Create for other addons
+                    AceGUI.Create = AceGUI.MidnightOriginalCreate
+                    AceGUI.MidnightCreateHooked = false
                 end
                 
-                local widget = originalCreate(self, type, ...)
-                -- Ensure type is preserved
-                if widget and type and (type == "MidnightSlider" or type == "MidnightCheckBox" or type == "MidnightEditBox" or type == "MidnightMultiLineEditBox" or type == "MidnightColorPicker" or type == "MidnightInlineGroup" or type == "MidnightButton" or type == "MidnightDropdown" or type == "MidnightDropdown-Pullout" or type == "MidnightHeading" or type == "MidnightTabGroup") then
-                    widget.type = type
-                end
-                
-                -- Style LSM widgets after creation (only for MidnightUI)
-                if calledByMidnight and widget and type and (type == "LSM30_Font" or type == "LSM30_Statusbar" or type == "LSM30_Border" or type == "LSM30_Background" or type == "LSM30_Sound") then
-                    MidnightUI:StyleLSMWidget(widget)
-                end
-                
-                -- Style ScrollFrame widgets (only for MidnightUI)
-                if calledByMidnight and widget and type == "ScrollFrame" then
-                    MidnightUI:StyleScrollFrame(widget)
-                end
-                
-                -- Style scrollbar in MultiLineEditBox (only for MidnightUI)
-                if calledByMidnight and widget and type == "MidnightMultiLineEditBox" and widget.scrollBar then
-                    -- Get the scroll buttons from the scrollbar (UIPanelScrollFrameTemplate creates these as global children)
-                    local scrollBar = widget.scrollBar
-                    local scrollBarName = scrollBar:GetName()
-                    local upButton = _G[scrollBarName .. "ScrollUpButton"]
-                    local downButton = _G[scrollBarName .. "ScrollDownButton"]
-                    
-                    -- Attach buttons as properties so StyleScrollFrame can find them
-                    scrollBar.ScrollUpButton = upButton
-                    scrollBar.ScrollDownButton = downButton
-                    
-                    -- Create a ScrollFrame-like object for our styling function
-                    local scrollFrameWidget = {
-                        scrollbar = scrollBar
-                    }
-                    MidnightUI:StyleScrollFrame(scrollFrameWidget)
-                end
-                
-                return widget
+                return originalOpen(self, appName, ...)
             end
-            AceGUI.MidnightCreateHooked = true
+            AceConfigDialog.MidnightWidgetHooked = true
         end
         
         -- Register theme change callback to refresh widget colors
