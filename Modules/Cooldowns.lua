@@ -663,9 +663,10 @@ function Cooldowns:GetCooldownData(displayName)
                             end)
                             if ok2 and remaining then
                                 data.remainingTime = remaining
-                                -- Store both start and duration in seconds for cooldown swipe
-                                data.startTime = start / 1000
-                                data.duration = duration / 1000
+                                -- Store raw values without conversion (secret values can't be operated on)
+                                data.startTime = start
+                                data.duration = duration
+                                data.duration_seconds = duration / 1000  -- Also store converted for non-secret use
                             end
                         end
                     end
@@ -681,9 +682,10 @@ function Cooldowns:GetCooldownData(displayName)
                                 end)
                                 if ok2 and remaining then
                                     data.remainingTime = remaining
-                                    -- Store both start and duration in seconds for cooldown swipe
-                                    data.startTime = start / 1000
-                                    data.duration = duration / 1000
+                                    -- Store raw values without conversion (secret values can't be operated on)
+                                    data.startTime = start
+                                    data.duration = duration
+                                    data.duration_seconds = duration / 1000  -- Also store converted for non-secret use
                                 end
                             end
                         end
@@ -1379,9 +1381,10 @@ function Cooldowns:UpdateIconDisplay(frame)
         end
         
         if hasRemainingTime and remainingTimeValue > 0 then
-            -- Set the cooldown swipe animation using stored start/duration from Blizzard frame
+            -- Set the cooldown swipe animation using raw millisecond values from Blizzard frame
             if icon.cooldown and cooldownData.startTime and cooldownData.duration then
-                -- Pass values directly - already in seconds, secret values pass through
+                -- Pass raw millisecond values directly - secret values pass through unchanged
+                -- SetCooldown in WoW 12.0 accepts milliseconds from GetCooldownTimes
                 pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownData.startTime, cooldownData.duration)
             end
             
