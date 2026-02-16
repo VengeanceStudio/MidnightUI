@@ -2750,23 +2750,28 @@ end
                         -- Skip Show() calls in combat to prevent taint
                         if not InCombatLockdown() then
                             local targetFrame = _G["MidnightUI_TargetFrame"]
-                            if targetFrame and UnitExists("target") then
-                                targetFrame:Show()
-                                if targetFrame.healthBar then targetFrame.healthBar:Show() end
-                                if targetFrame.powerBar then targetFrame.powerBar:Show() end
-                                if targetFrame.infoBar then targetFrame.infoBar:Show() end
+                            if targetFrame then
+                                local hasTarget = pcall(UnitExists, "target")
+                                if hasTarget then
+                                    targetFrame:Show()
+                                    if targetFrame.healthBar then targetFrame.healthBar:Show() end
+                                    if targetFrame.powerBar then targetFrame.powerBar:Show() end
+                                    if targetFrame.infoBar then targetFrame.infoBar:Show() end
+                                end
                             end
                         end
                         -- Delay update slightly to allow unit data to populate
                         C_Timer.After(0.05, function()
-                            if UnitExists("target") then
+                            local hasTarget = pcall(UnitExists, "target")
+                            if hasTarget then
                                 self:UpdateUnitFrame("TargetFrame", "target")
                             end
                         end)
                     end
                     if self.db.profile.showTargetTarget then 
                         C_Timer.After(0.05, function()
-                            if UnitExists("targettarget") then
+                            local hasTarget = pcall(UnitExists, "targettarget")
+                            if hasTarget then
                                 self:UpdateUnitFrame("TargetTargetFrame", "targettarget")
                             end
                         end)

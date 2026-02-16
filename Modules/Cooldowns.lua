@@ -2027,8 +2027,8 @@ end
 function Cooldowns:UpdateResourceBarWidths()
     local db = self.db.profile
     
-    -- Get the Essential Cooldown Viewer
-    local essentialFrame = _G["EssentialCooldownViewer"]
+    -- Get the custom Essential Cooldown display (not Blizzard's hidden frame)
+    local essentialFrame = self.customFrames and self.customFrames.essential
     if not essentialFrame then return end
     
     local essentialWidth = essentialFrame:GetWidth()

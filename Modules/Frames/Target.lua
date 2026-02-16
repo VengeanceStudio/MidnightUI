@@ -28,12 +28,14 @@ function UnitFrames:CreateTargetFrame()
             UnregisterStateDriver(customTargetFrame, "visibility")
             RegisterStateDriver(customTargetFrame, "visibility", "[@target,exists] show; hide")
         end
-        -- If target exists right now, force show and update
+        -- If target exists right now, force show and update (skip Show() in combat to prevent taint)
         if UnitExists("target") then
-            customTargetFrame:Show()
-            if customTargetFrame.healthBar then customTargetFrame.healthBar:Show() end
-            if customTargetFrame.powerBar then customTargetFrame.powerBar:Show() end
-            if customTargetFrame.infoBar then customTargetFrame.infoBar:Show() end
+            if not InCombatLockdown() then
+                customTargetFrame:Show()
+                if customTargetFrame.healthBar then customTargetFrame.healthBar:Show() end
+                if customTargetFrame.powerBar then customTargetFrame.powerBar:Show() end
+                if customTargetFrame.infoBar then customTargetFrame.infoBar:Show() end
+            end
             self:UpdateUnitFrame("TargetFrame", "target")
         end
     end

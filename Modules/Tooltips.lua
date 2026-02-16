@@ -442,14 +442,19 @@ function Tooltips:OnTooltipSetItem(tooltip)
     if not tooltip then return end
     
     -- Get item quality for border coloring
-    local _, item = tooltip:GetItem()
-    if item then
-        local itemQuality = C_Item.GetItemQualityByID(item)
-        if itemQuality then
-            -- Only use quality color for uncommon+ items, but always restyle
-            local qualityForBorder = (itemQuality >= Enum.ItemQuality.Uncommon) and itemQuality or nil
-            self:StyleTooltip(tooltip, qualityForBorder)
+    if tooltip.GetItem then
+        local _, item = tooltip:GetItem()
+        if item then
+            local itemQuality = C_Item.GetItemQualityByID(item)
+            if itemQuality then
+                -- Only use quality color for uncommon+ items, but always restyle
+                local qualityForBorder = (itemQuality >= Enum.ItemQuality.Uncommon) and itemQuality or nil
+                self:StyleTooltip(tooltip, qualityForBorder)
+            end
         end
+    else
+        -- For tooltips without GetItem (like ShoppingTooltips), just apply basic styling
+        self:StyleTooltip(tooltip)
     end
 end
 
@@ -517,10 +522,20 @@ end
 
 function Tooltips:OnTooltipSetUnit(tooltip)
     local _, unit = tooltip:GetUnit()
-    if not unit or not UnitExists(unit) then return end
+    
+    -- Protect against secret unit values in combat
+    local unitExists = false
+    local ok = pcall(function()
+        unitExists = unit and UnitExists(unit)
+    end)
+    if not ok or not unitExists then return end
     
     -- Only process players
-    if not UnitIsPlayer(unit) then return end
+    local isPlayer = false
+    ok = pcall(function()
+        isPlayer = UnitIsPlayer(unit)
+    end)
+    if not ok or not isPlayer then return end
     
     local name, realm = UnitName(unit)
     local guid = UnitGUID(unit)
