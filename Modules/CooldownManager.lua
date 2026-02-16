@@ -64,9 +64,6 @@ local defaults = {
 function CooldownManager:OnInitialize()
     -- Setup database
     self.db = MidnightUI.db:RegisterNamespace("CooldownManager", defaults)
-    
-    -- Create container frames
-    self:CreateContainerFrames()
 end
 
 function CooldownManager:OnEnable()
@@ -90,51 +87,6 @@ end
 function CooldownManager:OnDisable()
     self:UnhookAll()
     self:UnregisterAllEvents()
-    
-    if self.essentialFrame then
-        self.essentialFrame:Hide()
-    end
-    if self.utilityFrame then
-        self.utilityFrame:Hide()
-    end
-end
-
---------------------------------------------------------------------------------
--- Container Frames
---------------------------------------------------------------------------------
-
-function CooldownManager:CreateContainerFrames()
-    -- Essential cooldowns container
-    self.essentialFrame = CreateFrame("Frame", "MidnightUI_EssentialCooldowns", UIParent)
-    self.essentialFrame:SetSize(600, 50)
-    self.essentialFrame:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
-    self.essentialFrame.displayType = "essential"
-    
-    -- Utility cooldowns container
-    self.utilityFrame = CreateFrame("Frame", "MidnightUI_UtilityCooldowns", UIParent)
-    self.utilityFrame:SetSize(600, 40)
-    self.utilityFrame:SetPoint("CENTER", UIParent, "CENTER", 0, -250)
-    self.utilityFrame.displayType = "utility"
-    
-    -- Apply positions from saved variables
-    self:ApplyFramePosition(self.essentialFrame, "essential")
-    self:ApplyFramePosition(self.utilityFrame, "utility")
-end
-
-function CooldownManager:ApplyFramePosition(frame, displayType)
-    local pos = self.db.profile[displayType].position
-    frame:ClearAllPoints()
-    frame:SetPoint(pos.point, _G[pos.relativeTo] or UIParent, pos.relativePoint, pos.x, pos.y)
-end
-
-function CooldownManager:SaveFramePosition(frame, displayType)
-    local point, relativeTo, relativePoint, x, y = frame:GetPoint()
-    local pos = self.db.profile[displayType].position
-    pos.point = point
-    pos.relativeTo = relativeTo and relativeTo:GetName() or "UIParent"
-    pos.relativePoint = relativePoint
-    pos.x = x
-    pos.y = y
 end
 
 --------------------------------------------------------------------------------
@@ -197,29 +149,15 @@ function CooldownManager:UpdateViewerDisplay(viewerName, displayType)
     local viewer = _G[viewerName]
     if not viewer then return end
     
-    -- Hide the Blizzard frame itself (we only want its children)
-    viewer:SetAlpha(0)
-    viewer:EnableMouse(false)
-    
     -- Get all child frames from Blizzard's viewer
     local children = { viewer:GetChildren() }
-    local visibleFrames = {}
     
-    -- Skin and collect visible frames
+    -- Skin each visible frame
     for _, childFrame in ipairs(children) do
         if childFrame and childFrame.layoutIndex and childFrame:IsShown() then
             self:SkinBlizzardFrame(childFrame, displayType)
-            table.insert(visibleFrames, childFrame)
         end
     end
-    
-    -- Sort by layout index
-    table.sort(visibleFrames, function(a, b)
-        return (a.layoutIndex or 0) < (b.layoutIndex or 0)
-    end)
-    
-    -- Layout the frames
-    self:LayoutFrames(visibleFrames, displayType)
 end
 
 --------------------------------------------------------------------------------
@@ -231,11 +169,6 @@ function CooldownManager:SkinBlizzardFrame(childFrame, displayType)
     
     -- Resize the frame
     childFrame:SetSize(db.iconWidth, db.iconHeight)
-    
-    -- Reparent to our container
-    local container = displayType == "essential" and self.essentialFrame or self.utilityFrame
-    childFrame:SetParent(container)
-    childFrame:SetFrameLevel(container:GetFrameLevel() + 1)
     
     -- Style the icon
     if childFrame.Icon then
@@ -297,48 +230,6 @@ function CooldownManager:SkinBlizzardFrame(childFrame, displayType)
     
     -- Make sure the frame is visible
     childFrame:Show()
-end
-
---------------------------------------------------------------------------------
--- Frame Layout
---------------------------------------------------------------------------------
-
-function CooldownManager:LayoutFrames(frames, displayType)
-    local db = self.db.profile[displayType]
-    local container = displayType == "essential" and self.essentialFrame or self.utilityFrame
-    
-    if #frames == 0 then
-        container:Hide()
-        return
-    end
-    
-    container:Show()
-    
-    local iconWidth = db.iconWidth
-    local iconHeight = db.iconHeight
-    local spacing = db.iconSpacing
-    local maxPerRow = db.maxPerRow
-    
-    local row = 0
-    local col = 0
-    
-    for i, frame in ipairs(frames) do
-        frame:ClearAllPoints()
-        frame:SetPoint("TOPLEFT", container, "TOPLEFT", col * (iconWidth + spacing), -row * (iconHeight + spacing))
-        
-        col = col + 1
-        if col >= maxPerRow then
-            col = 0
-            row = row + 1
-        end
-    end
-    
-    -- Resize container to fit content
-    local numRows = math.ceil(#frames / maxPerRow)
-    local numCols = math.min(#frames, maxPerRow)
-    local containerWidth = (numCols * iconWidth) + ((numCols - 1) * spacing)
-    local containerHeight = (numRows * iconHeight) + ((numRows - 1) * spacing)
-    container:SetSize(containerWidth, containerHeight)
 end
 
 --------------------------------------------------------------------------------
