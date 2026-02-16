@@ -418,9 +418,21 @@ function Cooldowns:UpdateTrackedBarCache()
         local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
         if not auraData then break end
         
-        if auraData.spellId and spellIDsToCheck[auraData.spellId] then
-            self.activeTrackedBarSpells[auraData.spellId] = true
-            print("DEBUG - Cached active aura:", auraData.name, "spellID", auraData.spellId)
+        -- WoW 12.0: Protect against secret spellId being used as table index
+        if auraData.spellId then
+            local ok, isTracked = pcall(function() 
+                return spellIDsToCheck[auraData.spellId] 
+            end)
+            
+            if ok and isTracked then
+                local ok2 = pcall(function() 
+                    self.activeTrackedBarSpells[auraData.spellId] = true 
+                end)
+                
+                if ok2 then
+                    print("DEBUG - Cached active aura:", auraData.name, "spellID", auraData.spellId)
+                end
+            end
         end
     end
 end
