@@ -2464,9 +2464,14 @@ end
 
                     -- Set health bar text using new segment system
                     if frame.healthBar then
-                        local textLeft = h and h.textLeft or ""
-                        local textCenter = h and h.textCenter or "[curhp] / [maxhp] ([perhp]%)"
-                        local textRight = h and h.textRight or ""
+                        local textLeft = (h and h.textLeft) or ""
+                        local textCenter = (h and h.textCenter) or "[curhp] / [maxhp] ([perhp]%)"
+                        local textRight = (h and h.textRight) or ""
+                        
+                        -- Ensure strings (convert nil/false to empty string)
+                        if type(textLeft) ~= "string" then textLeft = "" end
+                        if type(textCenter) ~= "string" then textCenter = "" end
+                        if type(textRight) ~= "string" then textRight = "" end
                         
                         -- Get font settings
                         local font = LSM and LSM:Fetch("font", h.fontFace or "Arial Narrow") or "Fonts\\FRIZQT__.TTF"

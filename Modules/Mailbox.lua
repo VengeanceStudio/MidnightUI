@@ -535,15 +535,19 @@ end
 function Mailbox:SetupWireAutoSubject()
     if not SendMailMoneyGold then return end
     
-    self:SecureHookScript(SendMailMoneyGold, "OnTextChanged", function()
-        self:UpdateWireSubject()
-    end)
-    self:SecureHookScript(SendMailMoneySilver, "OnTextChanged", function()
-        self:UpdateWireSubject()
-    end)
-    self:SecureHookScript(SendMailMoneyCopper, "OnTextChanged", function()
-        self:UpdateWireSubject()
-    end)
+    -- Check if already hooked to avoid rehooking error
+    if not self.wireHooksInstalled then
+        self:SecureHookScript(SendMailMoneyGold, "OnTextChanged", function()
+            self:UpdateWireSubject()
+        end)
+        self:SecureHookScript(SendMailMoneySilver, "OnTextChanged", function()
+            self:UpdateWireSubject()
+        end)
+        self:SecureHookScript(SendMailMoneyCopper, "OnTextChanged", function()
+            self:UpdateWireSubject()
+        end)
+        self.wireHooksInstalled = true
+    end
 end
 
 function Mailbox:UpdateWireSubject()
