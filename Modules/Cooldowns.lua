@@ -412,8 +412,8 @@ function Cooldowns:GetTrackedBarsData()
             local isActive = child:IsShown() and child:GetWidth() > 0
             
             if isActive and bar.Name then
-                local barName = bar.Name:GetText()
-                if barName then
+                local ok, barName = pcall(function() return bar.Name:GetText() end)
+                if ok and barName and barName ~= "" then
                     -- Get spell info from the bar name
                     local spellInfo = C_Spell.GetSpellInfo(barName)
                     if spellInfo then
