@@ -1381,26 +1381,33 @@ function Cooldowns:UpdateIconDisplay(frame)
         -- Fetch fresh charge data on every update and pass directly to SetText
         if icon.spellID and (frame.displayType == "essential" or frame.displayType == "utility") then
             local chargeInfo = C_Spell.GetSpellCharges(icon.spellID)
-            if chargeInfo and chargeInfo.currentCharges ~= nil then
-                local current = chargeInfo.currentCharges
-                
-                -- Pass charge value to FontString (works for both normal and secret values)
-                icon.stackText:SetText(current)
-                icon.stackText:Show()
-                
-                -- Try to use curve for color (may fail if module is tainted)
-                -- Taint comes from hooksecurefunc on NineSlice
-                if self.chargeCurve then
-                    local ok, color = pcall(function() return self.chargeCurve:Evaluate(current) end)
-                    if ok and color then
-                        local r, g, b, a = color:GetRGBA()
-                        icon.stackText:SetTextColor(r, g, b, a)
+            if chargeInfo and chargeInfo.currentCharges ~= nil and chargeInfo.maxCharges then
+                -- Only show charge text if maxCharges > 1 (spells with single charge don't need indicator)
+                local maxCharges = chargeInfo.maxCharges
+                if maxCharges and maxCharges > 1 then
+                    local current = chargeInfo.currentCharges
+                    
+                    -- Pass charge value to FontString (works for both normal and secret values)
+                    icon.stackText:SetText(current)
+                    icon.stackText:Show()
+                    
+                    -- Try to use curve for color (may fail if module is tainted)
+                    -- Taint comes from hooksecurefunc on NineSlice
+                    if self.chargeCurve then
+                        local ok, color = pcall(function() return self.chargeCurve:Evaluate(current) end)
+                        if ok and color then
+                            local r, g, b, a = color:GetRGBA()
+                            icon.stackText:SetTextColor(r, g, b, a)
+                        else
+                            -- Fallback to white if tainted or secret value not allowed
+                            icon.stackText:SetTextColor(1, 1, 1)
+                        end
                     else
-                        -- Fallback to white if tainted or secret value not allowed
                         icon.stackText:SetTextColor(1, 1, 1)
                     end
                 else
-                    icon.stackText:SetTextColor(1, 1, 1)
+                    -- Single charge ability - no need to show count
+                    icon.stackText:Hide()
                 end
                 
                 icon.texture:SetDesaturated(false)
@@ -1409,8 +1416,8 @@ function Cooldowns:UpdateIconDisplay(frame)
                 icon.stackText:Hide()
                 icon.texture:SetDesaturated(false)
             end
-        elseif cooldownData.charges ~= nil then
-            -- Fallback to stored charge data (for buffs/other displays)
+        elseif cooldownData.charges ~= nil and cooldownData.maxCharges and cooldownData.maxCharges > 1 then
+            -- Fallback to stored charge data (for buffs/other displays) - only if maxCharges > 1
             local current = cooldownData.charges
             
             icon.stackText:SetText(current)
@@ -1430,7 +1437,7 @@ function Cooldowns:UpdateIconDisplay(frame)
             end
             icon.texture:SetDesaturated(false)
         else
-            -- No charge system - hide charge counter
+            -- No charge system or single charge - hide charge counter
             icon.stackText:Hide()
             icon.texture:SetDesaturated(false)
             icon.stackText:SetTextColor(1, 1, 1)
