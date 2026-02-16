@@ -1009,44 +1009,10 @@ function Cooldowns:CreateCustomDisplays()
         self.customFrames.buffs = f
     end
     
-    -- Create Tracked Bars (buff bars)
-    if not self.customFrames.cooldowns then
-        local f = CreateFrame("Frame", "MidnightTrackedBars", UIParent)
-        
-        -- Load saved position or use default
-        local pos = db.customBuffBars.position
-        if pos and pos.point then
-            f:SetPoint(pos.point, UIParent, pos.relativePoint or "CENTER", pos.x or 0, pos.y or 0)
-        else
-            f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
-        end
-        
-        -- Use bar width + padding for frame width, or minimum 400 for visibility in move mode
-        local buffDB = db.customBuffBars
-        local frameWidth = math.max(buffDB.barWidth + 4, 400)
-        f:SetSize(frameWidth, 90)
-        f:SetFrameStrata("MEDIUM")
-        f:EnableMouse(true)
-        
-        f.bars = {}
-        f.activeBars = {}
-        f.displayType = "cooldowns"
-        
-        -- Create the bar frames
-        local buffDB = db.customBuffBars
-        for i = 1, buffDB.maxBars do
-            f.bars[i] = self:CreateBar(f, i)
-        end
-        
-        f:Show()
-        self.customFrames.cooldowns = f
-    end
-    
     -- Setup move mode for all displays
     self:SetupMoveMode("essential", "Essential Cooldowns")
     self:SetupMoveMode("utility", "Utility Cooldowns")
     self:SetupMoveMode("buffs", "Tracked Buffs")
-    self:SetupMoveMode("cooldowns", "Tracked Bars", "customBuffBars")
 end
 
 function Cooldowns:CreateIconDisplay(name, displayType)
@@ -1334,14 +1300,10 @@ end
 function Cooldowns:UpdateAllDisplays()
     if not self.customFrames then return end
     
-    -- Update each display type
+    -- Update each display type (excluding cooldowns - that's Blizzard's now)
     for displayType, frame in pairs(self.customFrames) do
-        if frame and frame.displayType then
-            if displayType == "cooldowns" then
-                self:UpdateBarDisplay(frame)
-            else
-                self:UpdateIconDisplay(frame)
-            end
+        if frame and frame.displayType and displayType ~= "cooldowns" then
+            self:UpdateIconDisplay(frame)
         end
     end
 end
@@ -1594,12 +1556,12 @@ end
 function Cooldowns:FindAndSkinCooldownManager()
     if not self.db.profile.skinCooldownManager then return end
     
-    -- Hide all Blizzard cooldown viewer frames
+    -- Hide Essential, Utility, and BuffIcon viewers (we replace these)
+    -- BUT allow BuffBarCooldownViewer to show through (we just skin it)
     local blizzardFrames = {
         "EssentialCooldownViewer",
         "UtilityCooldownViewer", 
         "BuffIconCooldownViewer",
-        "BuffBarCooldownViewer",
     }
     
     for _, frameName in ipairs(blizzardFrames) do
