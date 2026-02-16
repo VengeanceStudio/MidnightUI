@@ -1378,8 +1378,15 @@ function Cooldowns:UpdateIconDisplay(frame)
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation
             if icon.cooldown then
-                -- Try fallback calculation first (uses stored duration)
-                if cooldownData.duration and cooldownData.duration > 0 then
+                -- Check if duration exists and is greater than 0 (using pcall for secret values)
+                local hasDuration = false
+                if cooldownData.duration then
+                    local ok, isValid = pcall(function() return cooldownData.duration > 0 end)
+                    hasDuration = ok and isValid
+                end
+                
+                if hasDuration then
+                    -- Calculate start time from stored duration and remaining time
                     local startTime = GetTime() - (cooldownData.duration - remainingTimeValue)
                     icon.cooldown:SetCooldown(startTime, cooldownData.duration)
                 elseif icon.spellID then
