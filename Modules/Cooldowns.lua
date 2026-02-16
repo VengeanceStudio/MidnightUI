@@ -1357,9 +1357,8 @@ function Cooldowns:UpdateIconDisplay(frame)
         -- Store spellID on icon for future lookups
         icon.spellID = cooldownData.spellID
         -- Also set it on the cooldown frame for OnUpdate script
-        if icon.cooldown then
-            icon.cooldown.spellID = cooldownData.spellID
-        end
+        -- Store spellID on icon for future lookups
+        icon.spellID = cooldownData.spellID
         
         -- Set cooldown text (protect against secret values)
         local hasRemainingTime = false
@@ -1372,12 +1371,12 @@ function Cooldowns:UpdateIconDisplay(frame)
                 local ok2, value = pcall(function() return cooldownData.remainingTime end)
                 if ok2 then
                     remainingTimeValue = value
-                endhasRemainingTime and remainingTimeValue > 0 then
-            -- Cooldown swipe is handled by OnUpdate script using spellID
-            -- Just make sure the cooldown frame is visible
-            if icon.cooldown then
-                icon.cooldown:Show()
-            endUse the Blizzard cooldown frame directly (reparent it to our icon)
+                end
+            end
+        end
+        
+        if hasRemainingTime and remainingTimeValue > 0 then
+            -- Use the Blizzard cooldown frame directly (reparent it to our icon)
             if cooldownData.blizzardCooldownFrame then
                 local blizzCooldown = cooldownData.blizzardCooldownFrame
                 
@@ -1394,7 +1393,11 @@ function Cooldowns:UpdateIconDisplay(frame)
                     blizzCooldown:SetDrawSwipe(true)
                     blizzCooldown:SetHideCountdownNumbers(true)
                     blizzCooldown:Show()
-                end3 then
+                end
+            end
+            
+            -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
+            if remainingTimeValue > 3 then
                 if remainingTimeValue > 60 then
                     icon.cooldownText:SetFormattedText("%.1fm", remainingTimeValue / 60)
                 else
