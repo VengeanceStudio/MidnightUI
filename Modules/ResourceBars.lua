@@ -312,21 +312,18 @@ function ResourceBars:SetupSecondaryResourceBar()
         return 
     end
     
-    -- Detect secondary resource based on class and what resources the player actually has
-    local _, class = UnitClass("player")
-    local specIndex = GetSpecialization()
+    -- Auto-detect secondary resource by checking which power types have a max value > 0
     local useSecondary = false
     local resourceType = nil
     
-    -- Try to auto-detect by checking which power types have a max value > 0
     local powerTypesToCheck = {
-        Enum.PowerType.HolyPower,
-        Enum.PowerType.ComboPoints,
-        Enum.PowerType.Chi,
-        Enum.PowerType.ArcaneCharges,
-        Enum.PowerType.SoulShards,
-        Enum.PowerType.Runes,
-        Enum.PowerType.Essence,
+        Enum.PowerType.ComboPoints,      -- Rogue, Feral/Guardian Druid
+        Enum.PowerType.HolyPower,        -- Paladin
+        Enum.PowerType.Chi,              -- Monk
+        Enum.PowerType.ArcaneCharges,    -- Arcane Mage, some Frost abilities
+        Enum.PowerType.SoulShards,       -- Warlock
+        Enum.PowerType.Runes,            -- Death Knight
+        Enum.PowerType.Essence,          -- Evoker
     }
     
     for _, powerType in ipairs(powerTypesToCheck) do
@@ -338,23 +335,36 @@ function ResourceBars:SetupSecondaryResourceBar()
         end
     end
     
-    if not useSecondary then return end
+    -- If no secondary resource found, hide the bar if it exists and exit
+    if not useSecondary then
+        if self.secondaryBar then
+            self.secondaryBar:Hide()
+        end
+        return
+    end
     
     if self.secondaryBar then
-        -- Update position if attachment settings changed
-        local db = self.db.profile.secondary
-        self.secondaryBar:ClearAllPoints()
-        if db.attachToPrimary and self.primaryBar then
-            if db.attachPosition == "ABOVE" then
-                self.secondaryBar:SetPoint("BOTTOM", self.primaryBar, "TOP", 0, db.attachSpacing)
-            else -- "BELOW"
-                self.secondaryBar:SetPoint("TOP", self.primaryBar, "BOTTOM", 0, -db.attachSpacing)
-            end
+        -- Check if resource type changed - if so, recreate the bar
+        if self.secondaryBar.resourceType ~= resourceType then
+            self.secondaryBar:Hide()
+            self.secondaryBar = nil
+            -- Continue to create new bar below
         else
-            self.secondaryBar:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+            -- Update position if attachment settings changed
+            local db = self.db.profile.secondary
+            self.secondaryBar:ClearAllPoints()
+            if db.attachToPrimary and self.primaryBar then
+                if db.attachPosition == "ABOVE" then
+                    self.secondaryBar:SetPoint("BOTTOM", self.primaryBar, "TOP", 0, db.attachSpacing)
+                else -- "BELOW"
+                    self.secondaryBar:SetPoint("TOP", self.primaryBar, "BOTTOM", 0, -db.attachSpacing)
+                end
+            else
+                self.secondaryBar:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+            end
+            self:UpdateSecondaryResourceBar()
+            return
         end
-        self:UpdateSecondaryResourceBar()
-        return
     end
     
     local db = self.db.profile.secondary
