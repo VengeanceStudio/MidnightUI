@@ -289,12 +289,8 @@ function Cooldowns:EDIT_MODE_LAYOUTS_UPDATED()
     if self.editModeUpdatePending then return end
     self.editModeUpdatePending = true
     
-    -- Immediately reapply positioning when Edit Mode updates layouts
-    self:UpdateAttachment()
-    self:UpdateFrameGrouping()
-    
-    -- Also reapply after a delay to catch late updates
-    C_Timer.After(0.2, function()
+    -- Delay to ensure all frames are fully positioned before updating attachments
+    C_Timer.After(0.3, function()
         Cooldowns:UpdateAttachment()
         Cooldowns:UpdateFrameGrouping()
         Cooldowns.editModeUpdatePending = false
@@ -2076,17 +2072,29 @@ end
 -- RESOURCE BAR ATTACHMENT
 -- -----------------------------------------------------------------------------
 function Cooldowns:UpdateAttachment()
-    if not self.db.profile.attachToResourceBar then return end
-    
     -- Try to find the MidnightUI ResourceBars module
     local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
     if not ResourceBars or not ResourceBars.primaryBar then return end
+    
+    if not self.db.profile.attachToResourceBar then
+        -- Attachment disabled - clear flag and restore saved position
+        if ResourceBars.primaryBar.isAttached then
+            ResourceBars.primaryBar.isAttached = false
+            local db = ResourceBars.db.profile.primary
+            ResourceBars.primaryBar:ClearAllPoints()
+            ResourceBars.primaryBar:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+        end
+        return
+    end
     
     local db = self.db.profile
     
     -- Find the custom Essential Cooldown display (not Blizzard's hidden frame!)
     local essentialFrame = self.customFrames and self.customFrames.essential
     if not essentialFrame then return end
+    
+    -- Mark resource bar as attached so it doesn't reapply saved positions
+    ResourceBars.primaryBar.isAttached = true
     
     -- Attach RESOURCE BAR to Essential Cooldowns (not the other way around!)
     ResourceBars.primaryBar:ClearAllPoints()

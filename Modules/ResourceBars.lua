@@ -208,6 +208,19 @@ function ResourceBars:SetupPrimaryResourceBar()
     -- Setup dragging
     self:SetupDragging(frame, "primary")
     
+    -- Add nudge arrows
+    local Movable = MidnightUI:GetModule("Movable")
+    if Movable and Movable.CreateNudgeArrows then
+        Movable:CreateNudgeArrows(frame, db, function()
+            -- Reset callback: center the frame
+            db.point = "CENTER"
+            db.x = 0
+            db.y = 0
+            frame:ClearAllPoints()
+            frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        end)
+    end
+    
     -- Set initial color based on power type
     local powerType = UnitPowerType("player")
     if db.customColor then
@@ -397,6 +410,19 @@ function ResourceBars:SetupSecondaryResourceBar()
     -- Setup dragging
     self:SetupDragging(frame, "secondary")
     
+    -- Add nudge arrows
+    local Movable = MidnightUI:GetModule("Movable")
+    if Movable and Movable.CreateNudgeArrows then
+        Movable:CreateNudgeArrows(frame, db, function()
+            -- Reset callback: center the frame
+            db.point = "CENTER"
+            db.x = 0
+            db.y = 0
+            frame:ClearAllPoints()
+            frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        end)
+    end
+    
     -- Don't call update here - let the events handle it once player data is loaded
 end
 
@@ -508,14 +534,22 @@ function ResourceBars:SetupDragging(frame, barType)
 end
 
 function ResourceBars:OnMoveModeChanged(event, enabled)
+    local Movable = MidnightUI:GetModule("Movable")
+    
     if self.primaryBar then
         self.primaryBar:EnableMouse(enabled)
         if enabled then
             self.primaryBar:SetAlpha(0.3)
             self.primaryBar.movableHighlightFrame:Show()
+            if Movable and Movable.UpdateNudgeArrows then
+                Movable:UpdateNudgeArrows(self.primaryBar)
+            end
         else
             self.primaryBar:SetAlpha(1.0)
             self.primaryBar.movableHighlightFrame:Hide()
+            if Movable and Movable.HideNudgeArrows then
+                Movable:HideNudgeArrows(self.primaryBar)
+            end
         end
     end
     if self.secondaryBar then
@@ -523,9 +557,15 @@ function ResourceBars:OnMoveModeChanged(event, enabled)
         if enabled then
             self.secondaryBar:SetAlpha(0.3)
             self.secondaryBar.movableHighlightFrame:Show()
+            if Movable and Movable.UpdateNudgeArrows then
+                Movable:UpdateNudgeArrows(self.secondaryBar)
+            end
         else
             self.secondaryBar:SetAlpha(1.0)
             self.secondaryBar.movableHighlightFrame:Hide()
+            if Movable and Movable.HideNudgeArrows then
+                Movable:HideNudgeArrows(self.secondaryBar)
+            end
         end
     end
 end

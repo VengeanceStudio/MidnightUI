@@ -889,12 +889,15 @@ function Movable:CreateNudgeArrows(container, db, resetCallback, updateCallback)
         
         container:HookScript("OnLeave", function()
             -- Delay hiding to allow mouse to move to arrows
+            if container.arrowHideTimer then
+                container.arrowHideTimer:Cancel()
+            end
             container.arrowHideTimer = C_Timer.NewTimer(0.3, function()
-                if not MouseIsOver(container) then
+                if not MouseIsOver(container) and container.arrows then
                     -- Check if mouse is over any arrow button
                     local overArrow = false
-                    for _, arrow in pairs(container.arrows or {}) do
-                        if MouseIsOver(arrow) then
+                    for _, arrow in pairs(container.arrows) do
+                        if arrow and MouseIsOver(arrow) then
                             overArrow = true
                             break
                         end
