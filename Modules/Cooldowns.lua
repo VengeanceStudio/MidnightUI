@@ -1374,10 +1374,7 @@ function Cooldowns:UpdateIconDisplay(frame)
         end
         
         if hasRemainingTime and remainingTimeValue > 0 then
-            -- Set the cooldown swipe animation using raw millisecond values from Blizzard frame
-            if icon.cooldown and cooldownData.startTime and cooldownData.duration then
-                -- Pass raw millisecond values directly - secret values pass through unchanged
-               Reference the Blizzard cooldown frame for automatic updates (works in combat)
+            -- Reference the Blizzard cooldown frame for automatic updates (works in combat)
             if cooldownData.cooldownFrame and icon.blizzCooldownFrame ~= cooldownData.cooldownFrame then
                 -- Reparent the Blizzard cooldown frame to our icon
                 icon.blizzCooldownFrame = cooldownData.cooldownFrame
@@ -1388,7 +1385,10 @@ function Cooldowns:UpdateIconDisplay(frame)
                 icon.cooldown:SetDrawEdge(false)
                 icon.cooldown:SetDrawSwipe(true)
                 icon.cooldown:SetHideCountdownNumbers(true)
-                icon.cooldown:Show(
+                icon.cooldown:Show()
+            end
+            
+            -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
             if remainingTimeValue > 3 then
                 if remainingTimeValue > 60 then
                     icon.cooldownText:SetFormattedText("%.1fm", remainingTimeValue / 60)
