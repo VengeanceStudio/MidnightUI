@@ -143,6 +143,14 @@ function CooldownManager:UpdateCooldownManager()
     if self.db.profile.utility.enabled then
         self:UpdateViewerDisplay("UtilityCooldownViewer", "utility")
     end
+    
+    -- Update Resource Bars if they're attached to Essential Cooldowns
+    C_Timer.After(0.1, function()
+        local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
+        if ResourceBars and ResourceBars.db and ResourceBars.db.profile.primary.attachToEssentialCooldowns then
+            ResourceBars:UpdatePrimaryResourceBar()
+        end
+    end)
 end
 
 function CooldownManager:UpdateViewerDisplay(viewerName, displayType)

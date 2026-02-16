@@ -23,6 +23,11 @@ local defaults = {
             width = 250,
             height = 20,
             
+            -- Attachment
+            attachToEssentialCooldowns = false,
+            attachPosition = "BELOW", -- "ABOVE" or "BELOW"
+            attachSpacing = 2, -- Spacing from Essential Cooldowns
+            
             -- Appearance
             texture = "Blizzard",
             showBorder = true,
@@ -73,6 +78,43 @@ local defaults = {
         }
     }
 }
+
+-- -----------------------------------------------------------------------------
+-- HELPER FUNCTIONS
+-- -----------------------------------------------------------------------------
+function ResourceBars:GetEssentialCooldownsWidth()
+    local viewer = _G["EssentialCooldownViewer"]
+    if not viewer then return nil end
+    
+    -- Calculate width based on visible children
+    local children = { viewer:GetChildren() }
+    local visibleCount = 0
+    local iconSize = 44 -- Default from CooldownManager
+    local spacing = 4 -- Default from CooldownManager
+    local maxPerRow = 12 -- Default from CooldownManager
+    
+    -- Get actual settings if CooldownManager module exists
+    if _G.CooldownManager and _G.CooldownManager.db and _G.CooldownManager.db.profile then
+        local db = _G.CooldownManager.db.profile.essential
+        iconSize = db.iconWidth or iconSize
+        spacing = db.iconSpacing or spacing
+        maxPerRow = db.maxPerRow or maxPerRow
+    end
+    
+    for _, childFrame in ipairs(children) do
+        if childFrame and childFrame.layoutIndex and childFrame:IsShown() then
+            visibleCount = visibleCount + 1
+        end
+    end
+    
+    if visibleCount == 0 then return nil end
+    
+    -- Calculate width: (icons per row * icon size) + (spacing between icons)
+    local iconsInRow = math.min(visibleCount, maxPerRow)
+    local width = (iconsInRow * iconSize) + ((iconsInRow - 1) * spacing)
+    
+    return width
+end
 
 -- -----------------------------------------------------------------------------
 -- INITIALIZATION
@@ -159,10 +201,35 @@ function ResourceBars:SetupPrimaryResourceBar()
     
     local db = self.db.profile.primary
     
+    -- Calculate width based on attachment
+    local barWidth = db.width
+    if db.attachToEssentialCooldowns then
+        local cooldownWidth = self:GetEssentialCooldownsWidth()
+        if cooldownWidth then
+            barWidth = cooldownWidth
+        end
+    end
+    
     -- Create main frame
     local frame = CreateFrame("Frame", "MidnightUI_PrimaryResourceBar", UIParent, "BackdropTemplate")
-    frame:SetSize(db.width, db.height)
-    frame:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+    frame:SetSize(barWidth, db.height)
+    
+    -- Set position based on attachment
+    if db.attachToEssentialCooldowns then
+        local viewer = _G["EssentialCooldownViewer"]
+        if viewer then
+            frame:ClearAllPoints()
+            if db.attachPosition == "ABOVE" then
+                frame:SetPoint("BOTTOM", viewer, "TOP", 0, db.attachSpacing)
+            else -- "BELOW"
+                frame:SetPoint("TOP", viewer, "BOTTOM", 0, -db.attachSpacing)
+            end
+        else
+            frame:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+        end
+    else
+        frame:SetPoint(db.point, UIParent, db.point, db.x, db.y)
+    end
     frame:SetMovable(true)
     frame:EnableMouse(false)
     frame:SetClampedToScreen(true)
@@ -266,6 +333,21 @@ function ResourceBars:UpdatePrimaryResourceBar()
     
     local db = self.db.profile.primary
     local statusBar = self.primaryBar.statusBar
+    
+    -- Update width if attached to Essential Cooldowns
+    if db.attachToEssentialCooldowns then
+        local cooldownWidth = self:GetEssentialCooldownsWidth()
+        if cooldownWidth and cooldownWidth ~= self.primaryBar:GetWidth() then
+            self.primaryBar:SetWidth(cooldownWidth)
+            -- Update secondary bar width if it's attached to primary
+            if self.secondaryBar and self.db.profile.secondary.attachToPrimary then
+                self.secondaryBar:SetWidth(cooldownWidth)
+                if self.secondaryBar.resourceType then
+                    self:CreateSecondarySegments()
+                end
+            end
+        end
+    end
     
     -- Get power type and values
     local powerType = UnitPowerType("player")
@@ -473,7 +555,7 @@ function ResourceBars:SetupSecondaryResourceBar()
     local frame = CreateFrame("Frame", "MidnightUI_SecondaryResourceBar", UIParent, "BackdropTemplate")
     frame:SetSize(db.width, db.height)
     
-    -- Set position based on attachment setting
+    -- Set position and width based on attachment setting
     if db.attachToPrimary and self.primaryBar then
         frame:ClearAllPoints()
         if db.attachPosition == "ABOVE" then
@@ -481,6 +563,8 @@ function ResourceBars:SetupSecondaryResourceBar()
         else -- "BELOW"
             frame:SetPoint("TOP", self.primaryBar, "BOTTOM", 0, -db.attachSpacing)
         end
+        -- Match primary bar width
+        frame:SetSize(self.primaryBar:GetWidth(), db.height)
     else
         frame:SetPoint(db.point, UIParent, db.point, db.x, db.y)
     end
@@ -794,6 +878,76 @@ function ResourceBars:GetOptions()
                     self.db.profile.primary.showPercentage = v
                     if self.primaryBar then
                         self:UpdatePrimaryResourceBar()
+                    end
+                end
+            },
+            primaryAttachToEssentialCooldowns = {
+                name = "Attach to Essential Cooldowns",
+                desc = "Automatically position and size the primary bar to match Essential Cooldowns width.",
+                type = "toggle",
+                order = 16,
+                disabled = function() return not self.db.profile.primary.enabled end,
+                get = function() return self.db.profile.primary.attachToEssentialCooldowns end,
+                set = function(_, v)
+                    self.db.profile.primary.attachToEssentialCooldowns = v
+                    if self.primaryBar then
+                        self.primaryBar:Hide()
+                        self.primaryBar = nil
+                        self:SetupPrimaryResourceBar()
+                        if self.secondaryBar then
+                            self.secondaryBar:Hide()
+                            self.secondaryBar = nil
+                            self:SetupSecondaryResourceBar()
+                        end
+                    end
+                end
+            },
+            primaryAttachPosition = {
+                name = "Attach Position",
+                desc = "Position the primary bar above or below Essential Cooldowns.",
+                type = "select",
+                order = 17,
+                disabled = function() return not self.db.profile.primary.enabled or not self.db.profile.primary.attachToEssentialCooldowns end,
+                values = {
+                    ["ABOVE"] = "Above",
+                    ["BELOW"] = "Below"
+                },
+                get = function() return self.db.profile.primary.attachPosition end,
+                set = function(_, v)
+                    self.db.profile.primary.attachPosition = v
+                    if self.primaryBar then
+                        self.primaryBar:Hide()
+                        self.primaryBar = nil
+                        self:SetupPrimaryResourceBar()
+                        if self.secondaryBar then
+                            self.secondaryBar:Hide()
+                            self.secondaryBar = nil
+                            self:SetupSecondaryResourceBar()
+                        end
+                    end
+                end
+            },
+            primaryAttachSpacing = {
+                name = "Attach Spacing",
+                desc = "Spacing between primary bar and Essential Cooldowns when attached.",
+                type = "range",
+                order = 18,
+                min = 0,
+                max = 20,
+                step = 1,
+                disabled = function() return not self.db.profile.primary.enabled or not self.db.profile.primary.attachToEssentialCooldowns end,
+                get = function() return self.db.profile.primary.attachSpacing end,
+                set = function(_, v)
+                    self.db.profile.primary.attachSpacing = v
+                    if self.primaryBar then
+                        self.primaryBar:Hide()
+                        self.primaryBar = nil
+                        self:SetupPrimaryResourceBar()
+                        if self.secondaryBar then
+                            self.secondaryBar:Hide()
+                            self.secondaryBar = nil
+                            self:SetupSecondaryResourceBar()
+                        end
                     end
                 end
             },
