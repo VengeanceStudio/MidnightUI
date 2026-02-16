@@ -921,6 +921,11 @@ function Movable:CreateNudgeArrows(container, db, resetCallback, updateCallback)
             end)
             
             arrow:HookScript("OnLeave", function()
+                -- Cancel any existing timer before creating a new one
+                if container.arrowHideTimer then
+                    container.arrowHideTimer:Cancel()
+                end
+                
                 container.arrowHideTimer = C_Timer.NewTimer(0.3, function()
                     if not MouseIsOver(container) then
                         local overArrow = false
