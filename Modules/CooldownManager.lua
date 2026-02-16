@@ -178,15 +178,12 @@ function CooldownManager:SkinBlizzardFrame(childFrame, displayType)
         childFrame.Icon:SetPoint("BOTTOMRIGHT", childFrame, "BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     end
     
-    -- Style the cooldown swipe
+    -- Style the cooldown swipe - use Blizzard defaults
     if childFrame.Cooldown then
-        childFrame.Cooldown:SetSwipeColor(0, 0, 0, 0.8)
-        childFrame.Cooldown:SetDrawEdge(false)
+        childFrame.Cooldown:SetDrawEdge(true)
         childFrame.Cooldown:SetDrawSwipe(true)
-        childFrame.Cooldown:SetHideCountdownNumbers(true)
-        childFrame.Cooldown:ClearAllPoints()
-        childFrame.Cooldown:SetPoint("TOPLEFT", childFrame, "TOPLEFT", db.borderThickness, -db.borderThickness)
-        childFrame.Cooldown:SetPoint("BOTTOMRIGHT", childFrame, "BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
+        childFrame.Cooldown:SetHideCountdownNumbers(false)
+        -- Don't modify swipe color, positioning, or other settings
     end
     
     -- Add custom border if it doesn't exist
