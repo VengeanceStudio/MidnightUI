@@ -1378,12 +1378,10 @@ function Cooldowns:UpdateIconDisplay(frame)
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation
             if icon.cooldown and icon.spellID then
-                -- C_Spell.GetSpellCooldown returns a table in WoW 12.0
-                local cooldownInfo = C_Spell.GetSpellCooldown(icon.spellID)
-                if cooldownInfo then
-                    -- Extract and pass values directly without checking them (secret value pass-through)
-                    pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownInfo.startTime, cooldownInfo.duration)
-                end
+                -- Use GetSpellCooldown (not C_Spell) - returns multiple values, not a table
+                -- Secret values pass through when returned as multiple values
+                local startTime, duration = GetSpellCooldown(icon.spellID)
+                pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
