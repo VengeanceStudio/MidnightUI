@@ -1381,10 +1381,8 @@ function Cooldowns:UpdateIconDisplay(frame)
                 -- C_Spell.GetSpellCooldown returns multiple values directly (not a table)
                 -- Secret values pass through when returned as multiple values
                 local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
-                -- Only set if we got valid values (non-nil)
-                if startTime and duration then
-                    icon.cooldown:SetCooldown(startTime, duration)
-                end
+                -- Use pcall to handle both nil values and secret value failures
+                pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
