@@ -451,6 +451,7 @@ function Cooldowns:GetTrackedBarsData()
                         }
                         
                         table.insert(cooldowns, data)
+                    end
                 end
             end
         end
