@@ -1307,8 +1307,8 @@ function Cooldowns:UpdateAllDisplays()
         end
     end
     
-    -- Delay resource bar width matching slightly to ensure all layout is complete
-    C_Timer.After(0.1, function()
+    -- Delay resource bar width matching to ensure all layout and positioning is complete
+    C_Timer.After(0.3, function()
         self:UpdateResourceBarWidths()
     end)
 end
@@ -2040,8 +2040,9 @@ function Cooldowns:UpdateResourceBarWidths()
     local essentialWidth = essentialFrame:GetWidth()
     if not essentialWidth or essentialWidth == 0 then return end
     
-    -- Match the exact outer width - both frames have padding/borders that cancel out
-    local resourceBarWidth = essentialWidth
+    -- Resource bars have 1px border + 1px inset on each side (4px total)
+    -- Subtract 4px to make the inner content match the essential width
+    local resourceBarWidth = essentialWidth - 4
     
     -- Get ResourceBars module
     local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
