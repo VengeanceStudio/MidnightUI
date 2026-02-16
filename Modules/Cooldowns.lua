@@ -1158,13 +1158,26 @@ function Cooldowns:CreateIcon(parent, displayType)
     icon.texture:SetPoint("BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     icon.texture:SetTexCoord(0.1, 0.9, 0.1, 0.9) -- Crop rounded corners
     
-    -- Cooldown swipe animation - create frame that we'll manually update
+    -- Cooldown swipe animation
     icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
     icon.cooldown:SetAllPoints(icon.texture)
     icon.cooldown:SetDrawEdge(false)
     icon.cooldown:SetDrawSwipe(true)
     icon.cooldown:SetReverse(false)
     icon.cooldown:SetHideCountdownNumbers(true)
+    
+    -- OnUpdate to query cooldown state (works in combat with secret values)
+    icon.cooldown.spellID = nil
+    icon.cooldown:SetScript("OnUpdate", function(self, elapsed)
+        if self.spellID then
+            -- Query fresh cooldown data every frame - secret values handled internally
+            local info = C_Spell.GetSpellCooldown(self.spellID)
+            if info and info.startTime and info.duration then
+                -- The cooldown frame handles secret values internally when we call SetCooldown
+                self:SetCooldown(info.startTime, info.duration)
+            end
+        end
+    end)
     
     -- Cooldown text (keeping for long cooldowns if needed)
     local fontPath = LSM:Fetch("font", db.font or self.db.profile.font)
@@ -1360,6 +1373,10 @@ function Cooldowns:UpdateIconDisplay(frame)
         
         -- Store spellID on icon for future lookups
         icon.spellID = cooldownData.spellID
+        -- Also set it on the cooldown frame for OnUpdate script
+        if icon.cooldown then
+            icon.cooldown.spellID = cooldownData.spellID
+        end
         
         -- Set cooldown text (protect against secret values)
         local hasRemainingTime = false
@@ -1377,17 +1394,10 @@ function Cooldowns:UpdateIconDisplay(frame)
         end
         
         if hasRemainingTime and remainingTimeValue > 0 then
-            -- Copy cooldown state from Blizzard frame (works in combat)
-            if cooldownData.cooldownFrame and icon.cooldown then
-                -- Use SetCooldownDuration which accepts a frame directly
-                local blizzCooldown = cooldownData.cooldownFrame
-                if blizzCooldown.GetCooldownDuration then
-                    local start, duration, enable = blizzCooldown:GetCooldownDuration()
-                    pcall(icon.cooldown.SetCooldownDuration, icon.cooldown, start, duration, enable)
-                elseif blizzCooldown.GetCooldownDisplayDuration then
-                    local start, duration = blizzCooldown:GetCooldownDisplayDuration()
-                    pcall(icon.cooldown.SetCooldownDuration, icon.cooldown, start, duration)
-                end
+            -- Cooldown swipe is handled by OnUpdate script using spellID
+            -- Just make sure the cooldown frame is visible
+            if icon.cooldown then
+                icon.cooldown:Show()
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
