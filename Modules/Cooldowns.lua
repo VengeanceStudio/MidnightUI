@@ -409,38 +409,37 @@ function Cooldowns:GetTrackedBarsData()
             
             -- Check if the Bar itself is shown (not the parent child frame)
             if bar:IsShown() and bar.Name then
-                    local ok, barName = pcall(function() return bar.Name:GetText() end)
-                    print("    GetText ok:", ok, "name:", barName)
-                    if ok and barName then
                 local ok, barName = pcall(function() return bar.Name:GetText() end)
                 if ok and barName then
                     -- Get spell info from the bar name
                     local ok2, spellInfo = pcall(function() return C_Spell.GetSpellInfo(barName) end)
+                    if ok2 and spellInfo then
+                        local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
+                        
                         if iconTexture then
-                                local value = 0
-                                local maxValue = 0
-                                
-                                local ok1, val = pcall(function() return bar:GetValue() end)
-                                if ok1 and val then
-                                    value = val
-                                end
-                                
-                                local ok2, max = pcall(function() return select(2, bar:GetMinMaxValues()) end)
-                                if ok2 and max then
-                                    maxValue = max
-                                end
-                                
-                                local data = {
-                                    icon = iconTexture,
-                                    name = spellInfo.name,
-                                    spellID = spellInfo.spellID,
-                                    remainingTime = value,
-                                    duration = maxValue,
-                                    charges = 1,
-                                }
-                                
-                                table.insert(cooldowns, data)
+                            local value = 0
+                            local maxValue = 0
+                            
+                            local ok1, val = pcall(function() return bar:GetValue() end)
+                            if ok1 and val then
+                                value = val
                             end
+                            
+                            local ok2, max = pcall(function() return select(2, bar:GetMinMaxValues()) end)
+                            if ok2 and max then
+                                maxValue = max
+                            end
+                            
+                            local data = {
+                                icon = iconTexture,
+                                name = spellInfo.name,
+                                spellID = spellInfo.spellID,
+                                remainingTime = value,
+                                duration = maxValue,
+                                charges = 1,
+                            }
+                            
+                            table.insert(cooldowns, data)
                         end
                     end
                 end
