@@ -460,16 +460,34 @@ function Cooldowns:GetTrackedBarsData()
                 
                 -- Determine if this bar is active by checking if player has the aura
                 local isActive = false
+                local foundSpellID = nil
                 
                 -- Use C_UnitAuras to check if the player has this aura
                 -- This works in and out of combat without taint
                 if C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID then
+                    -- Try the main spellID first
                     local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
                     if auraData then
                         isActive = true
-                        print("DEBUG - Found aura for", spellInfo.name, "with spellID", spellID)
+                        foundSpellID = spellID
+                        print("DEBUG - Found aura for", spellInfo.name, "with MAIN spellID", spellID)
                     else
-                        print("DEBUG - No aura found for", spellInfo.name, "with spellID", spellID)
+                        -- Try linkedSpellIDs if main spellID didn't work
+                        if info.linkedSpellIDs and #info.linkedSpellIDs > 0 then
+                            for _, linkedID in ipairs(info.linkedSpellIDs) do
+                                auraData = C_UnitAuras.GetPlayerAuraBySpellID(linkedID)
+                                if auraData then
+                                    isActive = true
+                                    foundSpellID = linkedID
+                                    print("DEBUG - Found aura for", spellInfo.name, "with LINKED spellID", linkedID)
+                                    break
+                                end
+                            end
+                        end
+                        
+                        if not isActive then
+                            print("DEBUG - No aura found for", spellInfo.name, "(tried main:", spellID, "and", info.linkedSpellIDs and #info.linkedSpellIDs or 0, "linked IDs)")
+                        end
                     end
                 end
                 
