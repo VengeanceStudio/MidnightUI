@@ -1157,7 +1157,15 @@ function Cooldowns:CreateIcon(parent, displayType)
     icon.texture:SetPoint("BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     icon.texture:SetTexCoord(0.1, 0.9, 0.1, 0.9) -- Crop rounded corners
     
-    -- Cooldown text
+    -- Cooldown swipe animation (shadowed clock overlay)
+    icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+    icon.cooldown:SetAllPoints(icon.texture)
+    icon.cooldown:SetDrawEdge(false)
+    icon.cooldown:SetDrawSwipe(true)
+    icon.cooldown:SetReverse(false)
+    icon.cooldown:SetHideCountdownNumbers(true) -- Hide Blizzard's countdown text
+    
+    -- Cooldown text (keeping for long cooldowns if needed)
     local fontPath = LSM:Fetch("font", db.font or self.db.profile.font)
     local fontFlag = db.fontFlag or self.db.profile.fontFlag or "OUTLINE"
     local fontSize = db.fontSize or self.db.profile.fontSize or 14
@@ -1368,13 +1376,27 @@ function Cooldowns:UpdateIconDisplay(frame)
         end
         
         if hasRemainingTime and remainingTimeValue > 0 then
-            if remainingTimeValue > 60 then
-                icon.cooldownText:SetFormattedText("%.1fm", remainingTimeValue / 60)
+            -- Set the cooldown swipe animation
+            if icon.cooldown and cooldownData.duration then
+                local startTime = GetTime() - (cooldownData.duration - remainingTimeValue)
+                icon.cooldown:SetCooldown(startTime, cooldownData.duration)
+            end
+            
+            -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
+            if remainingTimeValue > 3 then
+                if remainingTimeValue > 60 then
+                    icon.cooldownText:SetFormattedText("%.1fm", remainingTimeValue / 60)
+                else
+                    icon.cooldownText:SetFormattedText("%.0f", remainingTimeValue)
+                end
             else
-                icon.cooldownText:SetFormattedText("%.0f", remainingTimeValue)
+                icon.cooldownText:SetText("")
             end
         else
             icon.cooldownText:SetText("")
+            if icon.cooldown then
+                icon.cooldown:Clear()
+            end
         end
         
         -- Handle charges (WoW 12.0 event-driven pass-through)
