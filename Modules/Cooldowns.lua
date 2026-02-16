@@ -188,6 +188,10 @@ function Cooldowns:OnInitialize()
     }
     self.iconPools = {}
     self.barPools = {}
+    
+    -- WoW 12.0: Cache of active tracked bar spell IDs (works in combat)
+    -- Maps spellID -> true for active auras
+    self.activeTrackedBarSpells = {}
 end
 
 function Cooldowns:CreateChargeColorCurve()
@@ -379,6 +383,48 @@ function Cooldowns:HideIconGlow(spellID)
     end
 end
 
+-- WoW 12.0: Update cache of active tracked bar spell IDs from player auras
+-- This works in combat when GetPlayerAuraBySpellID() doesn't
+function Cooldowns:UpdateTrackedBarCache()
+    if not C_CooldownViewer or not Enum or not Enum.CooldownViewerCategory then
+        return
+    end
+    
+    -- Clear cache
+    wipe(self.activeTrackedBarSpells)
+    
+    -- Get all tracked bar cooldowns and their linked spell IDs
+    local trackedIDs = C_CooldownViewer.GetCooldownViewerCategorySet(Enum.CooldownViewerCategory.TrackedBar)
+    if not trackedIDs then return end
+    
+    local spellIDsToCheck = {}
+    for _, cooldownID in ipairs(trackedIDs) do
+        local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cooldownID)
+        if info and info.isKnown then
+            local spellID = info.overrideSpellID or info.spellID or cooldownID
+            spellIDsToCheck[spellID] = true
+            
+            -- Also track linked spell IDs
+            if info.linkedSpellIDs then
+                for _, linkedID in ipairs(info.linkedSpellIDs) do
+                    spellIDsToCheck[linkedID] = true
+                end
+            end
+        end
+    end
+    
+    -- Scan all player auras and cache matching spell IDs
+    for i = 1, 40 do
+        local auraData = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
+        if not auraData then break end
+        
+        if auraData.spellId and spellIDsToCheck[auraData.spellId] then
+            self.activeTrackedBarSpells[auraData.spellId] = true
+            print("DEBUG - Cached active aura:", auraData.name, "spellID", auraData.spellId)
+        end
+    end
+end
+
 -- WoW 12.0: Get tracked bars data - match cooldowns to bars by index
 function Cooldowns:GetTrackedBarsData()
     local cooldowns = {}
@@ -458,36 +504,31 @@ function Cooldowns:GetTrackedBarsData()
                     
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
-                -- Determine if this bar is active by checking if player has the aura
+                -- Determine if this bar is active by checking cache
+                -- WoW 12.0: Use cached spell IDs instead of API (works in combat)
                 local isActive = false
                 local foundSpellID = nil
                 
-                -- Use C_UnitAuras to check if the player has this aura
-                -- This works in and out of combat without taint
-                if C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID then
-                    -- Try the main spellID first
-                    local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-                    if auraData then
-                        isActive = true
-                        foundSpellID = spellID
-                        print("DEBUG - Found aura for", spellInfo.name, "with MAIN spellID", spellID)
-                    else
-                        -- Try linkedSpellIDs if main spellID didn't work
-                        if info.linkedSpellIDs and #info.linkedSpellIDs > 0 then
-                            for _, linkedID in ipairs(info.linkedSpellIDs) do
-                                auraData = C_UnitAuras.GetPlayerAuraBySpellID(linkedID)
-                                if auraData then
-                                    isActive = true
-                                    foundSpellID = linkedID
-                                    print("DEBUG - Found aura for", spellInfo.name, "with LINKED spellID", linkedID)
-                                    break
-                                end
+                -- Check main spell ID in cache
+                if self.activeTrackedBarSpells[spellID] then
+                    isActive = true
+                    foundSpellID = spellID
+                    print("DEBUG - Found cached aura for", spellInfo.name, "with MAIN spellID", spellID)
+                else
+                    -- Try linkedSpellIDs
+                    if info.linkedSpellIDs and #info.linkedSpellIDs > 0 then
+                        for _, linkedID in ipairs(info.linkedSpellIDs) do
+                            if self.activeTrackedBarSpells[linkedID] then
+                                isActive = true
+                                foundSpellID = linkedID
+                                print("DEBUG - Found cached aura for", spellInfo.name, "with LINKED spellID", linkedID)
+                                break
                             end
                         end
-                        
-                        if not isActive then
-                            print("DEBUG - No aura found for", spellInfo.name, "(tried main:", spellID, "and", info.linkedSpellIDs and #info.linkedSpellIDs or 0, "linked IDs)")
-                        end
+                    end
+                    
+                    if not isActive then
+                        print("DEBUG - No cached aura for", spellInfo.name, "(tried main:", spellID, "and", info.linkedSpellIDs and #info.linkedSpellIDs or 0, "linked IDs)")
                     end
                 end
                 
@@ -523,9 +564,12 @@ function Cooldowns:GetTrackedBarsData()
     return cooldowns
 end
 
-function Cooldowns:UNIT_AURA(event, unitTarget)
+function Cooldowns:UNIT_AURA(event, unitTarget, updateInfo)
     -- Player auras changed
     if unitTarget == "player" then
+        -- WoW 12.0: Update cache of active tracked bar spell IDs
+        -- This works in combat when GetPlayerAuraBySpellID doesn't
+        self:UpdateTrackedBarCache()
         self:UpdateAllDisplays()
     end
 end
@@ -1710,6 +1754,7 @@ function Cooldowns:FindAndSkinCooldownManager()
     end
     
     -- Initial update
+    self:UpdateTrackedBarCache()  -- WoW 12.0: Build initial cache
     self:UpdateAllDisplays()
 end
 
