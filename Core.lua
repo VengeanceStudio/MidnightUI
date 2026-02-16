@@ -2003,56 +2003,75 @@ function MidnightUI:HookConfigDialogFrames()
         end)
     end
     
-    -- Hook AceGUI:Create to skin widgets as they're created
-    local oldCreate = AceGUI.Create
-    AceGUI.Create = function(self, widgetType)
-        local widget = oldCreate(self, widgetType)
-        if widget then
-            C_Timer.After(0, function()
-                MidnightUI:SkinAceGUIWidget(widget, widgetType)
-                
-                -- Register frames that we've styled
-                if widgetType == "TabGroup" and widget.tabs then
-                    for _, tab in pairs(widget.tabs) do
-                        if tab.SetBackdrop then
-                            local isSelected = (widget.selected == tab.value)
-                            local r, g, b, a
-                            if isSelected then
-                                r, g, b, a = ColorPalette:GetColor('button-bg')
-                                r, g, b = r * 1.5, g * 1.5, b * 1.5
-                            else
-                                r, g, b, a = ColorPalette:GetColor('button-bg')
-                            end
-                            
-                            styledFrames[tab] = {
-                                backdrop = {
-                                    bgFile = "Interface\\Buttons\\WHITE8X8",
-                                    edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                    tile = false, edgeSize = 1,
-                                    insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                                },
-                                bgColor = {r, g, b, a},
-                                borderColor = isSelected and {0.1608, 0.5216, 0.5804, 1} or {ColorPalette:GetColor('panel-border')}
-                            }
+    -- Hook AceConfigDialog:Open to enable custom widgets only for MidnightUI
+    if AceConfigDialog and not AceConfigDialog.MidnightUIHooked then
+        local originalOpen = AceConfigDialog.Open
+        AceConfigDialog.Open = function(self, appName, ...)
+            -- Enable custom widgets when opening MidnightUI config
+            if appName == "MidnightUI" and not AceGUI.MidnightUICreateActive then
+                local originalCreate = AceGUI.Create
+                AceGUI.Create = function(aceGUI, widgetType, ...)
+                    -- Only replace if we're actively in MidnightUI config
+                    if AceGUI.MidnightUICreateActive then
+                        if widgetType == "Slider" then
+                            widgetType = "MidnightSlider"
+                        elseif widgetType == "CheckBox" then
+                            widgetType = "MidnightCheckBox"
+                        elseif widgetType == "EditBox" then
+                            widgetType = "MidnightEditBox"
+                        elseif widgetType == "MultiLineEditBox" then
+                            widgetType = "MidnightMultiLineEditBox"
+                        elseif widgetType == "ColorPicker" then
+                            widgetType = "MidnightColorPicker"
+                        elseif widgetType == "InlineGroup" then
+                            widgetType = "MidnightInlineGroup"
+                        elseif widgetType == "Button" then
+                            widgetType = "MidnightButton"
+                        elseif widgetType == "Dropdown" then
+                            widgetType = "MidnightDropdown"
+                        elseif widgetType == "Dropdown-Pullout" then
+                            widgetType = "MidnightDropdown-Pullout"
+                        elseif widgetType == "Heading" then
+                            widgetType = "MidnightHeading"
+                        elseif widgetType == "TabGroup" then
+                            widgetType = "MidnightTabGroup"
                         end
                     end
-                elseif widgetType == "Dropdown" and widget.dropdown then
-                    if widget.dropdown.SetBackdrop then
-                        styledFrames[widget.dropdown] = {
-                            backdrop = {
-                                bgFile = "Interface\\Buttons\\WHITE8X8",
-                                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                                tile = false, edgeSize = 1,
-                                insets = { left = 1, right = 1, top = 1, bottom = 1 }
-                            },
-                            bgColor = {ColorPalette:GetColor('button-bg')},
-                            borderColor = {ColorPalette:GetColor('panel-border')}
-                        }
+                    
+                    local widget = originalCreate(aceGUI, widgetType, ...)
+                    
+                    -- Apply additional styling for MidnightUI
+                    if widget and AceGUI.MidnightUICreateActive then
+                        C_Timer.After(0, function()
+                            MidnightUI:SkinAceGUIWidget(widget, widgetType)
+                        end)
                     end
+                    
+                    return widget
                 end
-            end)
+                AceGUI.MidnightUIOriginalCreate = originalCreate
+            end
+            
+            -- Set flag when opening MidnightUI
+            if appName == "MidnightUI" then
+                AceGUI.MidnightUICreateActive = true
+            else
+                AceGUI.MidnightUICreateActive = false
+            end
+            
+            return originalOpen(self, appName, ...)
         end
-        return widget
+        
+        -- Hook Close to disable custom widgets
+        local originalClose = AceConfigDialog.Close
+        AceConfigDialog.Close = function(self, appName, ...)
+            if appName == "MidnightUI" then
+                AceGUI.MidnightUICreateActive = false
+            end
+            return originalClose(self, appName, ...)
+        end
+        
+        AceConfigDialog.MidnightUIHooked = true
     end
 end
 
