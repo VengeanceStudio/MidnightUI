@@ -121,9 +121,9 @@ function ResourceBars:PLAYER_ENTERING_WORLD()
             
             -- Trigger cooldowns attachment update after bars are created
             C_Timer.After(0.5, function()
-                local Cooldowns = MidnightUI:GetModule("Cooldowns", true)
-                if Cooldowns then
-                    Cooldowns:UpdateAttachment()
+                local CooldownManager = MidnightUI:GetModule("CooldownManager", true)
+                if CooldownManager then
+                    CooldownManager:UpdateCooldownManager()
                 end
             end)
         end

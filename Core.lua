@@ -630,12 +630,16 @@ function MidnightUI:ScaleLayoutToResolution()
         end
     end
     
-    -- Scale Cooldowns position
-    if _G.Cooldowns and _G.Cooldowns.db and _G.Cooldowns.db.profile then
-        local cd = _G.Cooldowns.db.profile
-        if cd.x and cd.y then
-            cd.x = math.floor(cd.x * scaleX)
-            cd.y = math.floor(cd.y * scaleY)
+    -- Scale CooldownManager position
+    if _G.CooldownManager and _G.CooldownManager.db and _G.CooldownManager.db.profile then
+        local cd = _G.CooldownManager.db.profile
+        if cd.essential and cd.essential.position then
+            cd.essential.position.x = math.floor(cd.essential.position.x * scaleX)
+            cd.essential.position.y = math.floor(cd.essential.position.y * scaleY)
+        end
+        if cd.utility and cd.utility.position then
+            cd.utility.position.x = math.floor(cd.utility.position.x * scaleX)
+            cd.utility.position.y = math.floor(cd.utility.position.y * scaleY)
         end
     end
     
@@ -3910,9 +3914,11 @@ function MidnightUI:GetOptions()
                                     _G.Bar:UpdateAllFonts()
                                 end
                             end
-                            -- Cooldowns module
-                            if _G.Cooldowns and _G.Cooldowns.db and _G.Cooldowns.db.profile then
-                                _G.Cooldowns.db.profile.font = font
+                            -- CooldownManager module
+                            if _G.CooldownManager and _G.CooldownManager.db and _G.CooldownManager.db.profile then
+                                _G.CooldownManager.db.profile.font = font
+                                _G.CooldownManager.db.profile.essential.font = font
+                                _G.CooldownManager.db.profile.utility.font = font
                             end
                             -- Maps module
                             if _G.Maps and _G.Maps.db and _G.Maps.db.profile then
@@ -4166,7 +4172,7 @@ function MidnightUI:GetOptions()
             dbKey = "actionbars"
         elseif name == "UnitFrames" then
             dbKey = "unitframes"
-        elseif name == "Cooldowns" then
+        elseif name == "CooldownManager" then
             dbKey = "cooldowns"
         elseif name == "Tweaks" then
             dbKey = "tweaks"
@@ -4188,7 +4194,7 @@ function MidnightUI:GetOptions()
                 displayName = "Skinning"
             elseif name == "BrokerBar" then 
                 displayName = "Data Brokers"
-            elseif name == "Cooldowns" then
+            elseif name == "CooldownManager" then
                 displayName = "Cooldown Manager"
             end
             if name == "UnitFrames" then

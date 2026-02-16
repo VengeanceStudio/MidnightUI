@@ -1158,9 +1158,13 @@ function Cooldowns:CreateIcon(parent, displayType)
     icon.texture:SetPoint("BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     icon.texture:SetTexCoord(0.1, 0.9, 0.1, 0.9) -- Crop rounded corners
     
-    -- Don't create our own cooldown frame - we'll use Blizzard's
-    icon.cooldown = nil
-    icon.blizzardCooldownFrame = nil
+    -- Cooldown swipe animation - create our own but it won't update in combat
+    icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+    icon.cooldown:SetAllPoints(icon.texture)
+    icon.cooldown:SetDrawEdge(false)
+    icon.cooldown:SetDrawSwipe(true)
+    icon.cooldown:SetReverse(false)
+    icon.cooldown:SetHideCountdownNumbers(true)
     
     -- Cooldown text (keeping for long cooldowns if needed)
     local fontPath = LSM:Fetch("font", db.font or self.db.profile.font)
@@ -1376,23 +1380,16 @@ function Cooldowns:UpdateIconDisplay(frame)
         end
         
         if hasRemainingTime and remainingTimeValue > 0 then
-            -- Use the Blizzard cooldown frame directly (reparent it to our icon)
-            if cooldownData.blizzardCooldownFrame then
-                local blizzCooldown = cooldownData.blizzardCooldownFrame
-                
-                -- Only reparent if we haven't already or if it's a different frame
-                if icon.blizzardCooldownFrame ~= blizzCooldown then
-                    icon.blizzardCooldownFrame = blizzCooldown
-                    icon.cooldown = blizzCooldown
-                    
-                    -- Reparent to our icon and position it
-                    blizzCooldown:SetParent(icon)
-                    blizzCooldown:ClearAllPoints()
-                    blizzCooldown:SetAllPoints(icon.texture)
-                    blizzCooldown:SetDrawEdge(false)
-                    blizzCooldown:SetDrawSwipe(true)
-                    blizzCooldown:SetHideCountdownNumbers(true)
-                    blizzCooldown:Show()
+            -- Cooldown swipe only works out of combat (secret values prevent in-combat updates)
+            if icon.cooldown and not InCombatLockdown() then
+                -- Try to get fresh cooldown info from Blizzard frame
+                if cooldownData.blizzardCooldownFrame then
+                    local start, duration = cooldownData.blizzardCooldownFrame:GetCooldownTimes()
+                    if start and duration then
+                        pcall(function()
+                            icon.cooldown:SetCooldown(start / 1000, duration / 1000)
+                        end)
+                    end
                 end
             end
             
