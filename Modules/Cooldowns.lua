@@ -1306,6 +1306,9 @@ function Cooldowns:UpdateAllDisplays()
             self:UpdateIconDisplay(frame)
         end
     end
+    
+    -- After updating icon displays, sync resource bar widths if enabled
+    self:UpdateResourceBarWidths()
 end
 
 function Cooldowns:UpdateIconDisplay(frame)
