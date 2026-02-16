@@ -1378,19 +1378,20 @@ function Cooldowns:UpdateIconDisplay(frame)
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation
             if icon.cooldown then
-                -- Check if duration exists and is greater than 0 (using pcall for secret values)
-                local hasDuration = false
+                -- Try calculation with stored duration (wrap in pcall to handle secret values)
                 if cooldownData.duration then
-                    local ok, isValid = pcall(function() return cooldownData.duration > 0 end)
-                    hasDuration = ok and isValid
-                end
-                
-                if hasDuration then
-                    -- Calculate start time from stored duration and remaining time
-                    local startTime = GetTime() - (cooldownData.duration - remainingTimeValue)
-                    icon.cooldown:SetCooldown(startTime, cooldownData.duration)
+                    local ok = pcall(function()
+                        local startTime = GetTime() - (cooldownData.duration - remainingTimeValue)
+                        icon.cooldown:SetCooldown(startTime, cooldownData.duration)
+                    end)
+                    
+                    -- If that failed and we have spellID, try API approach
+                    if not ok and icon.spellID then
+                        local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
+                        pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
+                    end
                 elseif icon.spellID then
-                    -- API fallback if no stored duration
+                    -- No stored duration, use API
                     local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
                     pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
                 end
