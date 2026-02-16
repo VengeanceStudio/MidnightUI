@@ -95,6 +95,7 @@ function ResourceBars:OnDBReady()
     self:RegisterEvent("UNIT_MAXPOWER")
     self:RegisterEvent("UNIT_DISPLAYPOWER")
     self:RegisterEvent("UNIT_POWER_FREQUENT", "UNIT_POWER_UPDATE")
+    self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     
     -- For secondary resources (combo points, runes, chi, etc.)
     self:RegisterEvent("UNIT_POWER_POINT_CHARGE")
@@ -116,6 +117,20 @@ function ResourceBars:PLAYER_ENTERING_WORLD()
     C_Timer.After(0.5, function()
         if self.db and self.db.profile then
             self:SetupPrimaryResourceBar()
+            self:SetupSecondaryResourceBar()
+        end
+    end)
+end
+
+function ResourceBars:PLAYER_SPECIALIZATION_CHANGED()
+    -- Recreate secondary bar when spec changes (different specs may use different resources)
+    if self.secondaryBar then
+        self.secondaryBar:Hide()
+        self.secondaryBar = nil
+    end
+    
+    C_Timer.After(0.2, function()
+        if self.db and self.db.profile then
             self:SetupSecondaryResourceBar()
         end
     end)
@@ -297,29 +312,30 @@ function ResourceBars:SetupSecondaryResourceBar()
         return 
     end
     
-    -- Check if player class uses a secondary resource
+    -- Detect secondary resource based on class and what resources the player actually has
     local _, class = UnitClass("player")
+    local specIndex = GetSpecialization()
     local useSecondary = false
     local resourceType = nil
     
-    if class == "PALADIN" then
-        resourceType = Enum.PowerType.HolyPower
-        useSecondary = true
-    elseif class == "ROGUE" or class == "DRUID" then
-        resourceType = Enum.PowerType.ComboPoints
-        useSecondary = true
-    elseif class == "MONK" then
-        resourceType = Enum.PowerType.Chi
-        useSecondary = true
-    elseif class == "MAGE" then
-        resourceType = Enum.PowerType.ArcaneCharges
-        useSecondary = true
-    elseif class == "WARLOCK" then
-        resourceType = Enum.PowerType.SoulShards
-        useSecondary = true
-    elseif class == "DEATHKNIGHT" then
-        resourceType = Enum.PowerType.Runes
-        useSecondary = true
+    -- Try to auto-detect by checking which power types have a max value > 0
+    local powerTypesToCheck = {
+        Enum.PowerType.HolyPower,
+        Enum.PowerType.ComboPoints,
+        Enum.PowerType.Chi,
+        Enum.PowerType.ArcaneCharges,
+        Enum.PowerType.SoulShards,
+        Enum.PowerType.Runes,
+        Enum.PowerType.Essence,
+    }
+    
+    for _, powerType in ipairs(powerTypesToCheck) do
+        local maxPower = UnitPowerMax("player", powerType)
+        if maxPower and maxPower > 0 then
+            resourceType = powerType
+            useSecondary = true
+            break
+        end
     end
     
     if not useSecondary then return end
