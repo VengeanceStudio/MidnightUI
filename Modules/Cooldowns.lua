@@ -1305,9 +1305,10 @@ function Cooldowns:UpdateAllDisplays()
         end
     end
     
-    -- Delay resource bar width matching to ensure all layout and positioning is complete
+    -- Delay resource bar width matching and attachment to ensure all layout and positioning is complete
     C_Timer.After(0.3, function()
         self:UpdateResourceBarWidths()
+        self:UpdateAttachment()
     end)
 end
 
