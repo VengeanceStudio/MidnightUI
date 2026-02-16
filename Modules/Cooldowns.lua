@@ -1659,15 +1659,18 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
     
     local db = self.db.profile
     
-    -- Apply scale
-    if frame.SetScale then
-        frame:SetScale(db.scale)
-    end
-    
-    -- Strip Blizzard borders for BuffBar immediately
+    -- Strip Blizzard borders for BuffBar but don't add our own styling
+    -- We're using Blizzard's native tracked bars, so leave them alone
     local frameName = frame:GetName()
     if frameName == "BuffBarCooldownViewer" then
         self:StripBlizzardBorders(frame)
+        self.styledFrames[frame] = true
+        return  -- Exit early - no background or borders for tracked bars
+    end
+    
+    -- Apply scale
+    if frame.SetScale then
+        frame:SetScale(db.scale)
     end
     
     -- Aggressively remove Blizzard's default styling
@@ -1763,8 +1766,9 @@ function Cooldowns:ApplyCooldownManagerSkin(frame)
         end
         
         -- Make sure the background frame updates position if the viewer moves
+        -- BUT don't interfere with Edit Mode dragging
         frame:HookScript("OnUpdate", function()
-            if frame.midnightBgFrame then
+            if frame.midnightBgFrame and not EditModeManagerFrame:IsEditModeActive() then
                 frame.midnightBgFrame:SetAllPoints(frame)
             end
         end)
