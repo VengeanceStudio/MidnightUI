@@ -1382,9 +1382,17 @@ function Cooldowns:UpdateIconDisplay(frame)
         if icon.spellID and (frame.displayType == "essential" or frame.displayType == "utility") then
             local chargeInfo = C_Spell.GetSpellCharges(icon.spellID)
             if chargeInfo and chargeInfo.currentCharges ~= nil and chargeInfo.maxCharges then
-                -- Only show charge text if maxCharges > 1 (spells with single charge don't need indicator)
-                local maxCharges = chargeInfo.maxCharges
-                if maxCharges and maxCharges > 1 then
+                -- Check if maxCharges > 1 (may be secret in combat, use pcall)
+                local showCharges = false
+                local ok, result = pcall(function() return chargeInfo.maxCharges > 1 end)
+                if ok then
+                    showCharges = result
+                else
+                    -- If maxCharges is secret, assume it's multi-charge and show it
+                    showCharges = true
+                end
+                
+                if showCharges then
                     local current = chargeInfo.currentCharges
                     
                     -- Pass charge value to FontString (works for both normal and secret values)
@@ -1416,26 +1424,41 @@ function Cooldowns:UpdateIconDisplay(frame)
                 icon.stackText:Hide()
                 icon.texture:SetDesaturated(false)
             end
-        elseif cooldownData.charges ~= nil and cooldownData.maxCharges and cooldownData.maxCharges > 1 then
-            -- Fallback to stored charge data (for buffs/other displays) - only if maxCharges > 1
-            local current = cooldownData.charges
+        elseif cooldownData.charges ~= nil and cooldownData.maxCharges then
+            -- Fallback to stored charge data (for buffs/other displays) - check maxCharges with pcall
+            local showCharges = false
+            local ok, result = pcall(function() return cooldownData.maxCharges > 1 end)
+            if ok then
+                showCharges = result
+            else
+                -- If maxCharges is secret, assume it's multi-charge and show it
+                showCharges = true
+            end
             
-            icon.stackText:SetText(current)
-            icon.stackText:Show()
-            
-            -- Try curve-based color (with taint protection)
-            if self.chargeCurve then
-                local ok, color = pcall(function() return self.chargeCurve:Evaluate(current) end)
-                if ok and color then
-                    local r, g, b, a = color:GetRGBA()
-                    icon.stackText:SetTextColor(r, g, b, a)
+            if showCharges then
+                local current = cooldownData.charges
+                
+                icon.stackText:SetText(current)
+                icon.stackText:Show()
+                
+                -- Try curve-based color (with taint protection)
+                if self.chargeCurve then
+                    local ok, color = pcall(function() return self.chargeCurve:Evaluate(current) end)
+                    if ok and color then
+                        local r, g, b, a = color:GetRGBA()
+                        icon.stackText:SetTextColor(r, g, b, a)
+                    else
+                        icon.stackText:SetTextColor(1, 1, 1)
+                    end
                 else
                     icon.stackText:SetTextColor(1, 1, 1)
                 end
+                icon.texture:SetDesaturated(false)
             else
-                icon.stackText:SetTextColor(1, 1, 1)
+                -- Single charge - hide charge counter
+                icon.stackText:Hide()
+                icon.texture:SetDesaturated(false)
             end
-            icon.texture:SetDesaturated(false)
         else
             -- No charge system or single charge - hide charge counter
             icon.stackText:Hide()
