@@ -1158,10 +1158,13 @@ function Cooldowns:CreateIcon(parent, displayType)
     icon.texture:SetPoint("BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     icon.texture:SetTexCoord(0.1, 0.9, 0.1, 0.9) -- Crop rounded corners
     
-    -- Cooldown swipe animation - reference Blizzard's cooldown frame
-    -- Don't create our own, use the existing one that updates automatically
-    icon.cooldown = nil  -- Will be set from Blizzard frame
-    icon.blizzCooldownFrame = nil  -- Store reference to source frame
+    -- Cooldown swipe animation - create frame that we'll manually update
+    icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+    icon.cooldown:SetAllPoints(icon.texture)
+    icon.cooldown:SetDrawEdge(false)
+    icon.cooldown:SetDrawSwipe(true)
+    icon.cooldown:SetReverse(false)
+    icon.cooldown:SetHideCountdownNumbers(true)
     
     -- Cooldown text (keeping for long cooldowns if needed)
     local fontPath = LSM:Fetch("font", db.font or self.db.profile.font)
@@ -1374,18 +1377,17 @@ function Cooldowns:UpdateIconDisplay(frame)
         end
         
         if hasRemainingTime and remainingTimeValue > 0 then
-            -- Reference the Blizzard cooldown frame for automatic updates (works in combat)
-            if cooldownData.cooldownFrame and icon.blizzCooldownFrame ~= cooldownData.cooldownFrame then
-                -- Reparent the Blizzard cooldown frame to our icon
-                icon.blizzCooldownFrame = cooldownData.cooldownFrame
-                icon.cooldown = cooldownData.cooldownFrame
-                icon.cooldown:SetParent(icon)
-                icon.cooldown:ClearAllPoints()
-                icon.cooldown:SetAllPoints(icon.texture)
-                icon.cooldown:SetDrawEdge(false)
-                icon.cooldown:SetDrawSwipe(true)
-                icon.cooldown:SetHideCountdownNumbers(true)
-                icon.cooldown:Show()
+            -- Copy cooldown state from Blizzard frame (works in combat)
+            if cooldownData.cooldownFrame and icon.cooldown then
+                -- Use SetCooldownDuration which accepts a frame directly
+                local blizzCooldown = cooldownData.cooldownFrame
+                if blizzCooldown.GetCooldownDuration then
+                    local start, duration, enable = blizzCooldown:GetCooldownDuration()
+                    pcall(icon.cooldown.SetCooldownDuration, icon.cooldown, start, duration, enable)
+                elseif blizzCooldown.GetCooldownDisplayDuration then
+                    local start, duration = blizzCooldown:GetCooldownDisplayDuration()
+                    pcall(icon.cooldown.SetCooldownDuration, icon.cooldown, start, duration)
+                end
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
