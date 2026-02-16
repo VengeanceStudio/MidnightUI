@@ -1307,8 +1307,10 @@ function Cooldowns:UpdateAllDisplays()
         end
     end
     
-    -- After updating icon displays, sync resource bar widths if enabled
-    self:UpdateResourceBarWidths()
+    -- Delay resource bar width matching slightly to ensure all layout is complete
+    C_Timer.After(0.1, function()
+        self:UpdateResourceBarWidths()
+    end)
 end
 
 function Cooldowns:UpdateIconDisplay(frame)
