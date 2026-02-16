@@ -413,10 +413,10 @@ function Cooldowns:GetTrackedBarsData()
             
             if isActive and bar.Name then
                 local ok, barName = pcall(function() return bar.Name:GetText() end)
-                if ok and barName and barName ~= "" then
-                    -- Get spell info from the bar name
-                    local spellInfo = C_Spell.GetSpellInfo(barName)
-                    if spellInfo then
+                if ok and barName then
+                    -- Get spell info from the bar name (barName might be secret in combat)
+                    local ok2, spellInfo = pcall(function() return C_Spell.GetSpellInfo(barName) end)
+                    if ok2 and spellInfo then
                         local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
                         
                         if iconTexture then
