@@ -2084,8 +2084,8 @@ function Cooldowns:UpdateAttachment()
     
     local db = self.db.profile
     
-    -- Find the Essential Cooldown Viewer (this is our anchor)
-    local essentialFrame = _G["EssentialCooldownViewer"]
+    -- Find the custom Essential Cooldown display (not Blizzard's hidden frame!)
+    local essentialFrame = self.customFrames and self.customFrames.essential
     if not essentialFrame then return end
     
     -- Attach RESOURCE BAR to Essential Cooldowns (not the other way around!)
