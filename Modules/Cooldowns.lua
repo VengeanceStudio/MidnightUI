@@ -2036,17 +2036,9 @@ function Cooldowns:UpdateResourceBarWidths()
     local essentialFrame = self.customFrames and self.customFrames.essential
     if not essentialFrame then return end
     
-    -- Calculate the width the same way UpdateIconDisplay does
-    local essentialDb = db.essential
-    local cooldowns = self:GetCooldownData("essential")
-    local numIcons = #cooldowns
-    if numIcons == 0 then return end
-    
-    local iconSize = essentialDb.iconWidth
-    local spacing = essentialDb.iconSpacing
-    local iconsPerRow = essentialDb.iconsPerRow
-    local cols = math.min(numIcons, iconsPerRow)
-    local essentialWidth = 4 + cols * iconSize + (cols - 1) * spacing
+    -- Get the actual rendered width after all layout is complete
+    local essentialWidth = essentialFrame:GetWidth()
+    if not essentialWidth or essentialWidth == 0 then return end
     
     -- Get ResourceBars module
     local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
