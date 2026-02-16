@@ -401,20 +401,16 @@ function Cooldowns:GetTrackedBarsData()
         return cooldowns
     end
     
-    -- Get all bar children - Blizzard already shows/hides these correctly
+    -- Get all bar children - if Blizzard shows it, we show it
     for i = 1, blizzFrame:GetNumChildren() do
         local child = select(i, blizzFrame:GetChildren())
-        if child and child.Bar then
+        if child and child.Bar and child:IsShown() then
             local bar = child.Bar
             
-            -- Check if the bar's parent frame is shown and has size
-            -- Blizzard sets width to 0 for inactive bars
-            local isActive = child:IsShown() and child:GetWidth() > 0
-            
-            if isActive and bar.Name then
+            if bar.Name then
                 local ok, barName = pcall(function() return bar.Name:GetText() end)
                 if ok and barName then
-                    -- Get spell info from the bar name (barName might be secret in combat)
+                    -- Get spell info from the bar name
                     local ok2, spellInfo = pcall(function() return C_Spell.GetSpellInfo(barName) end)
                     if ok2 and spellInfo then
                         local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
