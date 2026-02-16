@@ -1606,9 +1606,15 @@ function Cooldowns:FindAndSkinCooldownManager()
             frame:EnableMouse(false)
             frame:SetFrameStrata("BACKGROUND")
             
-            -- Move it off-screen
-            frame:ClearAllPoints()
-            frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10000, -10000)
+            -- DON'T move it off-screen - this triggers Edit Mode to save bad positions
+            -- Just hide it and it will stay at its Edit Mode position but invisible
+            -- frame:ClearAllPoints()
+            -- frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -10000, -10000)
+            
+            -- Prevent Edit Mode from selecting/showing these frames
+            if frame.SetIgnoreParentAlpha then
+                frame:SetIgnoreParentAlpha(true)
+            end
         end
     end
     
@@ -1997,10 +2003,11 @@ function Cooldowns:UpdateFrameGrouping()
     
     -- Map of frame names to WoW global names or resource bars
     local frameMap = {
-        essential = "EssentialCooldownViewer",
-        utility = "UtilityCooldownViewer",
-        buffs = "BuffIconCooldownViewer",
-        bars = "BuffBarCooldownViewer",
+        -- DON'T include Blizzard viewer frames - we're not moving them anymore
+        -- essential = "EssentialCooldownViewer",
+        -- utility = "UtilityCooldownViewer",
+        -- buffs = "BuffIconCooldownViewer",
+        -- bars = "BuffBarCooldownViewer",
         primaryBar = ResourceBars and ResourceBars.primaryBar,
         secondaryBar = ResourceBars and ResourceBars.secondaryBar,
     }
