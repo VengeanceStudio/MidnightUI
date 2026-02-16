@@ -2040,9 +2040,8 @@ function Cooldowns:UpdateResourceBarWidths()
     local essentialWidth = essentialFrame:GetWidth()
     if not essentialWidth or essentialWidth == 0 then return end
     
-    -- Resource bars have 1px border + 1px inset on each side (4px total)
-    -- So we need to subtract 4px to make the inner content match the essential width
-    local resourceBarWidth = essentialWidth - 4
+    -- Match the exact outer width - both frames have padding/borders that cancel out
+    local resourceBarWidth = essentialWidth
     
     -- Get ResourceBars module
     local ResourceBars = MidnightUI:GetModule("ResourceBars", true)
@@ -2093,16 +2092,16 @@ function Cooldowns:UpdateAttachment()
     
     if db.attachPosition == "BOTTOM" then
         -- Resource bar goes ABOVE Essential (Essential is below)
-        ResourceBars.primaryBar:SetPoint("BOTTOM", essentialFrame, "TOP", db.attachOffsetX, -db.attachOffsetY)
+        ResourceBars.primaryBar:SetPoint("BOTTOM", essentialFrame, "TOP", db.attachOffsetX, db.attachOffsetY)
     elseif db.attachPosition == "TOP" then
         -- Resource bar goes BELOW Essential (Essential is above)
-        ResourceBars.primaryBar:SetPoint("TOP", essentialFrame, "BOTTOM", db.attachOffsetX, -db.attachOffsetY)
+        ResourceBars.primaryBar:SetPoint("TOP", essentialFrame, "BOTTOM", db.attachOffsetX, db.attachOffsetY)
     elseif db.attachPosition == "LEFT" then
         -- Resource bar goes RIGHT of Essential (Essential is left)
-        ResourceBars.primaryBar:SetPoint("LEFT", essentialFrame, "RIGHT", -db.attachOffsetX, db.attachOffsetY)
+        ResourceBars.primaryBar:SetPoint("LEFT", essentialFrame, "RIGHT", db.attachOffsetX, db.attachOffsetY)
     elseif db.attachPosition == "RIGHT" then
         -- Resource bar goes LEFT of Essential (Essential is right)
-        ResourceBars.primaryBar:SetPoint("RIGHT", essentialFrame, "LEFT", -db.attachOffsetX, db.attachOffsetY)
+        ResourceBars.primaryBar:SetPoint("RIGHT", essentialFrame, "LEFT", db.attachOffsetX, db.attachOffsetY)
     end
     
     -- Update frame grouping if enabled
