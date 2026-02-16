@@ -663,8 +663,8 @@ function Cooldowns:GetCooldownData(displayName)
                             end)
                             if ok2 and remaining then
                                 data.remainingTime = remaining
-                                -- Store both start and duration (in milliseconds) for cooldown swipe
-                                data.startTime = start
+                                -- Store both start and duration in seconds for cooldown swipe
+                                data.startTime = start / 1000
                                 data.duration = duration / 1000
                             end
                         end
@@ -681,8 +681,8 @@ function Cooldowns:GetCooldownData(displayName)
                                 end)
                                 if ok2 and remaining then
                                     data.remainingTime = remaining
-                                    -- Store both start and duration (in milliseconds) for cooldown swipe
-                                    data.startTime = start
+                                    -- Store both start and duration in seconds for cooldown swipe
+                                    data.startTime = start / 1000
                                     data.duration = duration / 1000
                                 end
                             end
@@ -1381,9 +1381,8 @@ function Cooldowns:UpdateIconDisplay(frame)
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation using stored start/duration from Blizzard frame
             if icon.cooldown and cooldownData.startTime and cooldownData.duration then
-                -- Convert from milliseconds to seconds for SetCooldown
-                -- cooldownData.startTime is in ms, cooldownData.duration is already in seconds
-                pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownData.startTime / 1000, cooldownData.duration)
+                -- Pass values directly - already in seconds, secret values pass through
+                pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownData.startTime, cooldownData.duration)
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
