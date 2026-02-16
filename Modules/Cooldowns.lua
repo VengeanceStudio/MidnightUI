@@ -460,7 +460,6 @@ function Cooldowns:GetTrackedBarsData()
     
     return cooldowns
 end
-end
 
 function Cooldowns:UNIT_AURA(event, unitTarget, updateInfo)
     -- Player auras changed - just refresh display
