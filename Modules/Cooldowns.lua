@@ -417,6 +417,11 @@ function Cooldowns:GetTrackedBarsData()
             local spellID = info.overrideSpellID or info.spellID or cooldownID
             local spellInfo = C_Spell.GetSpellInfo(spellID)
             
+            -- DEBUG: Print linkedSpellIDs
+            if info.linkedSpellIDs and #info.linkedSpellIDs > 0 then
+                print("DEBUG - linkedSpellIDs for", spellInfo and spellInfo.name or spellID, ":", unpack(info.linkedSpellIDs))
+            end
+            
             if spellInfo then
                 -- Find matching bar by comparing spell names
                 local matchingBar = nil
@@ -446,6 +451,11 @@ function Cooldowns:GetTrackedBarsData()
                 
                 if matchingBar then
                     local bar = matchingBar
+                    
+                    -- DEBUG: Print bar.auraInstanceID
+                    local auraInstanceID = bar.auraInstanceID or "nil"
+                    print("DEBUG - bar.auraInstanceID for", spellInfo.name, ":", auraInstanceID)
+                    
                 local iconTexture = C_Spell.GetSpellTexture(spellID)
                 
                 -- Determine if this bar is active by checking if player has the aura
@@ -457,6 +467,9 @@ function Cooldowns:GetTrackedBarsData()
                     local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
                     if auraData then
                         isActive = true
+                        print("DEBUG - Found aura for", spellInfo.name, "with spellID", spellID)
+                    else
+                        print("DEBUG - No aura found for", spellInfo.name, "with spellID", spellID)
                     end
                 end
                 
