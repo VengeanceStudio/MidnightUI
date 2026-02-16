@@ -422,8 +422,9 @@ function Cooldowns:GetTrackedBarsData()
                 maxValue = max
             end
             
-            -- Bar is active if it has a max value > 0 (means it has duration data)
-            isActive = maxValue > 0 and value >= 0
+            -- Bar is active if it has a max value > 0 (protect comparison with pcall)
+            local ok3, hasData = pcall(function() return maxValue > 0 and value >= 0 end)
+            isActive = ok3 and hasData
             
             if isActive and bar.Name then
                 local barName = bar.Name:GetText()
