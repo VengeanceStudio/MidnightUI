@@ -178,12 +178,12 @@ function CooldownManager:SkinBlizzardFrame(childFrame, displayType)
         childFrame.Icon:SetPoint("BOTTOMRIGHT", childFrame, "BOTTOMRIGHT", -db.borderThickness, db.borderThickness)
     end
     
-    -- Style the cooldown swipe - use Blizzard defaults
+    -- Style the cooldown swipe - use dark swipe like Blizzard default
     if childFrame.Cooldown then
+        childFrame.Cooldown:SetSwipeColor(0, 0, 0, 0.8)  -- Dark swipe overlay
         childFrame.Cooldown:SetDrawEdge(true)
         childFrame.Cooldown:SetDrawSwipe(true)
         childFrame.Cooldown:SetHideCountdownNumbers(false)
-        -- Don't modify swipe color, positioning, or other settings
     end
     
     -- Add custom border if it doesn't exist
