@@ -407,24 +407,9 @@ function Cooldowns:GetTrackedBarsData()
         if child and child.Bar then
             local bar = child.Bar
             
-            -- Check if bar is active by checking if it has valid duration/value
-            local isActive = false
-            local value = 0
-            local maxValue = 0
-            
-            local ok1, val = pcall(function() return bar:GetValue() end)
-            if ok1 and val then
-                value = val
-            end
-            
-            local ok2, max = pcall(function() return select(2, bar:GetMinMaxValues()) end)
-            if ok2 and max then
-                maxValue = max
-            end
-            
-            -- Bar is active if it has a max value > 0 (protect comparison with pcall)
-            local ok3, hasData = pcall(function() return maxValue > 0 and value >= 0 end)
-            isActive = ok3 and hasData
+            -- Check if the bar's parent frame is shown and has size
+            -- Blizzard sets width to 0 for inactive bars
+            local isActive = child:IsShown() and child:GetWidth() > 0
             
             if isActive and bar.Name then
                 local barName = bar.Name:GetText()
@@ -435,6 +420,19 @@ function Cooldowns:GetTrackedBarsData()
                         local iconTexture = C_Spell.GetSpellTexture(spellInfo.spellID)
                         
                         if iconTexture then
+                            local value = 0
+                            local maxValue = 0
+                            
+                            local ok1, val = pcall(function() return bar:GetValue() end)
+                            if ok1 and val then
+                                value = val
+                            end
+                            
+                            local ok2, max = pcall(function() return select(2, bar:GetMinMaxValues()) end)
+                            if ok2 and max then
+                                maxValue = max
+                            end
+                            
                             local data = {
                                 icon = iconTexture,
                                 name = spellInfo.name,
