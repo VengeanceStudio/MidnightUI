@@ -663,10 +663,8 @@ function Cooldowns:GetCooldownData(displayName)
                             end)
                             if ok2 and remaining then
                                 data.remainingTime = remaining
-                                -- Store raw values without conversion (secret values can't be operated on)
-                                data.startTime = start
-                                data.duration = duration
-                                data.duration_seconds = duration / 1000  -- Also store converted for non-secret use
+                                -- Store reference to Blizzard cooldown frame for automatic updates
+                                data.cooldownFrame = child.Cooldown
                             end
                         end
                     end
@@ -682,10 +680,8 @@ function Cooldowns:GetCooldownData(displayName)
                                 end)
                                 if ok2 and remaining then
                                     data.remainingTime = remaining
-                                    -- Store raw values without conversion (secret values can't be operated on)
-                                    data.startTime = start
-                                    data.duration = duration
-                                    data.duration_seconds = duration / 1000  -- Also store converted for non-secret use
+                                    -- Store reference to Blizzard cooldown frame for automatic updates
+                                    data.cooldownFrame = child.Bar.Cooldown
                                 end
                             end
                         end
@@ -1164,13 +1160,10 @@ function Cooldowns:CreateIcon(parent, displayType)
     
     -- Cooldown swipe animation (shadowed clock overlay)
     icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
-    icon.cooldown:SetAllPoints(icon.texture)
-    icon.cooldown:SetDrawEdge(false)
-    icon.cooldown:SetDrawSwipe(true)
-    icon.cooldown:SetReverse(false)
-    icon.cooldown:SetHideCountdownNumbers(true) -- Hide Blizzard's countdown text
-    
-    -- Cooldown text (keeping for long cooldowns if needed)
+    icon.cooldown:SetAllPoints(i- reference Blizzard's cooldown frame
+    -- Don't create our own, use the existing one that updates automatically
+    icon.cooldown = nil  -- Will be set from Blizzard frame
+    icon.blizzCooldownFrame = nil  -- Store reference to source frame
     local fontPath = LSM:Fetch("font", db.font or self.db.profile.font)
     local fontFlag = db.fontFlag or self.db.profile.fontFlag or "OUTLINE"
     local fontSize = db.fontSize or self.db.profile.fontSize or 14
@@ -1384,11 +1377,18 @@ function Cooldowns:UpdateIconDisplay(frame)
             -- Set the cooldown swipe animation using raw millisecond values from Blizzard frame
             if icon.cooldown and cooldownData.startTime and cooldownData.duration then
                 -- Pass raw millisecond values directly - secret values pass through unchanged
-                -- SetCooldown in WoW 12.0 accepts milliseconds from GetCooldownTimes
-                pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownData.startTime, cooldownData.duration)
-            end
-            
-            -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
+               Reference the Blizzard cooldown frame for automatic updates (works in combat)
+            if cooldownData.cooldownFrame and icon.blizzCooldownFrame ~= cooldownData.cooldownFrame then
+                -- Reparent the Blizzard cooldown frame to our icon
+                icon.blizzCooldownFrame = cooldownData.cooldownFrame
+                icon.cooldown = cooldownData.cooldownFrame
+                icon.cooldown:SetParent(icon)
+                icon.cooldown:ClearAllPoints()
+                icon.cooldown:SetAllPoints(icon.texture)
+                icon.cooldown:SetDrawEdge(false)
+                icon.cooldown:SetDrawSwipe(true)
+                icon.cooldown:SetHideCountdownNumbers(true)
+                icon.cooldown:Show(
             if remainingTimeValue > 3 then
                 if remainingTimeValue > 60 then
                     icon.cooldownText:SetFormattedText("%.1fm", remainingTimeValue / 60)
