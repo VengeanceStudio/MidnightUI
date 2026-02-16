@@ -1381,7 +1381,8 @@ function Cooldowns:UpdateIconDisplay(frame)
                 -- Get fresh cooldown data from API and pass directly to SetCooldown
                 -- Works in combat because secret values pass through without any operations
                 local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
-                icon.cooldown:SetCooldown(startTime, duration)
+                -- Wrap in pcall to handle nil values gracefully
+                pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
