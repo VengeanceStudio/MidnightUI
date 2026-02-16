@@ -407,10 +407,25 @@ function Cooldowns:GetTrackedBarsData()
         if child and child.Bar then
             local bar = child.Bar
             
-            -- Check if Blizzard is showing this bar
-            local isVisible = bar:IsShown() and bar:GetAlpha() > 0
+            -- Check if bar is active by checking if it has valid duration/value
+            local isActive = false
+            local value = 0
+            local maxValue = 0
             
-            if isVisible and bar.Name then
+            local ok1, val = pcall(function() return bar:GetValue() end)
+            if ok1 and val then
+                value = val
+            end
+            
+            local ok2, max = pcall(function() return select(2, bar:GetMinMaxValues()) end)
+            if ok2 and max then
+                maxValue = max
+            end
+            
+            -- Bar is active if it has a max value > 0 (means it has duration data)
+            isActive = maxValue > 0 and value >= 0
+            
+            if isActive and bar.Name then
                 local barName = bar.Name:GetText()
                 if barName then
                     -- Get spell info from the bar name
@@ -423,22 +438,10 @@ function Cooldowns:GetTrackedBarsData()
                                 icon = iconTexture,
                                 name = spellInfo.name,
                                 spellID = spellInfo.spellID,
-                                remainingTime = 0,
+                                remainingTime = value,
+                                duration = maxValue,
                                 charges = 1,
                             }
-                            
-                            -- Get bar values
-                            local ok, value = pcall(function() return bar:GetValue() end)
-                            if ok and value then
-                                data.remainingTime = value
-                            end
-                            
-                            local maxOk, maxDuration = pcall(function()
-                                return select(2, bar:GetMinMaxValues())
-                            end)
-                            if maxOk and maxDuration then
-                                data.duration = maxDuration
-                            end
                             
                             table.insert(cooldowns, data)
                         end
