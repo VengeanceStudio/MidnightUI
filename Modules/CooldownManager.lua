@@ -253,119 +253,115 @@ function CooldownManager:GetOptions()
                     end
                 end,
             },
-            essential = {
-                type = "group",
+            essentialHeader = {
+                type = "header",
                 name = "Essential Cooldowns",
-                order = 2,
-                args = {
-                    enabled = {
-                        type = "toggle",
-                        name = "Enable",
-                        order = 1,
-                        get = function() return self.db.profile.essential.enabled end,
-                        set = function(_, value)
-                            self.db.profile.essential.enabled = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                    iconSize = {
-                        type = "range",
-                        name = "Icon Size",
-                        order = 2,
-                        min = 24,
-                        max = 64,
-                        step = 2,
-                        get = function() return self.db.profile.essential.iconWidth end,
-                        set = function(_, value)
-                            self.db.profile.essential.iconWidth = value
-                            self.db.profile.essential.iconHeight = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                    spacing = {
-                        type = "range",
-                        name = "Icon Spacing",
-                        order = 3,
-                        min = 0,
-                        max = 20,
-                        step = 1,
-                        get = function() return self.db.profile.essential.iconSpacing end,
-                        set = function(_, value)
-                            self.db.profile.essential.iconSpacing = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                    maxPerRow = {
-                        type = "range",
-                        name = "Icons Per Row",
-                        order = 4,
-                        min = 1,
-                        max = 20,
-                        step = 1,
-                        get = function() return self.db.profile.essential.maxPerRow end,
-                        set = function(_, value)
-                            self.db.profile.essential.maxPerRow = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                },
+                order = 10,
             },
-            utility = {
-                type = "group",
+            essentialEnabled = {
+                type = "toggle",
+                name = "Enable Essential Cooldowns",
+                order = 11,
+                get = function() return self.db.profile.essential.enabled end,
+                set = function(_, value)
+                    self.db.profile.essential.enabled = value
+                    self:UpdateCooldownManager()
+                end,
+            },
+            essentialIconSize = {
+                type = "range",
+                name = "Essential Icon Size",
+                order = 12,
+                min = 24,
+                max = 64,
+                step = 2,
+                get = function() return self.db.profile.essential.iconWidth end,
+                set = function(_, value)
+                    self.db.profile.essential.iconWidth = value
+                    self.db.profile.essential.iconHeight = value
+                    self:UpdateCooldownManager()
+                end,
+            },
+            essentialSpacing = {
+                type = "range",
+                name = "Essential Icon Spacing",
+                order = 13,
+                min = 0,
+                max = 20,
+                step = 1,
+                get = function() return self.db.profile.essential.iconSpacing end,
+                set = function(_, value)
+                    self.db.profile.essential.iconSpacing = value
+                    self:UpdateCooldownManager()
+                end,
+            },
+            essentialMaxPerRow = {
+                type = "range",
+                name = "Essential Icons Per Row",
+                order = 14,
+                min = 1,
+                max = 20,
+                step = 1,
+                get = function() return self.db.profile.essential.maxPerRow end,
+                set = function(_, value)
+                    self.db.profile.essential.maxPerRow = value
+                    self:UpdateCooldownManager()
+                end,
+            },
+            utilityHeader = {
+                type = "header",
                 name = "Utility Cooldowns",
-                order = 3,
-                args = {
-                    enabled = {
-                        type = "toggle",
-                        name = "Enable",
-                        order = 1,
-                        get = function() return self.db.profile.utility.enabled end,
-                        set = function(_, value)
-                            self.db.profile.utility.enabled = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                    iconSize = {
-                        type = "range",
-                        name = "Icon Size",
-                        order = 2,
-                        min = 24,
-                        max = 64,
-                        step = 2,
-                        get = function() return self.db.profile.utility.iconWidth end,
-                        set = function(_, value)
-                            self.db.profile.utility.iconWidth = value
-                            self.db.profile.utility.iconHeight = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                    spacing = {
-                        type = "range",
-                        name = "Icon Spacing",
-                        order = 3,
-                        min = 0,
-                        max = 20,
-                        step = 1,
-                        get = function() return self.db.profile.utility.iconSpacing end,
-                        set = function(_, value)
-                            self.db.profile.utility.iconSpacing = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                    maxPerRow = {
-                        type = "range",
-                        name = "Icons Per Row",
-                        order = 4,
-                        min = 1,
-                        max = 20,
-                        step = 1,
-                        get = function() return self.db.profile.utility.maxPerRow end,
-                        set = function(_, value)
-                            self.db.profile.utility.maxPerRow = value
-                            self:UpdateCooldownManager()
-                        end,
-                    },
-                },
+                order = 20,
+            },
+            utilityEnabled = {
+                type = "toggle",
+                name = "Enable Utility Cooldowns",
+                order = 21,
+                get = function() return self.db.profile.utility.enabled end,
+                set = function(_, value)
+                    self.db.profile.utility.enabled = value
+                    self:UpdateCooldownManager()
+                end,
+            },
+            utilityIconSize = {
+                type = "range",
+                name = "Utility Icon Size",
+                order = 22,
+                min = 24,
+                max = 64,
+                step = 2,
+                get = function() return self.db.profile.utility.iconWidth end,
+                set = function(_, value)
+                    self.db.profile.utility.iconWidth = value
+                    self.db.profile.utility.iconHeight = value
+                    self:UpdateCooldownManager()
+                end,
+            },
+            utilitySpacing = {
+                type = "range",
+                name = "Utility Icon Spacing",
+                order = 23,
+                min = 0,
+                max = 20,
+                step = 1,
+                get = function() return self.db.profile.utility.iconSpacing end,
+                set = function(_, value)
+                    self.db.profile.utility.iconSpacing = value
+                    self:UpdateCooldownManager()
+                end,
+            },
+            utilityMaxPerRow = {
+                type = "range",
+                name = "Utility Icons Per Row",
+                order = 24,
+                min = 1,
+                max = 20,
+                step = 1,
+                get = function() return self.db.profile.utility.maxPerRow end,
+                set = function(_, value)
+                    self.db.profile.utility.maxPerRow = value
+                    self:UpdateCooldownManager()
+                end,
             },
         },
     }
