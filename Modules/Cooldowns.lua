@@ -1377,12 +1377,18 @@ function Cooldowns:UpdateIconDisplay(frame)
         
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation
-            if icon.cooldown and icon.spellID then
-                -- C_Spell.GetSpellCooldown returns multiple values directly (not a table)
-                -- Secret values pass through when returned as multiple values
-                local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
-                -- Use pcall to handle both nil values and secret value failures
-                pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
+            if icon.cooldown then
+                if icon.spellID then
+                    -- C_Spell.GetSpellCooldown returns multiple values directly (not a table)
+                    -- Secret values pass through when returned as multiple values
+                    local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
+                    -- Use pcall to handle both nil values and secret value failures
+                    pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
+                elseif cooldownData.duration and cooldownData.duration > 0 then
+                    -- Fallback: calculate start time from remaining time
+                    local startTime = GetTime() - (cooldownData.duration - remainingTimeValue)
+                    icon.cooldown:SetCooldown(startTime, cooldownData.duration)
+                end
             end
             
             -- Only show text for cooldowns longer than 3 seconds (hide GCD numbers)
