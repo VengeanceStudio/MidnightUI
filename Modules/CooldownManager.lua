@@ -67,9 +67,6 @@ function CooldownManager:OnInitialize()
     
     -- Create container frames
     self:CreateContainerFrames()
-    
-    -- Register for module toggle
-    MidnightUI.RegisterModuleOptions("CooldownManager", self:GetOptions())
 end
 
 function CooldownManager:OnEnable()
