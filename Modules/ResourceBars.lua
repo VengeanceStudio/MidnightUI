@@ -84,36 +84,17 @@ local defaults = {
 -- -----------------------------------------------------------------------------
 function ResourceBars:GetEssentialCooldownsWidth()
     local viewer = _G["EssentialCooldownViewer"]
-    if not viewer then return nil end
+    if not viewer or not viewer:IsShown() then return nil end
     
-    -- Calculate width based on visible children
-    local children = { viewer:GetChildren() }
-    local visibleCount = 0
-    local iconSize = 44 -- Default from CooldownManager
-    local spacing = 4 -- Default from CooldownManager
-    local maxPerRow = 12 -- Default from CooldownManager
+    -- Simply return the actual width of Blizzard's viewer frame
+    local width = viewer:GetWidth()
     
-    -- Get actual settings if CooldownManager module exists
-    if _G.CooldownManager and _G.CooldownManager.db and _G.CooldownManager.db.profile then
-        local db = _G.CooldownManager.db.profile.essential
-        iconSize = db.iconWidth or iconSize
-        spacing = db.iconSpacing or spacing
-        maxPerRow = db.maxPerRow or maxPerRow
+    -- Ensure we have a valid width
+    if width and width > 0 then
+        return width
     end
     
-    for _, childFrame in ipairs(children) do
-        if childFrame and childFrame.layoutIndex and childFrame:IsShown() then
-            visibleCount = visibleCount + 1
-        end
-    end
-    
-    if visibleCount == 0 then return nil end
-    
-    -- Calculate width: (icons per row * icon size) + (spacing between icons)
-    local iconsInRow = math.min(visibleCount, maxPerRow)
-    local width = (iconsInRow * iconSize) + ((iconsInRow - 1) * spacing)
-    
-    return width
+    return nil
 end
 
 -- -----------------------------------------------------------------------------
