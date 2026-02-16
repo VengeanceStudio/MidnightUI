@@ -1377,16 +1377,12 @@ function Cooldowns:UpdateIconDisplay(frame)
         
         if hasRemainingTime and remainingTimeValue > 0 then
             -- Set the cooldown swipe animation
-            if icon.cooldown then
-                -- Try API approach (works in combat with secret values)
-                if icon.spellID then
-                    local startTime, duration = C_Spell.GetSpellCooldown(icon.spellID)
-                    -- Debug: check what we got
-                    print("SpellID:", icon.spellID, "StartTime:", startTime, "Duration:", duration)
-                    local ok = pcall(icon.cooldown.SetCooldown, icon.cooldown, startTime, duration)
-                    print("SetCooldown result:", ok)
-                else
-                    print("No spellID on icon!")
+            if icon.cooldown and icon.spellID then
+                -- C_Spell.GetSpellCooldown returns a table in WoW 12.0
+                local cooldownInfo = C_Spell.GetSpellCooldown(icon.spellID)
+                if cooldownInfo then
+                    -- Extract and pass values directly without checking them (secret value pass-through)
+                    pcall(icon.cooldown.SetCooldown, icon.cooldown, cooldownInfo.startTime, cooldownInfo.duration)
                 end
             end
             
