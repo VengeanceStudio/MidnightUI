@@ -99,17 +99,45 @@ function MidnightUI:OnEnable()
             AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
-        -- Hook into AceConfigDialog Open (kept for future use if needed)
-        if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
-            AceConfigDialog.MidnightOpenHooked = true
+        -- Hook AceGUI widget creation to style widgets for MidnightUI options
+        local AceGUI = LibStub("AceGUI-3.0")
+        if AceGUI and not AceGUI.MidnightUIHooked then
+            local originalCreate = AceGUI.Create
+            AceGUI.Create = function(self, widgetType)
+                local widget = originalCreate(self, widgetType)
+                
+                -- Only style if we're currently building MidnightUI options
+                if _G.MidnightUI_BuildingOptions then
+                    C_Timer.After(0, function()
+                        MidnightUI:SkinAceGUIWidget(widget, widgetType)
+                    end)
+                end
+                
+                return widget
+            end
+            AceGUI.MidnightUIHooked = true
         end
         
-        -- DO NOT hook AceGUI:Create globally - it affects all addons
-        -- Instead, MidnightUI widgets are registered and available by their
-        -- "Midnight*" names for explicit use only
-        
-        -- Note: Custom widgets must be explicitly requested by name in options tables
-        -- using the dialogControl property (e.g., dialogControl = "MidnightSlider")
+        -- Hook AceConfigDialog Open to set flag when building MidnightUI options
+        if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
+            local originalOpen = AceConfigDialog.Open
+            AceConfigDialog.Open = function(self, appName, ...)
+                if appName == "MidnightUI" then
+                    _G.MidnightUI_BuildingOptions = true
+                end
+                
+                local result = originalOpen(self, appName, ...)
+                
+                if appName == "MidnightUI" then
+                    C_Timer.After(0.2, function()
+                        _G.MidnightUI_BuildingOptions = false
+                    end)
+                end
+                
+                return result
+            end
+            AceConfigDialog.MidnightOpenHooked = true
+        end
         
         -- Register theme change callback to refresh widget colors
         if ColorPalette and not ColorPalette.MidnightCallbackRegistered then
@@ -1978,6 +2006,24 @@ function MidnightUI:HookConfigDialogFrames()
     local ColorPalette = _G.MidnightUI_ColorPalette
     if not ColorPalette then return end
     
+    -- Hook AceGUI widget creation to style widgets for MidnightUI options
+    if not AceGUI.MidnightUIHooked then
+        local originalCreate = AceGUI.Create
+        AceGUI.Create = function(self, widgetType)
+            local widget = originalCreate(self, widgetType)
+            
+            -- Only style if we're currently building MidnightUI options
+            if _G.MidnightUI_BuildingOptions then
+                C_Timer.After(0, function()
+                    MidnightUI:SkinAceGUIWidget(widget, widgetType)
+                end)
+            end
+            
+            return widget
+        end
+        AceGUI.MidnightUIHooked = true
+    end
+    
     -- Track styled frames to restore their backdrops
     local styledFrames = {}
     
@@ -2003,10 +2049,15 @@ function MidnightUI:HookConfigDialogFrames()
         end)
     end
     
-    -- Hook AceConfigDialog:Open to apply MidnightUI styling only to our frames
+    -- Hook AceConfigDialog:Open to apply MidnightUI styling and set build flag
     if AceConfigDialog and not AceConfigDialog.MidnightUIHooked then
         local originalOpen = AceConfigDialog.Open
         AceConfigDialog.Open = function(self, appName, ...)
+            -- Set flag when building MidnightUI options
+            if appName == "MidnightUI" then
+                _G.MidnightUI_BuildingOptions = true
+            end
+            
             local result = originalOpen(self, appName, ...)
             
             -- Only skin the frame if it's MidnightUI
@@ -2017,6 +2068,11 @@ function MidnightUI:HookConfigDialogFrames()
                         MidnightUI:SkinConfigFrame(frame.frame)
                     end)
                 end
+                
+                -- Clear the build flag after widgets are created
+                C_Timer.After(0.3, function()
+                    _G.MidnightUI_BuildingOptions = false
+                end)
             end
             
             return result
