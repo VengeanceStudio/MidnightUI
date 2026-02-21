@@ -625,14 +625,33 @@ end
 -- Create header widget
 function MidnightOptionsPanel:CreateHeader(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
     
-    local header = parent:CreateFontString(nil, "OVERLAY")
-    header:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
-    header:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+    -- Create container frame for header with lines
+    local headerFrame = CreateFrame("Frame", nil, parent)
+    headerFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
+    headerFrame:SetSize(parent:GetWidth() - xOffset, 28)
+    
+    -- Header text
+    local header = headerFrame:CreateFontString(nil, "OVERLAY")
+    header:SetPoint("LEFT", headerFrame, "LEFT", 0, 0)
+    if FontKit then
+        FontKit:SetFont(header, 'heading', 'bold')
+    else
+        header:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+    end
     header:SetText(EvaluateValue(option.name) or "")
     header:SetTextColor(ColorPalette:GetColor('accent-primary'))
     
-    return header, 28, parent:GetWidth()
+    -- Horizontal line to the right of text
+    local line = headerFrame:CreateTexture(nil, "BACKGROUND")
+    line:SetHeight(1)
+    line:SetPoint("LEFT", header, "RIGHT", 8, 0)
+    line:SetPoint("RIGHT", headerFrame, "RIGHT", -3, 0)
+    local r, g, b = ColorPalette:GetColor('accent-primary')
+    line:SetColorTexture(r, g, b, 0.5)
+    
+    return headerFrame, 32, parent:GetWidth()
 end
 
 -- Create description widget
