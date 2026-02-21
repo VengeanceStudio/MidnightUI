@@ -39,11 +39,12 @@ function MidnightOptionsPanel:ParseOptionsToTree(optionsTable)
                 desc = EvaluateValue(option.desc),
                 order = option.order or 100,
                 children = {},
-                options = option.args or {}
+                options = option.args or {},
+                childGroups = option.childGroups  -- Store childGroups setting
             }
             
-            -- Recursively parse child groups
-            if option.args then
+            -- Recursively parse child groups ONLY if childGroups != "tab"
+            if option.args and option.childGroups ~= "tab" then
                 for childKey, childOption in pairs(option.args) do
                     if childOption.type == "group" then
                         local childNode = {
@@ -346,7 +347,23 @@ function MidnightOptionsPanel:RenderContent(node)
     end
     panel.widgets = {}
     
+    -- Clear existing tabs
+    if panel.tabs then
+        for _, tab in ipairs(panel.tabs) do
+            tab:Hide()
+            tab:SetParent(nil)
+        end
+        panel.tabs = nil
+        panel.activeTab = nil
+    end
+    
     if not node or not node.options then
+        return
+    end
+    
+    -- Check if this node uses tabs for child groups
+    if node.childGroups == "tab" then
+        self:RenderTabGroup(node)
         return
     end
     
@@ -369,6 +386,127 @@ function MidnightOptionsPanel:RenderContent(node)
             if widget then
                 table.insert(panel.widgets, widget)
                 yOffset = yOffset + height + 10 -- 10px spacing
+            end
+        end
+    end
+    
+    -- Update scroll child height
+    panel.scrollChild:SetHeight(math.max(yOffset, panel.scrollFrame:GetHeight()))
+end
+
+-- Render a group with tabs for child groups
+function MidnightOptionsPanel:RenderTabGroup(node)
+    local panel = self.frame.contentPanel
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    
+    -- Build sorted list of child groups
+    local childGroups = {}
+    for key, option in pairs(node.options) do
+        if option.type == "group" then
+            option.key = key
+            table.insert(childGroups, option)
+        end
+    end
+    table.sort(childGroups, function(a, b)
+        return (a.order or 100) < (b.order or 100)
+    end)
+    
+    if #childGroups == 0 then
+        return -- No child groups to render as tabs
+    end
+    
+    -- Create tab buttons
+    panel.tabs = {}
+    panel.activeTab = nil
+    local xOffset = 10
+    
+    for i, childGroup in ipairs(childGroups) do
+        local tabButton = CreateFrame("Button", nil, panel, "BackdropTemplate")
+        tabButton:SetSize(140, 32)
+        tabButton:SetPoint("TOPLEFT", panel, "TOPLEFT", xOffset, -10)
+        tabButton:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false,
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        
+        local tabText = tabButton:CreateFontString(nil, "OVERLAY")
+        tabText:SetFont("Fonts\\FRIZQT__.TTF", 13, "OUTLINE")
+        tabText:SetText(EvaluateValue(childGroup.name) or childGroup.key)
+        tabText:SetPoint("CENTER")
+        
+        tabButton.childGroup = childGroup
+        tabButton.text = tabText
+        tabButton.index = i
+        
+        tabButton:SetScript("OnClick", function(self)
+            MidnightOptionsPanel:SelectTab(self.index)
+        end)
+        
+        table.insert(panel.tabs, tabButton)
+        xOffset = xOffset + 145
+    end
+    
+    -- Select first tab by default
+    self:SelectTab(1)
+end
+
+-- Select and render a specific tab
+function MidnightOptionsPanel:SelectTab(tabIndex)
+    local panel = self.frame.contentPanel
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    
+    if not panel.tabs or not panel.tabs[tabIndex] then
+        return
+    end
+    
+    -- Update tab appearance
+    for i, tab in ipairs(panel.tabs) do
+        if i == tabIndex then
+            tab:SetBackdropColor(ColorPalette:GetColor('tab-active'))
+            tab:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+            tab.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        else
+            tab:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+            tab:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+            tab.text:SetTextColor(ColorPalette:GetColor('text-secondary'))
+        end
+    end
+    
+    panel.activeTab = tabIndex
+    
+    -- Clear existing widgets
+    for _, widget in ipairs(panel.widgets) do
+        widget:Hide()
+        widget:SetParent(nil)
+    end
+    panel.widgets = {}
+    
+    -- Render the selected tab's content
+    local selectedTab = panel.tabs[tabIndex]
+    local childGroup = selectedTab.childGroup
+    
+    -- Sort child group's options
+    local sortedOptions = {}
+    for key, option in pairs(childGroup.args or {}) do
+        option.key = key
+        table.insert(sortedOptions, option)
+    end
+    table.sort(sortedOptions, function(a, b)
+        return (a.order or 100) < (b.order or 100)
+    end)
+    
+    -- Render widgets (starting below tabs)
+    local yOffset = 50 -- Space for tabs
+    for _, option in ipairs(sortedOptions) do
+        -- Skip group types
+        if option.type ~= "group" then
+            local widget, height = self:CreateWidgetForOption(panel.scrollChild, option, yOffset)
+            if widget then
+                table.insert(panel.widgets, widget)
+                yOffset = yOffset + height + 10
             end
         end
     end
