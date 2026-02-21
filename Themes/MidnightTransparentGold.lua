@@ -39,6 +39,10 @@ ColorPalette:RegisterPalette("MidnightTransparentGold", {
     ["button-pressed"] = {r = 0.80, g = 0.60, b = 0.20, a = 0.90}, -- Bright gold
     ["button-disabled"] = {r = 0.08, g = 0.06, b = 0.04, a = 0.40},
     
+    -- Toggle switch colors
+    ["toggle-off-bg"] = {r = 0.05, g = 0.04, b = 0.02, a = 1.0},
+    ["toggle-off-border"] = {r = 0.35, g = 0.30, b = 0.20, a = 0.8},
+    
     ["tab-inactive"] = {r = 0.10, g = 0.08, b = 0.06, a = 0.55},
     ["tab-selected-bg"] = {r = 0.50, g = 0.38, b = 0.15, a = 0.75},
     

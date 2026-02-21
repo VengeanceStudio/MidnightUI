@@ -499,10 +499,12 @@ function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
             -- ON state: accent color with knob on right
             toggleKnob:SetPoint("CENTER", toggleBg, "RIGHT", -10, 0)
             toggleBg:SetVertexColor(ColorPalette:GetColor('accent-primary'))
+            toggleBorder:SetVertexColor(ColorPalette:GetColor('panel-border'))
         else
-            -- OFF state: very dark background with knob on left
+            -- OFF state: dark background from theme with knob on left
             toggleKnob:SetPoint("CENTER", toggleBg, "LEFT", 10, 0)
-            toggleBg:SetVertexColor(0.1, 0.1, 0.1, 1)  -- Dark grey, fully opaque
+            toggleBg:SetVertexColor(ColorPalette:GetColor('toggle-off-bg'))
+            toggleBorder:SetVertexColor(ColorPalette:GetColor('toggle-off-border'))
         end
     end
     

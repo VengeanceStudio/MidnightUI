@@ -39,6 +39,10 @@ ColorPalette:RegisterPalette("MidnightTransparent", {
     ["button-pressed"] = {r = 0.60, g = 0.65, b = 0.75, a = 0.90}, -- Bright steel blue
     ["button-disabled"] = {r = 0.05, g = 0.05, b = 0.05, a = 0.40},
     
+    -- Toggle switch colors
+    ["toggle-off-bg"] = {r = 0.02, g = 0.02, b = 0.02, a = 1.0},   -- Almost black for clear OFF indication
+    ["toggle-off-border"] = {r = 0.30, g = 0.30, b = 0.30, a = 0.8}, -- Dimmed border for OFF state
+    
     ["tab-inactive"] = {r = 0.08, g = 0.08, b = 0.10, a = 0.55},
     ["tab-selected-bg"] = {r = 0.40, g = 0.42, b = 0.48, a = 0.75},
     

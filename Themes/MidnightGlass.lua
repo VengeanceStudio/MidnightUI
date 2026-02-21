@@ -38,6 +38,10 @@ ColorPalette:RegisterPalette("MidnightGlass", {
     ["button-pressed"] = {r = 0.0, g = 0.6, b = 0.8, a = 1.0},
     ["button-disabled"] = {r = 0.05, g = 0.05, b = 0.1, a = 0.5},
     
+    -- Toggle switch colors
+    ["toggle-off-bg"] = {r = 0.02, g = 0.02, b = 0.05, a = 1.0},
+    ["toggle-off-border"] = {r = 0.25, g = 0.25, b = 0.35, a = 0.8},
+    
     ["panel-bg"] = {r = 0.05, g = 0.05, b = 0.1, a = 0.95},
     ["panel-border"] = {r = 0.2, g = 0.4, b = 0.6, a = 0.8},
     

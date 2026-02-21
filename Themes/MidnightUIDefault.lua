@@ -39,6 +39,10 @@ ColorPalette:RegisterPalette("MidnightUIDefault", {
     ["button-pressed"] = {r = 1.0, g = 0.0, b = 0.6, a = 1.0},    -- Pink when pressed
     ["button-disabled"] = {r = 0.08, g = 0.08, b = 0.15, a = 0.5},
     
+    -- Toggle switch colors
+    ["toggle-off-bg"] = {r = 0.03, g = 0.03, b = 0.08, a = 1.0},
+    ["toggle-off-border"] = {r = 0.28, g = 0.28, b = 0.38, a = 0.8},
+    
     ["tab-inactive"] = {r = 0.12, g = 0.12, b = 0.20, a = 0.8},
     ["tab-selected-bg"] = {r = 0.42, g = 0.31, b = 0.88, a = 0.95},
     

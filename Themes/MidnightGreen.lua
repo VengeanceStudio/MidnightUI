@@ -39,6 +39,10 @@ ColorPalette:RegisterPalette("MidnightGreen", {
     ["button-pressed"] = {r = 0.0, g = 1.0, b = 0.0, a = 1.0},     -- Bright green
     ["button-disabled"] = {r = 0.05, g = 0.05, b = 0.05, a = 0.5},
     
+    -- Toggle switch colors
+    ["toggle-off-bg"] = {r = 0.02, g = 0.05, b = 0.02, a = 1.0},
+    ["toggle-off-border"] = {r = 0.25, g = 0.35, b = 0.25, a = 0.8},
+    
     ["tab-inactive"] = {r = 0.10, g = 0.10, b = 0.10, a = 0.8},
     ["tab-selected-bg"] = {r = 0.0, g = 0.6, b = 0.0, a = 0.95},
     

@@ -39,6 +39,10 @@ ColorPalette:RegisterPalette("MidnightMage", {
     ["button-pressed"] = {r = 0.60, g = 0.65, b = 0.75, a = 0.90}, -- Bright steel blue (from Transparent)
     ["button-disabled"] = {r = 0.05, g = 0.05, b = 0.05, a = 0.40},
     
+    -- Toggle switch colors
+    ["toggle-off-bg"] = {r = 0.02, g = 0.04, b = 0.08, a = 1.0},
+    ["toggle-off-border"] = {r = 0.20, g = 0.28, b = 0.40, a = 0.8},
+    
     ["tab-inactive"] = {r = 0.08, g = 0.08, b = 0.10, a = 0.55},
     ["tab-selected-bg"] = {r = 0.40, g = 0.42, b = 0.48, a = 0.75},
     
