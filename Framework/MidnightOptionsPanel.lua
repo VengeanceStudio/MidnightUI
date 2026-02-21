@@ -1,0 +1,1029 @@
+-- ============================================================================
+-- MidnightUI Options Panel Framework
+-- Custom options UI framework - zero dependency on AceGUI
+-- ============================================================================
+
+local MidnightOptionsPanel = {}
+_G.MidnightUI_OptionsPanel = MidnightOptionsPanel
+
+-- ============================================================================
+-- TREE PARSER - Convert options table to tree structure
+-- ============================================================================
+
+-- Parse options table into tree structure for navigation
+function MidnightOptionsPanel:ParseOptionsToTree(optionsTable)
+    local tree = {}
+    
+    if not optionsTable or not optionsTable.args then
+        return tree
+    end
+    
+    -- Build tree nodes from options table
+    for key, option in pairs(optionsTable.args) do
+        if option.type == "group" then
+            local node = {
+                key = key,
+                name = option.name or key,
+                desc = option.desc,
+                order = option.order or 100,
+                children = {},
+                options = option.args or {}
+            }
+            
+            -- Recursively parse child groups
+            if option.args then
+                for childKey, childOption in pairs(option.args) do
+                    if childOption.type == "group" then
+                        local childNode = {
+                            key = childKey,
+                            name = childOption.name or childKey,
+                            desc = childOption.desc,
+                            order = childOption.order or 100,
+                            parent = node,
+                            options = childOption.args or {}
+                        }
+                        table.insert(node.children, childNode)
+                    end
+                end
+                
+                -- Sort children by order
+                table.sort(node.children, function(a, b)
+                    return (a.order or 100) < (b.order or 100)
+                end)
+            end
+            
+            table.insert(tree, node)
+        end
+    end
+    
+    -- Sort top-level nodes by order
+    table.sort(tree, function(a, b)
+        return (a.order or 100) < (b.order or 100)
+    end)
+    
+    return tree
+end
+
+-- ============================================================================
+-- MAIN FRAME CREATION
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateFrame(addonRef)
+    if self.frame then
+        return self.frame
+    end
+    
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    -- Create main frame
+    local frame = CreateFrame("Frame", "MidnightUIOptionsFrame", UIParent, "BackdropTemplate")
+    frame:SetSize(1100, 800)
+    frame:SetPoint("CENTER")
+    frame:SetFrameStrata("DIALOG")
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:Hide()
+    
+    -- Apply backdrop
+    frame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 2,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+    frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Add logo
+    frame.logo = frame:CreateTexture(nil, "ARTWORK")
+    frame.logo:SetTexture("Interface\\AddOns\\MidnightUI\\Media\\midnightUI_icon.tga")
+    frame.logo:SetSize(80, 80)
+    frame.logo:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -18)
+    
+    -- Add title
+    frame.title = frame:CreateFontString(nil, "OVERLAY")
+    frame.title:SetFont("Fonts\\FRIZQT__.TTF", 32, "OUTLINE")
+    frame.title:SetText("Midnight UI")
+    frame.title:SetTextColor(ColorPalette:GetColor('text-primary'))
+    frame.title:SetPoint("LEFT", frame.logo, "RIGHT", 15, 0)
+    
+    -- Create drag area (top 100px excluding close button)
+    frame.dragArea = CreateFrame("Frame", nil, frame)
+    frame.dragArea:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    frame.dragArea:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -50, 0)
+    frame.dragArea:SetHeight(100)
+    frame.dragArea:EnableMouse(true)
+    frame.dragArea:RegisterForDrag("LeftButton")
+    frame.dragArea:SetScript("OnDragStart", function() frame:StartMoving() end)
+    frame.dragArea:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+    
+    -- Create close button
+    frame.closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    frame.closeButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -8, -8)
+    frame.closeButton:SetSize(32, 32)
+    frame.closeButton:SetScript("OnClick", function() frame:Hide() end)
+    
+    -- Create tree navigation panel (left side)
+    frame.treePanel = self:CreateTreePanel(frame)
+    
+    -- Create content panel (right side)
+    frame.contentPanel = self:CreateContentPanel(frame)
+    
+    -- Store references
+    self.frame = frame
+    self.addonRef = addonRef
+    
+    return frame
+end
+
+-- ============================================================================
+-- TREE NAVIGATION PANEL
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateTreePanel(parent)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    
+    local panel = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    panel:SetPoint("TOPLEFT", parent, "TOPLEFT", 6, -106)
+    panel:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 6, 6)
+    panel:SetWidth(250)
+    
+    -- Apply backdrop
+    panel:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 2,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    panel:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+    panel:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Create scrollframe for tree buttons
+    panel.scrollFrame = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
+    panel.scrollFrame:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -4)
+    panel.scrollFrame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -24, 4)
+    
+    -- Create scroll child
+    panel.scrollChild = CreateFrame("Frame", nil, panel.scrollFrame)
+    panel.scrollChild:SetSize(panel.scrollFrame:GetWidth(), 1)
+    panel.scrollFrame:SetScrollChild(panel.scrollChild)
+    
+    -- Store tree buttons
+    panel.buttons = {}
+    
+    return panel
+end
+
+-- Build tree buttons from parsed tree structure
+function MidnightOptionsPanel:BuildTree(tree)
+    local panel = self.frame.treePanel
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    -- Clear existing buttons
+    for _, btn in ipairs(panel.buttons) do
+        btn:Hide()
+        btn:SetParent(nil)
+    end
+    panel.buttons = {}
+    
+    local yOffset = 0
+    local buttonHeight = 24
+    local indent = 0
+    
+    -- Recursive function to create buttons
+    local function CreateTreeButton(node, depth)
+        local btn = CreateFrame("Button", nil, panel.scrollChild, "BackdropTemplate")
+        btn:SetSize(panel.scrollChild:GetWidth() - (depth * 16), buttonHeight)
+        btn:SetPoint("TOPLEFT", panel.scrollChild, "TOPLEFT", depth * 16, -yOffset)
+        
+        -- Create text
+        btn.text = btn:CreateFontString(nil, "OVERLAY")
+        if FontKit then
+            FontKit:SetFont(btn.text, 'body', 'normal')
+        end
+        btn.text:SetPoint("LEFT", btn, "LEFT", 8, 0)
+        btn.text:SetText(node.name)
+        btn.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+        
+        -- Store node reference
+        btn.node = node
+        
+        -- Click handler
+        btn:SetScript("OnClick", function(self)
+            MidnightOptionsPanel:SelectNode(self.node)
+        end)
+        
+        -- Hover effect
+        btn:SetScript("OnEnter", function(self)
+            self:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = nil,
+                tile = false
+            })
+            local r, g, b = ColorPalette:GetColor('accent-primary')
+            self:SetBackdropColor(r, g, b, 0.15)
+        end)
+        
+        btn:SetScript("OnLeave", function(self)
+            if MidnightOptionsPanel.selectedNode ~= self.node then
+                self:SetBackdrop(nil)
+            end
+        end)
+        
+        table.insert(panel.buttons, btn)
+        yOffset = yOffset + buttonHeight
+        
+        -- Create child buttons if expanded (for now, always expanded in MVP)
+        if node.children then
+            for _, child in ipairs(node.children) do
+                CreateTreeButton(child, depth + 1)
+            end
+        end
+    end
+    
+    -- Create buttons for all top-level nodes
+    for _, node in ipairs(tree) do
+        CreateTreeButton(node, 0)
+    end
+    
+    -- Update scroll child height
+    panel.scrollChild:SetHeight(math.max(yOffset, panel.scrollFrame:GetHeight()))
+end
+
+-- Handle node selection
+function MidnightOptionsPanel:SelectNode(node)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    
+    -- Clear previous selection
+    if self.selectedNode then
+        for _, btn in ipairs(self.frame.treePanel.buttons) do
+            if btn.node == self.selectedNode then
+                btn:SetBackdrop(nil)
+            end
+        end
+    end
+    
+    -- Set new selection
+    self.selectedNode = node
+    
+    -- Highlight selected button
+    for _, btn in ipairs(self.frame.treePanel.buttons) do
+        if btn.node == node then
+            btn:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = nil,
+                tile = false
+            })
+            local r, g, b = ColorPalette:GetColor('accent-primary')
+            btn:SetBackdropColor(r, g, b, 0.3)
+        end
+    end
+    
+    -- Render content for selected node
+    self:RenderContent(node)
+end
+
+-- ============================================================================
+-- CONTENT PANEL
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateContentPanel(parent)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    
+    local panel = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    panel:SetPoint("TOPLEFT", parent.treePanel, "TOPRIGHT", 6, 0)
+    panel:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -6, 6)
+    
+    -- Apply backdrop
+    panel:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 2,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    panel:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+    panel:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Create scrollframe for content
+    panel.scrollFrame = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
+    panel.scrollFrame:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -8)
+    panel.scrollFrame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -28, 8)
+    
+    -- Create scroll child
+    panel.scrollChild = CreateFrame("Frame", nil, panel.scrollFrame)
+    panel.scrollChild:SetWidth(panel.scrollFrame:GetWidth() - 20)
+    panel.scrollChild:SetHeight(1)
+    panel.scrollFrame:SetScrollChild(panel.scrollChild)
+    
+    -- Store for widgets
+    panel.widgets = {}
+    
+    return panel
+end
+
+-- Render content for selected node
+function MidnightOptionsPanel:RenderContent(node)
+    local panel = self.frame.contentPanel
+    
+    -- Clear existing widgets
+    for _, widget in ipairs(panel.widgets) do
+        widget:Hide()
+        widget:SetParent(nil)
+    end
+    panel.widgets = {}
+    
+    if not node or not node.options then
+        return
+    end
+    
+    -- Sort options by order
+    local sortedOptions = {}
+    for key, option in pairs(node.options) do
+        option.key = key
+        table.insert(sortedOptions, option)
+    end
+    table.sort(sortedOptions, function(a, b)
+        return (a.order or 100) < (b.order or 100)
+    end)
+    
+    -- Render widgets
+    local yOffset = 0
+    for _, option in ipairs(sortedOptions) do
+        -- Skip group types (they're in the tree)
+        if option.type ~= "group" then
+            local widget, height = self:CreateWidgetForOption(panel.scrollChild, option, yOffset)
+            if widget then
+                table.insert(panel.widgets, widget)
+                yOffset = yOffset + height + 10 -- 10px spacing
+            end
+        end
+    end
+    
+    -- Update scroll child height
+    panel.scrollChild:SetHeight(math.max(yOffset, panel.scrollFrame:GetHeight()))
+end
+
+-- ============================================================================
+-- WIDGET CREATION
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateWidgetForOption(parent, option, yOffset)
+    -- Dispatch to specific widget creator based on type
+    if option.type == "header" then
+        return self:CreateHeader(parent, option, yOffset)
+    elseif option.type == "description" then
+        return self:CreateDescription(parent, option, yOffset)
+    elseif option.type == "toggle" then
+        return self:CreateToggle(parent, option, yOffset)
+    elseif option.type == "range" then
+        return self:CreateRange(parent, option, yOffset)
+    elseif option.type == "select" then
+        return self:CreateSelect(parent, option, yOffset)
+    elseif option.type == "input" then
+        return self:CreateInput(parent, option, yOffset)
+    elseif option.type == "color" then
+        return self:CreateColor(parent, option, yOffset)
+    elseif option.type == "execute" then
+        return self:CreateExecute(parent, option, yOffset)
+    end
+    
+    return nil, 0
+end
+
+-- Create header widget
+function MidnightOptionsPanel:CreateHeader(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    
+    local header = parent:CreateFontString(nil, "OVERLAY")
+    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    header:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+    header:SetText(option.name or "")
+    header:SetTextColor(ColorPalette:GetColor('accent-primary'))
+    
+    return header, 28
+end
+
+-- Create description widget
+function MidnightOptionsPanel:CreateDescription(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    
+    local desc = parent:CreateFontString(nil, "OVERLAY")
+    desc:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    desc:SetPoint("RIGHT", parent, "RIGHT", -20, 0)
+    desc:SetFont("Fonts\\FRIZQT__.TTF", 12, "")
+    desc:SetText(option.name or "")
+    desc:SetTextColor(ColorPalette:GetColor('text-primary'))
+    desc:SetJustifyH("LEFT")
+    desc:SetWordWrap(true)
+    
+    return desc, 20
+end
+
+-- ============================================================================
+-- TOGGLE (CHECKBOX) WIDGET
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    frame:SetSize(parent:GetWidth(), 30)
+    
+    -- Create toggle slider background (like MidnightCheckBox)
+    local toggleBg = frame:CreateTexture(nil, "BACKGROUND")
+    toggleBg:SetSize(40, 20)
+    toggleBg:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -4)
+    toggleBg:SetTexture("Interface\\Buttons\\WHITE8X8")
+    
+    -- Create border
+    local toggleBorder = frame:CreateTexture(nil, "BORDER")
+    toggleBorder:SetSize(42, 22)
+    toggleBorder:SetPoint("CENTER", toggleBg, "CENTER")
+    toggleBorder:SetTexture("Interface\\Buttons\\WHITE8X8")
+    toggleBorder:SetVertexColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Create slider knob
+    local toggleKnob = frame:CreateTexture(nil, "OVERLAY")
+    toggleKnob:SetSize(16, 16)
+    toggleKnob:SetTexture("Interface\\Buttons\\WHITE8X8")
+    toggleKnob:SetVertexColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Create label
+    local label = frame:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(label, 'body', 'normal')
+    end
+    label:SetPoint("LEFT", frame, "LEFT", 50, 0)
+    label:SetText(option.name or "")
+    label:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Make clickable
+    local button = CreateFrame("Button", nil, frame)
+    button:SetAllPoints(frame)
+    
+    -- Get/Set value function
+    local function GetValue()
+        if option.get then
+            return option.get(self.addonRef.db.profile)
+        end
+        return false
+    end
+    
+    local function SetValue(value)
+        if option.set then
+            option.set(self.addonRef.db.profile, value)
+        end
+        
+        -- Update visual
+        if value then
+            toggleKnob:SetPoint("CENTER", toggleBg, "RIGHT", -10, 0)
+            toggleBg:SetVertexColor(ColorPalette:GetColor('accent-primary'))
+        else
+            toggleKnob:SetPoint("CENTER", toggleBg, "LEFT", 10, 0)
+            toggleBg:SetVertexColor(0.02, 0.02, 0.02, 1)
+        end
+    end
+    
+    -- Click handler
+    button:SetScript("OnClick", function()
+        local currentValue = GetValue()
+        SetValue(not currentValue)
+    end)
+    
+    -- Set initial state
+    SetValue(GetValue())
+    
+    return frame, 30
+end
+
+-- ============================================================================
+-- RANGE (SLIDER) WIDGET
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    frame:SetSize(parent:GetWidth(), 70)
+    
+    -- Create label
+    local label = frame:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(label, 'body', 'normal')
+    end
+    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    label:SetText(option.name or "")
+    label:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Create slider
+    local slider = CreateFrame("Slider", nil, frame, "BackdropTemplate")
+    slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -10)
+    slider:SetSize(parent:GetWidth() - 100, 4)
+    slider:SetOrientation("HORIZONTAL")
+    slider:SetMinMaxValues(option.min or 0, option.max or 100)
+    slider:SetValueStep(option.step or 1)
+    slider:SetObeyStepOnDrag(true)
+    
+    -- Style slider track
+    slider:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    local r, g, b = ColorPalette:GetColor('accent-primary')
+    slider:SetBackdropColor(r, g, b, 0.5)
+    slider:SetBackdropBorderColor(r, g, b, 1)
+    
+    -- Style thumb
+    slider:SetThumbTexture("Interface\\Buttons\\WHITE8X8")
+    local thumb = slider:GetThumbTexture()
+    thumb:SetVertexColor(ColorPalette:GetColor('text-primary'))
+    thumb:SetSize(6, 10)
+    
+    -- Create value display
+    local valueText = frame:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(valueText, 'body', 'normal')
+    end
+    valueText:SetPoint("LEFT", slider, "RIGHT", 10, 0)
+    valueText:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Get/Set value functions
+    local function GetValue()
+        if option.get then
+            return option.get(self.addonRef.db.profile)
+        end
+        return option.min or 0
+    end
+    
+    local function SetValue(value)
+        if option.set then
+            option.set(self.addonRef.db.profile, value)
+        end
+        slider:SetValue(value)
+        valueText:SetText(tostring(value))
+    end
+    
+    -- Slider change handler
+    slider:SetScript("OnValueChanged", function(self, value)
+        value = math.floor(value + 0.5) -- Round to nearest
+        SetValue(value)
+    end)
+    
+    -- Set initial value
+    SetValue(GetValue())
+    
+    return frame, 70
+end
+
+-- ============================================================================
+-- SELECT (DROPDOWN) WIDGET
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    frame:SetSize(parent:GetWidth(), 50)
+    
+    -- Create label
+    local label = frame:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(label, 'body', 'normal')
+    end
+    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    label:SetText(option.name or "")
+    label:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Create dropdown button
+    local dropdown = CreateFrame("Button", nil, frame, "BackdropTemplate")
+    dropdown:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
+    dropdown:SetSize(200, 24)
+    
+    -- Style dropdown
+    dropdown:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    dropdown:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+    dropdown:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Dropdown text
+    dropdown.text = dropdown:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(dropdown.text, 'body', 'normal')
+    end
+    dropdown.text:SetPoint("LEFT", dropdown, "LEFT", 8, 0)
+    dropdown.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Dropdown arrow
+    dropdown.arrow = dropdown:CreateTexture(nil, "OVERLAY")
+    dropdown.arrow:SetTexture("Interface\\Buttons\\Arrow-Down-Up")
+    dropdown.arrow:SetTexCoord(0, 1, 0, 0.5)
+    dropdown.arrow:SetSize(12, 12)
+    dropdown.arrow:SetPoint("RIGHT", dropdown, "RIGHT", -6, 0)
+    local r, g, b = ColorPalette:GetColor('accent-primary')
+    dropdown.arrow:SetVertexColor(r, g, b, 1)
+    
+    -- Get/Set value functions
+    local function GetValue()
+        if option.get then
+            return option.get(self.addonRef.db.profile)
+        end
+        return nil
+    end
+    
+    local function SetValue(value)
+        if option.set then
+            option.set(self.addonRef.db.profile, value)
+        end
+        
+        -- Update display text
+        if option.values then
+            dropdown.text:SetText(option.values[value] or tostring(value))
+        else
+            dropdown.text:SetText(tostring(value))
+        end
+    end
+    
+    -- Create simple dropdown menu on click
+    dropdown:SetScript("OnClick", function(self)
+        if not option.values then return end
+        
+        -- Create menu
+        local menu = CreateFrame("Frame", nil, self, "BackdropTemplate")
+        menu:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, -2)
+        menu:SetFrameStrata("DIALOG")
+        menu:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 }
+        })
+        menu:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+        menu:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+        
+        -- Calculate menu size
+        local itemHeight = 20
+        local numItems = 0
+        for _ in pairs(option.values) do numItems = numItems + 1 end
+        menu:SetSize(200, numItems * itemHeight + 4)
+        
+        -- Create menu items
+        local y = -2
+        for key, text in pairs(option.values) do
+            local item = CreateFrame("Button", nil, menu)
+            item:SetPoint("TOPLEFT", menu, "TOPLEFT", 2, y)
+            item:SetSize(196, itemHeight)
+            
+            item.text = item:CreateFontString(nil, "OVERLAY")
+            if FontKit then
+                FontKit:SetFont(item.text, 'body', 'normal')
+            end
+            item.text:SetPoint("LEFT", item, "LEFT", 6, 0)
+            item.text:SetText(text)
+            item.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+            
+            -- Highlight on hover
+            item:SetScript("OnEnter", function()
+                item:SetBackdrop({bgFile = "Interface\\Buttons\\WHITE8X8"})
+                local r, g, b = ColorPalette:GetColor('accent-primary')
+                item:SetBackdropColor(r, g, b, 0.15)
+            end)
+            item:SetScript("OnLeave", function()
+                item:SetBackdrop(nil)
+            end)
+            
+            -- Click handler
+            item:SetScript("OnClick", function()
+                SetValue(key)
+                menu:Hide()
+            end)
+            
+            y = y - itemHeight
+        end
+        
+        -- Close menu when clicking outside
+        menu:SetScript("OnHide", function() menu:SetParent(nil) end)
+        C_Timer.After(0.1, function()
+            menu:SetScript("OnUpdate", function(self)
+                if not MouseIsOver(self) and not MouseIsOver(dropdown) then
+                    self:Hide()
+                    self:SetScript("OnUpdate", nil)
+                end
+            end)
+        end)
+    end)
+    
+    -- Set initial value
+    SetValue(GetValue())
+    
+    return frame, 50
+end
+
+-- ============================================================================
+-- INPUT (TEXT BOX) WIDGET
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    
+    local isMultiline = option.multiline
+    local frameHeight = isMultiline and 100 or 50
+    frame:SetSize(parent:GetWidth(), frameHeight)
+    
+    -- Create label
+    local label = frame:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(label, 'body', 'normal')
+    end
+    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    label:SetText(option.name or "")
+    label:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Create edit box
+    local editBox
+    if isMultiline then
+        local scroll = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
+        scroll:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
+        scroll:SetSize(parent:GetWidth() - 30, 60)
+        
+        editBox = CreateFrame("EditBox", nil, scroll)
+        editBox:SetMultiLine(true)
+        editBox:SetSize(scroll:GetWidth() - 10, 200)
+        editBox:SetAutoFocus(false)
+        scroll:SetScrollChild(editBox)
+        
+        -- Style scroll background
+        if scroll.SetBackdrop then
+            scroll:SetBackdrop({
+                bgFile = "Interface\\Buttons\\WHITE8X8",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                tile = false, edgeSize = 1,
+                insets = { left = 4, right = 4, top = 4, bottom = 4 }
+            })
+            scroll:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+            scroll:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+        end
+    else
+        editBox = CreateFrame("EditBox", nil, frame, "BackdropTemplate")
+        editBox:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
+        editBox:SetSize(parent:GetWidth() - 20, 24)
+        editBox:SetAutoFocus(false)
+        
+        -- Style edit box
+        editBox:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = false, edgeSize = 1,
+            insets = { left = 4, right = 4, top = 2, bottom = 2 }
+        })
+        editBox:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+        editBox:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    end
+    
+    -- Set font
+    if FontKit then
+        FontKit:SetFont(editBox, 'body', 'normal')
+    else
+        editBox:SetFont("Fonts\\FRIZQT__.TTF", 12)
+    end
+    editBox:SetTextColor(ColorPalette:GetColor('text-primary'))
+    editBox:SetTextInsets(6, 6, 2, 2)
+    
+    -- Get/Set value functions
+    local function GetValue()
+        if option.get then
+            return option.get(self.addonRef.db.profile)
+        end
+        return ""
+    end
+    
+    local function SetValue(value)
+        if option.set then
+            option.set(self.addonRef.db.profile, value)
+        end
+        editBox:SetText(value or "")
+    end
+    
+    -- Save on focus lost
+    editBox:SetScript("OnEditFocusLost", function()
+        SetValue(editBox:GetText())
+    end)
+    
+    editBox:SetScript("OnEnterPressed", function()
+        editBox:ClearFocus()
+    end)
+    
+    editBox:SetScript("OnEscapePressed", function()
+        editBox:ClearFocus()
+        SetValue(GetValue()) -- Revert
+    end)
+    
+    -- Set initial value
+    SetValue(GetValue())
+    
+    return frame, frameHeight
+end
+
+-- ============================================================================
+-- COLOR PICKER WIDGET
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateColor(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    frame:SetSize(parent:GetWidth(), 40)
+    
+    -- Create label
+    local label = frame:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(label, 'body', 'normal')
+    end
+    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    label:SetText(option.name or "")
+    label:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Create color swatch button
+    local swatch = CreateFrame("Button", nil, frame, "BackdropTemplate")
+    swatch:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
+    swatch:SetSize(32, 32)
+    
+    -- Swatch border
+    swatch:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 1,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    swatch:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    
+    -- Swatch color texture
+    swatch.texture = swatch:CreateTexture(nil, "BACKGROUND")
+    swatch.texture:SetPoint("TOPLEFT", swatch, "TOPLEFT", 2, -2)
+    swatch.texture:SetPoint("BOTTOMRIGHT", swatch, "BOTTOMRIGHT", -2, 2)
+    swatch.texture:SetTexture("Interface\\Buttons\\WHITE8X8")
+    
+    -- Get/Set value functions
+    local function GetValue()
+        if option.get then
+            local color = option.get(self.addonRef.db.profile)
+            if type(color) == "table" then
+                return color[1] or 1, color[2] or 1, color[3] or 1, color[4] or 1
+            end
+        end
+        return 1, 1, 1, 1
+    end
+    
+    local function SetValue(r, g, b, a)
+        if option.set then
+            option.set(self.addonRef.db.profile, {r, g, b, a or 1})
+        end
+        swatch.texture:SetVertexColor(r, g, b, a or 1)
+    end
+    
+    -- Open color picker on click
+    swatch:SetScript("OnClick", function()
+        local r, g, b, a = GetValue()
+        
+        ColorPickerFrame:SetupColorPickerAndShow({
+            r = r,
+            g = g,
+            b = b,
+            opacity = a,
+            hasOpacity = option.hasAlpha,
+            swatchFunc = function()
+                local r, g, b = ColorPickerFrame:GetColorRGB()
+                local a = ColorPickerFrame:GetColorAlpha()
+                SetValue(r, g, b, a)
+            end,
+            opacityFunc = function()
+                local r, g, b = ColorPickerFrame:GetColorRGB()
+                local a = ColorPickerFrame:GetColorAlpha()
+                SetValue(r, g, b, a)
+            end,
+            cancelFunc = function()
+                SetValue(r, g, b, a)
+            end,
+        })
+    end)
+    
+    -- Set initial color
+    SetValue(GetValue())
+    
+    return frame, 40
+end
+
+-- ============================================================================
+-- EXECUTE (BUTTON) WIDGET
+-- ============================================================================
+
+function MidnightOptionsPanel:CreateExecute(parent, option, yOffset)
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    local FontKit = _G.MidnightUI_FontKit
+    
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    frame:SetSize(parent:GetWidth(), 40)
+    
+    -- Create button
+    local button = CreateFrame("Button", nil, frame, "BackdropTemplate")
+    button:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    button:SetSize(150, 28)
+    
+    -- Style button
+    button:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    button:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+    button:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
+    
+    -- Button text
+    button.text = button:CreateFontString(nil, "OVERLAY")
+    if FontKit then
+        FontKit:SetFont(button.text, 'button', 'normal')
+    end
+    button.text:SetPoint("CENTER")
+    button.text:SetText(option.name or "")
+    button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
+    
+    -- Hover effect
+    button:SetScript("OnEnter", function(self)
+        local r, g, b = ColorPalette:GetColor('button-bg')
+        self:SetBackdropColor(r * 1.3, g * 1.3, b * 1.3, 1)
+    end)
+    
+    button:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+    end)
+    
+    -- Click handler
+    button:SetScript("OnClick", function()
+        if option.func then
+            option.func()
+        end
+    end)
+    
+    return frame, 40
+end
+
+-- ============================================================================
+-- OPEN/CLOSE FUNCTIONS
+-- ============================================================================
+
+function MidnightOptionsPanel:Open(addonRef)
+    if not self.frame then
+        self:CreateFrame(addonRef)
+    end
+    
+    -- Parse options table
+    local optionsTable = addonRef:GetOptions()
+    local tree = self:ParseOptionsToTree(optionsTable)
+    
+    -- Build tree navigation
+    self:BuildTree(tree)
+    
+    -- Select first node by default
+    if tree[1] then
+        self:SelectNode(tree[1])
+    end
+    
+    self.frame:Show()
+end
+
+function MidnightOptionsPanel:Close()
+    if self.frame then
+        self.frame:Hide()
+    end
+end
+
+function MidnightOptionsPanel:Toggle(addonRef)
+    if self.frame and self.frame:IsShown() then
+        self:Close()
+    else
+        self:Open(addonRef)
+    end
+end
+
+return MidnightOptionsPanel

@@ -91,58 +91,14 @@ function MidnightUI:OnEnable()
     end)
     
     -- Register options after modules load
-    C_Timer.After(0.2, function()
-        AceConfig:RegisterOptionsTable("MidnightUI", function() return self:GetOptions() end)
-        AceConfigDialog:AddToBlizOptions("MidnightUI", "Midnight UI")
-        -- Set a larger default size for the options window
-        if AceConfigDialog.SetDefaultSize then
-            AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
-        end
-        
-        -- Hook AceConfigDialog Open to style MidnightUI options after they're built
-        if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
-            local originalOpen = AceConfigDialog.Open
-            AceConfigDialog.Open = function(self, appName, ...)
-                local result = originalOpen(self, appName, ...)
-                
-                -- Only style MidnightUI options
-                if appName == "MidnightUI" then
-                    local frame = AceConfigDialog.OpenFrames[appName]
-                    if frame and frame.obj then
-                        -- Apply styling after UI is built
-                        C_Timer.After(0.1, function()
-                            MidnightUI:StyleOptionsFrame(frame.obj)
-                        end)
-                    end
-                end
-                
-                return result
-            end
-            AceConfigDialog.MidnightOpenHooked = true
-        end
-        
-        -- Register theme change callback to refresh widget colors
-        if ColorPalette and not ColorPalette.MidnightCallbackRegistered then
-            ColorPalette:RegisterCallback(function(themeName)
-                -- Close and reopen config dialog to apply new theme
-                if AceConfigDialog then
-                    local frame = AceConfigDialog.OpenFrames["MidnightUI"]
-                    if frame then
-                        C_Timer.After(0.1, function()
-                            AceConfigDialog:Close("MidnightUI")
-                            C_Timer.After(0.1, function()
-                                AceConfigDialog:Open("MidnightUI")
-                            end)
-                        end)
-                    end
-                end
-            end)
-            ColorPalette.MidnightCallbackRegistered = true
-        end
-        
-        -- Hook AceConfigDialog to apply themed backdrop
-        self:HookConfigDialogFrames()
-    end)
+    -- NOTE: No longer using AceConfig/AceConfigDialog - we have our own custom framework now!
+    -- Options panel is opened via MidnightUI:OpenConfig() which uses Framework/MidnightOptionsPanel.lua
+    
+    -- C_Timer.After(0.2, function()
+    --     AceConfig:RegisterOptionsTable("MidnightUI", function() return self:GetOptions() end)
+    --     AceConfigDialog:AddToBlizOptions("MidnightUI", "Midnight UI")
+    --     ... (commented out old AceGUI code)
+    -- end)
     
     -- Initialize Framework
     if _G.MidnightUI_FrameFactory then
@@ -2282,23 +2238,12 @@ function MidnightUI:SkinConfigFrame(frame)
 end
 
 function MidnightUI:OpenConfig()
-    if Settings and Settings.OpenToCategory then
-        local categoryID = nil
-        if SettingsPanel and SettingsPanel.GetCategoryList then
-            for _, category in ipairs(SettingsPanel:GetCategoryList()) do
-                if category.name == "Midnight UI" then
-                    categoryID = category:GetID()
-                    break
-                end
-            end
-        end
-        if categoryID then Settings.OpenToCategory(categoryID); return end
-    end
-    
-    if InterfaceOptionsFrame_OpenToCategory then
-        InterfaceOptionsFrame_OpenToCategory("Midnight UI")
+    -- Use custom MidnightUI Options Panel (zero AceGUI dependency)
+    local optionsPanel = _G.MidnightUI_OptionsPanel
+    if optionsPanel then
+        optionsPanel:Toggle(self)
     else
-        LibStub("AceConfigDialog-3.0"):Open("MidnightUI")
+        self:Print("Options panel not loaded yet. Please try again in a moment.")
     end
 end
 
