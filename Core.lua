@@ -99,41 +99,21 @@ function MidnightUI:OnEnable()
             AceConfigDialog:SetDefaultSize("MidnightUI", 1100, 800)
         end
         
-        -- Hook AceGUI widget creation to style widgets for MidnightUI options
-        local AceGUI = LibStub("AceGUI-3.0")
-        if AceGUI and not AceGUI.MidnightUIHooked then
-            local originalCreate = AceGUI.Create
-            AceGUI.Create = function(self, widgetType)
-                local widget = originalCreate(self, widgetType)
-                
-                -- Only style if we're currently building MidnightUI options
-                if _G.MidnightUI_BuildingOptions then
-                    -- Style all widgets with a minimal delay to allow proper initialization
-                    -- This prevents interference with AceGUI's widget lifecycle
-                    C_Timer.After(0, function()
-                        MidnightUI:SkinAceGUIWidget(widget, widgetType)
-                    end)
-                end
-                
-                return widget
-            end
-            AceGUI.MidnightUIHooked = true
-        end
-        
-        -- Hook AceConfigDialog Open to set flag when building MidnightUI options
+        -- Hook AceConfigDialog Open to style MidnightUI options after they're built
         if AceConfigDialog.Open and not AceConfigDialog.MidnightOpenHooked then
             local originalOpen = AceConfigDialog.Open
             AceConfigDialog.Open = function(self, appName, ...)
-                if appName == "MidnightUI" then
-                    _G.MidnightUI_BuildingOptions = true
-                end
-                
                 local result = originalOpen(self, appName, ...)
                 
+                -- Only style MidnightUI options
                 if appName == "MidnightUI" then
-                    C_Timer.After(0.2, function()
-                        _G.MidnightUI_BuildingOptions = false
-                    end)
+                    local frame = AceConfigDialog.OpenFrames[appName]
+                    if frame and frame.obj then
+                        -- Apply styling after UI is built
+                        C_Timer.After(0.1, function()
+                            MidnightUI:StyleOptionsFrame(frame.obj)
+                        end)
+                    end
                 end
                 
                 return result
@@ -627,10 +607,33 @@ function MidnightUI:ScaleLayoutToResolution()
     StaticPopup_Show("MIDNIGHTUI_RELOAD_CONFIRM")
 end
 
+-- Walk widget tree and apply styling (safe for options panel)
+function MidnightUI:StyleOptionsFrame(widget)
+    if not widget then return end
+    
+    -- Get widget type
+    local widgetType = widget.type
+    if widgetType then
+        -- Apply styling based on type
+        self:SkinAceGUIWidget(widget, widgetType)
+    end
+    
+    -- Recursively style children
+    if widget.children then
+        for _, child in pairs(widget.children) do
+            self:StyleOptionsFrame(child)
+        end
+    end
+end
+
 function MidnightUI:SkinAceGUIWidget(widget, widgetType)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
-    if not ColorPalette then return end
+    if not ColorPalette or not widget then return end
+    
+    -- Skip if already styled to avoid double-styling
+    if widget.midnightStyled then return end
+    widget.midnightStyled = true
     
     -- Skin based on widget type
     if widgetType == "Frame" then
