@@ -496,11 +496,13 @@ function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
     
     local function UpdateVisual(value)
         if value then
+            -- ON state: accent color with knob on right
             toggleKnob:SetPoint("CENTER", toggleBg, "RIGHT", -10, 0)
             toggleBg:SetVertexColor(ColorPalette:GetColor('accent-primary'))
         else
+            -- OFF state: dark disabled color with knob on left
             toggleKnob:SetPoint("CENTER", toggleBg, "LEFT", 10, 0)
-            toggleBg:SetVertexColor(0.02, 0.02, 0.02, 1)
+            toggleBg:SetVertexColor(ColorPalette:GetColor('button-disabled'))
         end
     end
     
