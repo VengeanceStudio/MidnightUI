@@ -458,7 +458,18 @@ function MidnightOptionsPanel:RenderTabGroup(node)
     
     for i, childGroup in ipairs(childGroups) do
         local tabButton = CreateFrame("Button", nil, panel, "BackdropTemplate")
-        tabButton:SetSize(140, 32)
+        
+        -- Create tab text first to measure width
+        local tabText = tabButton:CreateFontString(nil, "OVERLAY")
+        tabText:SetFont("Fonts\\FRIZQT__.TTF", 13, "OUTLINE")
+        tabText:SetText(EvaluateValue(childGroup.name) or childGroup.key)
+        tabText:SetPoint("CENTER")
+        
+        -- Calculate tab width based on text width + padding
+        local textWidth = tabText:GetStringWidth()
+        local tabWidth = math.max(textWidth + 30, 80) -- Min 80px, 15px padding each side
+        
+        tabButton:SetSize(tabWidth, 32)
         tabButton:SetPoint("TOPLEFT", panel, "TOPLEFT", xOffset, -10)
         tabButton:SetBackdrop({
             bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -467,11 +478,6 @@ function MidnightOptionsPanel:RenderTabGroup(node)
             edgeSize = 1,
             insets = { left = 1, right = 1, top = 1, bottom = 1 }
         })
-        
-        local tabText = tabButton:CreateFontString(nil, "OVERLAY")
-        tabText:SetFont("Fonts\\FRIZQT__.TTF", 13, "OUTLINE")
-        tabText:SetText(EvaluateValue(childGroup.name) or childGroup.key)
-        tabText:SetPoint("CENTER")
         
         tabButton.childGroup = childGroup
         tabButton.text = tabText
@@ -482,7 +488,7 @@ function MidnightOptionsPanel:RenderTabGroup(node)
         end)
         
         table.insert(panel.tabs, tabButton)
-        xOffset = xOffset + 145
+        xOffset = xOffset + tabWidth + 5
     end
     
     -- Select first tab by default
