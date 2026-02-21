@@ -7,6 +7,18 @@ local MidnightOptionsPanel = {}
 _G.MidnightUI_OptionsPanel = MidnightOptionsPanel
 
 -- ============================================================================
+-- HELPER FUNCTIONS
+-- ============================================================================
+
+-- Evaluate a value that can be either a literal or a function
+local function EvaluateValue(value, ...)
+    if type(value) == "function" then
+        return value(...)
+    end
+    return value
+end
+
+-- ============================================================================
 -- TREE PARSER - Convert options table to tree structure
 -- ============================================================================
 
@@ -23,8 +35,8 @@ function MidnightOptionsPanel:ParseOptionsToTree(optionsTable)
         if option.type == "group" then
             local node = {
                 key = key,
-                name = option.name or key,
-                desc = option.desc,
+                name = EvaluateValue(option.name) or key,
+                desc = EvaluateValue(option.desc),
                 order = option.order or 100,
                 children = {},
                 options = option.args or {}
@@ -36,8 +48,8 @@ function MidnightOptionsPanel:ParseOptionsToTree(optionsTable)
                     if childOption.type == "group" then
                         local childNode = {
                             key = childKey,
-                            name = childOption.name or childKey,
-                            desc = childOption.desc,
+                            name = EvaluateValue(childOption.name) or childKey,
+                            desc = EvaluateValue(childOption.desc),
                             order = childOption.order or 100,
                             parent = node,
                             options = childOption.args or {}
@@ -399,7 +411,7 @@ function MidnightOptionsPanel:CreateHeader(parent, option, yOffset)
     local header = parent:CreateFontString(nil, "OVERLAY")
     header:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
     header:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
-    header:SetText(option.name or "")
+    header:SetText(EvaluateValue(option.name) or "")
     header:SetTextColor(ColorPalette:GetColor('accent-primary'))
     
     return header, 28
@@ -413,7 +425,7 @@ function MidnightOptionsPanel:CreateDescription(parent, option, yOffset)
     desc:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
     desc:SetPoint("RIGHT", parent, "RIGHT", -20, 0)
     desc:SetFont("Fonts\\FRIZQT__.TTF", 12, "")
-    desc:SetText(option.name or "")
+    desc:SetText(EvaluateValue(option.name) or "")
     desc:SetTextColor(ColorPalette:GetColor('text-primary'))
     desc:SetJustifyH("LEFT")
     desc:SetWordWrap(true)
@@ -458,7 +470,7 @@ function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
         FontKit:SetFont(label, 'body', 'normal')
     end
     label:SetPoint("LEFT", frame, "LEFT", 50, 0)
-    label:SetText(option.name or "")
+    label:SetText(EvaluateValue(option.name) or "")
     label:SetTextColor(ColorPalette:GetColor('text-primary'))
     
     -- Make clickable
@@ -518,7 +530,7 @@ function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
         FontKit:SetFont(label, 'body', 'normal')
     end
     label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    label:SetText(option.name or "")
+    label:SetText(EvaluateValue(option.name) or "")
     label:SetTextColor(ColorPalette:GetColor('text-primary'))
     
     -- Create slider
@@ -601,7 +613,7 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
         FontKit:SetFont(label, 'body', 'normal')
     end
     label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    label:SetText(option.name or "")
+    label:SetText(EvaluateValue(option.name) or "")
     label:SetTextColor(ColorPalette:GetColor('text-primary'))
     
     -- Create dropdown button
@@ -753,7 +765,7 @@ function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
         FontKit:SetFont(label, 'body', 'normal')
     end
     label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    label:SetText(option.name or "")
+    label:SetText(EvaluateValue(option.name) or "")
     label:SetTextColor(ColorPalette:GetColor('text-primary'))
     
     -- Create edit box
@@ -859,7 +871,7 @@ function MidnightOptionsPanel:CreateColor(parent, option, yOffset)
         FontKit:SetFont(label, 'body', 'normal')
     end
     label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    label:SetText(option.name or "")
+    label:SetText(EvaluateValue(option.name) or "")
     label:SetTextColor(ColorPalette:GetColor('text-primary'))
     
     -- Create color swatch button
@@ -965,7 +977,7 @@ function MidnightOptionsPanel:CreateExecute(parent, option, yOffset)
         FontKit:SetFont(button.text, 'button', 'normal')
     end
     button.text:SetPoint("CENTER")
-    button.text:SetText(option.name or "")
+    button.text:SetText(EvaluateValue(option.name) or "")
     button.text:SetTextColor(ColorPalette:GetColor('text-primary'))
     
     -- Hover effect
