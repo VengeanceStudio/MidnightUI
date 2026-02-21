@@ -5,8 +5,9 @@
 local _, MidnightUI = ...
 local ScrollFrame = {}
 MidnightUI.ScrollFrame = ScrollFrame
+_G.MidnightUI_ScrollFrame = ScrollFrame
 
-local ColorPalette = MidnightUI.ColorPalette
+local ColorPalette = _G.MidnightUI_ColorPalette
 
 -- Create a custom scrollbar frame
 local function CreateScrollbar(parent, width)
