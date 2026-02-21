@@ -377,21 +377,57 @@ function MidnightOptionsPanel:RenderContent(node)
         return (a.order or 100) < (b.order or 100)
     end)
     
-    -- Render widgets
+    -- Render widgets with inline layout support
+    local xOffset = 0
     local yOffset = 0
+    local rowHeight = 0
+    local maxWidth = panel.scrollChild:GetWidth() - 20
+    
     for _, option in ipairs(sortedOptions) do
         -- Skip group types (they're in the tree)
         if option.type ~= "group" then
-            local widget, height = self:CreateWidgetForOption(panel.scrollChild, option, yOffset)
+            local isFullWidth = (option.width == "full" or not option.width)
+            
+            -- Check if we need to wrap to next row
+            if isFullWidth and xOffset > 0 then
+                -- Move to next row
+                yOffset = yOffset + rowHeight + 10
+                xOffset = 0
+                rowHeight = 0
+            end
+            
+            local widget, height, width = self:CreateWidgetForOption(panel.scrollChild, option, xOffset, yOffset)
             if widget then
                 table.insert(panel.widgets, widget)
-                yOffset = yOffset + height + 10 -- 10px spacing
+                rowHeight = math.max(rowHeight, height)
+                
+                if isFullWidth then
+                    -- Full width widget - move to next row
+                    yOffset = yOffset + height + 10
+                    xOffset = 0
+                    rowHeight = 0
+                else
+                    -- Inline widget - advance horizontally
+                    xOffset = xOffset + width + 20
+                    
+                    -- If we exceed max width, wrap to next row
+                    if xOffset >= maxWidth then
+                        yOffset = yOffset + rowHeight + 10
+                        xOffset = 0
+                        rowHeight = 0
+                    end
+                end
             end
         end
     end
     
+    -- Add final row height
+    if rowHeight > 0 then
+        yOffset = yOffset + rowHeight
+    end
+    
     -- Update scroll child height
-    panel.scrollChild:SetHeight(math.max(yOffset, panel.scrollFrame:GetHeight()))
+    panel.scrollChild:SetHeight(math.max(yOffset + 20, panel.scrollFrame:GetHeight()))
 end
 
 -- Render a group with tabs for child groups
@@ -498,69 +534,105 @@ function MidnightOptionsPanel:SelectTab(tabIndex)
         return (a.order or 100) < (b.order or 100)
     end)
     
-    -- Render widgets (starting below tabs)
+    -- Render widgets (starting below tabs) with inline layout support
+    local xOffset = 0
     local yOffset = 50 -- Space for tabs
+    local rowHeight = 0
+    local maxWidth = panel.scrollChild:GetWidth() - 20
+    
     for _, option in ipairs(sortedOptions) do
         -- Skip group types
         if option.type ~= "group" then
-            local widget, height = self:CreateWidgetForOption(panel.scrollChild, option, yOffset)
+            local isFullWidth = (option.width == "full" or not option.width)
+            
+            -- Check if we need to wrap to next row
+            if isFullWidth and xOffset > 0 then
+                -- Move to next row
+                yOffset = yOffset + rowHeight + 10
+                xOffset = 0
+                rowHeight = 0
+            end
+            
+            local widget, height, width = self:CreateWidgetForOption(panel.scrollChild, option, xOffset, yOffset)
             if widget then
                 table.insert(panel.widgets, widget)
-                yOffset = yOffset + height + 10
+                rowHeight = math.max(rowHeight, height)
+                
+                if isFullWidth then
+                    -- Full width widget - move to next row
+                    yOffset = yOffset + height + 10
+                    xOffset = 0
+                    rowHeight = 0
+                else
+                    -- Inline widget - advance horizontally
+                    xOffset = xOffset + width + 20
+                    
+                    -- If we exceed max width, wrap to next row
+                    if xOffset >= maxWidth then
+                        yOffset = yOffset + rowHeight + 10
+                        xOffset = 0
+                        rowHeight = 0
+                    end
+                end
             end
         end
     end
     
+    -- Add final row height
+    if rowHeight > 0 then
+        yOffset = yOffset + rowHeight
+    end
+    
     -- Update scroll child height
-    panel.scrollChild:SetHeight(math.max(yOffset, panel.scrollFrame:GetHeight()))
+    panel.scrollChild:SetHeight(math.max(yOffset + 20, panel.scrollFrame:GetHeight()))
 end
 
 -- ============================================================================
 -- WIDGET CREATION
 -- ============================================================================
 
-function MidnightOptionsPanel:CreateWidgetForOption(parent, option, yOffset)
+function MidnightOptionsPanel:CreateWidgetForOption(parent, option, xOffset, yOffset)
     -- Dispatch to specific widget creator based on type
     if option.type == "header" then
-        return self:CreateHeader(parent, option, yOffset)
+        return self:CreateHeader(parent, option, xOffset, yOffset)
     elseif option.type == "description" then
-        return self:CreateDescription(parent, option, yOffset)
+        return self:CreateDescription(parent, option, xOffset, yOffset)
     elseif option.type == "toggle" then
-        return self:CreateToggle(parent, option, yOffset)
+        return self:CreateToggle(parent, option, xOffset, yOffset)
     elseif option.type == "range" then
-        return self:CreateRange(parent, option, yOffset)
+        return self:CreateRange(parent, option, xOffset, yOffset)
     elseif option.type == "select" then
-        return self:CreateSelect(parent, option, yOffset)
+        return self:CreateSelect(parent, option, xOffset, yOffset)
     elseif option.type == "input" then
-        return self:CreateInput(parent, option, yOffset)
+        return self:CreateInput(parent, option, xOffset, yOffset)
     elseif option.type == "color" then
-        return self:CreateColor(parent, option, yOffset)
+        return self:CreateColor(parent, option, xOffset, yOffset)
     elseif option.type == "execute" then
-        return self:CreateExecute(parent, option, yOffset)
+        return self:CreateExecute(parent, option, xOffset, yOffset)
     end
     
-    return nil, 0
+    return nil, 0, 0
 end
 
 -- Create header widget
-function MidnightOptionsPanel:CreateHeader(parent, option, yOffset)
+function MidnightOptionsPanel:CreateHeader(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     
     local header = parent:CreateFontString(nil, "OVERLAY")
-    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    header:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
     header:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
     header:SetText(EvaluateValue(option.name) or "")
     header:SetTextColor(ColorPalette:GetColor('accent-primary'))
     
-    return header, 28
+    return header, 28, parent:GetWidth()
 end
 
 -- Create description widget
-function MidnightOptionsPanel:CreateDescription(parent, option, yOffset)
+function MidnightOptionsPanel:CreateDescription(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     
     local desc = parent:CreateFontString(nil, "OVERLAY")
-    desc:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    desc:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
     desc:SetPoint("RIGHT", parent, "RIGHT", -20, 0)
     desc:SetFont("Fonts\\FRIZQT__.TTF", 12, "")
     desc:SetText(EvaluateValue(option.name) or "")
@@ -575,13 +647,14 @@ end
 -- TOGGLE (CHECKBOX) WIDGET
 -- ============================================================================
 
-function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
+function MidnightOptionsPanel:CreateToggle(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     
+    local frameWidth = (option.width == "full" or not option.width) and parent:GetWidth() or 220
     local frame = CreateFrame("Frame", nil, parent)
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
-    frame:SetSize(parent:GetWidth(), 30)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
+    frame:SetSize(frameWidth, 30)
     
     -- Create toggle slider background (like MidnightCheckBox)
     local toggleBg = frame:CreateTexture(nil, "BACKGROUND")
@@ -655,20 +728,21 @@ function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
     -- Set initial state (visual only, don't call set function)
     UpdateVisual(GetValue())
     
-    return frame, 30
+    return frame, 30, frameWidth
 end
 
 -- ============================================================================
 -- RANGE (SLIDER) WIDGET
 -- ============================================================================
 
-function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
+function MidnightOptionsPanel:CreateRange(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     
+    local frameWidth = (option.width == "full" or not option.width) and parent:GetWidth() or 220
     local frame = CreateFrame("Frame", nil, parent)
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
-    frame:SetSize(parent:GetWidth(), 70)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
+    frame:SetSize(frameWidth, 70)
     
     -- Create label
     local label = frame:CreateFontString(nil, "OVERLAY")
@@ -682,7 +756,7 @@ function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
     -- Create slider
     local slider = CreateFrame("Slider", nil, frame, "BackdropTemplate")
     slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -10)
-    slider:SetSize(200, 4)
+    slider:SetSize(150, 4)
     slider:SetOrientation("HORIZONTAL")
     slider:SetMinMaxValues(option.min or 0, option.max or 100)
     slider:SetValueStep(option.step or 1)
@@ -742,20 +816,21 @@ function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
     -- Set initial value (visual only)
     UpdateVisual(GetValue())
     
-    return frame, 70
+    return frame, 70, frameWidth
 end
 
 -- ============================================================================
 -- SELECT (DROPDOWN) WIDGET
 -- ============================================================================
 
-function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
+function MidnightOptionsPanel:CreateSelect(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     
+    local frameWidth = (option.width == "full" or not option.width) and parent:GetWidth() or 220
     local frame = CreateFrame("Frame", nil, parent)
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
-    frame:SetSize(parent:GetWidth(), 50)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
+    frame:SetSize(frameWidth, 50)
     
     -- Create label
     local label = frame:CreateFontString(nil, "OVERLAY")
@@ -896,23 +971,24 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
     -- Set initial value (visual only)
     UpdateVisual(GetValue())
     
-    return frame, 50
+    return frame, 50, frameWidth
 end
 
 -- ============================================================================
 -- INPUT (TEXT BOX) WIDGET
 -- ============================================================================
 
-function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
+function MidnightOptionsPanel:CreateInput(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     
+    local frameWidth = (option.width == "full" or not option.width) and parent:GetWidth() or 220
     local frame = CreateFrame("Frame", nil, parent)
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
     
     local isMultiline = option.multiline
     local frameHeight = isMultiline and 100 or 50
-    frame:SetSize(parent:GetWidth(), frameHeight)
+    frame:SetSize(frameWidth, frameHeight)
     
     -- Create label
     local label = frame:CreateFontString(nil, "OVERLAY")
@@ -928,7 +1004,7 @@ function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
     if isMultiline then
         local scroll = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
         scroll:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
-        scroll:SetSize(parent:GetWidth() - 30, 60)
+        scroll:SetSize(frameWidth - 30, 60)
         
         editBox = CreateFrame("EditBox", nil, scroll)
         editBox:SetMultiLine(true)
@@ -950,7 +1026,7 @@ function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
     else
         editBox = CreateFrame("EditBox", nil, frame, "BackdropTemplate")
         editBox:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
-        editBox:SetSize(parent:GetWidth() - 20, 24)
+        editBox:SetSize(frameWidth - 20, 24)
         editBox:SetAutoFocus(false)
         
         -- Style edit box
@@ -1009,20 +1085,21 @@ function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
     -- Set initial value (visual only)
     UpdateVisual(GetValue())
     
-    return frame, frameHeight
+    return frame, frameHeight, frameWidth
 end
 
 -- ============================================================================
 -- COLOR PICKER WIDGET
 -- ============================================================================
 
-function MidnightOptionsPanel:CreateColor(parent, option, yOffset)
+function MidnightOptionsPanel:CreateColor(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     
+    local frameWidth = (option.width == "full" or not option.width) and parent:GetWidth() or 220
     local frame = CreateFrame("Frame", nil, parent)
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
-    frame:SetSize(parent:GetWidth(), 40)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
+    frame:SetSize(frameWidth, 40)
     
     -- Create label
     local label = frame:CreateFontString(nil, "OVERLAY")
@@ -1104,20 +1181,21 @@ function MidnightOptionsPanel:CreateColor(parent, option, yOffset)
     -- Set initial color (visual only)
     UpdateVisual(GetValue())
     
-    return frame, 40
+    return frame, 40, frameWidth
 end
 
 -- ============================================================================
 -- EXECUTE (BUTTON) WIDGET
 -- ============================================================================
 
-function MidnightOptionsPanel:CreateExecute(parent, option, yOffset)
+function MidnightOptionsPanel:CreateExecute(parent, option, xOffset, yOffset)
     local ColorPalette = _G.MidnightUI_ColorPalette
     local FontKit = _G.MidnightUI_FontKit
     
+    local frameWidth = (option.width == "full" or not option.width) and parent:GetWidth() or 220
     local frame = CreateFrame("Frame", nil, parent)
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -yOffset)
-    frame:SetSize(parent:GetWidth(), 40)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
+    frame:SetSize(frameWidth, 40)
     
     -- Create button
     local button = CreateFrame("Button", nil, frame, "BackdropTemplate")
@@ -1177,7 +1255,7 @@ function MidnightOptionsPanel:CreateExecute(parent, option, yOffset)
         end
     end)
     
-    return frame, 40
+    return frame, 40, frameWidth
 end
 
 -- ============================================================================

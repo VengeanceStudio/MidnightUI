@@ -1381,6 +1381,7 @@ function BrokerBar:GetOptions()
                         max = 32, 
                         step = 1, 
                         order = 2,
+                        width = "half",
                         dialogControl = "MidnightSlider", 
                         get = function() return self.db.profile.fontSize end, 
                         set = function(_, v) self.db.profile.fontSize = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
@@ -1392,6 +1393,7 @@ function BrokerBar:GetOptions()
                         max = 50, 
                         step = 1, 
                         order = 3,
+                        width = "half",
                         dialogControl = "MidnightSlider", 
                         get = function() return self.db.profile.spacing end, 
                         set = function(_, v) self.db.profile.spacing = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
@@ -1512,6 +1514,7 @@ function BrokerBar:GetOptions()
                     min = 50, 
                     max = screenWidth, 
                     step = 1,
+                    width = "half",
                     dialogControl = "MidnightSlider", 
                     disabled = function() return self.db.profile.brokers[id] and self.db.profile.brokers[id].fullWidth or false end, 
                     get = function() return self.db.profile.bars[id].width end, 
@@ -1524,6 +1527,7 @@ function BrokerBar:GetOptions()
                     min = 10, 
                     max = 100, 
                     step = 1,
+                    width = "half",
                     dialogControl = "MidnightSlider", 
                     get = function() return self.db.profile.bars[id].height end, 
                     set = function(_, v) self.db.profile.bars[id].height = v; self:ApplyBarSettings(id) end 
@@ -1535,6 +1539,7 @@ function BrokerBar:GetOptions()
                     min = 0.5, 
                     max = 3.0, 
                     step = 0.1,
+                    width = "half",
                     dialogControl = "MidnightSlider", 
                     get = function() return self.db.profile.bars[id].scale or 1.0 end, 
                     set = function(_, v) self.db.profile.bars[id].scale = v; self:ApplyBarSettings(id) end 

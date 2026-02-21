@@ -565,7 +565,7 @@ function CastBar:GetOptions()
             },
             desc = {
                 type = "description",
-                name = "Display a custom cast bar for your character.\n\nHold CTRL+ALT to drag, or use /muimove to enable Move Mode.",
+                name = "Display a custom cast bar for your character.\n\n",
                 order = 2
             },
             
@@ -574,6 +574,7 @@ function CastBar:GetOptions()
                 name = "Width",
                 type = "range",
                 order = 11,
+                width = "half",
                 dialogControl = "MidnightSlider",
                 min = 100,
                 max = 500,
@@ -590,6 +591,7 @@ function CastBar:GetOptions()
                 name = "Height",
                 type = "range",
                 order = 12,
+                width = "half",
                 dialogControl = "MidnightSlider",
                 min = 16,
                 max = 50,
