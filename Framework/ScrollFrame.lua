@@ -20,8 +20,8 @@ local function CreateScrollbar(parent, width)
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         edgeSize = 1,
     })
-    scrollbar:SetBackdropColor(ColorPalette:GetColor('input-background'))
-    scrollbar:SetBackdropBorderColor(ColorPalette:GetColor('border'))
+    scrollbar:SetBackdropColor(ColorPalette:GetColor('scrollbar-track'))
+    scrollbar:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     
     -- Up button
     local upButton = CreateFrame("Button", nil, scrollbar, "BackdropTemplate")
@@ -32,22 +32,22 @@ local function CreateScrollbar(parent, width)
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         edgeSize = 1,
     })
-    upButton:SetBackdropColor(ColorPalette:GetColor('button-background'))
-    upButton:SetBackdropBorderColor(ColorPalette:GetColor('button-border'))
+    upButton:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+    upButton:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     
     -- Up button arrow
     local upArrow = upButton:CreateTexture(nil, "ARTWORK")
     upArrow:SetSize(8, 8)
     upArrow:SetPoint("CENTER")
     upArrow:SetTexture("Interface\\Buttons\\WHITE8X8")
-    upArrow:SetVertexColor(ColorPalette:GetColor('text'))
+    upArrow:SetVertexColor(ColorPalette:GetColor('text-primary'))
     upArrow:SetRotation(math.rad(45))
     
     upButton:SetScript("OnEnter", function(self)
         self:SetBackdropColor(ColorPalette:GetColor('button-hover'))
     end)
     upButton:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(ColorPalette:GetColor('button-background'))
+        self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
     end)
     
     -- Down button
@@ -59,22 +59,22 @@ local function CreateScrollbar(parent, width)
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         edgeSize = 1,
     })
-    downButton:SetBackdropColor(ColorPalette:GetColor('button-background'))
-    downButton:SetBackdropBorderColor(ColorPalette:GetColor('button-border'))
+    downButton:SetBackdropColor(ColorPalette:GetColor('button-bg'))
+    downButton:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     
     -- Down button arrow
     local downArrow = downButton:CreateTexture(nil, "ARTWORK")
     downArrow:SetSize(8, 8)
     downArrow:SetPoint("CENTER")
     downArrow:SetTexture("Interface\\Buttons\\WHITE8X8")
-    downArrow:SetVertexColor(ColorPalette:GetColor('text'))
+    downArrow:SetVertexColor(ColorPalette:GetColor('text-primary'))
     downArrow:SetRotation(math.rad(-135))
     
     downButton:SetScript("OnEnter", function(self)
         self:SetBackdropColor(ColorPalette:GetColor('button-hover'))
     end)
     downButton:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(ColorPalette:GetColor('button-background'))
+        self:SetBackdropColor(ColorPalette:GetColor('button-bg'))
     end)
     
     -- Thumb (draggable slider)
@@ -86,15 +86,15 @@ local function CreateScrollbar(parent, width)
         edgeFile = "Interface\\Buttons\\WHITE8X8",
         edgeSize = 1,
     })
-    thumb:SetBackdropColor(ColorPalette:GetColor('slider-thumb'))
-    thumb:SetBackdropBorderColor(ColorPalette:GetColor('slider-border'))
+    thumb:SetBackdropColor(ColorPalette:GetColor('scrollbar-thumb'))
+    thumb:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     thumb:SetPoint("TOP", upButton, "BOTTOM", 0, -2)
     
     thumb:SetScript("OnEnter", function(self)
-        self:SetBackdropColor(ColorPalette:GetColor('slider-hover'))
+        self:SetBackdropColor(ColorPalette:GetColor('button-hover'))
     end)
     thumb:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(ColorPalette:GetColor('slider-thumb'))
+        self:SetBackdropColor(ColorPalette:GetColor('scrollbar-thumb'))
     end)
     
     scrollbar.upButton = upButton
@@ -169,14 +169,14 @@ function ScrollFrame:Create(parent)
             isDragging = true
             dragStartY = select(2, GetCursorPosition()) / self:GetEffectiveScale()
             dragStartScroll = scrollArea:GetVerticalScroll()
-            self:SetBackdropColor(ColorPalette:GetColor('slider-active'))
+            self:SetBackdropColor(ColorPalette:GetColor('button-pressed'))
         end
     end)
     
     scrollbar.thumb:SetScript("OnMouseUp", function(self, button)
         if button == "LeftButton" then
             isDragging = false
-            self:SetBackdropColor(ColorPalette:GetColor('slider-thumb'))
+            self:SetBackdropColor(ColorPalette:GetColor('scrollbar-thumb'))
         end
     end)
     
