@@ -689,14 +689,14 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
         menu:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
         
         -- Calculate menu size
-        local itemHeighvalues) do numItems = numItems + 1 end
+        local itemHeight = 20
+        local numItems = 0
+        for _ in pairs(values) do numItems = numItems + 1 end
         menu:SetSize(200, numItems * itemHeight + 4)
         
         -- Create menu items
         local y = -2
-        for key, text in pairs(
-        local y = -2
-        for key, text in pairs(option.values) do
+        for key, text in pairs(values) do
             local item = CreateFrame("Button", nil, menu)
             item:SetPoint("TOPLEFT", menu, "TOPLEFT", 2, y)
             item:SetSize(196, itemHeight)
