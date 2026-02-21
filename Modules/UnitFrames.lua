@@ -1114,7 +1114,6 @@ function UnitFrames:GetBarOptions(barType, db, update)
         name = "Display Text",
         order = 3.5,
         inline = true,
-        dialogControl = "MidnightInlineGroup",
         args = {
             tagHelp = {
                 type = "execute",
