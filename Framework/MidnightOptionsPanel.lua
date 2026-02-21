@@ -648,7 +648,11 @@ function MidnightOptionsPanel:CreateDescription(parent, option, xOffset, yOffset
     desc:SetJustifyH("LEFT")
     desc:SetWordWrap(true)
     
-    return desc, 20
+    -- Calculate actual height of wrapped text
+    local stringHeight = desc:GetStringHeight()
+    local height = math.max(stringHeight + 10, 20)  -- Add some padding, minimum 20
+    
+    return desc, height
 end
 
 -- ============================================================================
