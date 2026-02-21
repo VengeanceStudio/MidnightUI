@@ -1124,6 +1124,7 @@ function Tooltips:GetOptions()
                 name = "Show AFK/DND Status",
                 desc = "Display player AFK or DND status",
                 order = 35,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showStatus end,
                 set = function(_, value)
                     self.db.profile.showStatus = value
@@ -1135,6 +1136,7 @@ function Tooltips:GetOptions()
                 name = "Show Item Level",
                 desc = "Display player item levels (requires inspect)",
                 order = 36,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showItemLevel end,
                 set = function(_, value)
                     self.db.profile.showItemLevel = value
@@ -1146,6 +1148,7 @@ function Tooltips:GetOptions()
                 name = "Show Faction",
                 desc = "Display player faction (Horde/Alliance)",
                 order = 37,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showFaction end,
                 set = function(_, value)
                     self.db.profile.showFaction = value
@@ -1157,6 +1160,7 @@ function Tooltips:GetOptions()
                 name = "Show Mount Info",
                 desc = "Display mounted player's mount and if you have it collected",
                 order = 38,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showMount end,
                 set = function(_, value)
                     self.db.profile.showMount = value
@@ -1168,6 +1172,7 @@ function Tooltips:GetOptions()
                 name = "Show Role",
                 desc = "Display player role (Tank/Healer/DPS)",
                 order = 39,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showRole end,
                 set = function(_, value)
                     self.db.profile.showRole = value
@@ -1179,6 +1184,7 @@ function Tooltips:GetOptions()
                 name = "Show Mythic+ Rating",
                 desc = "Display player's Mythic+ score",
                 order = 40,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showMythicScore end,
                 set = function(_, value)
                     self.db.profile.showMythicScore = value
@@ -1190,6 +1196,7 @@ function Tooltips:GetOptions()
                 name = "Show Target Of Target",
                 desc = "Display who the unit is targeting",
                 order = 41,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showTargetOf end,
                 set = function(_, value)
                     self.db.profile.showTargetOf = value

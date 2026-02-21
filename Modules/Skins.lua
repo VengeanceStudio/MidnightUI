@@ -867,6 +867,7 @@ function Skin:GetOptions()
                 type = "toggle",
                 order = 16,
                 width = "full",
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.skinChatFrames end,
                 set = function(_, v)
                     self.db.profile.skinChatFrames = v
