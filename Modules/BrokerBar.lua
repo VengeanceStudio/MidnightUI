@@ -1191,7 +1191,6 @@ function BrokerBar:GetPluginOptions()
         type = "group", 
         childGroups = "tree",
         order = 3,
-        dialogControl = "MidnightTabGroup",
         args = {} 
     }
     
@@ -1360,7 +1359,6 @@ function BrokerBar:GetOptions()
                 name = "Settings",
                 type = "group",
                 order = 1,
-                dialogControl = "MidnightTabGroup",
                 args = {
                     font = { 
                         name = "Global Font", 
@@ -1438,7 +1436,6 @@ function BrokerBar:GetOptions()
                 type = "group",
                 childGroups = "tree",
                 order = 2,
-                dialogControl = "MidnightTabGroup",
                 args = {} 
             },
             brokers = self:GetPluginOptions()
