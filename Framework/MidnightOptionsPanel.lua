@@ -662,8 +662,9 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
         end
         
         -- Update display text
-        if option.values then
-            dropdown.text:SetText(option.values[value] or tostring(value))
+        local values = EvaluateValue(option.values)
+        if values then
+            dropdown.text:SetText(values[value] or tostring(value))
         else
             dropdown.text:SetText(tostring(value))
         end
@@ -671,7 +672,8 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
     
     -- Create simple dropdown menu on click
     dropdown:SetScript("OnClick", function(self)
-        if not option.values then return end
+        local values = EvaluateValue(option.values)
+        if not values then return end
         
         -- Create menu
         local menu = CreateFrame("Frame", nil, self, "BackdropTemplate")
@@ -687,12 +689,12 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
         menu:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
         
         -- Calculate menu size
-        local itemHeight = 20
-        local numItems = 0
-        for _ in pairs(option.values) do numItems = numItems + 1 end
+        local itemHeighvalues) do numItems = numItems + 1 end
         menu:SetSize(200, numItems * itemHeight + 4)
         
         -- Create menu items
+        local y = -2
+        for key, text in pairs(
         local y = -2
         for key, text in pairs(option.values) do
             local item = CreateFrame("Button", nil, menu)
@@ -993,7 +995,24 @@ function MidnightOptionsPanel:CreateExecute(parent, option, yOffset)
     -- Click handler
     button:SetScript("OnClick", function()
         if option.func then
-            option.func()
+            -- Check for confirmation dialog
+            local confirmText = EvaluateValue(option.confirm)
+            if confirmText then
+                StaticPopupDialogs["MIDNIGHTUI_OPTIONS_CONFIRM"] = {
+                    text = confirmText,
+                    button1 = "Yes",
+                    button2 = "No",
+                    OnAccept = function()
+                        option.func()
+                    end,
+                    timeout = 0,
+                    whileDead = true,
+                    hideOnEscape = true,
+                }
+                StaticPopup_Show("MIDNIGHTUI_OPTIONS_CONFIRM")
+            else
+                option.func()
+            end
         end
     end)
     
