@@ -993,13 +993,32 @@ end
 -- ============================================================================
 
 function MidnightOptionsPanel:Open(addonRef)
+    -- Store addon reference
+    self.addonRef = addonRef
+    
+    -- Create frame if needed
     if not self.frame then
         self:CreateFrame(addonRef)
     end
     
-    -- Parse options table
-    local optionsTable = addonRef:GetOptions()
+    -- Get and parse options table
+    local success, optionsTable = pcall(function() return addonRef:GetOptions() end)
+    if not success then
+        print("|cffff0000[MidnightUI]|r Error getting options:", optionsTable)
+        return
+    end
+    
+    if not optionsTable or not optionsTable.args then
+        print("|cffff0000[MidnightUI]|r No options available")
+        return
+    end
+    
     local tree = self:ParseOptionsToTree(optionsTable)
+    
+    if not tree or #tree == 0 then
+        print("|cffff0000[MidnightUI]|r No options tree generated")
+        return
+    end
     
     -- Build tree navigation
     self:BuildTree(tree)

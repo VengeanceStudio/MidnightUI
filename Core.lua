@@ -3492,15 +3492,12 @@ function MidnightUI:OpenColorEditorFrame()
             OnAccept = function()
                 -- Open settings to Themes page so user can enter a name and save
                 frame:Hide()
-                local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-                if AceConfigDialog then
-                    AceConfigDialog:Open("MidnightUI")
-                    -- Try to select the Themes category
-                    C_Timer.After(0.1, function()
-                        AceConfigDialog:SelectGroup("MidnightUI", "themes")
-                    end)
+                if MidnightUI and type(MidnightUI.OpenConfig) == "function" then
+                    MidnightUI:OpenConfig()
+                    -- TODO: Navigate to Themes section in custom panel
+                    -- For now, user will need to click Themes in the tree
                 end
-                MidnightUI:Print("Enter a theme name and click 'Save Custom Theme' to save your changes.")
+                MidnightUI:Print("Click 'Themes' in the options panel, then enter a theme name and click 'Save Custom Theme' to save your changes.")
             end,
             OnCancel = function()
                 -- Cancel - keep window open
@@ -3706,18 +3703,12 @@ function MidnightUI:LoadCustomThemes()
 end
 
 function MidnightUI:GetOptions()
-    -- Cleanup check every time options are fetched
-    if self.colorSwatchContainer then
-        local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-        if AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"] then
-            local status = AceConfigDialog.OpenFrames["MidnightUI"].status
-            if status and status.groups and status.groups.selected ~= "themes" then
-                self.colorSwatchContainer:Hide()
-                self.colorSwatchContainer:SetParent(nil)
-                self.colorSwatchContainer = nil
-                self.themeColorSwatches = nil
-            end
-        end
+    -- Note: Using custom MidnightOptionsPanel now, no AceConfig dependency
+    -- Cleanup theme color swatch container if needed
+    if self.colorSwatchContainer and not self.colorSwatchContainer:IsShown() then
+        self.colorSwatchContainer:SetParent(nil)
+        self.colorSwatchContainer = nil
+        self.themeColorSwatches = nil
     end
     
     local options = {
@@ -4085,11 +4076,12 @@ function MidnightUI:GetOptions()
                     },
                 },
             },
-            profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+            -- Note: Profile management disabled - using custom options panel
+            -- profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
         }  -- closes main args table
     }  -- closes options table
     
-    options.args.profiles.order = 100
+    -- options.args.profiles.order = 100
     
     -- Inject Module Options
     for name, module in self:IterateModules() do

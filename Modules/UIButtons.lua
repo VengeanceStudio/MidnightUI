@@ -140,14 +140,8 @@ function UIButtons:CreateButtons()
             text = "O",
             tooltip = "Open MidnightUI Options",
             onClick = function()
-                local ACD = LibStub("AceConfigDialog-3.0")
-                if ACD and ACD.Open and ACD.Close then
-                    if ACD.OpenFrames and ACD.OpenFrames["MidnightUI"] then
-                        ACD:Close("MidnightUI")
-                    else
-                        ACD:Open("MidnightUI")
-                    end
-                elseif MidnightUI and type(MidnightUI.OpenConfig) == "function" then
+                -- Use custom MidnightUI options panel
+                if MidnightUI and type(MidnightUI.OpenConfig) == "function" then
                     MidnightUI:OpenConfig()
                 end
             end
