@@ -108,9 +108,15 @@ function MidnightUI:OnEnable()
                 
                 -- Only style if we're currently building MidnightUI options
                 if _G.MidnightUI_BuildingOptions then
-                    C_Timer.After(0, function()
+                    -- TreeGroup needs immediate styling to preserve callbacks
+                    if widgetType == "TreeGroup" or widgetType == "TabGroup" then
                         MidnightUI:SkinAceGUIWidget(widget, widgetType)
-                    end)
+                    else
+                        -- Other widgets can be styled with a slight delay
+                        C_Timer.After(0, function()
+                            MidnightUI:SkinAceGUIWidget(widget, widgetType)
+                        end)
+                    end
                 end
                 
                 return widget
