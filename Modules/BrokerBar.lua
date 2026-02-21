@@ -1189,7 +1189,9 @@ function BrokerBar:GetPluginOptions()
     local options = { 
         name = "Brokers", 
         type = "group", 
-        childGroups = "tree", 
+        childGroups = "tree",
+        order = 3,
+        dialogControl = "MidnightTabGroup",
         args = {} 
     }
     
@@ -1354,80 +1356,89 @@ function BrokerBar:GetOptions()
         name = "Data Brokers", 
         childGroups = "tab", 
         args = {
-            font = { 
-                name = "Global Font", 
-                type = "select", 
-                order = 1, 
-                dialogControl = "MidnightDropdown", 
-                values = function()
-                    local fonts = LSM:List("font")
-                    local out = {}
-                    for _, font in ipairs(fonts) do out[font] = font end
-                    return out
-                end,
-                get = function() return self.db.profile.font end, 
-                set = function(_, v) self.db.profile.font = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
-            },
-            fontSize = { 
-                name = "Font Size", 
-                type = "range", 
-                min = 6, 
-                max = 32, 
-                step = 1, 
-                order = 2,
-                dialogControl = "MidnightSlider", 
-                get = function() return self.db.profile.fontSize end, 
-                set = function(_, v) self.db.profile.fontSize = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
-            },
-            spacing = { 
-                name = "Spacing", 
-                type = "range", 
-                min = 0, 
-                max = 50, 
-                step = 1, 
-                order = 3,
-                dialogControl = "MidnightSlider", 
-                get = function() return self.db.profile.spacing end, 
-                set = function(_, v) self.db.profile.spacing = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
-            },
-            useClassColor = { 
-                name = "Use Class Color", 
-                type = "toggle", 
-                order = 4,
-                dialogControl = "MidnightCheckBox", 
-                get = function() return self.db.profile.useClassColor end, 
-                set = function(_, v) self.db.profile.useClassColor = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
-            },
-            color = { 
-                name = "Custom Font Color", 
-                type = "color", 
-                order = 5,
-                dialogControl = "MidnightColorPicker", 
-                disabled = function() return self.db.profile.useClassColor end, 
-                get = function() local c = self.db.profile.fontColor; return c.r, c.g, c.b end, 
-                set = function(_, r, g, b) self.db.profile.fontColor = {r=r, g=g, b=b}; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
-            },
-            useStandardTime = { 
-                name = "Use 24-Hour Time", 
-                type = "toggle", 
-                order = 6,
-                dialogControl = "MidnightCheckBox", 
-                get = function() return self.db.profile.useStandardTime end, 
-                set = function(_, v) self.db.profile.useStandardTime = v; self:UpdateAllModules() end 
-            },
-            lock = { 
-                name = "Lock", 
-                type = "toggle", 
-                order = 7,
-                dialogControl = "MidnightCheckBox", 
-                get = function() return self.db.profile.locked end, 
-                set = function(_, v) self.db.profile.locked = v; for id in pairs(bars) do self:ApplyBarSettings(id) end end 
+            settings = {
+                name = "Settings",
+                type = "group",
+                order = 1,
+                dialogControl = "MidnightTabGroup",
+                args = {
+                    font = { 
+                        name = "Global Font", 
+                        type = "select", 
+                        order = 1, 
+                        dialogControl = "MidnightDropdown", 
+                        values = function()
+                            local fonts = LSM:List("font")
+                            local out = {}
+                            for _, font in ipairs(fonts) do out[font] = font end
+                            return out
+                        end,
+                        get = function() return self.db.profile.font end, 
+                        set = function(_, v) self.db.profile.font = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
+                    },
+                    fontSize = { 
+                        name = "Font Size", 
+                        type = "range", 
+                        min = 6, 
+                        max = 32, 
+                        step = 1, 
+                        order = 2,
+                        dialogControl = "MidnightSlider", 
+                        get = function() return self.db.profile.fontSize end, 
+                        set = function(_, v) self.db.profile.fontSize = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
+                    },
+                    spacing = { 
+                        name = "Spacing", 
+                        type = "range", 
+                        min = 0, 
+                        max = 50, 
+                        step = 1, 
+                        order = 3,
+                        dialogControl = "MidnightSlider", 
+                        get = function() return self.db.profile.spacing end, 
+                        set = function(_, v) self.db.profile.spacing = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
+                    },
+                    useClassColor = { 
+                        name = "Use Class Color", 
+                        type = "toggle", 
+                        order = 4,
+                        dialogControl = "MidnightCheckBox", 
+                        get = function() return self.db.profile.useClassColor end, 
+                        set = function(_, v) self.db.profile.useClassColor = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
+                    },
+                    color = { 
+                        name = "Custom Font Color", 
+                        type = "color", 
+                        order = 5,
+                        dialogControl = "MidnightColorPicker", 
+                        disabled = function() return self.db.profile.useClassColor end, 
+                        get = function() local c = self.db.profile.fontColor; return c.r, c.g, c.b end, 
+                        set = function(_, r, g, b) self.db.profile.fontColor = {r=r, g=g, b=b}; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
+                    },
+                    useStandardTime = { 
+                        name = "Use 24-Hour Time", 
+                        type = "toggle", 
+                        order = 6,
+                        dialogControl = "MidnightCheckBox", 
+                        get = function() return self.db.profile.useStandardTime end, 
+                        set = function(_, v) self.db.profile.useStandardTime = v; self:UpdateAllModules() end 
+                    },
+                    lock = { 
+                        name = "Lock", 
+                        type = "toggle", 
+                        order = 7,
+                        dialogControl = "MidnightCheckBox", 
+                        get = function() return self.db.profile.locked end, 
+                        set = function(_, v) self.db.profile.locked = v; for id in pairs(bars) do self:ApplyBarSettings(id) end end 
+                    },
+                }
             },
             bars = { 
                 name = "Bars", 
                 type = "group",
                 childGroups = "tree",
-                order = 8, 
+                order = 2,
+                dialogControl = "MidnightTabGroup",
                 args = {} 
             },
             brokers = self:GetPluginOptions()
