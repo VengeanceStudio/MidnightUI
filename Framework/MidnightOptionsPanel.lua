@@ -682,7 +682,7 @@ function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
     -- Create slider
     local slider = CreateFrame("Slider", nil, frame, "BackdropTemplate")
     slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -10)
-    slider:SetSize(300, 4)
+    slider:SetSize(200, 4)
     slider:SetOrientation("HORIZONTAL")
     slider:SetMinMaxValues(option.min or 0, option.max or 100)
     slider:SetValueStep(option.step or 1)
