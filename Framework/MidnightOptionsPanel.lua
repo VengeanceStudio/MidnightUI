@@ -6,6 +6,8 @@
 local MidnightOptionsPanel = {}
 _G.MidnightUI_OptionsPanel = MidnightOptionsPanel
 
+local ScrollFrame = _G.MidnightUI_ScrollFrame
+
 -- ============================================================================
 -- HELPER FUNCTIONS
 -- ============================================================================
@@ -172,15 +174,14 @@ function MidnightOptionsPanel:CreateTreePanel(parent)
     panel:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
     panel:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     
-    -- Create scrollframe for tree buttons
-    panel.scrollFrame = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
+    -- Create custom scrollframe for tree buttons
+    panel.scrollFrame = ScrollFrame:Create(panel)
     panel.scrollFrame:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -4)
-    panel.scrollFrame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -24, 4)
+    panel.scrollFrame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -4, 4)
     
-    -- Create scroll child
-    panel.scrollChild = CreateFrame("Frame", nil, panel.scrollFrame)
-    panel.scrollChild:SetSize(panel.scrollFrame:GetWidth(), 1)
-    panel.scrollFrame:SetScrollChild(panel.scrollChild)
+    -- Get scroll child
+    panel.scrollChild = panel.scrollFrame:GetScrollChild()
+    panel.scrollChild:SetWidth(panel.scrollFrame.scrollArea:GetWidth())
     
     -- Store tree buttons
     panel.buttons = {}
@@ -263,6 +264,7 @@ function MidnightOptionsPanel:BuildTree(tree)
     
     -- Update scroll child height
     panel.scrollChild:SetHeight(math.max(yOffset, panel.scrollFrame:GetHeight()))
+    panel.scrollFrame:UpdateScroll()
 end
 
 -- Handle node selection
@@ -319,16 +321,14 @@ function MidnightOptionsPanel:CreateContentPanel(parent)
     panel:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
     panel:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
     
-    -- Create scrollframe for content
-    panel.scrollFrame = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
+    -- Create custom scrollframe for content
+    panel.scrollFrame = ScrollFrame:Create(panel)
     panel.scrollFrame:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -8)
-    panel.scrollFrame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -28, 8)
+    panel.scrollFrame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -8, 8)
     
-    -- Create scroll child
-    panel.scrollChild = CreateFrame("Frame", nil, panel.scrollFrame)
-    panel.scrollChild:SetWidth(panel.scrollFrame:GetWidth() - 20)
-    panel.scrollChild:SetHeight(1)
-    panel.scrollFrame:SetScrollChild(panel.scrollChild)
+    -- Get scroll child
+    panel.scrollChild = panel.scrollFrame:GetScrollChild()
+    panel.scrollChild:SetWidth(panel.scrollFrame.scrollArea:GetWidth())
     
     -- Store for widgets
     panel.widgets = {}
@@ -428,6 +428,7 @@ function MidnightOptionsPanel:RenderContent(node)
     
     -- Update scroll child height
     panel.scrollChild:SetHeight(math.max(yOffset + 20, panel.scrollFrame:GetHeight()))
+    panel.scrollFrame:UpdateScroll()
 end
 
 -- Render a group with tabs for child groups
@@ -591,6 +592,7 @@ function MidnightOptionsPanel:SelectTab(tabIndex)
     
     -- Update scroll child height
     panel.scrollChild:SetHeight(math.max(yOffset + 20, panel.scrollFrame:GetHeight()))
+    panel.scrollFrame:UpdateScroll()
 end
 
 -- ============================================================================
@@ -1008,27 +1010,15 @@ function MidnightOptionsPanel:CreateInput(parent, option, xOffset, yOffset)
     -- Create edit box
     local editBox
     if isMultiline then
-        local scroll = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
+        local scroll = ScrollFrame:Create(frame)
         scroll:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
-        scroll:SetSize(frameWidth - 30, 60)
+        scroll:SetSize(frameWidth - 20, 60)
         
-        editBox = CreateFrame("EditBox", nil, scroll)
+        editBox = CreateFrame("EditBox", nil, scroll.scrollArea)
         editBox:SetMultiLine(true)
-        editBox:SetSize(scroll:GetWidth() - 10, 200)
+        editBox:SetSize(scroll.scrollArea:GetWidth(), 200)
         editBox:SetAutoFocus(false)
         scroll:SetScrollChild(editBox)
-        
-        -- Style scroll background
-        if scroll.SetBackdrop then
-            scroll:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                tile = false, edgeSize = 1,
-                insets = { left = 4, right = 4, top = 4, bottom = 4 }
-            })
-            scroll:SetBackdropColor(ColorPalette:GetColor('button-bg'))
-            scroll:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-        end
     else
         editBox = CreateFrame("EditBox", nil, frame, "BackdropTemplate")
         editBox:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
