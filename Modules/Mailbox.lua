@@ -780,12 +780,14 @@ function Mailbox:GetOptions()
                 type = "header",
                 name = "BlackBook (Contact List)",
                 order = 10,
+                dialogControl = "MidnightHeading",
             },
             blackBookEnabled = {
                 type = "toggle",
                 name = "Enable BlackBook",
                 desc = "Add contact list next to To: field",
                 order = 11,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.blackBookEnabled end,
                 set = function(_, value)
                     self.db.profile.blackBookEnabled = value
@@ -797,6 +799,7 @@ function Mailbox:GetOptions()
                 name = "Track Alts",
                 desc = "Automatically track your characters",
                 order = 12,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.trackAlts end,
                 set = function(_, value)
                     self.db.profile.trackAlts = value
@@ -808,6 +811,7 @@ function Mailbox:GetOptions()
                 name = "Autofill Last Recipient",
                 desc = "Automatically fill in the last person mailed",
                 order = 13,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.autofillLastRecipient end,
                 set = function(_, value)
                     self.db.profile.autofillLastRecipient = value
@@ -819,6 +823,7 @@ function Mailbox:GetOptions()
                 name = "Disable Blizzard Autocomplete",
                 desc = "Disable Blizzard's name auto-completion popup",
                 order = 14,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.disableBlizzardAutocomplete end,
                 set = function(_, value)
                     self.db.profile.disableBlizzardAutocomplete = value
@@ -831,12 +836,14 @@ function Mailbox:GetOptions()
                 type = "header",
                 name = "OpenAll (Bulk Operations)",
                 order = 20,
+                dialogControl = "MidnightHeading",
             },
             openAllEnabled = {
                 type = "toggle",
                 name = "Enable OpenAll",
                 desc = "Add button to open all mail at once",
                 order = 21,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.openAllEnabled end,
                 set = function(_, value)
                     self.db.profile.openAllEnabled = value
@@ -851,6 +858,7 @@ function Mailbox:GetOptions()
                 max = 20,
                 step = 1,
                 order = 22,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.keepFreeSlots end,
                 set = function(_, value)
                     self.db.profile.keepFreeSlots = value
@@ -863,12 +871,14 @@ function Mailbox:GetOptions()
                 type = "header",
                 name = "Express (Shortcuts)",
                 order = 30,
+                dialogControl = "MidnightHeading",
             },
             expressEnabled = {
                 type = "toggle",
                 name = "Enable Express",
                 desc = "Shift-Click to take, Ctrl-Click to return, Alt-Click to attach",
                 order = 31,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.expressEnabled end,
                 set = function(_, value)
                     self.db.profile.expressEnabled = value
@@ -881,12 +891,14 @@ function Mailbox:GetOptions()
                 type = "header",
                 name = "Other Features",
                 order = 40,
+                dialogControl = "MidnightHeading",
             },
             carbonCopyEnabled = {
                 type = "toggle",
                 name = "Enable CarbonCopy",
                 desc = "Copy contents of mail",
                 order = 41,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.carbonCopyEnabled end,
                 set = function(_, value)
                     self.db.profile.carbonCopyEnabled = value
@@ -898,6 +910,7 @@ function Mailbox:GetOptions()
                 name = "Enable DoNotWant",
                 desc = "Show icons for expiring mail",
                 order = 42,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.doNotWantEnabled end,
                 set = function(_, value)
                     self.db.profile.doNotWantEnabled = value
@@ -909,6 +922,7 @@ function Mailbox:GetOptions()
                 name = "Enable Wire",
                 desc = "Auto-update subject with money amount",
                 order = 43,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.wireEnabled end,
                 set = function(_, value)
                     self.db.profile.wireEnabled = value
@@ -920,6 +934,7 @@ function Mailbox:GetOptions()
                 name = "Enable QuickAttach",
                 desc = "Show Ore, Herb, Leather, Cloth, Gems buttons on send mail screen",
                 order = 44,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.quickAttachEnabled end,
                 set = function(_, value)
                     self.db.profile.quickAttachEnabled = value
@@ -931,6 +946,7 @@ function Mailbox:GetOptions()
                 name = "Enable TradeBlock",
                 desc = "Block trades while at mailbox",
                 order = 45,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.tradeBlockEnabled end,
                 set = function(_, value)
                     self.db.profile.tradeBlockEnabled = value
