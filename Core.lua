@@ -2344,6 +2344,7 @@ function MidnightUI:GetThemeOptions()
             type = "header",
             name = "Theme Management",
             order = 1,
+            dialogControl = "MidnightHeading",
         },
         description = {
             type = "description",
@@ -2356,6 +2357,7 @@ function MidnightUI:GetThemeOptions()
             name = "Active Theme",
             desc = "Select which theme to use for the MidnightUI framework.",
             order = 3,
+            dialogControl = "MidnightDropdown",
             values = themeValues,
             get = function() return self.db.profile.theme.active end,
             set = function(_, value)
@@ -2405,6 +2407,7 @@ function MidnightUI:GetThemeOptions()
             type = "header",
             name = "Custom Theme Editor",
             order = 4,
+            dialogControl = "MidnightHeading",
         },
         customThemeDesc = {
             type = "description",
@@ -2418,6 +2421,7 @@ function MidnightUI:GetThemeOptions()
             desc = "Enter a name for your custom theme before saving.",
             order = 6,
             width = "full",
+            dialogControl = "MidnightEditBox",
             get = function() return self.customThemeName or "" end,
             set = function(_, v) self.customThemeName = v end,
         },
@@ -2426,6 +2430,7 @@ function MidnightUI:GetThemeOptions()
             name = "Save Custom Theme",
             desc = "Save current color settings as a new custom theme.",
             order = 7,
+            dialogControl = "MidnightButton",
             func = function()
                 self:SaveCustomTheme()
             end,
@@ -2435,6 +2440,7 @@ function MidnightUI:GetThemeOptions()
             name = "Delete Custom Theme",
             desc = "Delete the currently selected custom theme (built-in themes cannot be deleted).",
             order = 8,
+            dialogControl = "MidnightButton",
             disabled = function()
                 local active = self.db.profile.theme.active
                 local builtInThemes = {
@@ -2469,6 +2475,7 @@ function MidnightUI:GetThemeOptions()
             type = "header",
             name = "Theme Colors",
             order = 9,
+            dialogControl = "MidnightHeading",
         },
         colorsDesc = {
             type = "description",
@@ -2535,6 +2542,7 @@ function MidnightUI:GetThemeOptions()
             name = "Reset to Theme Defaults",
             desc = "Reset all color changes back to the original theme defaults",
             order = 19.5,
+            dialogControl = "MidnightButton",
             func = function()
                 -- Clear temp colors
                 self.tempThemeColors = nil
@@ -2561,6 +2569,7 @@ function MidnightUI:GetThemeOptions()
             name = "Open Theme Editor",
             desc = "Opens a visual mockup window where you can click on elements to edit their colors",
             order = 20,
+            dialogControl = "MidnightButton",
             func = function()
                 self:OpenColorEditorFrame()
             end,
@@ -3727,6 +3736,7 @@ function MidnightUI:GetOptions()
                         type = "header",
                         name = "Resolution Scaling",
                         order = 1.0,
+                        dialogControl = "MidnightHeading",
                     },
                     resolutionDesc = {
                         type = "description",
@@ -3762,6 +3772,7 @@ function MidnightUI:GetOptions()
                         name = "Scale Layout Resolution",
                         desc = "Automatically adjusts all element positions from 2133x1200 to your current resolution",
                         order = 1.02,
+                        dialogControl = "MidnightButton",
                         func = function()
                             MidnightUI:ScaleLayoutToResolution()
                         end,
@@ -3780,12 +3791,14 @@ function MidnightUI:GetOptions()
                         type = "header",
                         name = "Global Font",
                         order = 1.1,
+                        dialogControl = "MidnightHeading",
                     },
                     globalFont = {
                         type = "select",
                         name = "Global Font",
                         desc = "Select a font to apply to all MidnightUI elements.",
                         order = 1.11,
+                        dialogControl = "MidnightDropdown",
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
@@ -3800,6 +3813,7 @@ function MidnightUI:GetOptions()
                         name = "Apply to All",
                         desc = "Apply the selected global font to all MidnightUI modules and bars.",
                         order = 1.12,
+                        dialogControl = "MidnightButton",
                         func = function()
                             local font = MidnightUI.db.profile.theme.font or "Friz Quadrata TT"
                             -- UnitFrames
@@ -3866,48 +3880,48 @@ function MidnightUI:GetOptions()
                         name = " ",
                         order = 1.995,
                     },
-                    modulesHeader = { type = "header", order = 2.0, name = "Modules" },
+                    modulesHeader = { type = "header", order = 2.0, name = "Modules", dialogControl = "MidnightHeading" },
                     modulesDesc = { type = "description", order = 2.01, name = "Toggle modules. Requires Reload." },
-                    bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full",
+                    bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.bar end,
                         set = function(_, v) self.db.profile.modules.bar = v; C_UI.Reload() end },
-                    UIButtons = { name = "UI Buttons", type = "toggle", order = 2.2, width = "full",
+                    UIButtons = { name = "UI Buttons", type = "toggle", order = 2.2, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.UIButtons end,
                         set = function(_, v) self.db.profile.modules.UIButtons = v; C_UI.Reload() end },
-                    tooltips = { name = "Tooltips", type = "toggle", order = 2.25, width = "full",
+                    tooltips = { name = "Tooltips", type = "toggle", order = 2.25, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.tooltips end,
                         set = function(_, v) self.db.profile.modules.tooltips = v; C_UI.Reload() end },
-                    mailbox = { name = "Mailbox", type = "toggle", order = 2.27, width = "full",
+                    mailbox = { name = "Mailbox", type = "toggle", order = 2.27, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.mailbox end,
                         set = function(_, v) self.db.profile.modules.mailbox = v; C_UI.Reload() end },
-                    chatcopy = { name = "Chat Copy", type = "toggle", order = 2.3, width = "full",
+                    chatcopy = { name = "Chat Copy", type = "toggle", order = 2.3, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.chatcopy ~= false end,
                         set = function(_, v) self.db.profile.modules.chatcopy = v; C_UI.Reload() end },
-                    maps = { name = "Maps", type = "toggle", order = 2.4, width = "full",
+                    maps = { name = "Maps", type = "toggle", order = 2.4, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.maps end,
                         set = function(_, v) self.db.profile.modules.maps = v; C_UI.Reload() end },
-                    actionbars = { name = "Action Bars", type = "toggle", order = 2.5, width = "full",
+                    actionbars = { name = "Action Bars", type = "toggle", order = 2.5, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.actionbars end,
                         set = function(_, v) self.db.profile.modules.actionbars = v; C_UI.Reload() end },
-                    unitframes = { name = "Unit Frames", type = "toggle", order = 2.6, width = "full",
+                    unitframes = { name = "Unit Frames", type = "toggle", order = 2.6, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.unitframes end,
                         set = function(_, v) self.db.profile.modules.unitframes = v; C_UI.Reload() end },
-                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full",
+                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full", dialogControl = "MidnightCheckBox",
                         desc = "Skins and enhances Blizzard's cooldown display manager.",
                         get = function() return self.db.profile.modules.cooldowns end,
                         set = function(_, v) 
                             self.db.profile.modules.cooldowns = v
                             C_UI.Reload()
                         end },
-                    resourceBars = { name = "Resource Bars", type = "toggle", order = 2.71, width = "full",
+                    resourceBars = { name = "Resource Bars", type = "toggle", order = 2.71, width = "full", dialogControl = "MidnightCheckBox",
                         desc = "Display primary and secondary resource bars (mana, energy, combo points, etc.)",
                         get = function() return self.db.profile.modules.resourceBars end,
                         set = function(_, v) self.db.profile.modules.resourceBars = v; C_UI.Reload() end },
-                    castBar = { name = "Cast Bar", type = "toggle", order = 2.72, width = "full",
+                    castBar = { name = "Cast Bar", type = "toggle", order = 2.72, width = "full", dialogControl = "MidnightCheckBox",
                         desc = "Display a custom player cast bar",
                         get = function() return self.db.profile.modules.castBar end,
                         set = function(_, v) self.db.profile.modules.castBar = v; C_UI.Reload() end },
-                    tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full",
+                    tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full", dialogControl = "MidnightCheckBox",
                         get = function() return self.db.profile.modules.tweaks end,
                         set = function(_, v) self.db.profile.modules.tweaks = v; C_UI.Reload() end }
                 }  -- closes args table for general
@@ -3927,6 +3941,7 @@ function MidnightUI:GetOptions()
                         type = "header",
                         name = "Export Profile",
                         order = 1,
+                        dialogControl = "MidnightHeading",
                     },
                     description = {
                         type = "description",
@@ -3939,6 +3954,7 @@ function MidnightUI:GetOptions()
                         name = "Generate Export String",
                         desc = "Creates an export string of your current profile",
                         order = 3,
+                        dialogControl = "MidnightButton",
                         func = function()
                             MidnightUI:ExportProfile()
                         end,
@@ -3955,6 +3971,7 @@ function MidnightUI:GetOptions()
                         order = 4,
                         width = "full",
                         multiline = 25,
+                        dialogControl = "MidnightMultiLineEditBox",
                         get = function() 
                             return MidnightUI.exportString or ""
                         end,
@@ -3971,6 +3988,7 @@ function MidnightUI:GetOptions()
                         type = "header",
                         name = "Import Profile",
                         order = 1,
+                        dialogControl = "MidnightHeading",
                     },
                     description = {
                         type = "description",
@@ -3984,6 +4002,7 @@ function MidnightUI:GetOptions()
                         desc = "Leave empty to overwrite current profile, or enter a name to create a new profile",
                         order = 3,
                         width = "full",
+                        dialogControl = "MidnightEditBox",
                         get = function() 
                             -- Store in both places to prevent clearing
                             if not MidnightUI.importNewProfileName then
@@ -4016,6 +4035,7 @@ function MidnightUI:GetOptions()
                         order = 4,
                         width = "full",
                         multiline = 20,
+                        dialogControl = "MidnightMultiLineEditBox",
                         get = function() 
                             if not MidnightUI.importString then
                                 MidnightUI.importString = ""
@@ -4052,6 +4072,7 @@ function MidnightUI:GetOptions()
                         name = "Import Profile",
                         desc = "Import the profile from the string above. Requires UI reload.",
                         order = 5,
+                        dialogControl = "MidnightButton",
                         func = function()
                             MidnightUI:ImportProfile()
                         end,

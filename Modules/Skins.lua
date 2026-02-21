@@ -759,7 +759,8 @@ function Skin:GetOptions()
             header = {
                 type = "header",
                 name = "Global Skinning System",
-                order = 1
+                order = 1,
+                dialogControl = "MidnightHeading",
             },
             desc = {
                 type = "description",
@@ -771,6 +772,7 @@ function Skin:GetOptions()
                 desc = "Default skin applied to all UI elements",
                 type = "select",
                 order = 3,
+                dialogControl = "MidnightDropdown",
                 values = skinList,
                 get = function() return self.db.profile.globalSkin end,
                 set = function(_, v)
@@ -779,13 +781,14 @@ function Skin:GetOptions()
                     C_UI.Reload()
                 end
             },
-            spacer1 = { type = "header", name = "Module-Specific Skinning", order = 10 },
+            spacer1 = { type = "header", name = "Module-Specific Skinning", order = 10, dialogControl="MidnightHeading" },
             skinActionBars = {
                 name = "Skin Action Bar Buttons",
                 desc = "Apply dark background to action bar buttons",
                 type = "toggle",
                 order = 11,
                 width = "full",
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.skinActionBars end,
                 set = function(_, v)
                     self.db.profile.skinActionBars = v
@@ -802,6 +805,7 @@ function Skin:GetOptions()
                 type = "toggle",
                 order = 12,
                 width = "full",
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.skinUnitFrames end,
                 set = function(_, v)
                     self.db.profile.skinUnitFrames = v
@@ -814,6 +818,7 @@ function Skin:GetOptions()
                 type = "toggle",
                 order = 13,
                 width = "full",
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.skinBags end,
                 set = function(_, v)
                     self.db.profile.skinBags = v
@@ -830,6 +835,7 @@ function Skin:GetOptions()
                 type = "toggle",
                 order = 14,
                 width = "full",
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.skinBlizzardFrames end,
                 set = function(_, v)
                     self.db.profile.skinBlizzardFrames = v
@@ -846,6 +852,7 @@ function Skin:GetOptions()
                 type = "toggle",
                 order = 15,
                 width = "full",
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.skinTooltips end,
                 set = function(_, v)
                     self.db.profile.skinTooltips = v

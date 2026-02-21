@@ -812,6 +812,7 @@ function Tooltips:GetOptions()
                 type = "header",
                 name = "Appearance Settings",
                 order = 10,
+                dialogControl = "MidnightHeading",
             },
             borderSize = {
                 type = "range",
@@ -821,6 +822,7 @@ function Tooltips:GetOptions()
                 max = 5,
                 step = 1,
                 order = 11,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.borderSize end,
                 set = function(_, value)
                     self.db.profile.borderSize = value
@@ -836,6 +838,7 @@ function Tooltips:GetOptions()
                 max = 1,
                 step = 0.05,
                 order = 12,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.backdropAlpha end,
                 set = function(_, value)
                     self.db.profile.backdropAlpha = value
@@ -851,6 +854,7 @@ function Tooltips:GetOptions()
                 max = 18,
                 step = 1,
                 order = 13,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.fontSize end,
                 set = function(_, value)
                     self.db.profile.fontSize = value
@@ -869,12 +873,14 @@ function Tooltips:GetOptions()
                 type = "header",
                 name = "Item Tooltips",
                 order = 19.5,
+                dialogControl = "MidnightHeading",
             },
             qualityBorderColors = {
                 type = "toggle",
                 name = "Quality Border Colors",
                 desc = "Color tooltip borders based on item quality (uncommon and above)",
                 order = 19.6,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.qualityBorderColors end,
                 set = function(_, value)
                     self.db.profile.qualityBorderColors = value
@@ -893,12 +899,14 @@ function Tooltips:GetOptions()
                 type = "header",
                 name = "Cursor Following",
                 order = 20,
+                dialogControl = "MidnightHeading",
             },
             cursorFollow = {
                 type = "toggle",
                 name = "Follow Cursor",
                 desc = "Tooltips will follow your mouse cursor",
                 order = 21,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.cursorFollow end,
                 set = function(_, value)
                     self.db.profile.cursorFollow = value
@@ -911,6 +919,7 @@ function Tooltips:GetOptions()
                 name = "Cursor Anchor",
                 desc = "Where the tooltip anchors to the cursor",
                 order = 22,
+                dialogControl = "MidnightDropdown",
                 values = {
                     ["TOPLEFT"] = "Top Left",
                     ["TOP"] = "Top",
@@ -937,6 +946,7 @@ function Tooltips:GetOptions()
                 max = 100,
                 step = 1,
                 order = 23,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.offsetX end,
                 set = function(_, value)
                     self.db.profile.offsetX = value
@@ -952,6 +962,7 @@ function Tooltips:GetOptions()
                 max = 100,
                 step = 1,
                 order = 24,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.offsetY end,
                 set = function(_, value)
                     self.db.profile.offsetY = value
@@ -967,6 +978,7 @@ function Tooltips:GetOptions()
                 max = 2,
                 step = 0.1,
                 order = 25,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.fadeDelay end,
                 set = function(_, value)
                     self.db.profile.fadeDelay = value
@@ -982,6 +994,7 @@ function Tooltips:GetOptions()
                 max = 2.0,
                 step = 0.05,
                 order = 26,
+                dialogControl = "MidnightSlider",
                 get = function() return self.db.profile.scale end,
                 set = function(_, value)
                     self.db.profile.scale = value
@@ -1000,12 +1013,14 @@ function Tooltips:GetOptions()
                 type = "header",
                 name = "Combat & Instances",
                 order = 29.5,
+                dialogControl = "MidnightHeading",
             },
             hideInCombat = {
                 type = "toggle",
                 name = "Hide in Combat",
                 desc = "Hide tooltips when entering combat",
                 order = 29.6,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.hideInCombat end,
                 set = function(_, value)
                     self.db.profile.hideInCombat = value
@@ -1017,6 +1032,7 @@ function Tooltips:GetOptions()
                 name = "Only in Dungeons/Raids",
                 desc = "Only hide tooltips in combat when inside a dungeon or raid",
                 order = 29.7,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.hideInInstance end,
                 set = function(_, value)
                     self.db.profile.hideInInstance = value
@@ -1034,12 +1050,14 @@ function Tooltips:GetOptions()
                 type = "header",
                 name = "Player Information",
                 order = 30,
+                dialogControl = "MidnightHeading",
             },
             classColor = {
                 type = "toggle",
                 name = "Class-Colored Names",
                 desc = "Display player names in their class colors",
                 order = 31,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.classColor end,
                 set = function(_, value)
                     self.db.profile.classColor = value
@@ -1051,6 +1069,7 @@ function Tooltips:GetOptions()
                 name = "Class-Colored Borders",
                 desc = "Color tooltip borders based on player class (overrides theme border color)",
                 order = 31.5,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.classColoredBorders end,
                 set = function(_, value)
                     self.db.profile.classColoredBorders = value
@@ -1063,6 +1082,7 @@ function Tooltips:GetOptions()
                 name = "Show Guild",
                 desc = "Display guild information",
                 order = 32,
+                dialogControl = "MidnightCheckBox",
                 get = function() return self.db.profile.showGuild end,
                 set = function(_, value)
                     self.db.profile.showGuild = value
@@ -1074,6 +1094,7 @@ function Tooltips:GetOptions()
                 name = "Your Guild Color",
                 desc = "Color for your guild members",
                 order = 33,
+                dialogControl = "MidnightColorPicker",
                 get = function()
                     local c = self.db.profile.yourGuildColor
                     return c.r, c.g, c.b
@@ -1088,6 +1109,7 @@ function Tooltips:GetOptions()
                 name = "Other Guild Color",
                 desc = "Color for other guild members",
                 order = 34,
+                dialogControl = "MidnightColorPicker",
                 get = function()
                     local c = self.db.profile.otherGuildColor
                     return c.r, c.g, c.b
