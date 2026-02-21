@@ -428,19 +428,6 @@ function Setup:GetOptions()
                     self.db.profile.hasCompletedSetup = false
                     print("MidnightUI: Setup status reset. The wizard will appear on next login.")
                 end
-            },
-            editPresets = {
-                name = "Edit Preset Strings",
-                type = "group",
-                inline = true,
-                order = 3,
-                args = {
-                    info = {
-                        name = "To configure preset strings, edit the Setup.lua file and replace the placeholder strings with your actual export strings.",
-                        type = "description",
-                        order = 1,
-                    }
-                }
             }
         }
     }
