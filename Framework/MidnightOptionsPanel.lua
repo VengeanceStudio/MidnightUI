@@ -491,6 +491,10 @@ function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
         end
         
         -- Update visual
+        UpdateVisual(value)
+    end
+    
+    local function UpdateVisual(value)
         if value then
             toggleKnob:SetPoint("CENTER", toggleBg, "RIGHT", -10, 0)
             toggleBg:SetVertexColor(ColorPalette:GetColor('accent-primary'))
@@ -506,8 +510,8 @@ function MidnightOptionsPanel:CreateToggle(parent, option, yOffset)
         SetValue(not currentValue)
     end)
     
-    -- Set initial state
-    SetValue(GetValue())
+    -- Set initial state (visual only, don't call set function)
+    UpdateVisual(GetValue())
     
     return frame, 30
 end
@@ -575,12 +579,16 @@ function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
         return option.min or 0
     end
     
+    local function UpdateVisual(value)
+        slider:SetValue(value)
+        valueText:SetText(tostring(value))
+    end
+    
     local function SetValue(value)
         if option.set then
             option.set(self.addonRef.db.profile, value)
         end
-        slider:SetValue(value)
-        valueText:SetText(tostring(value))
+        UpdateVisual(value)
     end
     
     -- Slider change handler
@@ -589,8 +597,8 @@ function MidnightOptionsPanel:CreateRange(parent, option, yOffset)
         SetValue(value)
     end)
     
-    -- Set initial value
-    SetValue(GetValue())
+    -- Set initial value (visual only)
+    UpdateVisual(GetValue())
     
     return frame, 70
 end
@@ -656,11 +664,7 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
         return nil
     end
     
-    local function SetValue(value)
-        if option.set then
-            option.set(self.addonRef.db.profile, value)
-        end
-        
+    local function UpdateVisual(value)
         -- Update display text
         local values = EvaluateValue(option.values)
         if values then
@@ -668,6 +672,13 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
         else
             dropdown.text:SetText(tostring(value))
         end
+    end
+    
+    local function SetValue(value)
+        if option.set then
+            option.set(self.addonRef.db.profile, value)
+        end
+        UpdateVisual(value)
     end
     
     -- Create simple dropdown menu on click
@@ -740,8 +751,8 @@ function MidnightOptionsPanel:CreateSelect(parent, option, yOffset)
         end)
     end)
     
-    -- Set initial value
-    SetValue(GetValue())
+    -- Set initial value (visual only)
+    UpdateVisual(GetValue())
     
     return frame, 50
 end
@@ -828,11 +839,15 @@ function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
         return ""
     end
     
+    local function UpdateVisual(value)
+        editBox:SetText(value or "")
+    end
+    
     local function SetValue(value)
         if option.set then
             option.set(self.addonRef.db.profile, value)
         end
-        editBox:SetText(value or "")
+        UpdateVisual(value)
     end
     
     -- Save on focus lost
@@ -846,11 +861,11 @@ function MidnightOptionsPanel:CreateInput(parent, option, yOffset)
     
     editBox:SetScript("OnEscapePressed", function()
         editBox:ClearFocus()
-        SetValue(GetValue()) -- Revert
+        UpdateVisual(GetValue()) -- Revert visual only
     end)
     
-    -- Set initial value
-    SetValue(GetValue())
+    -- Set initial value (visual only)
+    UpdateVisual(GetValue())
     
     return frame, frameHeight
 end
@@ -907,11 +922,15 @@ function MidnightOptionsPanel:CreateColor(parent, option, yOffset)
         return 1, 1, 1, 1
     end
     
+    local function UpdateVisual(r, g, b, a)
+        swatch.texture:SetVertexColor(r, g, b, a or 1)
+    end
+    
     local function SetValue(r, g, b, a)
         if option.set then
             option.set(self.addonRef.db.profile, {r, g, b, a or 1})
         end
-        swatch.texture:SetVertexColor(r, g, b, a or 1)
+        UpdateVisual(r, g, b, a)
     end
     
     -- Open color picker on click
@@ -935,13 +954,13 @@ function MidnightOptionsPanel:CreateColor(parent, option, yOffset)
                 SetValue(r, g, b, a)
             end,
             cancelFunc = function()
-                SetValue(r, g, b, a)
+                UpdateVisual(r, g, b, a)
             end,
         })
     end)
     
-    -- Set initial color
-    SetValue(GetValue())
+    -- Set initial color (visual only)
+    UpdateVisual(GetValue())
     
     return frame, 40
 end

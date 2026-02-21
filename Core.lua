@@ -2241,7 +2241,12 @@ function MidnightUI:OpenConfig()
     -- Use custom MidnightUI Options Panel (zero AceGUI dependency)
     local optionsPanel = _G.MidnightUI_OptionsPanel
     if optionsPanel then
-        optionsPanel:Toggle(self)
+        local success, err = pcall(function()
+            optionsPanel:Toggle(self)
+        end)
+        if not success then
+            self:Print("|cffff0000Error opening options panel:|r " .. tostring(err))
+        end
     else
         self:Print("Options panel not loaded yet. Please try again in a moment.")
     end
