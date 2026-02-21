@@ -636,16 +636,16 @@ function MidnightOptionsPanel:CreateHeader(parent, option, xOffset, yOffset)
     local header = headerFrame:CreateFontString(nil, "OVERLAY")
     header:SetPoint("LEFT", headerFrame, "LEFT", 0, 0)
     if FontKit then
-        FontKit:SetFont(header, 'heading', 'bold')
+        FontKit:SetFont(header, 'heading', 'huge')
     else
-        header:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
+        header:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
     end
     header:SetText(EvaluateValue(option.name) or "")
     header:SetTextColor(ColorPalette:GetColor('accent-primary'))
     
     -- Horizontal line to the right of text
     local line = headerFrame:CreateTexture(nil, "BACKGROUND")
-    line:SetHeight(1)
+    line:SetHeight(2)
     line:SetPoint("LEFT", header, "RIGHT", 8, 0)
     line:SetPoint("RIGHT", headerFrame, "RIGHT", -3, 0)
     local r, g, b = ColorPalette:GetColor('accent-primary')
