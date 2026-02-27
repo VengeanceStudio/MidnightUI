@@ -212,10 +212,11 @@ local methods = {
     end,
     
     ["RefreshColors"] = function(self)
-        local r, g, b = ColorPalette:GetColor('panel-bg')
-        self.frame:SetBackdropColor(r, g, b, 1)
-        r, g, b = ColorPalette:GetColor('accent-primary')
-        self.frame:SetBackdropBorderColor(r, g, b, 1)
+        -- Force solid background for readability (ignore theme alpha for pullout menu)
+        local r, g, b, a = ColorPalette:GetColor('panel-bg')
+        self.frame:SetBackdropColor(r, g, b, 1.0)  -- Always use alpha=1 for solid background
+        r, g, b, a = ColorPalette:GetColor('accent-primary')
+        self.frame:SetBackdropBorderColor(r, g, b, 1.0)
     end,
 }
 
@@ -235,10 +236,11 @@ local function Constructor()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    local r, g, b = ColorPalette:GetColor('panel-bg')
-    frame:SetBackdropColor(r, g, b, 1)
-    r, g, b = ColorPalette:GetColor('accent-primary')
-    frame:SetBackdropBorderColor(r, g, b, 1)
+    -- Force solid background for dropdown pullout (ignore theme alpha for readability)
+    local r, g, b, a = ColorPalette:GetColor('panel-bg')
+    frame:SetBackdropColor(r, g, b, 1.0)  -- Always use alpha=1 for solid background
+    r, g, b, a = ColorPalette:GetColor('accent-primary')
+    frame:SetBackdropBorderColor(r, g, b, 1.0)
     frame:SetFrameStrata("FULLSCREEN_DIALOG")
     frame:SetClampedToScreen(true)
     frame:SetWidth(200)
