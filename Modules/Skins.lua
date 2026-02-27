@@ -770,7 +770,7 @@ function Skin:GetOptions()
                 name = "Global Skin",
                 desc = "Default skin applied to all UI elements",
                 type = "select",
-                order = 3
+                order = 3,
                 values = skinList,
                 get = function() return self.db.profile.globalSkin end,
                 set = function(_, v)
