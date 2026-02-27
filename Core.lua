@@ -226,59 +226,92 @@ function MidnightUI:ScaleLayoutToResolution()
     StaticPopup_Show("MIDNIGHTUI_RELOAD_CONFIRM")
 end
 
--- Walk widget tree and apply styling (safe for options panel)
+function MidnightUI:OpenConfig()
+    -- Use custom MidnightUI Options Panel (zero AceGUI dependency)
+    local optionsPanel = _G.MidnightUI_OptionsPanel
+    if optionsPanel then
+        local success, err = pcall(function()
+            optionsPanel:Toggle(self)
+        end)
+        if not success then
+            self:Print("|cffff0000Error opening options panel:|r " .. tostring(err))
+        end
+    else
+        self:Print("Options panel not loaded yet. Please try again in a moment.")
     end
 end
 
-        
-        -- Style the horizontal bar at the top (tab separator)
-        if widget.tabs and widget.tabs[1] then
-            local tabParent = widget.tabs[1]:GetParent()
-            if tabParent then
-                for _, region in ipairs({tabParent:GetRegions()}) do
-                    if region:GetObjectType() == "Texture" then
-                        -- Check if this is a thin horizontal line (separator) not a background
-                        local width = region:GetWidth()
-                        local height = region:GetHeight()
-                        if height and height < 10 and width and width > 100 then
-                            -- This is likely the horizontal separator line
-                            region:SetTexture("Interface\\Buttons\\WHITE8X8")
-                            region:SetVertexColor(ColorPalette:GetColor('panel-border'))
-                        end
-                    end
-                end
-            end
-        end
-        
-        -- Skin tabs
-        if widget.tabs then
-            -- Function to hide Blizzard textures (defined outside loop for reuse)
-            local function HideTabTextures(t)
-                for _, region in ipairs({t:GetRegions()}) do
-                    if region:GetObjectType() == "Texture" and region ~= t.text then
-                        -- Don't hide backdrop textures (borders and background)
-                        if region ~= t.Center and region ~= t.TopEdge and region ~= t.BottomEdge and 
-                           region ~= t.LeftEdge and region ~= t.RightEdge and 
-                           region ~= t.TopLeftCorner and region ~= t.TopRightCorner and 
-                           region ~= t.BottomLeftCorner and region ~= t.BottomRightCorner then
-                            region:Hide()
-                        end
-                    end
-                end
-            end
-            
-            for i, tab in pairs(widget.tabs) do
-                
-                -- Hide all Blizzard textures on tab
-                HideTabTextures(tab)
-                for _, region in ipairs({tab:GetRegions()}) do
-                    if region:GetObjectType() == "Texture" and region ~= tab.text then
-                        region:Hide()
-                    end
-                end
-                
-                -- Add BackdropTemplate if needed
-                if not tab.SetBackdrop and BackdropTemplateMixin then
+-- Apply themed backdrop to a frame using ColorPalette
+function MidnightUI:ApplyThemedBackdrop(frame)
+    if not frame then return end
+    
+    -- Clear any backdrop on the parent frame itself
+    if frame.SetBackdrop then
+        frame:SetBackdrop(nil)
+    end
+    
+    -- Force recreation of backdrop to apply new settings
+    if frame.muiBackdrop then
+        frame.muiBackdrop:Hide()
+        frame.muiBackdrop:SetParent(nil)
+        frame.muiBackdrop = nil
+    end
+    
+    -- Create new backdrop with correct settings
+    frame.muiBackdrop = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+    frame.muiBackdrop:SetAllPoints()
+    local level = frame:GetFrameLevel()
+    frame.muiBackdrop:SetFrameLevel(level > 0 and level - 1 or 0)
+    
+    -- Set backdrop parameters
+    frame.muiBackdrop:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    
+    -- Use framework colors if available
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if ColorPalette then
+        local r, g, b, a = ColorPalette:GetColor('panel-bg')
+        frame.muiBackdrop:SetBackdropColor(r, g, b, a)
+        frame.muiBackdrop:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
+    else
+        -- Fallback to database colors
+        local cfg = self.db.profile.theme
+        frame.muiBackdrop:SetBackdropColor(unpack(cfg.bgColor))
+        frame.muiBackdrop:SetBackdropBorderColor(unpack(cfg.borderColor))
+    end
+    
+    frame.muiBackdrop:Show()
+end
+
+-- ============================================================================
+-- 4. OPTIONS TABLE
+-- ============================================================================
+function MidnightUI:GetThemeOptions()
+    local ColorPalette = _G.MidnightUI_ColorPalette
+    if not ColorPalette then
+        return {
+            header = {
+                type = "header",
+                name = "Theme System Not Loaded",
+                order = 1,
+            },
+            desc = {
+                type = "description",
+                name = "The theme system is not yet initialized. Please /reload and try again.",
+                order = 2,
+            },
+        }
+    end
+    
+    -- Get available themes
+    local availableThemes = {}
+    -- Get all registered themes from ColorPalette
+    for themeName, _ in pairs(ColorPalette.palettes) do
+        table.insert(availableThemes, themeName)
                     Mixin(tab, BackdropTemplateMixin)
                     if tab.OnBackdropLoaded then
                         tab:OnBackdropLoaded()
