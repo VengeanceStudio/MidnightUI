@@ -506,7 +506,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Reset to Theme Defaults",
             desc = "Reset all color changes back to the original theme defaults",
-            order = 19.5
+            order = 19.5,
             func = function()
                 -- Clear temp colors
                 self.tempThemeColors = nil
@@ -532,7 +532,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Open Theme Editor",
             desc = "Opens a visual mockup window where you can click on elements to edit their colors",
-            order = 20
+            order = 20,
             func = function()
                 self:OpenColorEditorFrame()
             end,
