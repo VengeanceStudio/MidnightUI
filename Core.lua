@@ -422,7 +422,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Save Custom Theme",
             desc = "Save current color settings as a new custom theme.",
-            order = 7
+            order = 7,
             func = function()
                 self:SaveCustomTheme()
             end,
@@ -431,7 +431,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Delete Custom Theme",
             desc = "Delete the currently selected custom theme (built-in themes cannot be deleted).",
-            order = 8
+            order = 8,
             disabled = function()
                 local active = self.db.profile.theme.active
                 local builtInThemes = {
