@@ -16,7 +16,7 @@ local Version = 1
 
 local methods = {
     ["OnAcquire"] = function(self)
-        local pullout = AceGUI:Create("Dropdown-Pullout")
+        local pullout = AceGUI:Create("MidnightDropdown-Pullout")
         self.pullout = pullout
         pullout.userdata.obj = self
         pullout:SetCallback("OnClose", function(widget)
