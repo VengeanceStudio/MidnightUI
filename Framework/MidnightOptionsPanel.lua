@@ -956,7 +956,7 @@ function MidnightOptionsPanel:CreateSelect(parent, option, xOffset, yOffset)
         -- Create menu items
         local y = -2
         for key, text in pairs(values) do
-            local item = CreateFrame("Button", nil, menu)
+            local item = CreateFrame("Button", nil, menu, BackdropTemplateMixin and "BackdropTemplate")
             item:SetPoint("TOPLEFT", menu, "TOPLEFT", 2, y)
             item:SetSize(196, itemHeight)
             
