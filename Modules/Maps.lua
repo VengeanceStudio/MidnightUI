@@ -957,13 +957,13 @@ function Maps:GetOptions()
             shape = {
                 name = "Map Shape (Requires /reload)",
                 type = "select",
-                order = 2
+                order = 2,
                 values = {SQUARE = "Square", ROUND = "Round"},
             },
             autoZoom = {
                 name = "Auto Zoom Out",
                 type = "toggle",
-                order = 4
+                order = 4,
             },
             positionNote = {
                 name = "|cffaaaaaa(Use Blizzard Edit Mode to move MinimapCluster)\nThen hold CTRL+ALT and drag OR use /muimove to enable Move Mode\nUse nudge arrows for pixel-perfect positioning|r",
@@ -1005,7 +1005,7 @@ function Maps:GetOptions()
                 name = "Reset Offsets",
                 desc = "Reset position offsets to 0",
                 type = "execute",
-                order = 9
+                order = 9,
                 func = function()
                     self.db.profile.offsetX = 0
                     self.db.profile.offsetY = 0
@@ -1018,19 +1018,19 @@ function Maps:GetOptions()
             showClock = { 
                 name = "Show Clock", 
                 type = "toggle", 
-                order = 11
+                order = 11,
                 set = function(_, v) self.db.profile.showClock = v; self:UpdateLayout() end
             },
             showZone = { 
                 name = "Show Zone Text", 
                 type = "toggle", 
-                order = 12
+                order = 12,
                 set = function(_, v) self.db.profile.showZone = v; self:UpdateLayout() end
             },
             showCoords = { 
                 name = "Show Coordinates", 
                 type = "toggle", 
-                order = 13
+                order = 13,
                 set = function(_, v) self.db.profile.showCoords = v; self:UpdateLayout() end
             },
             
@@ -1038,19 +1038,19 @@ function Maps:GetOptions()
             showCalendar = { 
                 name = "Calendar", 
                 type = "toggle", 
-                order = 21
+                order = 21,
                 set = function(_, v) self.db.profile.showCalendar = v; self:UpdateLayout() end
             },
             showTracking = { 
                 name = "Tracking", 
                 type = "toggle", 
-                order = 22
+                order = 22,
                 set = function(_, v) self.db.profile.showTracking = v; self:UpdateLayout() end
             },
             showMail = { 
                 name = "Mail", 
                 type = "toggle", 
-                order = 23
+                order = 23,
                 set = function(_, v) self.db.profile.showMail = v; self:UpdateLayout() end
             },
             mailOffsetX = {
@@ -1058,7 +1058,7 @@ function Maps:GetOptions()
                 name = "Mail Icon X Offset",
                 desc = "Horizontal offset from top-right of minimap. Negative = left.",
                 min = -200, max = 200, step = 1,
-                order = 23.1
+                order = 23.1,
                 get = function() return self.db.profile.mailOffsetX or -25 end,
                 set = function(_, v) self.db.profile.mailOffsetX = v; self:UpdateLayout() end,
             },
@@ -1067,26 +1067,26 @@ function Maps:GetOptions()
                 name = "Mail Icon Y Offset",
                 desc = "Vertical offset from top-right of minimap. Negative = down.",
                 min = -200, max = 200, step = 1,
-                order = 23.2
+                order = 23.2,
                 get = function() return self.db.profile.mailOffsetY or -25 end,
                 set = function(_, v) self.db.profile.mailOffsetY = v; self:UpdateLayout() end,
             },
             showMissions = { 
                 name = "Missions / Landing Page", 
                 type = "toggle", 
-                order = 24
+                order = 24,
                 set = function(_, v) self.db.profile.showMissions = v; self:UpdateLayout() end
             },
             showQueue = { 
                 name = "LFG / PvP Queue", 
                 type = "toggle", 
-                order = 25
+                order = 25,
                 set = function(_, v) self.db.profile.showQueue = v; self:UpdateLayout() end
             },
             showDifficulty = { 
                 name = "Instance Difficulty", 
                 type = "toggle", 
-                order = 26
+                order = 26,
                 set = function(_, v) self.db.profile.showDifficulty = v; self:UpdateLayout() end
             },
             difficultyOffsetX = {
@@ -1094,7 +1094,7 @@ function Maps:GetOptions()
                 name = "Difficulty Icon X Offset",
                 desc = "Horizontal offset from top-right of minimap. Negative = left.",
                 min = -200, max = 200, step = 1,
-                order = 26.1
+                order = 26.1,
                 get = function() return self.db.profile.difficultyOffsetX or -65 end,
                 set = function(_, v) self.db.profile.difficultyOffsetX = v; self:UpdateLayout() end,
             },
@@ -1103,7 +1103,7 @@ function Maps:GetOptions()
                 name = "Difficulty Icon Y Offset",
                 desc = "Vertical offset from top-right of minimap. Negative = down.",
                 min = -200, max = 200, step = 1,
-                order = 26.2
+                order = 26.2,
                 get = function() return self.db.profile.difficultyOffsetY or -5 end,
                 set = function(_, v) self.db.profile.difficultyOffsetY = v; self:UpdateLayout() end,
             },
@@ -1113,7 +1113,7 @@ function Maps:GetOptions()
                 name = "Enable Button Bar",
                 desc = "Collect addon minimap buttons into an expandable bar",
                 type = "toggle",
-                order = 31
+                order = 31,
                 get = function() return self.db.profile.buttonBarEnabled end,
                 set = function(_, v) self.db.profile.buttonBarEnabled = v; self:SetupButtonBar() end,
             },
@@ -1130,7 +1130,7 @@ function Maps:GetOptions()
                     LEFT = "Left",
                     RIGHT = "Right",
                 },
-                order = 32
+                order = 32,
                 get = function() return self.db.profile.buttonBarAnchor or "TOPRIGHT" end,
                 set = function(_, v) self.db.profile.buttonBarAnchor = v; self:SetupButtonBar() end,
             },
@@ -1138,7 +1138,7 @@ function Maps:GetOptions()
                 type = "range",
                 name = "X Offset",
                 min = -500, max = 500, step = 1,
-                order = 33
+                order = 33,
                 get = function() return self.db.profile.buttonBarX or 0 end,
                 set = function(_, v) self.db.profile.buttonBarX = v; self:SetupButtonBar() end,
             },
@@ -1146,7 +1146,7 @@ function Maps:GetOptions()
                 type = "range",
                 name = "Y Offset",
                 min = -500, max = 500, step = 1,
-                order = 34
+                order = 34,
                 get = function() return self.db.profile.buttonBarY or -200 end,
                 set = function(_, v) self.db.profile.buttonBarY = v; self:SetupButtonBar() end,
             },
@@ -1154,7 +1154,7 @@ function Maps:GetOptions()
                 type = "range",
                 name = "Button Size",
                 min = 16, max = 48, step = 1,
-                order = 35
+                order = 35,
                 get = function() return self.db.profile.buttonBarButtonSize or 32 end,
                 set = function(_, v) self.db.profile.buttonBarButtonSize = v; self:SetupButtonBar() end,
             },
@@ -1162,7 +1162,7 @@ function Maps:GetOptions()
                 type = "range",
                 name = "Buttons Per Row",
                 min = 1, max = 10, step = 1,
-                order = 36
+                order = 36,
                 get = function() return self.db.profile.buttonBarButtonsPerRow or 1 end,
                 set = function(_, v) self.db.profile.buttonBarButtonsPerRow = v; self:SetupButtonBar() end,
             },
@@ -1170,7 +1170,7 @@ function Maps:GetOptions()
                 type = "range",
                 name = "Collapsed Tab Size",
                 min = 10, max = 40, step = 1,
-                order = 37
+                order = 37,
                 get = function() return self.db.profile.buttonBarCollapsedSize or 20 end,
                 set = function(_, v) self.db.profile.buttonBarCollapsedSize = v; self:SetupButtonBar() end,
             },
@@ -1184,7 +1184,7 @@ function Maps:GetOptions()
                     down = "Down",
                     up = "Up",
                 },
-                order = 38
+                order = 38,
                 get = function() return self.db.profile.buttonBarGrowthDirection or "right" end,
                 set = function(_, v) self.db.profile.buttonBarGrowthDirection = v; self:SetupButtonBar() end,
             },
@@ -1193,7 +1193,7 @@ function Maps:GetOptions()
                 name = "Icon Scale",
                 desc = "Scale of minimap icons in the button bar (50% = half size)",
                 min = 0.25, max = 1.5, step = 0.05,
-                order = 39
+                order = 39,
                 get = function() return self.db.profile.buttonBarIconScale or 0.5 end,
                 set = function(_, v) self.db.profile.buttonBarIconScale = v; self:SetupButtonBar() end,
             },
@@ -1202,7 +1202,7 @@ function Maps:GetOptions()
                 name = "Button Spacing",
                 desc = "Space between buttons in pixels",
                 min = 0, max = 10, step = 1,
-                order = 40
+                order = 40,
                 get = function() return self.db.profile.buttonBarSpacing or 2 end,
                 set = function(_, v) self.db.profile.buttonBarSpacing = v; self:SetupButtonBar() end,
             },
@@ -1210,7 +1210,7 @@ function Maps:GetOptions()
                 name = "Use Class Color",
                 desc = "Use your class color for the button bar",
                 type = "toggle",
-                order = 41
+                order = 41,
                 get = function() return self.db.profile.buttonBarUseClassColor end,
                 set = function(_, v) self.db.profile.buttonBarUseClassColor = v; self:UpdateButtonBarColor() end,
             },
@@ -1219,7 +1219,7 @@ function Maps:GetOptions()
                 desc = "Color of the button bar tab",
                 type = "color",
                 hasAlpha = true,
-                order = 42
+                order = 42,
                 disabled = function() return self.db.profile.buttonBarUseClassColor end,
                 get = function()
                     local c = self.db.profile.buttonBarColor or { r = 0.5, g = 0.5, b = 0.5, a = 1 }

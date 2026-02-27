@@ -798,7 +798,7 @@ function ResourceBars:GetOptions()
             primaryEnabled = {
                 name = "Enable Primary Resource Bar",
                 type = "toggle",
-                order = 11
+                order = 11,
                 get = function() return self.db.profile.primary.enabled end,
                 set = function(_, v)
                     self.db.profile.primary.enabled = v
@@ -845,7 +845,7 @@ function ResourceBars:GetOptions()
             primaryShowText = {
                 name = "Show Text",
                 type = "toggle",
-                order = 14
+                order = 14,
                 disabled = function() return not self.db.profile.primary.enabled end,
                 get = function() return self.db.profile.primary.showText end,
                 set = function(_, v)
@@ -864,7 +864,7 @@ function ResourceBars:GetOptions()
                 name = "Show Percentage",
                 desc = "Display resource as percentage instead of current/max values.",
                 type = "toggle",
-                order = 15
+                order = 15,
                 disabled = function() return not self.db.profile.primary.enabled or not self.db.profile.primary.showText end,
                 get = function() return self.db.profile.primary.showPercentage end,
                 set = function(_, v)
@@ -878,7 +878,7 @@ function ResourceBars:GetOptions()
                 name = "Attach to Essential Cooldowns",
                 desc = "Automatically position and size the primary bar to match Essential Cooldowns width.",
                 type = "toggle",
-                order = 16
+                order = 16,
                 disabled = function() return not self.db.profile.primary.enabled end,
                 get = function() return self.db.profile.primary.attachToEssentialCooldowns end,
                 set = function(_, v)
@@ -899,7 +899,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Position",
                 desc = "Position the primary bar above or below Essential Cooldowns.",
                 type = "select",
-                order = 17
+                order = 17,
                 disabled = function() return not self.db.profile.primary.enabled or not self.db.profile.primary.attachToEssentialCooldowns end,
                 values = {
                     ["ABOVE"] = "Above",
@@ -950,7 +950,7 @@ function ResourceBars:GetOptions()
             secondaryEnabled = {
                 name = "Enable Secondary Resource Bar",
                 type = "toggle",
-                order = 21
+                order = 21,
                 get = function() return self.db.profile.secondary.enabled end,
                 set = function(_, v)
                     self.db.profile.secondary.enabled = v
@@ -1000,7 +1000,7 @@ function ResourceBars:GetOptions()
                 name = "Attach to Primary Bar",
                 desc = "Automatically position the secondary bar relative to the primary bar.",
                 type = "toggle",
-                order = 24
+                order = 24,
                 disabled = function() return not self.db.profile.secondary.enabled end,
                 get = function() return self.db.profile.secondary.attachToPrimary end,
                 set = function(_, v)
@@ -1014,7 +1014,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Position",
                 desc = "Position the secondary bar above or below the primary bar.",
                 type = "select",
-                order = 25
+                order = 25,
                 disabled = function() return not self.db.profile.secondary.enabled or not self.db.profile.secondary.attachToPrimary end,
                 values = {
                     ["ABOVE"] = "Above",

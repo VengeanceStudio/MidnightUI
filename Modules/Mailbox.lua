@@ -785,7 +785,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable BlackBook",
                 desc = "Add contact list next to To: field",
-                order = 11
+                order = 11,
                 get = function() return self.db.profile.blackBookEnabled end,
                 set = function(_, value)
                     self.db.profile.blackBookEnabled = value
@@ -796,7 +796,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Track Alts",
                 desc = "Automatically track your characters",
-                order = 12
+                order = 12,
                 get = function() return self.db.profile.trackAlts end,
                 set = function(_, value)
                     self.db.profile.trackAlts = value
@@ -807,7 +807,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Autofill Last Recipient",
                 desc = "Automatically fill in the last person mailed",
-                order = 13
+                order = 13,
                 get = function() return self.db.profile.autofillLastRecipient end,
                 set = function(_, value)
                     self.db.profile.autofillLastRecipient = value
@@ -818,7 +818,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Disable Blizzard Autocomplete",
                 desc = "Disable Blizzard's name auto-completion popup",
-                order = 14
+                order = 14,
                 get = function() return self.db.profile.disableBlizzardAutocomplete end,
                 set = function(_, value)
                     self.db.profile.disableBlizzardAutocomplete = value
@@ -836,7 +836,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable OpenAll",
                 desc = "Add button to open all mail at once",
-                order = 21
+                order = 21,
                 get = function() return self.db.profile.openAllEnabled end,
                 set = function(_, value)
                     self.db.profile.openAllEnabled = value
@@ -850,7 +850,7 @@ function Mailbox:GetOptions()
                 min = 0,
                 max = 20,
                 step = 1,
-                order = 22
+                order = 22,
                 get = function() return self.db.profile.keepFreeSlots end,
                 set = function(_, value)
                     self.db.profile.keepFreeSlots = value
@@ -868,7 +868,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable Express",
                 desc = "Shift-Click to take, Ctrl-Click to return, Alt-Click to attach",
-                order = 31
+                order = 31,
                 get = function() return self.db.profile.expressEnabled end,
                 set = function(_, value)
                     self.db.profile.expressEnabled = value
@@ -886,7 +886,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable CarbonCopy",
                 desc = "Copy contents of mail",
-                order = 41
+                order = 41,
                 get = function() return self.db.profile.carbonCopyEnabled end,
                 set = function(_, value)
                     self.db.profile.carbonCopyEnabled = value
@@ -897,7 +897,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable DoNotWant",
                 desc = "Show icons for expiring mail",
-                order = 42
+                order = 42,
                 get = function() return self.db.profile.doNotWantEnabled end,
                 set = function(_, value)
                     self.db.profile.doNotWantEnabled = value
@@ -908,7 +908,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable Wire",
                 desc = "Auto-update subject with money amount",
-                order = 43
+                order = 43,
                 get = function() return self.db.profile.wireEnabled end,
                 set = function(_, value)
                     self.db.profile.wireEnabled = value
@@ -919,7 +919,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable QuickAttach",
                 desc = "Show Ore, Herb, Leather, Cloth, Gems buttons on send mail screen",
-                order = 44
+                order = 44,
                 get = function() return self.db.profile.quickAttachEnabled end,
                 set = function(_, value)
                     self.db.profile.quickAttachEnabled = value
@@ -930,7 +930,7 @@ function Mailbox:GetOptions()
                 type = "toggle",
                 name = "Enable TradeBlock",
                 desc = "Block trades while at mailbox",
-                order = 45
+                order = 45,
                 get = function() return self.db.profile.tradeBlockEnabled end,
                 set = function(_, value)
                     self.db.profile.tradeBlockEnabled = value

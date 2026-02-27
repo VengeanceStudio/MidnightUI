@@ -506,7 +506,7 @@ function UIButtons:GetOptions()
             font = {
                 name = "Font",
                 type = "select",
-                order = 7
+                order = 7,
                 values = function()
                     local fonts = LSM:List("font")
                     local out = {}

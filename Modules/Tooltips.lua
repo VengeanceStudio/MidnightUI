@@ -820,7 +820,7 @@ function Tooltips:GetOptions()
                 min = 1,
                 max = 5,
                 step = 1,
-                order = 11
+                order = 11,
                 get = function() return self.db.profile.borderSize end,
                 set = function(_, value)
                     self.db.profile.borderSize = value
@@ -835,7 +835,7 @@ function Tooltips:GetOptions()
                 min = 0,
                 max = 1,
                 step = 0.05,
-                order = 12
+                order = 12,
                 get = function() return self.db.profile.backdropAlpha end,
                 set = function(_, value)
                     self.db.profile.backdropAlpha = value
@@ -850,7 +850,7 @@ function Tooltips:GetOptions()
                 min = 8,
                 max = 18,
                 step = 1,
-                order = 13
+                order = 13,
                 get = function() return self.db.profile.fontSize end,
                 set = function(_, value)
                     self.db.profile.fontSize = value
@@ -874,7 +874,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Quality Border Colors",
                 desc = "Color tooltip borders based on item quality (uncommon and above)",
-                order = 19.6
+                order = 19.6,
                 get = function() return self.db.profile.qualityBorderColors end,
                 set = function(_, value)
                     self.db.profile.qualityBorderColors = value
@@ -898,7 +898,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Follow Cursor",
                 desc = "Tooltips will follow your mouse cursor",
-                order = 21
+                order = 21,
                 get = function() return self.db.profile.cursorFollow end,
                 set = function(_, value)
                     self.db.profile.cursorFollow = value
@@ -910,7 +910,7 @@ function Tooltips:GetOptions()
                 type = "select",
                 name = "Cursor Anchor",
                 desc = "Where the tooltip anchors to the cursor",
-                order = 22
+                order = 22,
                 values = {
                     ["TOPLEFT"] = "Top Left",
                     ["TOP"] = "Top",
@@ -936,7 +936,7 @@ function Tooltips:GetOptions()
                 min = -100,
                 max = 100,
                 step = 1,
-                order = 23
+                order = 23,
                 get = function() return self.db.profile.offsetX end,
                 set = function(_, value)
                     self.db.profile.offsetX = value
@@ -951,7 +951,7 @@ function Tooltips:GetOptions()
                 min = -100,
                 max = 100,
                 step = 1,
-                order = 24
+                order = 24,
                 get = function() return self.db.profile.offsetY end,
                 set = function(_, value)
                     self.db.profile.offsetY = value
@@ -966,7 +966,7 @@ function Tooltips:GetOptions()
                 min = 0,
                 max = 2,
                 step = 0.1,
-                order = 25
+                order = 25,
                 get = function() return self.db.profile.fadeDelay end,
                 set = function(_, value)
                     self.db.profile.fadeDelay = value
@@ -981,7 +981,7 @@ function Tooltips:GetOptions()
                 min = 0.5,
                 max = 2.0,
                 step = 0.05,
-                order = 26
+                order = 26,
                 get = function() return self.db.profile.scale end,
                 set = function(_, value)
                     self.db.profile.scale = value
@@ -1005,7 +1005,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Hide in Combat",
                 desc = "Hide tooltips when entering combat",
-                order = 29.6
+                order = 29.6,
                 get = function() return self.db.profile.hideInCombat end,
                 set = function(_, value)
                     self.db.profile.hideInCombat = value
@@ -1016,7 +1016,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Only in Dungeons/Raids",
                 desc = "Only hide tooltips in combat when inside a dungeon or raid",
-                order = 29.7
+                order = 29.7,
                 get = function() return self.db.profile.hideInInstance end,
                 set = function(_, value)
                     self.db.profile.hideInInstance = value
@@ -1039,7 +1039,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Class-Colored Names",
                 desc = "Display player names in their class colors",
-                order = 31
+                order = 31,
                 get = function() return self.db.profile.classColor end,
                 set = function(_, value)
                     self.db.profile.classColor = value
@@ -1050,7 +1050,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Class-Colored Borders",
                 desc = "Color tooltip borders based on player class (overrides theme border color)",
-                order = 31.5
+                order = 31.5,
                 get = function() return self.db.profile.classColoredBorders end,
                 set = function(_, value)
                     self.db.profile.classColoredBorders = value
@@ -1062,7 +1062,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show Guild",
                 desc = "Display guild information",
-                order = 32
+                order = 32,
                 get = function() return self.db.profile.showGuild end,
                 set = function(_, value)
                     self.db.profile.showGuild = value
@@ -1073,7 +1073,7 @@ function Tooltips:GetOptions()
                 type = "color",
                 name = "Your Guild Color",
                 desc = "Color for your guild members",
-                order = 33
+                order = 33,
                 get = function()
                     local c = self.db.profile.yourGuildColor
                     return c.r, c.g, c.b
@@ -1087,7 +1087,7 @@ function Tooltips:GetOptions()
                 type = "color",
                 name = "Other Guild Color",
                 desc = "Color for other guild members",
-                order = 34
+                order = 34,
                 get = function()
                     local c = self.db.profile.otherGuildColor
                     return c.r, c.g, c.b
@@ -1101,7 +1101,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show AFK/DND Status",
                 desc = "Display player AFK or DND status",
-                order = 35
+                order = 35,
                 get = function() return self.db.profile.showStatus end,
                 set = function(_, value)
                     self.db.profile.showStatus = value
@@ -1112,7 +1112,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show Item Level",
                 desc = "Display player item levels (requires inspect)",
-                order = 36
+                order = 36,
                 get = function() return self.db.profile.showItemLevel end,
                 set = function(_, value)
                     self.db.profile.showItemLevel = value
@@ -1123,7 +1123,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show Faction",
                 desc = "Display player faction (Horde/Alliance)",
-                order = 37
+                order = 37,
                 get = function() return self.db.profile.showFaction end,
                 set = function(_, value)
                     self.db.profile.showFaction = value
@@ -1134,7 +1134,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show Mount Info",
                 desc = "Display mounted player's mount and if you have it collected",
-                order = 38
+                order = 38,
                 get = function() return self.db.profile.showMount end,
                 set = function(_, value)
                     self.db.profile.showMount = value
@@ -1145,7 +1145,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show Role",
                 desc = "Display player role (Tank/Healer/DPS)",
-                order = 39
+                order = 39,
                 get = function() return self.db.profile.showRole end,
                 set = function(_, value)
                     self.db.profile.showRole = value
@@ -1156,7 +1156,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show Mythic+ Rating",
                 desc = "Display player's Mythic+ score",
-                order = 40
+                order = 40,
                 get = function() return self.db.profile.showMythicScore end,
                 set = function(_, value)
                     self.db.profile.showMythicScore = value
@@ -1167,7 +1167,7 @@ function Tooltips:GetOptions()
                 type = "toggle",
                 name = "Show Target Of Target",
                 desc = "Display who the unit is targeting",
-                order = 41
+                order = 41,
                 get = function() return self.db.profile.showTargetOf end,
                 set = function(_, value)
                     self.db.profile.showTargetOf = value

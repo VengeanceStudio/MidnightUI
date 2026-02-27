@@ -412,7 +412,7 @@ function Setup:GetOptions()
                 name = "Run Setup Wizard",
                 desc = "Run the first-time setup wizard again",
                 type = "execute",
-                order = 1
+                order = 1,
                 func = function()
                     self:ShowSetupWizard()
                 end
@@ -421,7 +421,7 @@ function Setup:GetOptions()
                 name = "Reset Setup Status",
                 desc = "Mark setup as not completed so it runs again on next login",
                 type = "execute",
-                order = 2
+                order = 2,
                 func = function()
                     self.db.profile.hasCompletedSetup = false
                     print("MidnightUI: Setup status reset. The wizard will appear on next login.")

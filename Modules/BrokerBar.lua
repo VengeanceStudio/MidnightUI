@@ -1447,7 +1447,7 @@ function BrokerBar:GetOptions()
             create = {
                 name = "Bar Name",
                 type = "input",
-                order = 1
+                order = 1,
                 set = function(_, v) 
                     if v ~= "" and not self.db.profile.bars[v] then 
                         local r, g, b, a = ColorPalette:GetColor('panel-bg')
@@ -1534,7 +1534,7 @@ function BrokerBar:GetOptions()
                 skin = { 
                     name = "Skin", 
                     type = "select", 
-                    order = 5
+                    order = 5,
                     hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     values = GetSkinList, 
                     get = function() return self.db.profile.bars[id].skin or "Global" end, 
@@ -1557,7 +1557,7 @@ function BrokerBar:GetOptions()
                 useThemeColor = {
                     name = "Use Theme Color",
                     type = "toggle",
-                    order = 6.5
+                    order = 6.5,
                     get = function() return self.db.profile.bars[id].useThemeColor end,
                     set = function(_, v)
                         self.db.profile.bars[id].useThemeColor = v
@@ -1573,7 +1573,7 @@ function BrokerBar:GetOptions()
                     name = "Color", 
                     type = "color", 
                     hasAlpha = true, 
-                    order = 7
+                    order = 7,
                     hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     get = function() local c = self.db.profile.bars[id].color; return c.r, c.g, c.b, self.db.profile.bars[id].alpha end, 
                     set = function(_, r, g, b, a) 
@@ -1586,7 +1586,7 @@ function BrokerBar:GetOptions()
                 delete = {
                     name = "Delete Bar",
                     type = "execute",
-                    order = 99
+                    order = 99,
                     confirm = function() return string.format("Are you sure you want to delete %s?", id) end,
                     disabled = function() return id == "MainBar" end,
                     func = function()

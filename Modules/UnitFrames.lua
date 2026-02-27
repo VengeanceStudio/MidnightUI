@@ -946,7 +946,7 @@ function UnitFrames:GenerateFrameOptions(frameName, frameKey, createFunc, frameG
                 name = "Bar Spacing",
                 desc = "Vertical space between bars.",
                 min = 0, max = 32, step = 1,
-                order = 0.9
+                order = 0.9,
                 get = function() return self.db and self.db.profile and self.db.profile.spacing or 2 end,
                 set = function(_, v) if self.db and self.db.profile then self.db.profile.spacing = v; update() end end,
             },
@@ -955,7 +955,7 @@ function UnitFrames:GenerateFrameOptions(frameName, frameKey, createFunc, frameG
                 name = "Boss Frame Spacing",
                 desc = "Vertical space between each boss frame.",
                 min = 40, max = 200, step = 1,
-                order = 0.91
+                order = 0.91,
                 get = function() return self.db and self.db.profile and self.db.profile.boss and self.db.profile.boss.spacing or 80 end,
                 set = function(_, v) 
                     if self.db and self.db.profile and self.db.profile.boss then 
@@ -968,7 +968,7 @@ function UnitFrames:GenerateFrameOptions(frameName, frameKey, createFunc, frameG
                 type = "select",
                 name = "Copy From",
                 desc = "Copy all settings from another frame to this frame.",
-                order = 0.91
+                order = 0.91,
                 values = function()
                     local frames = {
                         [""] = "-- Select Frame --",
@@ -1021,7 +1021,7 @@ function UnitFrames:GenerateFrameOptions(frameName, frameKey, createFunc, frameG
                 name = "Raid Target Icon Size",
                 desc = "Size of the raid target marker icon.",
                 min = 16, max = 64, step = 1,
-                order = 0.92
+                order = 0.92,
                 get = function() return db.raidTargetIconSize or 32 end,
                 set = function(_, v) db.raidTargetIconSize = v; update() end,
             },
@@ -1030,7 +1030,7 @@ function UnitFrames:GenerateFrameOptions(frameName, frameKey, createFunc, frameG
                 name = "Raid Target Icon X Offset",
                 desc = "Horizontal offset of the raid target icon from center-top of frame.",
                 min = -100, max = 100, step = 1,
-                order = 0.93
+                order = 0.93,
                 get = function() return db.raidTargetIconOffsetX or 0 end,
                 set = function(_, v) db.raidTargetIconOffsetX = v; update() end,
             },
@@ -1039,7 +1039,7 @@ function UnitFrames:GenerateFrameOptions(frameName, frameKey, createFunc, frameG
                 name = "Raid Target Icon Y Offset",
                 desc = "Vertical offset of the raid target icon. Positive = up, negative = down.",
                 min = -100, max = 100, step = 1,
-                order = 0.94
+                order = 0.94,
                 get = function() return db.raidTargetIconOffsetY or 0 end,
                 set = function(_, v) db.raidTargetIconOffsetY = v; update() end,
             },
@@ -1074,7 +1074,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         enabled = {
             type = "toggle",
             name = "Show",
-            order = 1
+            order = 1,
             get = function() return db[barType] and db[barType].enabled end,
             set = function(_, v) db[barType].enabled = v; update() end,
         },
@@ -1082,7 +1082,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
             type = "range",
             name = "Width",
             min = 50, max = 600, step = 1,
-            order = 2
+            order = 2,
             get = function() return db[barType] and db[barType].width or 220 end,
             set = function(_, v) db[barType].width = v; update() end,
         },
@@ -1090,7 +1090,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
             type = "range",
             name = "Height",
             min = 5, max = 100, step = 1,
-            order = 3
+            order = 3,
             get = function() 
                 local defaults = {health = 24, power = 12, info = 10}
                 return db[barType] and db[barType].height or defaults[barType] or 20
@@ -1110,7 +1110,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
                 type = "execute",
                 name = "Show Tag Help",
                 desc = "Opens a window showing all available tags and examples",
-                order = 0.5
+                order = 0.5,
                 func = function()
                     if UnitFrames and UnitFrames.ShowTagHelp then
                         UnitFrames:ShowTagHelp()
@@ -1166,7 +1166,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
             type = "select",
             name = "Attach To",
             desc = "Attach the " .. barType:gsub("^%l", string.upper) .. " Bar to another bar.",
-            order = 1.5
+            order = 1.5,
             values = { health = "Health Bar", power = "Power Bar", info = "Info Bar", none = "None" },
             get = function() return db[barType] and db[barType].attachTo or "health" end,
             set = function(_, v) db[barType].attachTo = v; update() end,
@@ -1178,7 +1178,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         type = "toggle",
         name = "Class Colored Bar",
         desc = "Use class color for the " .. barType .. " bar.",
-        order = 3.9
+        order = 3.9,
         get = function() return db[barType] and db[barType].classColor end,
         set = function(_, v) db[barType].classColor = v; update() end,
     }
@@ -1189,7 +1189,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
             type = "toggle",
             name = "Hostility Colored Bar",
             desc = "Use reaction colors (green=friendly, yellow=neutral, red=hostile) for the " .. barType .. " bar.",
-            order = 3.91
+            order = 3.91,
             get = function() return db[barType] and db[barType].hostilityColor end,
             set = function(_, v) db[barType].hostilityColor = v; update() end,
         }
@@ -1231,7 +1231,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         type = "toggle",
         name = "Class Colored Font",
         desc = "Use class color for the " .. barType .. " bar text.",
-        order = 9.5
+        order = 9.5,
         get = function() return db[barType] and db[barType].fontClassColor end,
         set = function(_, v) db[barType].fontClassColor = v; update() end,
     }
@@ -1240,7 +1240,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         type = "color",
         name = "Background Color",
         hasAlpha = true,
-        order = 5
+        order = 5,
         get = function() return unpack(db[barType] and db[barType].bgColor or {0,0,0,0.5}) end,
         set = function(_, r,g,b,a) db[barType].bgColor = {r,g,b,a}; update() end,
     }
@@ -1248,7 +1248,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
     options.font = {
         type = "select",
         name = "Font",
-        order = 6
+        order = 6,
         values = function()
             local fonts = self.LSM and self.LSM:List("font") or (LibStub and LibStub("LibSharedMedia-3.0"):List("font")) or {}
             local out = {}
@@ -1263,7 +1263,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         type = "range",
         name = "Font Size",
         min = 6, max = 32, step = 1,
-        order = 7
+        order = 7,
         get = function() 
             local defaults = {health = 14, power = 12, info = 10}
             return db[barType] and db[barType].fontSize or defaults[barType] or 12
@@ -1274,7 +1274,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
     options.fontOutline = {
         type = "select",
         name = "Font Outline",
-        order = 8
+        order = 8,
         values = { NONE = "None", OUTLINE = "Outline", THICKOUTLINE = "Thick Outline" },
         get = function() return db[barType] and db[barType].fontOutline or "OUTLINE" end,
         set = function(_, v) db[barType].fontOutline = v; update() end,
@@ -1284,7 +1284,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         type = "color",
         name = "Font Color",
         hasAlpha = true,
-        order = 9
+        order = 9,
         get = function() return unpack(db[barType] and db[barType].fontColor or {1,1,1,1}) end,
         set = function(_, r,g,b,a) db[barType].fontColor = {r,g,b,a}; update() end,
     }
@@ -1292,7 +1292,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
     options.textPos = {
         type = "select",
         name = "Text Position",
-        order = 11
+        order = 11,
         values = { LEFT = "Left", CENTER = "Center", RIGHT = "Right" },
         get = function() return db[barType] and db[barType].textPos or "CENTER" end,
         set = function(_, v) db[barType].textPos = v; update() end,
@@ -1301,7 +1301,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
     options.texture = {
         type = "select",
         name = "Texture",
-        order = 12
+        order = 12,
         values = function()
             local LSM = self.LSM or (LibStub and LibStub("LibSharedMedia-3.0"))
             local textures = LSM and LSM:List("statusbar") or {}
@@ -1438,7 +1438,7 @@ function UnitFrames:GetBossOptions_Real()
         type = "toggle",
         name = "Show Boss Frames",
         desc = "Enable custom boss frames",
-        order = 0.5
+        order = 0.5,
         get = function() return self.db and self.db.profile and self.db.profile.showBoss end,
         set = function(_, v)
             if not self.db or not self.db.profile then return end
