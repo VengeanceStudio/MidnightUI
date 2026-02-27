@@ -1560,7 +1560,7 @@ function MidnightUI:GetOptions()
                         type = "select",
                         name = "Global Font",
                         desc = "Select a font to apply to all MidnightUI elements.",
-                        order = 1.11
+                        order = 1.11,
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
@@ -1574,7 +1574,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Apply to All",
                         desc = "Apply the selected global font to all MidnightUI modules and bars.",
-                        order = 1.12
+                        order = 1.12,
                         func = function()
                             local font = MidnightUI.db.profile.theme.font or "Friz Quadrata TT"
                             -- UnitFrames
@@ -1713,7 +1713,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Generate Export String",
                         desc = "Creates an export string of your current profile",
-                        order = 3
+                        order = 3,
                         func = function()
                             MidnightUI:ExportProfile()
                         end,
@@ -1758,7 +1758,7 @@ function MidnightUI:GetOptions()
                         name = "New Profile Name (Optional)",
                         desc = "Leave empty to overwrite current profile, or enter a name to create a new profile",
                         order = 3,
-                        width = "full"
+                        width = "full",
                         get = function() 
                             -- Store in both places to prevent clearing
                             if not MidnightUI.importNewProfileName then
@@ -1823,7 +1823,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Import Profile",
                         desc = "Import the profile from the string above. Requires UI reload.",
-                        order = 5
+                        order = 5,
                         func = function()
                             MidnightUI:ImportProfile()
                         end,
