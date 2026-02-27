@@ -250,8 +250,7 @@ function CooldownManager:GetOptions()
                 type = "toggle",
                 name = "Enable Cooldown Manager",
                 desc = "Enable the cooldown manager module",
-                order = 1,
-                dialogControl = "MidnightCheckBox",
+                order = 1
                 get = function() return self.db.profile.enabled end,
                 set = function(_, value)
                     self.db.profile.enabled = value
@@ -265,14 +264,12 @@ function CooldownManager:GetOptions()
             essentialHeader = {
                 type = "header",
                 name = "Essential Cooldowns",
-                order = 10,
-                dialogControl = "MidnightHeading",
+                order = 10
             },
             essentialEnabled = {
                 type = "toggle",
                 name = "Enable Essential Cooldowns",
-                order = 11,
-                dialogControl = "MidnightCheckBox",
+                order = 11
                 get = function() return self.db.profile.essential.enabled end,
                 set = function(_, value)
                     self.db.profile.essential.enabled = value
@@ -285,8 +282,7 @@ function CooldownManager:GetOptions()
                 order = 12,
                 min = 24,
                 max = 64,
-                step = 2,
-                dialogControl = "MidnightSlider",
+                step = 2
                 get = function() return self.db.profile.essential.iconWidth end,
                 set = function(_, value)
                     self.db.profile.essential.iconWidth = value
@@ -300,8 +296,7 @@ function CooldownManager:GetOptions()
                 order = 13,
                 min = 0,
                 max = 20,
-                step = 1,
-                dialogControl = "MidnightSlider",
+                step = 1
                 get = function() return self.db.profile.essential.iconSpacing end,
                 set = function(_, value)
                     self.db.profile.essential.iconSpacing = value
@@ -314,8 +309,7 @@ function CooldownManager:GetOptions()
                 order = 14,
                 min = 1,
                 max = 20,
-                step = 1,
-                dialogControl = "MidnightSlider",
+                step = 1
                 get = function() return self.db.profile.essential.maxPerRow end,
                 set = function(_, value)
                     self.db.profile.essential.maxPerRow = value
@@ -325,14 +319,12 @@ function CooldownManager:GetOptions()
             utilityHeader = {
                 type = "header",
                 name = "Utility Cooldowns",
-                order = 20,
-                dialogControl = "MidnightHeading",
+                order = 20
             },
             utilityEnabled = {
                 type = "toggle",
                 name = "Enable Utility Cooldowns",
-                order = 21,
-                dialogControl = "MidnightCheckBox",
+                order = 21
                 get = function() return self.db.profile.utility.enabled end,
                 set = function(_, value)
                     self.db.profile.utility.enabled = value
@@ -345,8 +337,7 @@ function CooldownManager:GetOptions()
                 order = 22,
                 min = 24,
                 max = 64,
-                step = 2,
-                dialogControl = "MidnightSlider",
+                step = 2
                 get = function() return self.db.profile.utility.iconWidth end,
                 set = function(_, value)
                     self.db.profile.utility.iconWidth = value
@@ -360,8 +351,7 @@ function CooldownManager:GetOptions()
                 order = 23,
                 min = 0,
                 max = 20,
-                step = 1,
-                dialogControl = "MidnightSlider",
+                step = 1
                 get = function() return self.db.profile.utility.iconSpacing end,
                 set = function(_, value)
                     self.db.profile.utility.iconSpacing = value
@@ -374,8 +364,7 @@ function CooldownManager:GetOptions()
                 order = 24,
                 min = 1,
                 max = 20,
-                step = 1,
-                dialogControl = "MidnightSlider",
+                step = 1
                 get = function() return self.db.profile.utility.maxPerRow end,
                 set = function(_, value)
                     self.db.profile.utility.maxPerRow = value

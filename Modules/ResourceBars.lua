@@ -785,8 +785,7 @@ function ResourceBars:GetOptions()
             header = {
                 type = "header",
                 name = "Resource Bars",
-                order = 1,
-                dialogControl = "MidnightHeading",
+                order = 1
             },
             desc = {
                 type = "description",
@@ -795,12 +794,11 @@ function ResourceBars:GetOptions()
             },
             
             -- Primary Resource Bar
-            primaryHeader = { type = "header", name = "Primary Resource Bar", order = 10, dialogControl = "MidnightHeading" },
+            primaryHeader = { type = "header", name = "Primary Resource Bar", order = 10},
             primaryEnabled = {
                 name = "Enable Primary Resource Bar",
                 type = "toggle",
-                order = 11,
-                dialogControl = "MidnightCheckBox",
+                order = 11
                 get = function() return self.db.profile.primary.enabled end,
                 set = function(_, v)
                     self.db.profile.primary.enabled = v
@@ -815,8 +813,7 @@ function ResourceBars:GetOptions()
             primaryWidth = {
                 name = "Width",
                 type = "range",
-                order = 12,
-                dialogControl = "MidnightSlider",
+                order = 12
                 min = 100,
                 max = 500,
                 step = 1,
@@ -832,8 +829,7 @@ function ResourceBars:GetOptions()
             primaryHeight = {
                 name = "Height",
                 type = "range",
-                order = 13,
-                dialogControl = "MidnightSlider",
+                order = 13
                 min = 10,
                 max = 50,
                 step = 1,
@@ -849,8 +845,7 @@ function ResourceBars:GetOptions()
             primaryShowText = {
                 name = "Show Text",
                 type = "toggle",
-                order = 14,
-                dialogControl = "MidnightCheckBox",
+                order = 14
                 disabled = function() return not self.db.profile.primary.enabled end,
                 get = function() return self.db.profile.primary.showText end,
                 set = function(_, v)
@@ -869,8 +864,7 @@ function ResourceBars:GetOptions()
                 name = "Show Percentage",
                 desc = "Display resource as percentage instead of current/max values.",
                 type = "toggle",
-                order = 15,
-                dialogControl = "MidnightCheckBox",
+                order = 15
                 disabled = function() return not self.db.profile.primary.enabled or not self.db.profile.primary.showText end,
                 get = function() return self.db.profile.primary.showPercentage end,
                 set = function(_, v)
@@ -884,8 +878,7 @@ function ResourceBars:GetOptions()
                 name = "Attach to Essential Cooldowns",
                 desc = "Automatically position and size the primary bar to match Essential Cooldowns width.",
                 type = "toggle",
-                order = 16,
-                dialogControl = "MidnightCheckBox",
+                order = 16
                 disabled = function() return not self.db.profile.primary.enabled end,
                 get = function() return self.db.profile.primary.attachToEssentialCooldowns end,
                 set = function(_, v)
@@ -906,8 +899,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Position",
                 desc = "Position the primary bar above or below Essential Cooldowns.",
                 type = "select",
-                order = 17,
-                dialogControl = "MidnightDropdown",
+                order = 17
                 disabled = function() return not self.db.profile.primary.enabled or not self.db.profile.primary.attachToEssentialCooldowns end,
                 values = {
                     ["ABOVE"] = "Above",
@@ -932,8 +924,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Spacing",
                 desc = "Spacing between primary bar and Essential Cooldowns when attached.",
                 type = "range",
-                order = 18,
-                dialogControl = "MidnightSlider",
+                order = 18
                 min = 0,
                 max = 20,
                 step = 1,
@@ -955,12 +946,11 @@ function ResourceBars:GetOptions()
             },
             
             -- Secondary Resource Bar
-            secondaryHeader = { type = "header", name = "Secondary Resource Bar", order = 20, dialogControl = "MidnightHeading" },
+            secondaryHeader = { type = "header", name = "Secondary Resource Bar", order = 20},
             secondaryEnabled = {
                 name = "Enable Secondary Resource Bar",
                 type = "toggle",
-                order = 21,
-                dialogControl = "MidnightCheckBox",
+                order = 21
                 get = function() return self.db.profile.secondary.enabled end,
                 set = function(_, v)
                     self.db.profile.secondary.enabled = v
@@ -975,8 +965,7 @@ function ResourceBars:GetOptions()
             secondaryWidth = {
                 name = "Width",
                 type = "range",
-                order = 22,
-                dialogControl = "MidnightSlider",
+                order = 22
                 min = 100,
                 max = 500,
                 step = 1,
@@ -993,8 +982,7 @@ function ResourceBars:GetOptions()
             secondaryHeight = {
                 name = "Height",
                 type = "range",
-                order = 23,
-                dialogControl = "MidnightSlider",
+                order = 23
                 min = 8,
                 max = 30,
                 step = 1,
@@ -1012,8 +1000,7 @@ function ResourceBars:GetOptions()
                 name = "Attach to Primary Bar",
                 desc = "Automatically position the secondary bar relative to the primary bar.",
                 type = "toggle",
-                order = 24,
-                dialogControl = "MidnightCheckBox",
+                order = 24
                 disabled = function() return not self.db.profile.secondary.enabled end,
                 get = function() return self.db.profile.secondary.attachToPrimary end,
                 set = function(_, v)
@@ -1027,8 +1014,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Position",
                 desc = "Position the secondary bar above or below the primary bar.",
                 type = "select",
-                order = 25,
-                dialogControl = "MidnightDropdown",
+                order = 25
                 disabled = function() return not self.db.profile.secondary.enabled or not self.db.profile.secondary.attachToPrimary end,
                 values = {
                     ["ABOVE"] = "Above",
@@ -1046,8 +1032,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Spacing",
                 desc = "Spacing between primary and secondary bars when attached.",
                 type = "range",
-                order = 26,
-                dialogControl = "MidnightSlider",
+                order = 26
                 min = 0,
                 max = 20,
                 step = 1,

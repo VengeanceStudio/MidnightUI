@@ -442,14 +442,13 @@ function UIButtons:GetOptions()
         name = "UI Buttons",
         order = 10,
         args = {
-            header = { type = "header", name = "Quick Access Buttons", order = 1, dialogControl="MidnightHeading" },
+            header = { type = "header", name = "Quick Access Buttons", order = 1},
             desc = { type = "description", name = "Buttons appear in a container that can be moved and customized.", order = 2 },
             locked = {
                 name = "Lock Position",
                 type = "toggle",
                 order = 3,
-                width = "full",
-                dialogControl = "MidnightCheckBox",
+                width = "full"
                 get = function() return self.db.profile.locked end,
                 set = function(_, v) self.db.profile.locked = v end
             },
@@ -461,8 +460,7 @@ function UIButtons:GetOptions()
                 max = 2.0,
                 step = 0.01,
                 bigStep = 0.1,
-                isPercent = false,
-                dialogControl = "MidnightSlider",
+                isPercent = false
                 get = function() return self.db.profile.scale end,
                 set = function(_, v)
                     self.db.profile.scale = v
@@ -478,8 +476,7 @@ function UIButtons:GetOptions()
                 order = 5,
                 min = 0,
                 max = 20,
-                step = 1,
-                dialogControl = "MidnightSlider",
+                step = 1
                 get = function() return self.db.profile.spacing end,
                 set = function(_, v)
                     self.db.profile.spacing = v
@@ -490,8 +487,7 @@ function UIButtons:GetOptions()
                 name = "Background Color",
                 type = "color",
                 order = 6,
-                hasAlpha = true,
-                dialogControl = "MidnightColorPicker",
+                hasAlpha = true
                 get = function()
                     local c = self.db.profile.backgroundColor
                     return c[1], c[2], c[3], c[4]
@@ -510,8 +506,7 @@ function UIButtons:GetOptions()
             font = {
                 name = "Font",
                 type = "select",
-                order = 7,
-                dialogControl = "MidnightDropdown",
+                order = 7
                 values = function()
                     local fonts = LSM:List("font")
                     local out = {}
@@ -530,17 +525,16 @@ function UIButtons:GetOptions()
                 order = 8,
                 min = 8,
                 max = 32,
-                step = 1,
-                dialogControl = "MidnightSlider",
+                step = 1
                 get = function() return self.db.profile.fontSize end,
                 set = function(_, v)
                     self.db.profile.fontSize = v
                     self:UpdateButtonFonts()
                 end
             },
-            buttonsHeader = { type = "header", name = "Individual Buttons", order = 10, dialogControl="MidnightHeading" },
+            buttonsHeader = { type = "header", name = "Individual Buttons", order = 10},
             reload = {
-                name = "Reload (R)", type = "toggle", order = 11, dialogControl = "MidnightCheckBox",
+                name = "Reload (R)", type = "toggle", order = 11
                 get = function() 
                     if not self.db.profile.UIButtons.reload then return true end
                     return self.db.profile.UIButtons.reload.enabled 
@@ -548,7 +542,7 @@ function UIButtons:GetOptions()
                 set = function(_, v) self.db.profile.UIButtons.reload.enabled = v; ReloadUI() end
             },
             exit = {
-                name = "Edit Mode (E)", type = "toggle", order = 12, dialogControl = "MidnightCheckBox",
+                name = "Edit Mode (E)", type = "toggle", order = 12
                 get = function() 
                     if not self.db.profile.UIButtons.exit then return true end
                     return self.db.profile.UIButtons.exit.enabled 
@@ -556,7 +550,7 @@ function UIButtons:GetOptions()
                 set = function(_, v) self.db.profile.UIButtons.exit.enabled = v; ReloadUI() end
             },
             options = {
-                name = "Options (O)", type = "toggle", order = 13, dialogControl = "MidnightCheckBox",
+                name = "Options (O)", type = "toggle", order = 13
                 get = function() 
                     if not self.db.profile.UIButtons.options then return true end
                     return self.db.profile.UIButtons.options.enabled 
@@ -564,7 +558,7 @@ function UIButtons:GetOptions()
                 set = function(_, v) self.db.profile.UIButtons.options.enabled = v; ReloadUI() end
             },
             addons = {
-                name = "Addons (A)", type = "toggle", order = 14, dialogControl = "MidnightCheckBox",
+                name = "Addons (A)", type = "toggle", order = 14
                 get = function() 
                     if not self.db.profile.UIButtons.addons then return true end
                     return self.db.profile.UIButtons.addons.enabled 
@@ -572,7 +566,7 @@ function UIButtons:GetOptions()
                 set = function(_, v) self.db.profile.UIButtons.addons.enabled = v; ReloadUI() end
             },
             move = {
-                name = "Move Mode (M)", type = "toggle", order = 15, dialogControl = "MidnightCheckBox",
+                name = "Move Mode (M)", type = "toggle", order = 15
                 get = function() 
                     if not self.db.profile.UIButtons.move then return true end
                     return self.db.profile.UIButtons.move.enabled 

@@ -687,7 +687,7 @@ function MidnightOptionsPanel:CreateToggle(parent, option, xOffset, yOffset)
     frame:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -yOffset)
     frame:SetSize(frameWidth, 30)
     
-    -- Create toggle slider background (like MidnightCheckBox)
+    -- Create toggle slider background
     local toggleBg = frame:CreateTexture(nil, "BACKGROUND")
     toggleBg:SetSize(40, 20)
     toggleBg:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -4)
@@ -944,7 +944,9 @@ function MidnightOptionsPanel:CreateSelect(parent, option, xOffset, yOffset)
             tile = false, edgeSize = 1,
             insets = { left = 1, right = 1, top = 1, bottom = 1 }
         })
-        menu:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
+        -- Force solid background for dropdown menu readability
+        local r, g, b, a = ColorPalette:GetColor('panel-bg')
+        menu:SetBackdropColor(r, g, b, 1.0)  -- Always use alpha=1.0
         menu:SetBackdropBorderColor(ColorPalette:GetColor('accent-primary'))
         
         -- Calculate menu size

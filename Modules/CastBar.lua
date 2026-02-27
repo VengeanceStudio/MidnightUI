@@ -560,8 +560,7 @@ function CastBar:GetOptions()
             header = {
                 type = "header",
                 name = "Player Cast Bar",
-                order = 1,
-                dialogControl = "MidnightHeading",
+                order = 1
             },
             desc = {
                 type = "description",
@@ -569,13 +568,12 @@ function CastBar:GetOptions()
                 order = 2
             },
             
-            headerPosition = { type = "header", name = "Position & Size", order = 10, dialogControl = "MidnightHeading" },
+            headerPosition = { type = "header", name = "Position & Size", order = 10},
             width = {
                 name = "Width",
                 type = "range",
                 order = 11,
-                width = "half",
-                dialogControl = "MidnightSlider",
+                width = "half"
                 min = 100,
                 max = 500,
                 step = 1,
@@ -591,8 +589,7 @@ function CastBar:GetOptions()
                 name = "Height",
                 type = "range",
                 order = 12,
-                width = "half",
-                dialogControl = "MidnightSlider",
+                width = "half"
                 min = 16,
                 max = 50,
                 step = 1,
@@ -609,12 +606,11 @@ function CastBar:GetOptions()
                 end
             },
             
-            headerAppearance = { type = "header", name = "Appearance", order = 20, dialogControl = "MidnightHeading" },
+            headerAppearance = { type = "header", name = "Appearance", order = 20},
             showIcon = {
                 name = "Show Spell Icon",
                 type = "toggle",
-                order = 21,
-                dialogControl = "MidnightCheckBox",
+                order = 21
                 get = function() return self.db.profile.showIcon end,
                 set = function(_, v)
                     self.db.profile.showIcon = v
@@ -628,8 +624,7 @@ function CastBar:GetOptions()
             iconPosition = {
                 name = "Icon Position",
                 type = "select",
-                order = 22,
-                dialogControl = "MidnightDropdown",
+                order = 22
                 values = {
                     LEFT = "Left",
                     RIGHT = "Right"
@@ -648,8 +643,7 @@ function CastBar:GetOptions()
             showLatency = {
                 name = "Show Latency",
                 type = "toggle",
-                order = 23,
-                dialogControl = "MidnightCheckBox",
+                order = 23
                 desc = "Shows your network lag as a red bar at the end of the cast",
                 get = function() return self.db.profile.showLatency end,
                 set = function(_, v)
@@ -660,8 +654,7 @@ function CastBar:GetOptions()
             showShieldBorder = {
                 name = "Show Shield for Non-Interruptible",
                 type = "toggle",
-                order = 24,
-                dialogControl = "MidnightCheckBox",
+                order = 24
                 desc = "Shows a shield icon when casting non-interruptible spells",
                 get = function() return self.db.profile.showShieldBorder end,
                 set = function(_, v)
@@ -670,12 +663,11 @@ function CastBar:GetOptions()
                 end
             },
             
-            headerText = { type = "header", name = "Text Display", order = 30, dialogControl = "MidnightHeading" },
+            headerText = { type = "header", name = "Text Display", order = 30},
             showSpellName = {
                 name = "Show Spell Name",
                 type = "toggle",
-                order = 31,
-                dialogControl = "MidnightCheckBox",
+                order = 31
                 get = function() return self.db.profile.showSpellName end,
                 set = function(_, v)
                     self.db.profile.showSpellName = v
@@ -691,8 +683,7 @@ function CastBar:GetOptions()
             showCastTime = {
                 name = "Show Cast Time",
                 type = "toggle",
-                order = 32,
-                dialogControl = "MidnightCheckBox",
+                order = 32
                 get = function() return self.db.profile.showCastTime end,
                 set = function(_, v)
                     self.db.profile.showCastTime = v
@@ -708,8 +699,7 @@ function CastBar:GetOptions()
             font = {
                 name = "Font",
                 type = "select",
-                order = 33,
-                dialogControl = "MidnightDropdown",
+                order = 33
                 values = LSM:HashTable("font"),
                 get = function() return self.db.profile.font end,
                 set = function(_, v)
@@ -724,8 +714,7 @@ function CastBar:GetOptions()
             fontSize = {
                 name = "Font Size",
                 type = "range",
-                order = 34,
-                dialogControl = "MidnightSlider",
+                order = 34
                 min = 8,
                 max = 24,
                 step = 1,
@@ -744,12 +733,11 @@ function CastBar:GetOptions()
                 end
             },
             
-            headerReset = { type = "header", name = "Reset", order = 40, dialogControl = "MidnightHeading" },
+            headerReset = { type = "header", name = "Reset", order = 40},
             resetPosition = {
                 name = "Reset Position",
                 type = "execute",
-                order = 41,
-                dialogControl = "MidnightButton",
+                order = 41
                 func = function()
                     self.db.profile.point = "CENTER"
                     self.db.profile.x = 0

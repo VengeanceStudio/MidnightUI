@@ -1363,8 +1363,7 @@ function BrokerBar:GetOptions()
                     font = { 
                         name = "Global Font", 
                         type = "select", 
-                        order = 1, 
-                        dialogControl = "MidnightDropdown", 
+                        order = 1 
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
@@ -1381,8 +1380,7 @@ function BrokerBar:GetOptions()
                         max = 32, 
                         step = 1, 
                         order = 2,
-                        width = "half",
-                        dialogControl = "MidnightSlider", 
+                        width = "half" 
                         get = function() return self.db.profile.fontSize end, 
                         set = function(_, v) self.db.profile.fontSize = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
                     },
@@ -1393,24 +1391,21 @@ function BrokerBar:GetOptions()
                         max = 50, 
                         step = 1, 
                         order = 3,
-                        width = "half",
-                        dialogControl = "MidnightSlider", 
+                        width = "half" 
                         get = function() return self.db.profile.spacing end, 
                         set = function(_, v) self.db.profile.spacing = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
                     },
                     useClassColor = { 
                         name = "Use Class Color", 
                         type = "toggle", 
-                        order = 4,
-                        dialogControl = "MidnightCheckBox", 
+                        order = 4 
                         get = function() return self.db.profile.useClassColor end, 
                         set = function(_, v) self.db.profile.useClassColor = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
                     },
                     color = { 
                         name = "Custom Font Color", 
                         type = "color", 
-                        order = 5,
-                        dialogControl = "MidnightColorPicker", 
+                        order = 5 
                         disabled = function() return self.db.profile.useClassColor end, 
                         get = function() local c = self.db.profile.fontColor; return c.r, c.g, c.b end, 
                         set = function(_, r, g, b) self.db.profile.fontColor = {r=r, g=g, b=b}; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
@@ -1418,16 +1413,14 @@ function BrokerBar:GetOptions()
                     useStandardTime = { 
                         name = "Use 24-Hour Time", 
                         type = "toggle", 
-                        order = 6,
-                        dialogControl = "MidnightCheckBox", 
+                        order = 6 
                         get = function() return self.db.profile.useStandardTime end, 
                         set = function(_, v) self.db.profile.useStandardTime = v; self:UpdateAllModules() end 
                     },
                     lock = { 
                         name = "Lock", 
                         type = "toggle", 
-                        order = 7,
-                        dialogControl = "MidnightCheckBox", 
+                        order = 7 
                         get = function() return self.db.profile.locked end, 
                         set = function(_, v) self.db.profile.locked = v; for id in pairs(bars) do self:ApplyBarSettings(id) end end 
                     },
@@ -1454,8 +1447,7 @@ function BrokerBar:GetOptions()
             create = {
                 name = "Bar Name",
                 type = "input",
-                order = 1,
-                dialogControl = "MidnightEditBox",
+                order = 1
                 set = function(_, v) 
                     if v ~= "" and not self.db.profile.bars[v] then 
                         local r, g, b, a = ColorPalette:GetColor('panel-bg')
@@ -1478,7 +1470,7 @@ function BrokerBar:GetOptions()
                         self:CreateBarFrame(v)
                         self:ApplyBarSettings(v)
                         -- Refresh options to show new bar
-                        LibStub("AceConfigRegistry-3.0"):NotifyChange("MidnightUI")
+                        
                     end 
                 end 
             }
@@ -1494,16 +1486,14 @@ function BrokerBar:GetOptions()
                 enabled = { 
                     name = "Enabled", 
                     type = "toggle", 
-                    order = 1,
-                    dialogControl = "MidnightCheckBox", 
+                    order = 1 
                     get = function() return self.db.profile.bars[id].enabled end, 
                     set = function(_, v) self.db.profile.bars[id].enabled = v; self:ApplyBarSettings(id) end 
                 },
                 fullWidth = { 
                     name = "Full Width", 
                     type = "toggle", 
-                    order = 2,
-                    dialogControl = "MidnightCheckBox", 
+                    order = 2 
                     get = function() return self.db.profile.bars[id].fullWidth end, 
                     set = function(_, v) self.db.profile.bars[id].fullWidth = v; self:ApplyBarSettings(id) end 
                 },
@@ -1514,8 +1504,7 @@ function BrokerBar:GetOptions()
                     min = 50, 
                     max = screenWidth, 
                     step = 1,
-                    width = "half",
-                    dialogControl = "MidnightSlider", 
+                    width = "half" 
                     disabled = function() return self.db.profile.brokers[id] and self.db.profile.brokers[id].fullWidth or false end, 
                     get = function() return self.db.profile.bars[id].width end, 
                     set = function(_, v) self.db.profile.bars[id].width = v; self:ApplyBarSettings(id) end 
@@ -1527,8 +1516,7 @@ function BrokerBar:GetOptions()
                     min = 10, 
                     max = 100, 
                     step = 1,
-                    width = "half",
-                    dialogControl = "MidnightSlider", 
+                    width = "half" 
                     get = function() return self.db.profile.bars[id].height end, 
                     set = function(_, v) self.db.profile.bars[id].height = v; self:ApplyBarSettings(id) end 
                 },
@@ -1539,16 +1527,14 @@ function BrokerBar:GetOptions()
                     min = 0.5, 
                     max = 3.0, 
                     step = 0.1,
-                    width = "half",
-                    dialogControl = "MidnightSlider", 
+                    width = "half" 
                     get = function() return self.db.profile.bars[id].scale or 1.0 end, 
                     set = function(_, v) self.db.profile.bars[id].scale = v; self:ApplyBarSettings(id) end 
                 },
                 skin = { 
                     name = "Skin", 
                     type = "select", 
-                    order = 5,
-                    dialogControl = "MidnightDropdown",
+                    order = 5
                     hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     values = GetSkinList, 
                     get = function() return self.db.profile.bars[id].skin or "Global" end, 
@@ -1558,8 +1544,7 @@ function BrokerBar:GetOptions()
                     name = "Texture", 
                     type = "select", 
                     order = 6,
-                    hidden = function() return self.db.profile.bars[id].useThemeColor end,
-                    dialogControl = "MidnightDropdown", 
+                    hidden = function() return self.db.profile.bars[id].useThemeColor end 
                     values = function()
                         local textures = LSM:List("statusbar")
                         local out = {}
@@ -1572,8 +1557,7 @@ function BrokerBar:GetOptions()
                 useThemeColor = {
                     name = "Use Theme Color",
                     type = "toggle",
-                    order = 6.5,
-                    dialogControl = "MidnightCheckBox",
+                    order = 6.5
                     get = function() return self.db.profile.bars[id].useThemeColor end,
                     set = function(_, v)
                         self.db.profile.bars[id].useThemeColor = v
@@ -1589,8 +1573,7 @@ function BrokerBar:GetOptions()
                     name = "Color", 
                     type = "color", 
                     hasAlpha = true, 
-                    order = 7,
-                    dialogControl = "MidnightColorPicker",
+                    order = 7
                     hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     get = function() local c = self.db.profile.bars[id].color; return c.r, c.g, c.b, self.db.profile.bars[id].alpha end, 
                     set = function(_, r, g, b, a) 
@@ -1603,8 +1586,7 @@ function BrokerBar:GetOptions()
                 delete = {
                     name = "Delete Bar",
                     type = "execute",
-                    order = 99,
-                    dialogControl = "MidnightButton",
+                    order = 99
                     confirm = function() return string.format("Are you sure you want to delete %s?", id) end,
                     disabled = function() return id == "MainBar" end,
                     func = function()

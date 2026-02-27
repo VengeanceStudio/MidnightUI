@@ -521,46 +521,41 @@ function Tweaks:GetOptions()
         get = function(info) return self.db.profile[info[#info]] end,
         set = function(info, value) self.db.profile[info[#info]] = value end,
         args = {
-            fastLoot = { name = "Fast Loot", type = "toggle", order = 1, dialogControl = "MidnightCheckBox" },
-            hideGryphons = { name = "Hide Action Bar Art", type = "toggle", order = 2, dialogControl = "MidnightCheckBox",
+            fastLoot = { name = "Fast Loot", type = "toggle", order = 1},
+            hideGryphons = { name = "Hide Action Bar Art", type = "toggle", order = 2
                 set = function(_, v) self.db.profile.hideGryphons = v; C_UI.Reload() end },
-            hideBagBar = { name = "Hide Bag Bar", type = "toggle", order = 3, dialogControl = "MidnightCheckBox",
+            hideBagBar = { name = "Hide Bag Bar", type = "toggle", order = 3
                 set = function(_, v) self.db.profile.hideBagBar = v; self:ApplyTweaks() end },
             autoRepair = {
                 name = "Auto Repair at Vendors",
                 desc = "Automatically repair all items when opening a merchant that can repair",
                 type = "toggle",
-                order = 4,
-                dialogControl = "MidnightCheckBox",
+                order = 4
             },
             autoRepairGuild = {
                 name = "Use Guild Bank for Repairs",
                 desc = "Use guild bank funds for repairs if available (requires guild repair privileges)",
                 type = "toggle",
-                order = 5,
-                dialogControl = "MidnightCheckBox",
+                order = 5
                 disabled = function() return not self.db.profile.autoRepair end,
             },
             autoSellJunk = {
                 name = "Auto Sell Junk at Vendors",
                 desc = "Automatically sell all grey (poor quality) items when opening a merchant",
                 type = "toggle",
-                order = 6,
-                dialogControl = "MidnightCheckBox",
+                order = 6
             },
             revealMap = {
                 name = "Reveal Entire Map",
                 desc = "Automatically reveals unexplored areas on the world map (Note: May not work on all map types due to Blizzard restrictions)",
                 type = "toggle",
-                order = 7,
-                dialogControl = "MidnightCheckBox",
+                order = 7
             },
             autoDelete = {
                 name = "Auto-Fill Delete Confirmation",
                 desc = "Automatically fills in the DELETE confirmation text and enables the delete button when deleting items",
                 type = "toggle",
-                order = 8,
-                dialogControl = "MidnightCheckBox",
+                order = 8
                 set = function(_, v)
                     self.db.profile.autoDelete = v
                     if v then
@@ -572,8 +567,7 @@ function Tweaks:GetOptions()
                 name = "Auto Screenshot on Achievement",
                 desc = "Automatically takes a screenshot whenever you earn an achievement",
                 type = "toggle",
-                order = 9,
-                dialogControl = "MidnightCheckBox",
+                order = 9
                 set = function(_, v)
                     self.db.profile.autoScreenshot = v
                     if v then
@@ -587,8 +581,7 @@ function Tweaks:GetOptions()
                 name = "Skip Cutscenes",
                 desc = "Automatically skips cinematics and movie cutscenes",
                 type = "toggle",
-                order = 10,
-                dialogControl = "MidnightCheckBox",
+                order = 10
                 set = function(_, v)
                     self.db.profile.skipCutscenes = v
                     if v then
@@ -600,15 +593,13 @@ function Tweaks:GetOptions()
                 name = "Auto-Insert Mythic Keystone",
                 desc = "Automatically places Mythic Keystones from your bags into the keystone font",
                 type = "toggle",
-                order = 11,
-                dialogControl = "MidnightCheckBox",
+                order = 11
             },
             importOverwriteEnabled = { 
                 name = "Enable Talent Import Overwrite", 
                 desc = "Adds a checkbox to the talent import dialog to overwrite the current loadout instead of creating a new one",
                 type = "toggle", 
-                order = 12,
-                dialogControl = "MidnightCheckBox",
+                order = 12
                 set = function(_, v) 
                     self.db.profile.importOverwriteEnabled = v
                     if v then

@@ -759,8 +759,7 @@ function Skin:GetOptions()
             header = {
                 type = "header",
                 name = "Global Skinning System",
-                order = 1,
-                dialogControl = "MidnightHeading",
+                order = 1
             },
             desc = {
                 type = "description",
@@ -771,8 +770,7 @@ function Skin:GetOptions()
                 name = "Global Skin",
                 desc = "Default skin applied to all UI elements",
                 type = "select",
-                order = 3,
-                dialogControl = "MidnightDropdown",
+                order = 3
                 values = skinList,
                 get = function() return self.db.profile.globalSkin end,
                 set = function(_, v)
@@ -781,14 +779,13 @@ function Skin:GetOptions()
                     C_UI.Reload()
                 end
             },
-            spacer1 = { type = "header", name = "Module-Specific Skinning", order = 10, dialogControl="MidnightHeading" },
+            spacer1 = { type = "header", name = "Module-Specific Skinning", order = 10},
             skinActionBars = {
                 name = "Skin Action Bar Buttons",
                 desc = "Apply dark background to action bar buttons",
                 type = "toggle",
                 order = 11,
-                width = "full",
-                dialogControl = "MidnightCheckBox",
+                width = "full"
                 get = function() return self.db.profile.skinActionBars end,
                 set = function(_, v)
                     self.db.profile.skinActionBars = v
@@ -804,8 +801,7 @@ function Skin:GetOptions()
                 desc = "Apply skin to player, target, party, and raid frames. WARNING: May conflict with Blizzard unit frames. Disable if you experience errors.",
                 type = "toggle",
                 order = 12,
-                width = "full",
-                dialogControl = "MidnightCheckBox",
+                width = "full"
                 get = function() return self.db.profile.skinUnitFrames end,
                 set = function(_, v)
                     self.db.profile.skinUnitFrames = v
@@ -817,8 +813,7 @@ function Skin:GetOptions()
                 desc = "Apply skin to bags and bank frames",
                 type = "toggle",
                 order = 13,
-                width = "full",
-                dialogControl = "MidnightCheckBox",
+                width = "full"
                 get = function() return self.db.profile.skinBags end,
                 set = function(_, v)
                     self.db.profile.skinBags = v
@@ -834,8 +829,7 @@ function Skin:GetOptions()
                 desc = "Apply skin to character panel, spellbook, talents, collections, etc.",
                 type = "toggle",
                 order = 14,
-                width = "full",
-                dialogControl = "MidnightCheckBox",
+                width = "full"
                 get = function() return self.db.profile.skinBlizzardFrames end,
                 set = function(_, v)
                     self.db.profile.skinBlizzardFrames = v
@@ -851,8 +845,7 @@ function Skin:GetOptions()
                 desc = "Apply skin to game tooltips",
                 type = "toggle",
                 order = 15,
-                width = "full",
-                dialogControl = "MidnightCheckBox",
+                width = "full"
                 get = function() return self.db.profile.skinTooltips end,
                 set = function(_, v)
                     self.db.profile.skinTooltips = v
@@ -866,8 +859,7 @@ function Skin:GetOptions()
                 desc = "Apply skin to chat windows",
                 type = "toggle",
                 order = 16,
-                width = "full",
-                dialogControl = "MidnightCheckBox",
+                width = "full"
                 get = function() return self.db.profile.skinChatFrames end,
                 set = function(_, v)
                     self.db.profile.skinChatFrames = v

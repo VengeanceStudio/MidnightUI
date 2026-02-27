@@ -1,7 +1,5 @@
 local MidnightUI = LibStub("AceAddon-3.0"):NewAddon("MidnightUI", "AceConsole-3.0", "AceEvent-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
-local AceConfig = LibStub("AceConfig-3.0")
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 MidnightUI.version = "1.0.0"
 
@@ -117,38 +115,6 @@ function MidnightUI:OnEnable()
     end
 end
 
--- Style LibSharedMedia widgets (LSM30_Font, LSM30_Statusbar, etc.)
-function MidnightUI:StyleLSMWidget(widget)
-    if not widget or not widget.frame then return end
-    
-    local frame = widget.frame
-    local ColorPalette = _G.MidnightUI_ColorPalette
-    local FontKit = _G.MidnightUI_FontKit
-    if not ColorPalette then return end
-    
-    -- Mark this widget so backdrop hooks can identify it
-    widget.isLSMWidget = true
-    frame.isLSMWidget = true
-    
-    -- Create background and border manually since frame doesn't support backdrop
-    if not frame.midnightBg then
-        -- Add semi-transparent dark background
-        frame.midnightBg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
-        frame.midnightBg:SetAllPoints(frame)
-        local r, g, b = ColorPalette:GetColor('button-bg')
-        frame.midnightBg:SetColorTexture(r, g, b, 0.3)
-    end
-    
-    -- Hide Blizzard textures (DLeft, DMiddle, DRight)
-    if frame.DLeft then frame.DLeft:Hide() end
-    if frame.DMiddle then frame.DMiddle:Hide() end
-    if frame.DRight then frame.DRight:Hide() end
-    
-    -- Style label (the dropdown name) - FORCE white color and prevent yellow
-    if frame.label then
-        if FontKit then
-            FontKit:SetFont(frame.label, 'body', 'normal')
-        end
         
         -- Hook SetTextColor itself to block yellow (NORMAL_FONT_COLOR is yellow)
         if not frame.label.colorHooked then
@@ -375,28 +341,6 @@ function MidnightUI:StyleLSMWidget(widget)
 end
 
 -- Style ScrollFrame widgets
-function MidnightUI:StyleScrollFrame(widget)
-    if not widget or not widget.scrollbar then return end
-    
-    local scrollbar = widget.scrollbar
-    local ColorPalette = _G.MidnightUI_ColorPalette
-    if not ColorPalette then return end
-    
-    -- Get the actual thumb texture
-    local thumbTexture = scrollbar:GetThumbTexture()
-    if thumbTexture then
-        local r, g, b = ColorPalette:GetColor('accent-primary')
-        thumbTexture:SetColorTexture(r, g, b, 1)
-        thumbTexture:SetSize(12, 24)
-    end
-    
-    -- Style the scrollbar track background
-    if not scrollbar.midnightBg then
-        scrollbar.midnightBg = scrollbar:CreateTexture(nil, "BACKGROUND")
-        scrollbar.midnightBg:SetAllPoints(scrollbar)
-        local r, g, b = ColorPalette:GetColor('button-bg')
-        scrollbar.midnightBg:SetColorTexture(r, g, b, 0.3)
-    end
     
     -- Hide and restyle scroll up button
     if scrollbar.ScrollUpButton then
@@ -564,56 +508,9 @@ function MidnightUI:ScaleLayoutToResolution()
 end
 
 -- Walk widget tree and apply styling (safe for options panel)
-function MidnightUI:StyleOptionsFrame(widget)
-    if not widget then return end
-    
-    -- Get widget type
-    local widgetType = widget.type
-    if widgetType then
-        -- Apply styling based on type
-        self:SkinAceGUIWidget(widget, widgetType)
-    end
-    
-    -- Recursively style children
-    if widget.children then
-        for _, child in pairs(widget.children) do
-            self:StyleOptionsFrame(child)
-        end
     end
 end
 
-function MidnightUI:SkinAceGUIWidget(widget, widgetType)
-    local ColorPalette = _G.MidnightUI_ColorPalette
-    local FontKit = _G.MidnightUI_FontKit
-    if not ColorPalette or not widget then return end
-    
-    -- Skip if already styled to avoid double-styling
-    if widget.midnightStyled then return end
-    widget.midnightStyled = true
-    
-    -- Skin based on widget type
-    if widgetType == "Frame" then
-        if widget.frame then
-            self:SkinConfigFrame(widget.frame)
-        end
-        
-    elseif widgetType == "TabGroup" then
-        -- Check if this is our custom MidnightTabGroup (it handles its own styling)
-        if widget.type == "MidnightTabGroup" then
-            -- Don't apply any styling to MidnightTabGroup - it handles everything itself
-            return
-        end
-        
-        if widget.border then
-            widget.border:SetBackdrop({
-                bgFile = "Interface\\Buttons\\WHITE8X8",
-                edgeFile = "Interface\\Buttons\\WHITE8X8",
-                tile = false, edgeSize = 1,
-                insets = { left = 1, right = 1, top = 26, bottom = 1 }
-            })
-            widget.border:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-            widget.border:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-        end
         
         -- Style the horizontal bar at the top (tab separator)
         if widget.tabs and widget.tabs[1] then
@@ -1825,15 +1722,12 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
             FontKit:SetFont(widget.text, 'body', 'normal')
             widget.text:SetTextColor(ColorPalette:GetColor('text-primary'))
             
-            -- Reposition dropdown text to reduce left padding (only for standard Dropdown, not MidnightDropdown)
+            -- Reposition dropdown text to reduce left padding
             if widgetType == "Dropdown" and widget.dropdown and widget.button then
-                local dropdownName = widget.dropdown:GetName() or ""
-                if not dropdownName:match("^Midnight") then
-                    widget.text:ClearAllPoints()
-                    widget.text:SetPoint("LEFT", widget.dropdown, "LEFT", 4, 0)
-                    widget.text:SetPoint("RIGHT", widget.button, "LEFT", -2, 0)
-                    widget.text:SetJustifyH("LEFT")
-                end
+                widget.text:ClearAllPoints()
+                widget.text:SetPoint("LEFT", widget.dropdown, "LEFT", 4, 0)
+                widget.text:SetPoint("RIGHT", widget.button, "LEFT", -2, 0)
+                widget.text:SetJustifyH("LEFT")
             end
         end
         
@@ -1960,47 +1854,6 @@ function MidnightUI:SkinAceGUIWidget(widget, widgetType)
     end
 end
 
-function MidnightUI:HookConfigDialogFrames()
-    local AceGUI = LibStub("AceGUI-3.0")
-    if not AceGUI then return end
-    
-    local ColorPalette = _G.MidnightUI_ColorPalette
-    if not ColorPalette then return end
-    
-    -- Hook AceGUI widget creation to style widgets for MidnightUI options
-    if not AceGUI.MidnightUIHooked then
-        local originalCreate = AceGUI.Create
-        AceGUI.Create = function(self, widgetType)
-            local widget = originalCreate(self, widgetType)
-            
-            -- Only style if we're currently building MidnightUI options
-            if _G.MidnightUI_BuildingOptions then
-                C_Timer.After(0, function()
-                    MidnightUI:SkinAceGUIWidget(widget, widgetType)
-                end)
-            end
-            
-            return widget
-        end
-        AceGUI.MidnightUIHooked = true
-    end
-    
-    -- Track styled frames to restore their backdrops
-    local styledFrames = {}
-    
-    -- Global backdrop monitor - hook the frame metatable
-    local FrameMT = getmetatable(CreateFrame("Frame")).__index
-    if FrameMT and FrameMT.SetBackdrop then
-        hooksecurefunc(FrameMT, "SetBackdrop", function(frame, backdrop)
-            if styledFrames[frame] and (not backdrop or backdrop == {}) then
-                -- This frame had styling and is being cleared, restore it immediately
-                C_Timer.After(0, function()
-                    if styledFrames[frame] and frame.SetBackdrop then
-                        local info = styledFrames[frame]
-                        frame:SetBackdrop(info.backdrop)
-                        if info.bgColor then
-                            frame:SetBackdropColor(unpack(info.bgColor))
-                        end
                         if info.borderColor then
                             frame:SetBackdropBorderColor(unpack(info.borderColor))
                         end
@@ -2010,86 +1863,7 @@ function MidnightUI:HookConfigDialogFrames()
         end)
     end
     
-    -- Hook AceConfigDialog:Open to apply MidnightUI styling and set build flag
-    if AceConfigDialog and not AceConfigDialog.MidnightUIHooked then
-        local originalOpen = AceConfigDialog.Open
-        AceConfigDialog.Open = function(self, appName, ...)
-            -- Set flag when building MidnightUI options
-            if appName == "MidnightUI" then
-                _G.MidnightUI_BuildingOptions = true
-            end
-            
-            local result = originalOpen(self, appName, ...)
-            
-            -- Only skin the frame if it's MidnightUI
-            if appName == "MidnightUI" then
-                local frame = AceConfigDialog.OpenFrames[appName]
-                if frame and frame.frame then
-                    C_Timer.After(0.1, function()
-                        MidnightUI:SkinConfigFrame(frame.frame)
-                    end)
-                end
-                
-                -- Clear the build flag after widgets are created
-                C_Timer.After(0.3, function()
-                    _G.MidnightUI_BuildingOptions = false
-                end)
-            end
-            
-            return result
-        end
-        
-        AceConfigDialog.MidnightUIHooked = true
-    end
-end
-
-function MidnightUI:SkinConfigFrame(frame)
-    if not frame or not frame.SetBackdrop then return end
-    
-    local ColorPalette = _G.MidnightUI_ColorPalette
-    local FontKit = _G.MidnightUI_FontKit
-    if not ColorPalette then return end
-    
-    -- Apply themed backdrop
-    frame:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8X8",
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = false,
-        tileSize = 16,
-        edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-    })
-    
-    frame:SetBackdropColor(ColorPalette:GetColor('panel-bg'))
-    frame:SetBackdropBorderColor(ColorPalette:GetColor('panel-border'))
-    
-    -- Skin the title frame and text
-    if frame.obj then
-        -- Add logo texture
-        if not frame.logoTexture then
-            frame.logoTexture = frame:CreateTexture(nil, "ARTWORK")
-            frame.logoTexture:SetTexture("Interface\\AddOns\\MidnightUI\\Media\\midnightUI_icon.tga")
-            frame.logoTexture:SetSize(80, 80)
-            frame.logoTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -18)
-        end
-        
-        -- Create draggable area over the top portion of the frame (excluding close button area)
-        if not frame.dragArea then
-            frame.dragArea = CreateFrame("Frame", nil, frame)
-            frame.dragArea:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-            frame.dragArea:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -50, 0)  -- Leave 50px for close button
-            frame.dragArea:SetHeight(100)
-            frame.dragArea:EnableMouse(true)
-            frame.dragArea:RegisterForDrag("LeftButton")
-            frame.dragArea:SetScript("OnDragStart", function()
-                frame:StartMoving()
-            end)
-            frame.dragArea:SetScript("OnDragStop", function()
-                frame:StopMovingOrSizing()
-            end)
-        end
-        
-        -- Add custom title text next to logo (no need for it to be draggable, the dragArea handles it)
+    -- Add custom title text next to logo (no need for it to be draggable, the dragArea handles it)
         if not frame.customTitle then
             frame.customTitle = frame:CreateFontString(nil, "OVERLAY")
             frame.customTitle:SetFont("Fonts\\FRIZQT__.TTF", 32, "OUTLINE")
@@ -2354,8 +2128,7 @@ function MidnightUI:GetThemeOptions()
         header = {
             type = "header",
             name = "Theme Management",
-            order = 1,
-            dialogControl = "MidnightHeading",
+            order = 1
         },
         description = {
             type = "description",
@@ -2367,8 +2140,7 @@ function MidnightUI:GetThemeOptions()
             type = "select",
             name = "Active Theme",
             desc = "Select which theme to use for the MidnightUI framework.",
-            order = 3,
-            dialogControl = "MidnightDropdown",
+            order = 3
             values = themeValues,
             get = function() return self.db.profile.theme.active end,
             set = function(_, value)
@@ -2403,10 +2175,7 @@ function MidnightUI:GetThemeOptions()
                 self:Print("Theme changed to " .. value .. ". Some changes may require a /reload to take full effect.")
                 
                 -- Refresh options to show current theme colors
-                local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-                if AceConfigRegistry then
-                    AceConfigRegistry:NotifyChange("MidnightUI")
-                end
+                
             end,
         },
         spacer1 = {
@@ -2417,8 +2186,7 @@ function MidnightUI:GetThemeOptions()
         customThemeHeader = {
             type = "header",
             name = "Custom Theme Editor",
-            order = 4,
-            dialogControl = "MidnightHeading",
+            order = 4
         },
         customThemeDesc = {
             type = "description",
@@ -2431,8 +2199,7 @@ function MidnightUI:GetThemeOptions()
             name = "New Theme Name",
             desc = "Enter a name for your custom theme before saving.",
             order = 6,
-            width = "full",
-            dialogControl = "MidnightEditBox",
+            width = "full"
             get = function() return self.customThemeName or "" end,
             set = function(_, v) self.customThemeName = v end,
         },
@@ -2440,8 +2207,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Save Custom Theme",
             desc = "Save current color settings as a new custom theme.",
-            order = 7,
-            dialogControl = "MidnightButton",
+            order = 7
             func = function()
                 self:SaveCustomTheme()
             end,
@@ -2450,8 +2216,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Delete Custom Theme",
             desc = "Delete the currently selected custom theme (built-in themes cannot be deleted).",
-            order = 8,
-            dialogControl = "MidnightButton",
+            order = 8
             disabled = function()
                 local active = self.db.profile.theme.active
                 local builtInThemes = {
@@ -2485,38 +2250,12 @@ function MidnightUI:GetThemeOptions()
         colorsHeader = {
             type = "header",
             name = "Theme Colors",
-            order = 9,
-            dialogControl = "MidnightHeading",
+            order = 9
         },
         colorsDesc = {
             type = "description",
             name = "Click any color rectangle below to change its color.",
             order = 10,
-        },
-        colorPaletteDisplay = {
-            type = "description",
-            name = function()
-                -- Always check and clean up swatches that shouldn't be showing
-                if self.colorSwatchContainer then
-                    local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-                    local status = AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"]
-                    if status and status.status and status.status.groups and status.status.groups.selected ~= "themes" then
-                        -- We're not on themes page but swatches exist - destroy them
-                        self.colorSwatchContainer:Hide()
-                        self.colorSwatchContainer:SetParent(nil)
-                        self.colorSwatchContainer = nil
-                        self.themeColorSwatches = nil
-                    end
-                end
-                
-                -- This will trigger the creation of custom color swatch frames
-                C_Timer.After(0.15, function()
-                    self:CreateColorPaletteSwatches()
-                end)
-                return " "
-            end,
-            order = 11,
-            width = "full",
         },
         spacer3 = {
             type = "description",
@@ -2552,8 +2291,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Reset to Theme Defaults",
             desc = "Reset all color changes back to the original theme defaults",
-            order = 19.5,
-            dialogControl = "MidnightButton",
+            order = 19.5
             func = function()
                 -- Clear temp colors
                 self.tempThemeColors = nil
@@ -2579,8 +2317,7 @@ function MidnightUI:GetThemeOptions()
             type = "execute",
             name = "Open Theme Editor",
             desc = "Opens a visual mockup window where you can click on elements to edit their colors",
-            order = 20,
-            dialogControl = "MidnightButton",
+            order = 20
             func = function()
                 self:OpenColorEditorFrame()
             end,
@@ -2670,188 +2407,6 @@ function MidnightUI:UpdateThemeColorSwatches()
             end
         end
     end
-end
-
-function MidnightUI:CreateColorPaletteSwatches()
-    local ColorPalette = _G.MidnightUI_ColorPalette
-    local FontKit = _G.MidnightUI_FontKit
-    if not ColorPalette or not FontKit then return end
-    
-    -- Clean up old container if it exists
-    if self.colorSwatchContainer then
-        self.colorSwatchContainer:Hide()
-        self.colorSwatchContainer:SetParent(nil)
-        self.colorSwatchContainer = nil
-        self.themeColorSwatches = nil
-    end
-    
-    -- Find the AceGUI container for the Themes tab
-    local AceGUI = LibStub("AceGUI-3.0")
-    local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-    if not AceGUI or not AceConfigDialog then return end
-    
-    -- Get the options frame
-    local appName = AceConfigDialog.OpenFrames["MidnightUI"]
-    if not appName or not appName.frame then return end
-    
-    -- Check if we're on the Themes tab
-    local status = appName.status
-    if not status or not status.groups or not status.groups.selected then
-        return
-    end
-    
-    -- Only show on Themes tab
-    if status.groups.selected ~= "themes" then
-        return
-    end
-    
-    -- Destroy any existing container first
-    if self.colorSwatchContainer then
-        self.colorSwatchContainer:Hide()
-        self.colorSwatchContainer:SetParent(nil)
-        self.colorSwatchContainer = nil
-        self.themeColorSwatches = nil
-    end
-    
-    local container = appName.frame.obj
-    if not container or not container.content then return end
-    
-    -- Find the actual content area (NOT the tree frame)
-    -- Look for the ScrollFrame that contains the options
-    local contentFrame = nil
-    for _, child in ipairs({container.content:GetChildren()}) do
-        local childType = child:GetObjectType()
-        -- Skip the tree frame, find the ScrollFrame that's for content
-        if childType == "ScrollFrame" then
-            -- Make sure this isn't the tree's scrollframe by checking its position
-            local point = child:GetPoint()
-            if point and point ~= "TOPLEFT" then  -- Tree is at TOPLEFT, content is elsewhere
-                contentFrame = child
-                break
-            end
-        end
-    end
-    
-    -- If we didn't find a separate scroll frame, look for the content container directly
-    if not contentFrame then
-        -- The content is likely directly in container.content, but positioned to the right of tree
-        contentFrame = container.content
-    end
-    
-    -- Hook the content frame's OnUpdate to detect when it's being reused for another page
-    if not contentFrame.MidnightSwatchCleanupHooked then
-        contentFrame:HookScript("OnHide", function()
-            if self.colorSwatchContainer and self.colorSwatchContainer:IsShown() then
-                self.colorSwatchContainer:Hide()
-                self.colorSwatchContainer:SetParent(nil)
-                self.colorSwatchContainer = nil
-                self.themeColorSwatches = nil
-            end
-        end)
-        contentFrame.MidnightSwatchCleanupHooked = true
-    end
-    
-    -- Create container for swatches - attach to the content frame
-    local swatchContainer = CreateFrame("Frame", "MidnightUI_ColorSwatches", contentFrame)
-    swatchContainer:SetSize(800, 100)
-    -- Position relative to the content frame with a left offset to account for tree width
-    -- Increased Y offset to position below the "Click any color rectangle" text
-    swatchContainer:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 200, -380)
-    
-    -- Set frame strata and level to ensure it's on top
-    local parentStrata = contentFrame:GetFrameStrata()
-    swatchContainer:SetFrameStrata(parentStrata)
-    swatchContainer:SetFrameLevel(contentFrame:GetFrameLevel() + 100)
-    
-    self.colorSwatchContainer = swatchContainer
-    
-    -- Add OnUpdate script to check if we should still be visible
-    swatchContainer:SetScript("OnUpdate", function(self)
-        local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-        if AceConfigDialog and AceConfigDialog.OpenFrames["MidnightUI"] then
-            local status = AceConfigDialog.OpenFrames["MidnightUI"].status
-            if status and status.groups and status.groups.selected ~= "themes" then
-                -- We're not on themes page anymore, hide immediately
-                self:Hide()
-                self:SetParent(nil)
-                MidnightUI.colorSwatchContainer = nil
-                MidnightUI.themeColorSwatches = nil
-            end
-        end
-    end)
-    
-    -- Define the 8 core colors
-    local coreColors = {
-        {key = "panel-bg", name = "Panel\nBackground"},
-        {key = "panel-border", name = "Panel\nBorder"},
-        {key = "accent-primary", name = "Accent"},
-        {key = "button-bg", name = "Button"},
-        {key = "button-hover", name = "Button\nHover"},
-        {key = "text-primary", name = "Primary\nText"},
-        {key = "text-secondary", name = "Secondary\nText"},
-        {key = "tab-active", name = "Active\nTab"},
-    }
-    
-    self.themeColorSwatches = {}
-    local xOffset = 0
-    
-    for i, colorData in ipairs(coreColors) do
-        -- Create clickable frame for the swatch
-        local swatchFrame = CreateFrame("Button", nil, swatchContainer)
-        swatchFrame:SetSize(80, 50)
-        swatchFrame:SetPoint("TOPLEFT", xOffset, 0)
-        
-        -- Create color texture directly (will show on settings window background)
-        local colorTexture = swatchFrame:CreateTexture(nil, "ARTWORK")
-        colorTexture:SetAllPoints()
-        
-        -- Check if there's a temp color (unsaved changes), otherwise use active theme
-        local r, g, b, a
-        if self.tempThemeColors and self.tempThemeColors[colorData.key] then
-            local tempColor = self.tempThemeColors[colorData.key]
-            r, g, b, a = tempColor.r, tempColor.g, tempColor.b, tempColor.a
-        else
-            r, g, b, a = ColorPalette:GetColor(colorData.key)
-        end
-        colorTexture:SetColorTexture(r, g, b, a)
-        
-        -- Label below
-        local label = FontKit:CreateFontString(swatchFrame, "body", "tiny")
-        label:SetPoint("TOP", swatchFrame, "BOTTOM", 0, -4)
-        label:SetWidth(80)  -- Match swatch width
-        label:SetText(colorData.name)
-        label:SetTextColor(ColorPalette:GetColor("text-secondary"))
-        label:SetJustifyH("CENTER")
-        label:SetWordWrap(true)  -- Enable word wrap
-        label:SetMaxLines(0)  -- Allow unlimited lines
-        
-        -- Click handler
-        swatchFrame:SetScript("OnClick", function()
-            self:OpenColorPickerForThemeColor(colorData.key, colorData.name:gsub("\n", " "))
-        end)
-        
-        -- Hover effect
-        swatchFrame:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(swatchFrame, "ANCHOR_TOP")
-            GameTooltip:SetText(colorData.name:gsub("\n", " "), 1, 1, 1)
-            GameTooltip:AddLine("Click to change this color", 0.7, 0.7, 0.7)
-            GameTooltip:Show()
-        end)
-        
-        swatchFrame:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
-        
-        -- Store for updates
-        self.themeColorSwatches[colorData.key] = {
-            texture = colorTexture,
-            frame = swatchFrame
-        }
-        
-        xOffset = xOffset + 90
-    end
-    
-    swatchContainer:Show()
 end
 
 function MidnightUI:OpenColorEditorFrame()
@@ -3656,10 +3211,7 @@ function MidnightUI:SaveCustomTheme()
     self:UpdateThemeColorSwatches()
     
     -- Refresh options
-    local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-    if AceConfigRegistry then
-        AceConfigRegistry:NotifyChange("MidnightUI")
-    end
+    
 end
 
 function MidnightUI:DeleteCustomTheme()
@@ -3689,10 +3241,7 @@ function MidnightUI:DeleteCustomTheme()
     self:Print("|cff00ff00Success:|r Theme '" .. themeName .. "' deleted. Switched to Midnight Transparent.")
     
     -- Refresh options
-    local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-    if AceConfigRegistry then
-        AceConfigRegistry:NotifyChange("MidnightUI")
-    end
+    
 end
 
 function MidnightUI:LoadCustomThemes()
@@ -3737,8 +3286,7 @@ function MidnightUI:GetOptions()
                     resolutionHeader = {
                         type = "header",
                         name = "Resolution Scaling",
-                        order = 1.0,
-                        dialogControl = "MidnightHeading",
+                        order = 1.0
                     },
                     resolutionDesc = {
                         type = "description",
@@ -3773,8 +3321,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Scale Layout Resolution",
                         desc = "Automatically adjusts all element positions from 2133x1200 to your current resolution",
-                        order = 1.02,
-                        dialogControl = "MidnightButton",
+                        order = 1.02
                         func = function()
                             MidnightUI:ScaleLayoutToResolution()
                         end,
@@ -3792,15 +3339,13 @@ function MidnightUI:GetOptions()
                     fontHeader = {
                         type = "header",
                         name = "Global Font",
-                        order = 1.1,
-                        dialogControl = "MidnightHeading",
+                        order = 1.1
                     },
                     globalFont = {
                         type = "select",
                         name = "Global Font",
                         desc = "Select a font to apply to all MidnightUI elements.",
-                        order = 1.11,
-                        dialogControl = "MidnightDropdown",
+                        order = 1.11
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
@@ -3814,8 +3359,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Apply to All",
                         desc = "Apply the selected global font to all MidnightUI modules and bars.",
-                        order = 1.12,
-                        dialogControl = "MidnightButton",
+                        order = 1.12
                         func = function()
                             local font = MidnightUI.db.profile.theme.font or "Friz Quadrata TT"
                             -- UnitFrames
@@ -3882,48 +3426,48 @@ function MidnightUI:GetOptions()
                         name = " ",
                         order = 1.995,
                     },
-                    modulesHeader = { type = "header", order = 2.0, name = "Modules", dialogControl = "MidnightHeading" },
+                    modulesHeader = { type = "header", order = 2.0, name = "Modules"},
                     modulesDesc = { type = "description", order = 2.01, name = "Toggle modules. Requires Reload." },
-                    bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full", dialogControl = "MidnightCheckBox",
+                    bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full"
                         get = function() return self.db.profile.modules.bar end,
                         set = function(_, v) self.db.profile.modules.bar = v; C_UI.Reload() end },
-                    UIButtons = { name = "UI Buttons", type = "toggle", order = 2.2, width = "full", dialogControl = "MidnightCheckBox",
+                    UIButtons = { name = "UI Buttons", type = "toggle", order = 2.2, width = "full"
                         get = function() return self.db.profile.modules.UIButtons end,
                         set = function(_, v) self.db.profile.modules.UIButtons = v; C_UI.Reload() end },
-                    tooltips = { name = "Tooltips", type = "toggle", order = 2.25, width = "full", dialogControl = "MidnightCheckBox",
+                    tooltips = { name = "Tooltips", type = "toggle", order = 2.25, width = "full"
                         get = function() return self.db.profile.modules.tooltips end,
                         set = function(_, v) self.db.profile.modules.tooltips = v; C_UI.Reload() end },
-                    mailbox = { name = "Mailbox", type = "toggle", order = 2.27, width = "full", dialogControl = "MidnightCheckBox",
+                    mailbox = { name = "Mailbox", type = "toggle", order = 2.27, width = "full"
                         get = function() return self.db.profile.modules.mailbox end,
                         set = function(_, v) self.db.profile.modules.mailbox = v; C_UI.Reload() end },
-                    chatcopy = { name = "Chat Copy", type = "toggle", order = 2.3, width = "full", dialogControl = "MidnightCheckBox",
+                    chatcopy = { name = "Chat Copy", type = "toggle", order = 2.3, width = "full"
                         get = function() return self.db.profile.modules.chatcopy ~= false end,
                         set = function(_, v) self.db.profile.modules.chatcopy = v; C_UI.Reload() end },
-                    maps = { name = "Maps", type = "toggle", order = 2.4, width = "full", dialogControl = "MidnightCheckBox",
+                    maps = { name = "Maps", type = "toggle", order = 2.4, width = "full"
                         get = function() return self.db.profile.modules.maps end,
                         set = function(_, v) self.db.profile.modules.maps = v; C_UI.Reload() end },
-                    actionbars = { name = "Action Bars", type = "toggle", order = 2.5, width = "full", dialogControl = "MidnightCheckBox",
+                    actionbars = { name = "Action Bars", type = "toggle", order = 2.5, width = "full"
                         get = function() return self.db.profile.modules.actionbars end,
                         set = function(_, v) self.db.profile.modules.actionbars = v; C_UI.Reload() end },
-                    unitframes = { name = "Unit Frames", type = "toggle", order = 2.6, width = "full", dialogControl = "MidnightCheckBox",
+                    unitframes = { name = "Unit Frames", type = "toggle", order = 2.6, width = "full"
                         get = function() return self.db.profile.modules.unitframes end,
                         set = function(_, v) self.db.profile.modules.unitframes = v; C_UI.Reload() end },
-                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full", dialogControl = "MidnightCheckBox",
+                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full"
                         desc = "Skins and enhances Blizzard's cooldown display manager.",
                         get = function() return self.db.profile.modules.cooldowns end,
                         set = function(_, v) 
                             self.db.profile.modules.cooldowns = v
                             C_UI.Reload()
                         end },
-                    resourceBars = { name = "Resource Bars", type = "toggle", order = 2.71, width = "full", dialogControl = "MidnightCheckBox",
+                    resourceBars = { name = "Resource Bars", type = "toggle", order = 2.71, width = "full"
                         desc = "Display primary and secondary resource bars (mana, energy, combo points, etc.)",
                         get = function() return self.db.profile.modules.resourceBars end,
                         set = function(_, v) self.db.profile.modules.resourceBars = v; C_UI.Reload() end },
-                    castBar = { name = "Cast Bar", type = "toggle", order = 2.72, width = "full", dialogControl = "MidnightCheckBox",
+                    castBar = { name = "Cast Bar", type = "toggle", order = 2.72, width = "full"
                         desc = "Display a custom player cast bar",
                         get = function() return self.db.profile.modules.castBar end,
                         set = function(_, v) self.db.profile.modules.castBar = v; C_UI.Reload() end },
-                    tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full", dialogControl = "MidnightCheckBox",
+                    tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full"
                         get = function() return self.db.profile.modules.tweaks end,
                         set = function(_, v) self.db.profile.modules.tweaks = v; C_UI.Reload() end }
                 }  -- closes args table for general
@@ -3942,8 +3486,7 @@ function MidnightUI:GetOptions()
                     header = {
                         type = "header",
                         name = "Export Profile",
-                        order = 1,
-                        dialogControl = "MidnightHeading",
+                        order = 1
                     },
                     description = {
                         type = "description",
@@ -3955,8 +3498,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Generate Export String",
                         desc = "Creates an export string of your current profile",
-                        order = 3,
-                        dialogControl = "MidnightButton",
+                        order = 3
                         func = function()
                             MidnightUI:ExportProfile()
                         end,
@@ -3972,8 +3514,7 @@ function MidnightUI:GetOptions()
                         desc = "Copy this entire string to share your profile",
                         order = 4,
                         width = "full",
-                        multiline = 25,
-                        dialogControl = "MidnightMultiLineEditBox",
+                        multiline = 25
                         get = function() 
                             return MidnightUI.exportString or ""
                         end,
@@ -3989,8 +3530,7 @@ function MidnightUI:GetOptions()
                     header = {
                         type = "header",
                         name = "Import Profile",
-                        order = 1,
-                        dialogControl = "MidnightHeading",
+                        order = 1
                     },
                     description = {
                         type = "description",
@@ -4003,8 +3543,7 @@ function MidnightUI:GetOptions()
                         name = "New Profile Name (Optional)",
                         desc = "Leave empty to overwrite current profile, or enter a name to create a new profile",
                         order = 3,
-                        width = "full",
-                        dialogControl = "MidnightEditBox",
+                        width = "full"
                         get = function() 
                             -- Store in both places to prevent clearing
                             if not MidnightUI.importNewProfileName then
@@ -4036,8 +3575,7 @@ function MidnightUI:GetOptions()
                         desc = "Paste the export string here (Ctrl+V to paste)\n|cffaaaaaa" .. (MidnightUI.importString and "Current length: " .. #MidnightUI.importString .. " characters" or "") .. "|r",
                         order = 4,
                         width = "full",
-                        multiline = 20,
-                        dialogControl = "MidnightMultiLineEditBox",
+                        multiline = 20
                         get = function() 
                             if not MidnightUI.importString then
                                 MidnightUI.importString = ""
@@ -4049,10 +3587,7 @@ function MidnightUI:GetOptions()
                             MidnightUI.importString = v
                             -- Delayed refresh to avoid interrupting the input
                             C_Timer.After(0.1, function()
-                                local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-                                if AceConfigRegistry then
-                                    AceConfigRegistry:NotifyChange("MidnightUI")
-                                end
+                                
                             end)
                         end,
                     },
@@ -4073,8 +3608,7 @@ function MidnightUI:GetOptions()
                         type = "execute",
                         name = "Import Profile",
                         desc = "Import the profile from the string above. Requires UI reload.",
-                        order = 5,
-                        dialogControl = "MidnightButton",
+                        order = 5
                         func = function()
                             MidnightUI:ImportProfile()
                         end,
@@ -4249,8 +3783,7 @@ function MidnightUI:ExportProfile()
     print("|cff00ff00MidnightUI:|r Use Ctrl+A to select all, then Ctrl+C to copy.")
     
     -- Refresh the options UI
-    local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-    AceConfigRegistry:NotifyChange("MidnightUI")
+    
 end
 
 -- Import Profile

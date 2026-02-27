@@ -1454,8 +1454,7 @@ function AB:GetOptions()
                         name = "Hide Gryphons",
                         desc = "Hide main bar gryphons and art",
                         type = "toggle",
-                        order = 3,
-                        dialogControl = "MidnightCheckBox",
+                        order = 3
                         get = function() return self.db.profile.hideGryphons end,
                         set = function(_, v)
                             self.db.profile.hideGryphons = v
@@ -1466,8 +1465,7 @@ function AB:GetOptions()
                         name = "Global Action Bar Scale",
                         desc = "Scale all action bars at once (multiplies individual bar scale)",
                         type = "range",
-                        order = 4,
-                        dialogControl = "MidnightSlider",
+                        order = 4
                         min = 0.5,
                         max = 2.0,
                         step = 0.01,
@@ -1477,7 +1475,7 @@ function AB:GetOptions()
                             self:UpdateAllBars()
                         end
                     },
-                    spacer0 = { name = "", type = "header", order = 5, dialogControl = "MidnightHeading" },
+                    spacer0 = { name = "", type = "header", order = 5},
                     moveNote = {
                         name = "|cffaaaaaa(Use /muimove or click M button to enable Move Mode)\nThen hover over bars to see nudge controls|r",
                         type = "description",
@@ -1488,8 +1486,7 @@ function AB:GetOptions()
                         name = "Reset All Bar Positions",
                         desc = "Reset all action bars to their default positions",
                         type = "execute",
-                        order = 6,
-                        dialogControl = "MidnightButton",
+                        order = 6
                         confirm = true,
                         confirmText = "Are you sure you want to reset all bar positions to default?",
                         func = function()
@@ -1508,8 +1505,7 @@ function AB:GetOptions()
                         name = "Global Button Size",
                         desc = "Default button size for all bars",
                         type = "range",
-                        order = 11,
-                        dialogControl = "MidnightSlider",
+                        order = 11
                         min = 20,
                         max = 64,
                         step = 1,
@@ -1526,8 +1522,7 @@ function AB:GetOptions()
                         name = "Global Button Spacing",
                         desc = "Default spacing between buttons",
                         type = "range",
-                        order = 12,
-                        dialogControl = "MidnightSlider",
+                        order = 12
                         min = 0,
                         max = 20,
                         step = 1,
@@ -1545,8 +1540,7 @@ function AB:GetOptions()
                         name = "Show Hotkeys",
                         desc = "Display keybind text on buttons",
                         type = "toggle",
-                        order = 21,
-                        dialogControl = "MidnightCheckBox",
+                        order = 21
                         get = function() return self.db.profile.showHotkeys end,
                         set = function(_, v)
                             self.db.profile.showHotkeys = v
@@ -1557,8 +1551,7 @@ function AB:GetOptions()
                         name = "Show Macro Names",
                         desc = "Display macro names on buttons",
                         type = "toggle",
-                        order = 22,
-                        dialogControl = "MidnightCheckBox",
+                        order = 22
                         get = function() return self.db.profile.showMacroNames end,
                         set = function(_, v)
                             self.db.profile.showMacroNames = v
@@ -1569,8 +1562,7 @@ function AB:GetOptions()
                         name = "Show Cooldown Numbers",
                         desc = "Display cooldown countdown numbers",
                         type = "toggle",
-                        order = 23,
-                        dialogControl = "MidnightCheckBox",
+                        order = 23
                         get = function() return self.db.profile.showCooldownNumbers end,
                         set = function(_, v)
                             self.db.profile.showCooldownNumbers = v
@@ -1615,8 +1607,7 @@ function AB:GetOptions()
                         name = "Enable",
                         desc = "Show this action bar",
                         type = "toggle",
-                        order = 1,
-                        dialogControl = "MidnightCheckBox",
+                        order = 1
                         get = function() return self.db.profile.bars[barKey].enabled end,
                         set = function(_, v)
                             self.db.profile.bars[barKey].enabled = v
@@ -1627,8 +1618,7 @@ function AB:GetOptions()
                         name = "Scale",
                         desc = "Scale of the entire bar",
                         type = "range",
-                        order = 2,
-                        dialogControl = "MidnightSlider",
+                        order = 2
                         min = 0.5,
                         max = 2.0,
                         step = 0.05,
@@ -1642,8 +1632,7 @@ function AB:GetOptions()
                         name = "Opacity",
                         desc = "Normal opacity of the bar",
                         type = "range",
-                        order = 3,
-                        dialogControl = "MidnightSlider",
+                        order = 3
                         min = 0,
                         max = 1,
                         step = 0.05,
@@ -1657,8 +1646,7 @@ function AB:GetOptions()
                         name = "Columns",
                         desc = "Number of buttons per row",
                         type = "range",
-                        order = 4,
-                        dialogControl = "MidnightSlider",
+                        order = 4
                         min = 1,
                         max = config.buttonCount,
                         step = 1,
@@ -1672,8 +1660,7 @@ function AB:GetOptions()
                         name = "Button Size",
                         desc = "Size of buttons in this bar",
                         type = "range",
-                        order = 5,
-                        dialogControl = "MidnightSlider",
+                        order = 5
                         min = 20,
                         max = 64,
                         step = 1,
@@ -1687,8 +1674,7 @@ function AB:GetOptions()
                         name = "Button Spacing",
                         desc = "Space between buttons",
                         type = "range",
-                        order = 6,
-                        dialogControl = "MidnightSlider",
+                        order = 6
                         min = 0,
                         max = 20,
                         step = 1,
@@ -1698,13 +1684,12 @@ function AB:GetOptions()
                             self:UpdateBar(barKey)
                         end
                     },
-                    spacer1 = { name = "", type = "header", order = 10, dialogControl = "MidnightHeading" },
+                    spacer1 = { name = "", type = "header", order = 10},
                     showEmpty = {
                         name = "Show Empty Buttons",
                         desc = "Show buttons even when they have no action assigned",
                         type = "toggle",
-                        order = 10.5,
-                        dialogControl = "MidnightCheckBox",
+                        order = 10.5
                         get = function() return self.db.profile.bars[barKey].showEmpty end,
                         set = function(_, v)
                             self.db.profile.bars[barKey].showEmpty = v
@@ -1715,8 +1700,7 @@ function AB:GetOptions()
                         name = "Fade on Mouseover",
                         desc = "Fade bar until you mouse over it",
                         type = "toggle",
-                        order = 11,
-                        dialogControl = "MidnightCheckBox",
+                        order = 11
                         get = function() return self.db.profile.bars[barKey].fadeMouseover end,
                         set = function(_, v)
                             self.db.profile.bars[barKey].fadeMouseover = v
@@ -1731,8 +1715,7 @@ function AB:GetOptions()
                         name = "Fade In Combat",
                         desc = "Show bar fully in combat",
                         type = "toggle",
-                        order = 12,
-                        dialogControl = "MidnightCheckBox",
+                        order = 12
                         disabled = function() return self.db.profile.bars[barKey].fadeMouseover end,
                         get = function() return self.db.profile.bars[barKey].fadeInCombat end,
                         set = function(_, v)
@@ -1744,8 +1727,7 @@ function AB:GetOptions()
                         name = "Fade Out of Combat",
                         desc = "Fade bar when out of combat",
                         type = "toggle",
-                        order = 13,
-                        dialogControl = "MidnightCheckBox",
+                        order = 13
                         disabled = function() return self.db.profile.bars[barKey].fadeMouseover end,
                         get = function() return self.db.profile.bars[barKey].fadeOutCombat end,
                         set = function(_, v)
@@ -1757,8 +1739,7 @@ function AB:GetOptions()
                         name = "Faded Opacity",
                         desc = "Opacity when faded",
                         type = "range",
-                        order = 14,
-                        dialogControl = "MidnightSlider",
+                        order = 14
                         min = 0,
                         max = 1,
                         step = 0.05,
@@ -1768,13 +1749,12 @@ function AB:GetOptions()
                             self:UpdateBar(barKey)
                         end
                     },
-                    spacer2 = { name = "", type = "header", order = 20, dialogControl = "MidnightHeading" },
+                    spacer2 = { name = "", type = "header", order = 20},
                     showInPetBattle = {
                         name = "Show in Pet Battles",
                         desc = "Keep bar visible during pet battles",
                         type = "toggle",
-                        order = 21,
-                        dialogControl = "MidnightCheckBox",
+                        order = 21
                         get = function() return self.db.profile.bars[barKey].showInPetBattle end,
                         set = function(_, v)
                             self.db.profile.bars[barKey].showInPetBattle = v
@@ -1784,20 +1764,18 @@ function AB:GetOptions()
                         name = "Show in Vehicles",
                         desc = "Keep bar visible when in a vehicle",
                         type = "toggle",
-                        order = 22,
-                        dialogControl = "MidnightCheckBox",
+                        order = 22
                         get = function() return self.db.profile.bars[barKey].showInVehicle end,
                         set = function(_, v)
                             self.db.profile.bars[barKey].showInVehicle = v
                         end
                     },
-                    spacer3 = { name = "", type = "header", order = 30, dialogControl = "MidnightHeading" },
+                    spacer3 = { name = "", type = "header", order = 30},
                     resetPosition = {
                         name = "Reset Position",
                         desc = "Reset bar to default position",
                         type = "execute",
-                        order = 31,
-                        dialogControl = "MidnightButton",
+                        order = 31
                         func = function()
                             local db = self.db.profile.bars[barKey]
                             db.point = config.default.point
@@ -1811,7 +1789,7 @@ function AB:GetOptions()
             
             -- Add paging options for Action Bar 1
             if barKey == "MainMenuBar" and config.hasPages then
-                barOptions.args.spacer4 = { name = "", type = "header", order = 40, dialogControl = "MidnightHeading" }
+                barOptions.args.spacer4 = { name = "", type = "header", order = 40}
                 barOptions.args.pagingHeader = {
                     name = "Bar Paging",
                     type = "description",
@@ -1824,8 +1802,7 @@ function AB:GetOptions()
                     type = "input",
                     width = "full",
                     multiline = 3,
-                    order = 42,
-                    dialogControl = "MidnightMultiLineEditBox",
+                    order = 42
                     get = function() return self.db.profile.bars[barKey].pagingCondition or DEFAULT_PAGING end,
                     set = function(_, v)
                         self.db.profile.bars[barKey].pagingCondition = v
@@ -1836,8 +1813,7 @@ function AB:GetOptions()
                     name = "Reset to Default",
                     desc = "Reset paging condition to default",
                     type = "execute",
-                    order = 43,
-                    dialogControl = "MidnightButton",
+                    order = 43
                     func = function()
                         self.db.profile.bars[barKey].pagingCondition = DEFAULT_PAGING
                         self:UpdateBarPaging(barKey)
