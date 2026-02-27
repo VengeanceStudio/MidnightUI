@@ -414,7 +414,7 @@ function MidnightUI:GetThemeOptions()
             name = "New Theme Name",
             desc = "Enter a name for your custom theme before saving.",
             order = 6,
-            width = "full"
+            width = "full",
             get = function() return self.customThemeName or "" end,
             set = function(_, v) self.customThemeName = v end,
         },
