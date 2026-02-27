@@ -1643,46 +1643,46 @@ function MidnightUI:GetOptions()
                     },
                     modulesHeader = { type = "header", order = 2.0, name = "Modules"},
                     modulesDesc = { type = "description", order = 2.01, name = "Toggle modules. Requires Reload." },
-                    bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full"
+                    bar = { name = "Data Brokers", type = "toggle", order = 2.1, width = "full",
                         get = function() return self.db.profile.modules.bar end,
                         set = function(_, v) self.db.profile.modules.bar = v; C_UI.Reload() end },
-                    UIButtons = { name = "UI Buttons", type = "toggle", order = 2.2, width = "full"
+                    UIButtons = { name = "UI Buttons", type = "toggle", order = 2.2, width = "full",
                         get = function() return self.db.profile.modules.UIButtons end,
                         set = function(_, v) self.db.profile.modules.UIButtons = v; C_UI.Reload() end },
-                    tooltips = { name = "Tooltips", type = "toggle", order = 2.25, width = "full"
+                    tooltips = { name = "Tooltips", type = "toggle", order = 2.25, width = "full",
                         get = function() return self.db.profile.modules.tooltips end,
                         set = function(_, v) self.db.profile.modules.tooltips = v; C_UI.Reload() end },
-                    mailbox = { name = "Mailbox", type = "toggle", order = 2.27, width = "full"
+                    mailbox = { name = "Mailbox", type = "toggle", order = 2.27, width = "full",
                         get = function() return self.db.profile.modules.mailbox end,
                         set = function(_, v) self.db.profile.modules.mailbox = v; C_UI.Reload() end },
-                    chatcopy = { name = "Chat Copy", type = "toggle", order = 2.3, width = "full"
+                    chatcopy = { name = "Chat Copy", type = "toggle", order = 2.3, width = "full",
                         get = function() return self.db.profile.modules.chatcopy ~= false end,
                         set = function(_, v) self.db.profile.modules.chatcopy = v; C_UI.Reload() end },
-                    maps = { name = "Maps", type = "toggle", order = 2.4, width = "full"
+                    maps = { name = "Maps", type = "toggle", order = 2.4, width = "full",
                         get = function() return self.db.profile.modules.maps end,
                         set = function(_, v) self.db.profile.modules.maps = v; C_UI.Reload() end },
-                    actionbars = { name = "Action Bars", type = "toggle", order = 2.5, width = "full"
+                    actionbars = { name = "Action Bars", type = "toggle", order = 2.5, width = "full",
                         get = function() return self.db.profile.modules.actionbars end,
                         set = function(_, v) self.db.profile.modules.actionbars = v; C_UI.Reload() end },
-                    unitframes = { name = "Unit Frames", type = "toggle", order = 2.6, width = "full"
+                    unitframes = { name = "Unit Frames", type = "toggle", order = 2.6, width = "full",
                         get = function() return self.db.profile.modules.unitframes end,
                         set = function(_, v) self.db.profile.modules.unitframes = v; C_UI.Reload() end },
-                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full"
+                    cooldowns = { name = "Cooldown Manager", type = "toggle", order = 2.7, width = "full",
                         desc = "Skins and enhances Blizzard's cooldown display manager.",
                         get = function() return self.db.profile.modules.cooldowns end,
                         set = function(_, v) 
                             self.db.profile.modules.cooldowns = v
                             C_UI.Reload()
                         end },
-                    resourceBars = { name = "Resource Bars", type = "toggle", order = 2.71, width = "full"
+                    resourceBars = { name = "Resource Bars", type = "toggle", order = 2.71, width = "full",
                         desc = "Display primary and secondary resource bars (mana, energy, combo points, etc.)",
                         get = function() return self.db.profile.modules.resourceBars end,
                         set = function(_, v) self.db.profile.modules.resourceBars = v; C_UI.Reload() end },
-                    castBar = { name = "Cast Bar", type = "toggle", order = 2.72, width = "full"
+                    castBar = { name = "Cast Bar", type = "toggle", order = 2.72, width = "full",
                         desc = "Display a custom player cast bar",
                         get = function() return self.db.profile.modules.castBar end,
                         set = function(_, v) self.db.profile.modules.castBar = v; C_UI.Reload() end },
-                    tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full"
+                    tweaks = { name = "Tweaks", type = "toggle", order = 9, width = "full",
                         get = function() return self.db.profile.modules.tweaks end,
                         set = function(_, v) self.db.profile.modules.tweaks = v; C_UI.Reload() end }
                 }  -- closes args table for general
@@ -1729,7 +1729,7 @@ function MidnightUI:GetOptions()
                         desc = "Copy this entire string to share your profile",
                         order = 4,
                         width = "full",
-                        multiline = 25
+                        multiline = 25,
                         get = function() 
                             return MidnightUI.exportString or ""
                         end,
@@ -1790,7 +1790,7 @@ function MidnightUI:GetOptions()
                         desc = "Paste the export string here (Ctrl+V to paste)\n|cffaaaaaa" .. (MidnightUI.importString and "Current length: " .. #MidnightUI.importString .. " characters" or "") .. "|r",
                         order = 4,
                         width = "full",
-                        multiline = 20
+                        multiline = 20,
                         get = function() 
                             if not MidnightUI.importString then
                                 MidnightUI.importString = ""
