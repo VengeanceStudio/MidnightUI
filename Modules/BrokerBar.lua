@@ -1363,7 +1363,7 @@ function BrokerBar:GetOptions()
                     font = { 
                         name = "Global Font", 
                         type = "select", 
-                        order = 1 
+                        order = 1, 
                         values = function()
                             local fonts = LSM:List("font")
                             local out = {}
@@ -1380,7 +1380,7 @@ function BrokerBar:GetOptions()
                         max = 32, 
                         step = 1, 
                         order = 2,
-                        width = "half" 
+                        width = "half",
                         get = function() return self.db.profile.fontSize end, 
                         set = function(_, v) self.db.profile.fontSize = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
                     },
@@ -1391,21 +1391,21 @@ function BrokerBar:GetOptions()
                         max = 50, 
                         step = 1, 
                         order = 3,
-                        width = "half" 
+                        width = "half",
                         get = function() return self.db.profile.spacing end, 
                         set = function(_, v) self.db.profile.spacing = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
                     },
                     useClassColor = { 
                         name = "Use Class Color", 
                         type = "toggle", 
-                        order = 4 
+                        order = 4,
                         get = function() return self.db.profile.useClassColor end, 
                         set = function(_, v) self.db.profile.useClassColor = v; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
                     },
                     color = { 
                         name = "Custom Font Color", 
                         type = "color", 
-                        order = 5 
+                        order = 5,
                         disabled = function() return self.db.profile.useClassColor end, 
                         get = function() local c = self.db.profile.fontColor; return c.r, c.g, c.b end, 
                         set = function(_, r, g, b) self.db.profile.fontColor = {r=r, g=g, b=b}; for id in pairs(bars) do self:UpdateBarLayout(id) end end 
@@ -1413,14 +1413,14 @@ function BrokerBar:GetOptions()
                     useStandardTime = { 
                         name = "Use 24-Hour Time", 
                         type = "toggle", 
-                        order = 6 
+                        order = 6,
                         get = function() return self.db.profile.useStandardTime end, 
                         set = function(_, v) self.db.profile.useStandardTime = v; self:UpdateAllModules() end 
                     },
                     lock = { 
                         name = "Lock", 
                         type = "toggle", 
-                        order = 7 
+                        order = 7,
                         get = function() return self.db.profile.locked end, 
                         set = function(_, v) self.db.profile.locked = v; for id in pairs(bars) do self:ApplyBarSettings(id) end end 
                     },
@@ -1486,14 +1486,14 @@ function BrokerBar:GetOptions()
                 enabled = { 
                     name = "Enabled", 
                     type = "toggle", 
-                    order = 1 
+                    order = 1,
                     get = function() return self.db.profile.bars[id].enabled end, 
                     set = function(_, v) self.db.profile.bars[id].enabled = v; self:ApplyBarSettings(id) end 
                 },
                 fullWidth = { 
                     name = "Full Width", 
                     type = "toggle", 
-                    order = 2 
+                    order = 2,
                     get = function() return self.db.profile.bars[id].fullWidth end, 
                     set = function(_, v) self.db.profile.bars[id].fullWidth = v; self:ApplyBarSettings(id) end 
                 },
@@ -1504,7 +1504,7 @@ function BrokerBar:GetOptions()
                     min = 50, 
                     max = screenWidth, 
                     step = 1,
-                    width = "half" 
+                    width = "half",
                     disabled = function() return self.db.profile.brokers[id] and self.db.profile.brokers[id].fullWidth or false end, 
                     get = function() return self.db.profile.bars[id].width end, 
                     set = function(_, v) self.db.profile.bars[id].width = v; self:ApplyBarSettings(id) end 
@@ -1516,7 +1516,7 @@ function BrokerBar:GetOptions()
                     min = 10, 
                     max = 100, 
                     step = 1,
-                    width = "half" 
+                    width = "half",
                     get = function() return self.db.profile.bars[id].height end, 
                     set = function(_, v) self.db.profile.bars[id].height = v; self:ApplyBarSettings(id) end 
                 },
@@ -1527,7 +1527,7 @@ function BrokerBar:GetOptions()
                     min = 0.5, 
                     max = 3.0, 
                     step = 0.1,
-                    width = "half" 
+                    width = "half",
                     get = function() return self.db.profile.bars[id].scale or 1.0 end, 
                     set = function(_, v) self.db.profile.bars[id].scale = v; self:ApplyBarSettings(id) end 
                 },
@@ -1544,7 +1544,7 @@ function BrokerBar:GetOptions()
                     name = "Texture", 
                     type = "select", 
                     order = 6,
-                    hidden = function() return self.db.profile.bars[id].useThemeColor end 
+                    hidden = function() return self.db.profile.bars[id].useThemeColor end,
                     values = function()
                         local textures = LSM:List("statusbar")
                         local out = {}

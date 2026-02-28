@@ -813,7 +813,7 @@ function ResourceBars:GetOptions()
             primaryWidth = {
                 name = "Width",
                 type = "range",
-                order = 12
+                order = 12,
                 min = 100,
                 max = 500,
                 step = 1,
@@ -829,7 +829,7 @@ function ResourceBars:GetOptions()
             primaryHeight = {
                 name = "Height",
                 type = "range",
-                order = 13
+                order = 13,
                 min = 10,
                 max = 50,
                 step = 1,
@@ -924,7 +924,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Spacing",
                 desc = "Spacing between primary bar and Essential Cooldowns when attached.",
                 type = "range",
-                order = 18
+                order = 18,
                 min = 0,
                 max = 20,
                 step = 1,
@@ -965,7 +965,7 @@ function ResourceBars:GetOptions()
             secondaryWidth = {
                 name = "Width",
                 type = "range",
-                order = 22
+                order = 22,
                 min = 100,
                 max = 500,
                 step = 1,
@@ -982,7 +982,7 @@ function ResourceBars:GetOptions()
             secondaryHeight = {
                 name = "Height",
                 type = "range",
-                order = 23
+                order = 23,
                 min = 8,
                 max = 30,
                 step = 1,
@@ -1032,7 +1032,7 @@ function ResourceBars:GetOptions()
                 name = "Attach Spacing",
                 desc = "Spacing between primary and secondary bars when attached.",
                 type = "range",
-                order = 26
+                order = 26,
                 min = 0,
                 max = 20,
                 step = 1,

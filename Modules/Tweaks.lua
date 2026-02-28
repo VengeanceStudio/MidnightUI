@@ -522,9 +522,9 @@ function Tweaks:GetOptions()
         set = function(info, value) self.db.profile[info[#info]] = value end,
         args = {
             fastLoot = { name = "Fast Loot", type = "toggle", order = 1},
-            hideGryphons = { name = "Hide Action Bar Art", type = "toggle", order = 2
+            hideGryphons = { name = "Hide Action Bar Art", type = "toggle", order = 2,
                 set = function(_, v) self.db.profile.hideGryphons = v; C_UI.Reload() end },
-            hideBagBar = { name = "Hide Bag Bar", type = "toggle", order = 3
+            hideBagBar = { name = "Hide Bag Bar", type = "toggle", order = 3,
                 set = function(_, v) self.db.profile.hideBagBar = v; self:ApplyTweaks() end },
             autoRepair = {
                 name = "Auto Repair at Vendors",

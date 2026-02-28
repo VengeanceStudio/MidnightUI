@@ -980,7 +980,7 @@ function Maps:GetOptions()
                 order = 7,
                 min = -200,
                 max = 200,
-                step = 1
+                step = 1,
                 set = function(info, value)
                     self.db.profile.offsetX = value
                     self:UpdateLayout()
@@ -994,7 +994,7 @@ function Maps:GetOptions()
                 order = 8,
                 min = -200,
                 max = 200,
-                step = 1
+                step = 1,
                 set = function(info, value)
                     self.db.profile.offsetY = value
                     self:UpdateLayout()

@@ -1129,7 +1129,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
                 name = "Left Text",
                 desc = "Text to display on the left side of the " .. barType .. " bar.",
                 order = 2,
-                width = "full"
+                width = "full",
                 get = function() 
                     local defaults = {health = "", power = "", info = "[name]"}
                     return db[barType] and db[barType].textLeft or defaults[barType] or ""
@@ -1141,7 +1141,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
                 name = "Center Text",
                 desc = "Text to display in the center of the " .. barType .. " bar.",
                 order = 3,
-                width = "full"
+                width = "full",
                 get = function() 
                     local defaults = {health = "[curhp] / [maxhp] ([perhp]%)", power = "", info = "[level]"}
                     return db[barType] and db[barType].textCenter or defaults[barType] or ""
@@ -1153,7 +1153,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
                 name = "Right Text",
                 desc = "Text to display on the right side of the " .. barType .. " bar.",
                 order = 4,
-                width = "full"
+                width = "full",
                 get = function() return db[barType] and db[barType].textRight or "" end,
                 set = function(_, v) db[barType].textRight = v; update() end,
             },
@@ -1199,7 +1199,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         type = "color",
         name = "Bar Color",
         hasAlpha = true,
-        order = 4
+        order = 4,
         get = function() 
             local defaults = {health = {0.2,0.8,0.2,1}, power = {0.2,0.4,0.8,1}, info = {0.8,0.8,0.2,1}}
             return unpack(db[barType] and db[barType].color or defaults[barType] or {1,1,1,1})
@@ -1211,7 +1211,7 @@ function UnitFrames:GetBarOptions(barType, db, update)
         type = "range",
         name = "Bar Transparency",
         desc = "Set the transparency of the " .. barType .. " bar.",
-        min = 0, max = 100, step = 1, order = 4.1
+        min = 0, max = 100, step = 1, order = 4.1,
         get = function() return math.floor(100 * (db[barType] and db[barType].alpha or (db[barType] and db[barType].color and db[barType].color[4]) or 1) + 0.5) end,
         set = function(_, v)
             local alpha = v / 100

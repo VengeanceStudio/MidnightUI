@@ -573,7 +573,7 @@ function CastBar:GetOptions()
                 name = "Width",
                 type = "range",
                 order = 11,
-                width = "half"
+                width = "half",
                 min = 100,
                 max = 500,
                 step = 1,
@@ -589,7 +589,7 @@ function CastBar:GetOptions()
                 name = "Height",
                 type = "range",
                 order = 12,
-                width = "half"
+                width = "half",
                 min = 16,
                 max = 50,
                 step = 1,
@@ -610,7 +610,7 @@ function CastBar:GetOptions()
             showIcon = {
                 name = "Show Spell Icon",
                 type = "toggle",
-                order = 21
+                order = 21,
                 get = function() return self.db.profile.showIcon end,
                 set = function(_, v)
                     self.db.profile.showIcon = v
@@ -624,7 +624,7 @@ function CastBar:GetOptions()
             iconPosition = {
                 name = "Icon Position",
                 type = "select",
-                order = 22
+                order = 22,
                 values = {
                     LEFT = "Left",
                     RIGHT = "Right"
@@ -643,7 +643,7 @@ function CastBar:GetOptions()
             showLatency = {
                 name = "Show Latency",
                 type = "toggle",
-                order = 23
+                order = 23,
                 desc = "Shows your network lag as a red bar at the end of the cast",
                 get = function() return self.db.profile.showLatency end,
                 set = function(_, v)
@@ -654,7 +654,7 @@ function CastBar:GetOptions()
             showShieldBorder = {
                 name = "Show Shield for Non-Interruptible",
                 type = "toggle",
-                order = 24
+                order = 24,
                 desc = "Shows a shield icon when casting non-interruptible spells",
                 get = function() return self.db.profile.showShieldBorder end,
                 set = function(_, v)
@@ -667,7 +667,7 @@ function CastBar:GetOptions()
             showSpellName = {
                 name = "Show Spell Name",
                 type = "toggle",
-                order = 31
+                order = 31,
                 get = function() return self.db.profile.showSpellName end,
                 set = function(_, v)
                     self.db.profile.showSpellName = v
@@ -683,7 +683,7 @@ function CastBar:GetOptions()
             showCastTime = {
                 name = "Show Cast Time",
                 type = "toggle",
-                order = 32
+                order = 32,
                 get = function() return self.db.profile.showCastTime end,
                 set = function(_, v)
                     self.db.profile.showCastTime = v
@@ -699,7 +699,7 @@ function CastBar:GetOptions()
             font = {
                 name = "Font",
                 type = "select",
-                order = 33
+                order = 33,
                 values = LSM:HashTable("font"),
                 get = function() return self.db.profile.font end,
                 set = function(_, v)
@@ -714,7 +714,7 @@ function CastBar:GetOptions()
             fontSize = {
                 name = "Font Size",
                 type = "range",
-                order = 34
+                order = 34,
                 min = 8,
                 max = 24,
                 step = 1,
@@ -737,7 +737,7 @@ function CastBar:GetOptions()
             resetPosition = {
                 name = "Reset Position",
                 type = "execute",
-                order = 41
+                order = 41,
                 func = function()
                     self.db.profile.point = "CENTER"
                     self.db.profile.x = 0

@@ -250,7 +250,7 @@ function CooldownManager:GetOptions()
                 type = "toggle",
                 name = "Enable Cooldown Manager",
                 desc = "Enable the cooldown manager module",
-                order = 1
+                order = 1,
                 get = function() return self.db.profile.enabled end,
                 set = function(_, value)
                     self.db.profile.enabled = value
@@ -269,7 +269,7 @@ function CooldownManager:GetOptions()
             essentialEnabled = {
                 type = "toggle",
                 name = "Enable Essential Cooldowns",
-                order = 11
+                order = 11,
                 get = function() return self.db.profile.essential.enabled end,
                 set = function(_, value)
                     self.db.profile.essential.enabled = value
@@ -282,7 +282,7 @@ function CooldownManager:GetOptions()
                 order = 12,
                 min = 24,
                 max = 64,
-                step = 2
+                step = 2,
                 get = function() return self.db.profile.essential.iconWidth end,
                 set = function(_, value)
                     self.db.profile.essential.iconWidth = value
@@ -296,7 +296,7 @@ function CooldownManager:GetOptions()
                 order = 13,
                 min = 0,
                 max = 20,
-                step = 1
+                step = 1,
                 get = function() return self.db.profile.essential.iconSpacing end,
                 set = function(_, value)
                     self.db.profile.essential.iconSpacing = value
@@ -309,7 +309,7 @@ function CooldownManager:GetOptions()
                 order = 14,
                 min = 1,
                 max = 20,
-                step = 1
+                step = 1,
                 get = function() return self.db.profile.essential.maxPerRow end,
                 set = function(_, value)
                     self.db.profile.essential.maxPerRow = value
@@ -324,7 +324,7 @@ function CooldownManager:GetOptions()
             utilityEnabled = {
                 type = "toggle",
                 name = "Enable Utility Cooldowns",
-                order = 21
+                order = 21,
                 get = function() return self.db.profile.utility.enabled end,
                 set = function(_, value)
                     self.db.profile.utility.enabled = value
@@ -337,7 +337,7 @@ function CooldownManager:GetOptions()
                 order = 22,
                 min = 24,
                 max = 64,
-                step = 2
+                step = 2,
                 get = function() return self.db.profile.utility.iconWidth end,
                 set = function(_, value)
                     self.db.profile.utility.iconWidth = value
@@ -351,7 +351,7 @@ function CooldownManager:GetOptions()
                 order = 23,
                 min = 0,
                 max = 20,
-                step = 1
+                step = 1,
                 get = function() return self.db.profile.utility.iconSpacing end,
                 set = function(_, value)
                     self.db.profile.utility.iconSpacing = value
@@ -364,7 +364,7 @@ function CooldownManager:GetOptions()
                 order = 24,
                 min = 1,
                 max = 20,
-                step = 1
+                step = 1,
                 get = function() return self.db.profile.utility.maxPerRow end,
                 set = function(_, value)
                     self.db.profile.utility.maxPerRow = value
